@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#061222">
+<title>挞飞 2.0 | 我的技术空间</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:#061222;color:#eaf4ff;
+  font-family:Arial,"Microsoft YaHei",sans-serif;
+  overflow-x:hidden
+}
+#particles{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:-1;pointer-events:none
+}
+nav{
+  position:sticky;top:0;z-index:5;
+  padding:18px 7%;display:flex;
+  justify-content:space-between;align-items:center;
+  background:rgba(6,18,34,.88);
+  backdrop-filter:blur(15px);
+  border-bottom:1px solid #183653
+}
+.logo{font-size:21px;font-weight:bold;color:#38bdf8}
+nav a{color:#a9bfd5;text-decoration:none;font-size:13px}
+nav a:hover{color:#38bdf8}
+.hero{
+  min-height:570px;padding:100px 9%;
+  display:flex;flex-direction:column;
+  justify-content:center;position:relative;
+  background:radial-gradient(ellipse at 75% 35%,
+  rgba(14,116,190,.25),transparent 60%)
+}
+.tag{color:#38bdf8;letter-spacing:5px;font-size:12px}
+h1{font-size:clamp(55px,12vw,100px);margin:25px 0}
+h1 span{color:#38bdf8;text-shadow:0 0 35px #0284c7}
+.hero p{color:#9db5ce;line-height:2;font-size:15px}
+.btn{
+  display:inline-block;margin-top:32px;
+  padding:15px 28px;background:#0284c7;
+  color:white;text-decoration:none;border-radius:7px;
+  width:fit-content;transition:.3s
+}
+.btn:hover{background:#0ea5e9;transform:translateY(-3px);
+box-shadow:0 0 25px #0284c7}
+section{padding:85px 9%}
+.heading{font-size:29px;margin-bottom:12px}
+.sub{color:#829bb4;margin-bottom:35px;font-size:13px}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:22px
+}
+.card{
+  background:rgba(13,32,54,.88);
+  border:1px solid #1d3d5c;
+  border-radius:13px;padding:28px;
+  cursor:pointer;transition:.3s
+}
+.card:hover{
+  transform:translateY(-7px);
+  border-color:#38bdf8;
+  box-shadow:0 10px 35px rgba(0,160,255,.12)
+}
+.number{color:#38bdf8;font-size:12px;letter-spacing:2px}
+.card h3{margin:17px 0 12px;font-size:19px}
+.card p{color:#9cb1c8;line-height:1.9;font-size:14px}
+.more{color:#38bdf8;font-size:12px;margin-top:20px}
+.about{
+  background:rgba(13,32,54,.65);
+  border:1px solid #1d3d5c;
+  padding:30px;border-radius:13px;
+  line-height:2;color:#a9bfd5
+}
+.about strong{color:#38bdf8}
+footer{
+  text-align:center;padding:35px;
+  color:#607d99;border-top:1px solid #173653;
+  font-size:12px
+}
+#notice{
+  position:fixed;bottom:25px;left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:#123657;color:white;padding:13px 20px;
+  border:1px solid #38bdf8;border-radius:8px;
+  transition:.3s;z-index:20;font-size:13px
+}
+#notice.show{transform:translateX(-50%) translateY(0)}
+.reveal{opacity:0;transform:translateY(25px);transition:.7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@media(max-width:600px){
+  nav{padding:16px 5%}
+  .hero{min-height:480px;padding:80px 7%}
+  section{padding:65px 7%}
+  .heading{font-size:25px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    transition:none!important
+  }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<nav>
+  <div class="logo">TAFEI 2.0</div>
+  <a href="#projects">我的作品　↓</a>
+</nav>
+
+<div class="hero">
+  <div class="tag">WELCOME TO MY DIGITAL WORLD</div>
+  <h1>挞飞 <span>2.0</span></h1>
+  <p>
+    探索未知，创造可能。<br>
+    用代码记录成长，用技术改变未来。
+  </p>
+  <a href="#projects" class="btn">探索我的世界 →</a>
+</div>
+
+<section id="projects">
+  <h2 class="heading">我的技术成果</h2>
+  <p class="sub">MY PROJECTS / 每一个作品都是一次成长</p>
+
+  <div class="cards">
+    <div class="card" onclick="showDetail('编程学习','这里记录我的编程学习经历、代码练习和独立开发的作品。')">
+      <div class="number">PROJECT / 01</div>
+      <h3>⌨ 编程学习</h3>
+      <p>从零开始学习代码，记录每一次进步。</p>
+      <div class="more">点击查看详情 →</div>
+    </div>
+
+    <div class="card" onclick="showDetail('网络安全','这里展示我在自己搭建或获得授权的实验环境中完成的网络安全学习项目。')">
+      <div class="number">PROJECT / 02</div>
+      <h3>🛡 网络安全</h3>
+      <p>学习安全知识，研究防护技术和实验原理。</p>
+      <div class="more">点击查看详情 →</div>
+    </div>
+
+    <div class="card" onclick="showDetail('未来项目','这里将展示我未来独立开发的项目。新作品正在准备中，敬请期待。')">
+      <div class="number">PROJECT / 03</div>
+      <h3>🚀 未来项目</h3>
+      <p>更多有趣的作品，正在开发中。</p>
+      <div class="more">点击查看详情 →</div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <h2 class="heading">关于挞飞</h2>
+  <p class="sub">ABOUT THIS WEBSITE</p>
+  <div class="about">
+    <strong>TAFEI 2.0</strong> 是一个个人技术作品展示网站。<br>
+    这里记录我的学习、实践与成长。<br>
+    我相信，每一个伟大的作品，都始于一个小小的想法。
+  </div>
+</section>
+
+<footer>
+  © 2026 TAFEI 2.0 · BUILT WITH PASSION
+  <br><br>
+  探索 · 创造 · 突破
+</footer>
+
+<div id="notice"></div>
+
+<script>
+// 动态粒子背景
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+let particles=[];
+let width,height;
+
+function resize(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  width=window.innerWidth;
+  height=window.i
