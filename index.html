@@ -49,7 +49,53 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 .stat-chip strong{color:var(--cyan);font-size:18px;margin-right:5px}
 @media(max-width:650px){.feature-grid{grid-template-columns:1fr}}
 
-</style>
+
+.article-area{
+ display:grid;
+ grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr);
+ gap:18px;
+ margin-top:28px;
+ align-items:start;
+}
+.article-form{padding:22px}
+.article-form h3,.article-list h3{margin:0 0 14px}
+.article-field{display:block;margin:13px 0}
+.article-field span{
+ display:block;color:var(--muted);
+ font-size:13px;margin-bottom:6px;
+}
+.article-field input,.article-field textarea{
+ width:100%;border:1px solid var(--line);
+ border-radius:12px;padding:12px;
+ background:var(--panel2);color:var(--text);
+ font:inherit;outline:none;
+}
+.article-field input:focus,.article-field textarea:focus{
+ border-color:var(--cyan);
+}
+.article-field textarea{min-height:145px;resize:vertical}
+.article-submit{width:100%;margin-top:8px}
+.article-status{min-height:24px;color:var(--muted);font-size:13px}
+.article-list{display:grid;gap:12px}
+.article-card{
+ padding:18px;background:var(--panel);
+ border:1px solid var(--line);border-radius:16px;
+}
+.article-card h4{margin:0 0 8px;overflow-wrap:anywhere}
+.article-card p{
+ margin:0;color:var(--muted);white-space:pre-wrap;
+ overflow-wrap:anywhere;font-size:14px;
+}
+.article-meta{margin-top:12px;color:var(--muted);font-size:12px}
+.article-empty{
+ padding:22px;text-align:center;color:var(--muted);
+ border:1px dashed var(--line);border-radius:16px;
+}
+@media(max-width:760px){
+ .article-area{grid-template-columns:1fr}
+ .article-form{padding:17px}
+}
+\n</style>
 </head>
 <body>
 <canvas id="stars"></canvas>
@@ -94,6 +140,33 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <div class="bottom"><span class="tag">现已开放</span><a class="textbtn" href="#guestbook">进入留言墙 ↗</a></div>
 </article>
 </div>
+
+<div class="article-area">
+ <form class="panel article-form" id="articleForm">
+  <h3>✦ 分享一篇知识</h3>
+  <label class="article-field">
+   <span>作者昵称（1—30字）</span>
+   <input id="articleName" maxlength="30" required placeholder="给自己取一个昵称">
+  </label>
+  <label class="article-field">
+   <span>文章标题（1—100字）</span>
+   <input id="articleTitle" maxlength="100" required placeholder="这篇文章想分享什么？">
+  </label>
+  <label class="article-field">
+   <span>文章正文（最多5000字）</span>
+   <textarea id="articleContent" maxlength="5000" required placeholder="写下你的知识、经验或学习心得……"></textarea>
+  </label>
+  <button class="btn primary article-submit" id="publishArticle" type="submit">发布文章 ↗</button>
+  <p class="article-status" id="articleStatus" role="status">发布的文章将公开展示，请勿填写个人隐私。</p>
+ </form>
+ <div class="article-list">
+  <h3>最新知识分享</h3>
+  <div id="articlesList" aria-live="polite">
+   <div class="article-empty">正在加载文章……</div>
+  </div>
+ </div>
+</div>
+
 </section>
 <section id="projects" class="reveal">
 <div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
@@ -283,8 +356,95 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
   }
  });
 
+
+ const ARTICLES_API='https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_articles';
+
+ async function loadArticles(){
+  const root=$id('articlesList');
+  if(!root)return;
+  root.textContent='正在加载文章……';
+  try{
+   const r=await fetch(ARTICLES_API+'?select=id,nickname,title,content,created_at&order=created_at.desc&limit=50',{
+    headers:{apikey:KEY,Authorization:'Bearer '+KEY}
+   });
+   if(!r.ok)throw new Error('读取文章失败');
+   const rows=await r.json();
+   root.replaceChildren();
+   if(!rows.length){
+    const empty=document.createElement('div');
+    empty.className='article-empty';
+    empty.textContent='还没有文章，欢迎分享第一篇知识。';
+    root.append(empty);
+    return;
+   }
+   rows.forEach(m=>{
+    const card=document.createElement('article');
+    card.className='article-card';
+    const title=document.createElement('h4');
+    title.textContent=m.title||'未命名文章';
+    const content=document.createElement('p');
+    content.textContent=m.content||'';
+    const meta=document.createElement('div');
+    meta.className='article-meta';
+    meta.textContent=(m.nickname||'访客')+' · '+(m.created_at?new Date(m.created_at).toLocaleString('zh-CN'):'');
+    card.append(title,content,meta);
+    root.append(card);
+   });
+  }catch(e){
+   console.error(e);
+   root.textContent='文章加载失败，请检查网络后刷新。';
+  }
+ }
+
+ $id('articleForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const button=$id('publishArticle');
+  const status=$id('articleStatus');
+  const nickname=$id('articleName').value.trim();
+  const title=$id('articleTitle').value.trim();
+  const content=$id('articleContent').value.trim();
+
+  if(!nickname||!title||!content){
+   status.textContent='请填写昵称、标题和正文。';
+   return;
+  }
+  if(nickname.length>30||title.length>100||content.length>5000){
+   status.textContent='昵称最多30字，标题最多100字，正文最多5000字。';
+   return;
+  }
+
+  button.disabled=true;
+  button.textContent='正在发布……';
+  status.textContent='正在提交文章……';
+
+  try{
+   const r=await fetch(ARTICLES_API,{
+    method:'POST',
+    headers:{
+     apikey:KEY,
+     Authorization:'Bearer '+KEY,
+     'Content-Type':'application/json',
+     Prefer:'return=minimal'
+    },
+    body:JSON.stringify({nickname,title,content})
+   });
+   if(!r.ok)throw new Error(await r.text());
+   $id('articleTitle').value='';
+   $id('articleContent').value='';
+   status.textContent='发布成功！你的文章已经公开。';
+   await loadArticles();
+  }catch(err){
+   console.error(err);
+   status.textContent='发布失败，请检查网络或数据库权限。';
+  }finally{
+   button.disabled=false;
+   button.textContent='发布文章 ↗';
+  }
+ });
+
  renderProjects();
  loadMessages();
+ loadArticles();
 })();
 
 </script>
