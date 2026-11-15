@@ -103,7 +103,7 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
    <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
   </div>
  </div>
- <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>5.0</strong>当前网站版本</div></div>
+ <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>6.0</strong>当前网站版本</div></div>
 </section>
 <section id="guestbook" class="reveal">
  <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
@@ -113,7 +113,7 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
    <input id="messageName" maxlength="24" placeholder="怎么称呼你（可选）">
    <textarea id="messageText" maxlength="240" placeholder="写下你的留言，最多 240 字"></textarea>
    <button class="action-btn primary" id="sendMessage">发布留言</button>
-   <p class="local-note">这是本地演示留言墙：留言只保存在你当前设备的浏览器中，其他访客看不到。若要全网共享，需要接入数据库或后端服务。</p>
+   <p class="local-note">留言保存在云端，所有访客都可以查看。</p>
   </div>
   <div class="panel"><h3>最近的留言</h3><div id="messages" class="messages"><div class="empty-state">还没有留言。欢迎写下第一条。</div></div></div>
  </div>
@@ -139,20 +139,118 @@ const canvas=$('#stars'),ctx=canvas.getContext('2d');let stars=[];
 function resize(){const dpr=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:Math.min(100,Math.floor(innerWidth/8))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.3,v:Math.random()*.22+.04,a:Math.random()*.6+.2}))}
 function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){s.y-=s.v;if(s.y<0){s.y=innerHeight;s.x=Math.random()*innerWidth}ctx.globalAlpha=s.a;ctx.fillStyle='#9bdfff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;requestAnimationFrame(draw)}addEventListener('resize',resize);resize();draw();
 
-// TAFEI 5.0: local project studio and local-only message wall
+// TAFEI 6.0: cloud guestbook
 (()=>{
  const $id=id=>document.getElementById(id);
- const safeRead=(key)=>{try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}};
+ const safeRead=key=>{try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}};
  const safeWrite=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
- const projectsKey='tafei5-projects',messagesKey='tafei5-messages';
- const projects=safeRead(projectsKey),messages=safeRead(messagesKey);
+ const projectsKey='tafei5-projects';
+ const projects=safeRead(projectsKey);
+ const API='https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei-cloud';
+ const KEY='sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
  const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- function renderProjects(){const root=$id('userProjects');if(!root)return;$id('projectCount').textContent=projects.length;if(!projects.length){root.innerHTML='<div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div>';return;}root.innerHTML=projects.map((p,i)=>`<article class="user-item"><h4>${esc(p.name)}</h4><p>${esc(p.desc)}</p>${p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">打开作品 ↗</a>`:''}<div class="item-tools"><span class="local-note">${esc(p.date)}</span><button class="action-btn" data-remove-project="${i}" type="button">删除</button></div></article>`).join('');}
- function renderMessages(){const root=$id('messages');if(!root)return;if(!messages.length){root.innerHTML='<div class="empty-state">还没有留言。欢迎写下第一条。</div>';return;}root.innerHTML=[...messages].reverse().map(m=>`<article class="message-item"><h4>${esc(m.name||'访客')}</h4><p>${esc(m.text)}</p><div class="local-note" style="margin-top:8px">${esc(m.date)}</div></article>`).join('');}
- $id('addProject')?.addEventListener('click',()=>{const name=$id('projectName').value.trim(),desc=$id('projectDesc').value.trim(),url=$id('projectUrl').value.trim();if(!name||!desc){alert('请先填写作品名称和介绍。');return;}if(url&&!/^https:\/\//i.test(url)){alert('网址请以 https:// 开头。');return;}projects.push({name,desc,url,date:new Date().toLocaleDateString('zh-CN')});if(!safeWrite(projectsKey,projects)){projects.pop();alert('保存失败，可能是浏览器存储空间不足。');return;}$id('projectName').value='';$id('projectDesc').value='';$id('projectUrl').value='';renderProjects();});
- $id('userProjects')?.addEventListener('click',e=>{const b=e.target.closest('[data-remove-project]');if(!b)return;const i=Number(b.dataset.removeProject);if(!Number.isInteger(i)||i<0||i>=projects.length)return;projects.splice(i,1);safeWrite(projectsKey,projects);renderProjects();});
- $id('sendMessage')?.addEventListener('click',()=>{const name=$id('messageName').value.trim(),value=$id('messageText').value.trim();if(!value){alert('先写点留言内容吧。');return;}messages.push({name,text:value,date:new Date().toLocaleString('zh-CN')});if(!safeWrite(messagesKey,messages)){messages.pop();alert('保存失败，可能是浏览器存储空间不足。');return;}$id('messageText').value='';renderMessages();});
- renderProjects();renderMessages();
+
+ function renderProjects(){
+  const root=$id('userProjects');
+  if(!root)return;
+  $id('projectCount').textContent=projects.length;
+  if(!projects.length){root.innerHTML='<div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div>';return;}
+  root.innerHTML=projects.map((p,i)=>`<article class="user-item"><h4>${esc(p.name)}</h4><p>${esc(p.desc)}</p>${p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">打开作品 ↗</a>`:''}<div class="item-tools"><span class="local-note">${esc(p.date)}</span><button class="action-btn" data-remove-project="${i}" type="button">删除</button></div></article>`).join('');
+ }
+
+ function renderMessages(rows){
+  const root=$id('messages');
+  if(!root)return;
+  root.replaceChildren();
+  if(!rows.length){root.textContent='还没有留言。欢迎写下第一条。';return;}
+  rows.forEach(m=>{
+   const article=document.createElement('article');
+   article.className='message-item';
+   const h=document.createElement('h4');
+   h.textContent=m.nickname||'访客';
+   const content=document.createElement('p');
+   content.textContent=m.content||'';
+   const date=document.createElement('div');
+   date.className='local-note';
+   date.textContent=m.created_at?new Date(m.created_at).toLocaleString('zh-CN'):'';
+   article.append(h,content,date);
+   root.append(article);
+  });
+ }
+
+ async function loadMessages(){
+  const root=$id('messages');
+  if(root)root.textContent='正在加载云端留言……';
+  try{
+   const r=await fetch(API+'?select=id,nickname,content,created_at&order=created_at.desc&limit=100',{
+    headers:{apikey:KEY,Authorization:'Bearer '+KEY}
+   });
+   if(!r.ok)throw new Error(await r.text());
+   renderMessages(await r.json());
+  }catch(e){
+   console.error(e);
+   if(root)root.textContent='云端留言加载失败，请检查网络后刷新。';
+  }
+ }
+
+ $id('addProject')?.addEventListener('click',()=>{
+  const name=$id('projectName').value.trim();
+  const desc=$id('projectDesc').value.trim();
+  const url=$id('projectUrl').value.trim();
+  if(!name||!desc){alert('请先填写作品名称和介绍。');return;}
+  if(url&&!/^https:\/\//i.test(url)){alert('网址请以 https:// 开头。');return;}
+  projects.push({name,desc,url,date:new Date().toLocaleDateString('zh-CN')});
+  if(!safeWrite(projectsKey,projects)){projects.pop();alert('保存失败。');return;}
+  $id('projectName').value='';
+  $id('projectDesc').value='';
+  $id('projectUrl').value='';
+  renderProjects();
+ });
+
+ $id('userProjects')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-remove-project]');
+  if(!b)return;
+  const i=Number(b.dataset.removeProject);
+  if(!Number.isInteger(i)||i<0||i>=projects.length)return;
+  projects.splice(i,1);
+  safeWrite(projectsKey,projects);
+  renderProjects();
+ });
+
+ $id('sendMessage')?.addEventListener('click',async()=>{
+  const button=$id('sendMessage');
+  const name=$id('messageName').value.trim()||'访客';
+  const content=$id('messageText').value.trim();
+  if(!content){alert('先写点留言内容吧。');return;}
+  if(name.length>30||content.length>500){alert('昵称最多30字，留言最多500字。');return;}
+  button.disabled=true;
+  button.textContent='正在发布……';
+  try{
+   const r=await fetch(API,{
+    method:'POST',
+    headers:{
+     apikey:KEY,
+     Authorization:'Bearer '+KEY,
+     'Content-Type':'application/json',
+     Prefer:'return=minimal'
+    },
+    body:JSON.stringify({nickname:name,content:content})
+   });
+   if(!r.ok)throw new Error(await r.text());
+   $id('messageText').value='';
+   await loadMessages();
+   alert('留言发布成功！');
+  }catch(e){
+   console.error(e);
+   alert('发布失败，请检查网络和数据库权限。');
+  }finally{
+   button.disabled=false;
+   button.textContent='发布留言';
+  }
+ });
+
+ renderProjects();
+ loadMessages();
 })();
 
 </script>
