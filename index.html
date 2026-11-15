@@ -1,142 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#061222">
-<meta name="description" content="挞飞个人技术空间，记录编程学习、网络安全知识与创意项目。">
-<title>挞飞 3.0 | 我的数字世界</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d1b">
+<meta name="description" content="挞飞的个人作品空间，记录学习、创作与成长。">
+<title>挞飞 · 个人数字空间</title>
 <style>
-:root{--bg:#061222;--panel:rgba(13,32,54,.82);--text:#eaf4ff;--muted:#9bb2ca;--cyan:#38bdf8;--line:#1d3d5c;--glow:rgba(56,189,248,.22)}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:85px}
-body{font-family:Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s}
-body.light{--bg:#eef7ff;--panel:rgba(255,255,255,.88);--text:#10243a;--muted:#526b83;--line:#c5dced;--glow:rgba(2,132,199,.15)}
-#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none}
-.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 75% 20%,rgba(14,116,190,.20),transparent 48%),radial-gradient(ellipse at 10% 80%,rgba(8,145,178,.10),transparent 40%)}
-nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:15px 7%;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.logo{font-size:20px;font-weight:800;letter-spacing:1px;color:var(--cyan)}
-.navlinks{display:flex;align-items:center;gap:22px}
-nav a,.navlinks a{color:var(--muted);text-decoration:none;font-size:13px}
-nav a:hover,.navlinks a:hover{color:var(--cyan)}
-.iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;padding:9px 12px;cursor:pointer}
-.hero{min-height:570px;padding:100px 9%;display:flex;flex-direction:column;justify-content:center;position:relative}
-.tag{color:var(--cyan);letter-spacing:4px;font-size:11px}
-h1{font-size:clamp(54px,12vw,104px);margin:24px 0 16px;line-height:1.05}
-h1 span{color:var(--cyan);text-shadow:0 0 34px #0284c7}
-.hero p{color:var(--muted);line-height:2;font-size:15px;max-width:560px}
-.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
-.btn{display:inline-block;padding:13px 22px;background:#0284c7;color:white;text-decoration:none;border-radius:8px;transition:.25s;border:1px solid #0284c7}
-.btn:hover{transform:translateY(-3px);box-shadow:0 0 25px #0284c7}
-.btn.secondary{background:transparent;color:var(--cyan);border-color:var(--line)}
-.meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:36px;color:var(--muted);font-size:12px}
-.meta span:before{content:"●";color:#22c55e;margin-right:7px}
-section{padding:78px 9%}
-.heading{font-size:29px;margin-bottom:10px}
-.sub{color:var(--muted);margin-bottom:30px;font-size:13px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:25px;cursor:pointer;transition:.25s;backdrop-filter:blur(10px)}
-.card:hover{transform:translateY(-6px);border-color:var(--cyan);box-shadow:0 12px 34px var(--glow)}
-.number{color:var(--cyan);font-size:11px;letter-spacing:2px}
-.card h3{margin:15px 0 10px;font-size:19px}
-.card p{color:var(--muted);line-height:1.8;font-size:14px}
-.more{color:var(--cyan);font-size:12px;margin-top:18px}
-.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:25px;backdrop-filter:blur(10px)}
-.about{color:var(--muted);line-height:2}
-.about strong{color:var(--cyan)}
-.terminal{background:#030b14;color:#b8f7d4;border-radius:10px;padding:18px;font:12px/1.9 ui-monospace,monospace;min-height:180px;overflow:hidden}
-.terminal .dim{color:#6d8da8}.terminal .prompt{color:#38bdf8}
-.terminal button{margin-top:12px;background:transparent;border:1px solid #28516d;color:#7dd3fc;padding:7px 10px;border-radius:6px;cursor:pointer}
-.skills{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
-.skills span{border:1px solid var(--line);border-radius:99px;padding:7px 12px;color:var(--muted);font-size:12px}
-footer{text-align:center;padding:30px;color:var(--muted);border-top:1px solid var(--line);font-size:12px}
-#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,120px);background:#123657;color:white;border:1px solid var(--cyan);border-radius:9px;padding:12px 18px;z-index:30;transition:.3s;font-size:13px;max-width:90%;text-align:center}
-#toast.show{transform:translate(-50%,0)}
-#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:25;align-items:center;justify-content:center;padding:20px}
-#modal.open{display:flex}
-.modalbox{width:min(520px,100%);background:var(--bg);border:1px solid var(--cyan);border-radius:15px;padding:26px;box-shadow:0 0 45px var(--glow)}
-.modalbox h3{color:var(--cyan);margin-bottom:12px}
-.modalbox p{color:var(--muted);line-height:1.9;font-size:14px}
-.modal-actions{display:flex;justify-content:flex-end;margin-top:20px}
-.reveal{opacity:0;transform:translateY(20px);transition:.65s}
-.reveal.visible{opacity:1;transform:none}
-@media(max-width:650px){nav{padding:13px 5%}.navlinks{gap:12px}.navlinks a{font-size:12px}.hero{min-height:500px;padding:78px 7%}section{padding:62px 7%}.heading{font-size:25px}.grid2{grid-template-columns:1fr}.logo{font-size:17px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+:root{--bg:#080d1b;--panel:rgba(16,25,48,.78);--panel2:#111d37;--text:#eef4ff;--muted:#9aaccb;--line:rgba(130,170,255,.18);--cyan:#64e8ff;--blue:#7297ff;--purple:#bd8cff;--shadow:0 20px 60px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:86px}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#17284b 0,transparent 42%),radial-gradient(ellipse at 90% 30%,#211642 0,transparent 35%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.65;overflow-x:hidden}
+body.light{--bg:#eef4ff;--panel:rgba(255,255,255,.82);--panel2:#fff;--text:#15213b;--muted:#60708f;--line:rgba(55,91,160,.18);--shadow:0 18px 48px rgba(48,74,130,.13);background:radial-gradient(ellipse at 10% 0%,#d6eaff 0,transparent 42%),radial-gradient(ellipse at 90% 25%,#e9ddff 0,transparent 35%),var(--bg)}
+a{color:inherit;text-decoration:none}button{font:inherit}.wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.7}
+header{position:sticky;top:0;z-index:20;background:rgba(8,13,27,.72);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}body.light header{background:rgba(238,244,255,.78)}
+.nav{height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-weight:850;letter-spacing:.08em;font-size:19px}.brand span{color:var(--cyan)}.navlinks{display:flex;gap:22px;color:var(--muted);font-size:14px}.navlinks a:hover{color:var(--cyan)}.navright{display:flex;gap:8px}.iconbtn,.menuBtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:8px 11px;cursor:pointer}.menuBtn{display:none}
+.hero{min-height:590px;display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:44px;padding:76px 0 60px}.eyebrow{color:var(--cyan);font-size:13px;letter-spacing:.18em;text-transform:uppercase}.hero h1{font-size:clamp(42px,7vw,76px);line-height:1.08;margin:16px 0}.gradient{background:linear-gradient(100deg,var(--cyan),#9b9cff 55%,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);font-size:17px;max-width:590px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;transition:.2s}.btn.primary{background:linear-gradient(110deg,#3b8fff,#846bff);border:0;color:white;box-shadow:0 10px 30px #4b79ff3d}.btn:hover{transform:translateY(-3px)}.orb-wrap{display:grid;place-items:center;min-height:340px}.orb{width:min(310px,70vw);aspect-ratio:1;border-radius:50%;position:relative;background:radial-gradient(circle at 35% 30%,#d6fbff 0 2%,#67dfff 4%,#426dce 28%,#29215f 58%,#0a1027 72%);box-shadow:0 0 45px #55bfff55,0 0 120px #795eff33,inset -20px -25px 50px #030716;animation:float 6s ease-in-out infinite}.orb:before,.orb:after{content:"";position:absolute;inset:-17px;border:1px solid #7ceaff77;border-radius:50%;transform:rotate(-24deg) scaleY(.34)}.orb:after{inset:-35px;transform:rotate(48deg) scaleY(.26);border-color:#b48aff66}@keyframes float{50%{transform:translateY(-14px) rotate(4deg)}}
+.status{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:30px;padding:6px 12px;color:var(--muted);font-size:12px}.dot{width:7px;height:7px;background:#4ee6a1;border-radius:50%;box-shadow:0 0 12px #4ee6a1}
+section{padding:64px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:26px}.kicker{font-size:12px;color:var(--cyan);letter-spacing:.16em}.section-head h2{font-size:clamp(27px,4vw,38px);margin:5px 0 0}.section-head p{color:var(--muted);margin:0;max-width:430px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(12px)}.project{padding:20px;min-height:230px;display:flex;flex-direction:column;transition:.25s}.project:hover{transform:translateY(-5px);border-color:#68dfff77}.project .symbol{font-size:28px;margin-bottom:12px}.project h3{margin:0 0 7px}.project p{margin:0;color:var(--muted);font-size:14px}.project .bottom{margin-top:auto;padding-top:18px;display:flex;justify-content:space-between;align-items:center}.tag{font-size:11px;color:var(--cyan);border:1px solid var(--line);border-radius:30px;padding:4px 9px}.textbtn{border:0;background:none;color:var(--cyan);cursor:pointer;padding:5px}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.about-card{padding:24px}.about-card p{color:var(--muted)}.skill{margin:18px 0}.skill-top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:7px}.track{height:8px;border-radius:20px;background:var(--line);overflow:hidden}.fill{height:100%;width:var(--w);background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:20px}.note{font-size:12px;color:var(--muted)}
+.lab{padding:22px}.terminal{background:#050914;border:1px solid #283957;border-radius:15px;overflow:hidden;color:#d8e7ff;font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}.termbar{padding:10px 14px;background:#101a30;border-bottom:1px solid #283957;color:#9bb2d8}.termout{padding:16px;min-height:160px;white-space:pre-wrap}.termform{display:flex;gap:8px;padding:0 14px 14px}.termform span{color:#63e8ff}.termform input{min-width:0;flex:1;background:transparent;border:0;outline:0;color:white;font:inherit}.termform button{background:#213c69;color:white;border:0;border-radius:8px;padding:6px 12px}
+.contact{padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px}.contact p{color:var(--muted);margin:5px 0}.contact-links{display:flex;gap:10px;flex-wrap:wrap}
+footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);text-align:center}
+.modal{position:fixed;inset:0;background:#020611c9;z-index:50;display:none;place-items:center;padding:20px}.modal.show{display:grid}.modalbox{width:min(520px,100%);padding:24px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.modalbox p{color:var(--muted)}.close{float:right}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s}.reveal.visible{opacity:1;transform:none}
+@media(max-width:760px){.navlinks{display:none;position:absolute;top:68px;left:0;right:0;padding:16px 22px;background:var(--panel2);border-bottom:1px solid var(--line);flex-direction:column;gap:12px}.navlinks.open{display:flex}.menuBtn{display:block}.hero{grid-template-columns:1fr;padding:62px 0 32px;gap:8px;min-height:auto}.hero p{font-size:15px}.orb-wrap{min-height:250px}.orb{width:210px}.grid{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:10px}.contact{display:block}.contact-links{margin-top:18px}section{padding:48px 0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<canvas id="stars"></canvas><div class="ambient"></div>
-<nav>
-  <div class="logo">TAFEI <span style="color:var(--text)">/ 3.0</span></div>
-  <div class="navlinks"><a href="#projects">作品</a><a href="#about">关于</a><a href="#terminal">终端</a><button class="iconbtn" id="themeBtn" aria-label="切换主题">☼</button></div>
-</nav>
-<header class="hero">
-  <div class="tag">WELCOME TO MY DIGITAL WORLD</div>
-  <h1>挞飞 <span>3.0</span></h1>
-  <p>探索未知，创造可能。<br>用代码记录成长，用技术改变未来。这里是我的数字空间，也是每一次新尝试的起点。</p>
-  <div class="actions"><a class="btn" href="#projects">探索我的作品 →</a><a class="btn secondary" href="#about">认识挞飞</a></div>
-  <div class="meta"><span>个人技术空间</span><span>持续更新中</span><span id="clock">正在读取时间…</span></div>
-</header>
-
+<canvas id="stars"></canvas>
+<header><div class="wrap nav">
+<a class="brand" href="#home">TAFEI<span>.</span></a>
+<nav class="navlinks" id="navlinks"><a href="#home">首页</a><a href="#projects">作品展厅</a><a href="#about">关于我</a><a href="#lab">交互实验室</a><a href="#contact">联系</a></nav>
+<div class="navright"><button class="iconbtn" id="themeBtn" aria-label="切换主题">☼</button><button class="menuBtn" id="menuBtn" aria-label="打开菜单">☰</button></div>
+</div></header>
+<main class="wrap">
+<section class="hero" id="home">
+<div><div class="status"><i class="dot"></i> PERSONAL SPACE · 4.0</div><div class="eyebrow" style="margin-top:22px">HELLO, WORLD</div>
+<h1>探索代码，<br><span class="gradient">创造可能。</span></h1>
+<p>你好，我是挞飞。这里记录我的学习、实验和作品。每一次尝试，都是向前迈出的一小步。</p>
+<div class="actions"><a class="btn primary" href="#projects">探索我的作品 ↗</a><a class="btn" href="#about">认识挞飞</a></div>
+<p class="note" style="margin-top:24px">LOCAL TIME · <span id="clock">正在读取时间…</span></p></div>
+<div class="orb-wrap"><div class="orb" aria-label="科技感发光球体"></div></div>
+</section>
 <section id="projects" class="reveal">
-  <h2 class="heading">我的技术成果</h2><p class="sub">MY PROJECTS / 每一个作品都是一次成长</p>
-  <div class="cards">
-    <article class="card" tabindex="0" role="button" onclick="showProject('编程学习','从 HTML、CSS、JavaScript 开始，记录代码练习、网页制作和独立开发的过程。后续可以在这里添加真实作品链接。')">
-      <div class="number">PROJECT / 01</div><h3>⌨ 编程学习</h3><p>从零开始学习代码，把想法一步步变成作品。</p><div class="more">查看项目详情 ↗</div>
-    </article>
-    <article class="card" tabindex="0" role="button" onclick="showProject('网络安全','专注合法、安全的学习实践：在自己搭建或获得明确授权的实验环境中学习基础原理、风险识别与防护方法。')">
-      <div class="number">PROJECT / 02</div><h3>🛡 网络安全</h3><p>学习安全知识，理解原理，提升防护能力。</p><div class="more">查看项目详情 ↗</div>
-    </article>
-    <article class="card" tabindex="0" role="button" onclick="showProject('创意实验室','这里将收录未来的小工具、网页实验和有趣的创意。每完成一个作品，就可以回来更新这张卡片。')">
-      <div class="number">PROJECT / 03</div><h3>🚀 创意实验室</h3><p>把灵感做成小工具，让创意真正运行起来。</p><div class="more">查看项目详情 ↗</div>
-    </article>
-  </div>
-</section>
-
+<div class="section-head"><div><div class="kicker">01 / SELECTED WORKS</div><h2>作品展厅</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
+<div class="grid">
+<article class="panel project"><div class="symbol">✦</div><h3>挞飞个人网站</h3><p>从零开始制作并部署的个人网站，记录这段学习与创作过程。</p><div class="bottom"><span class="tag">HTML · CSS · JS</span><a class="textbtn" href="https://piaony.github.io/tafei-site/" target="_blank" rel="noopener">访问网站 ↗</a></div></article>
+<article class="panel project"><div class="symbol">⌘</div><h3>下一个作品</h3><p>这里预留给你的下一个网页、小工具或编程练习。完成后再替换这段文字。</p><div class="bottom"><span class="tag">待添加</span><button class="textbtn detailBtn" data-title="下一个作品" data-desc="把你真正完成的项目名称、用途和访问链接添加到这里。">编辑提示 ↗</button></div></article>
+<article class="panel project"><div class="symbol">◇</div><h3>实验与练习</h3><p>收集学习过程中做过的小实验，展示从尝试到掌握的过程。</p><div class="bottom"><span class="tag">持续更新</span><button class="textbtn detailBtn" data-title="实验与练习" data-desc="可以放置 JavaScript 小练习、网页交互实验或自己编写的演示程序。">查看说明 ↗</button></div></article>
+</div></section>
 <section id="about" class="reveal">
-  <h2 class="heading">关于挞飞</h2><p class="sub">ABOUT THIS DIGITAL SPACE</p>
-  <div class="grid2">
-    <div class="panel about"><strong>TAFEI 3.0</strong> 是一个个人技术作品展示网站。<br>这里记录学习、实践与成长，也展示正在探索的方向。<br>我相信，每一个伟大的作品，都始于一个小小的想法。<div class="skills"><span>HTML</span><span>CSS</span><span>JavaScript</span><span>持续学习</span><span>创意开发</span></div></div>
-    <div class="panel"><div class="number">CURRENT STATUS</div><h3 style="margin:12px 0">持续构建中 <span style="color:#22c55e">●</span></h3><p style="color:var(--muted);line-height:1.9;font-size:14px">版本 3.0 已加入主题切换、项目详情弹窗、动态星点背景与移动端适配。后续可以继续添加真实项目、个人介绍和作品链接。</p></div>
-  </div>
-</section>
-
-<section id="terminal" class="reveal">
-  <h2 class="heading">交互式终端</h2><p class="sub">A SMALL DIGITAL CONSOLE / 一个安全的网页模拟终端</p>
-  <div class="terminal" aria-label="模拟终端">
-    <div><span class="prompt">tafei@web</span>:~$ <span class="dim">welcome</span></div>
-    <div>欢迎来到挞飞数字空间。</div>
-    <div id="terminalOutput">输入下方按钮，查看可用演示命令。</div>
-    <button onclick="runDemo('help')">help</button>
-    <button onclick="runDemo('about')">about</button>
-    <button onclick="runDemo('date')">date</button>
-    <button onclick="runDemo('clear')">clear</button>
-  </div>
-</section>
-<footer>© 2026 TAFEI 3.0 · BUILT WITH PASSION<br><br>探索 · 创造 · 突破</footer>
-
-<div id="toast" role="status"></div>
-<div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="if(event.target===this)closeModal()">
-  <div class="modalbox"><h3 id="modalTitle">项目详情</h3><p id="modalText"></p><div class="modal-actions"><button class="iconbtn" onclick="closeModal()">关闭</button></div></div>
-</div>
-
+<div class="section-head"><div><div class="kicker">02 / ABOUT</div><h2>关于这个空间</h2></div><p>不追求一步到位，认真记录每次进步。</p></div>
+<div class="about-grid">
+<div class="panel about-card"><h3>你好，很高兴认识你。</h3><p>我是挞飞，这个网站是我的个人数字空间。我正在学习网页制作与编程，并把自己的练习逐步整理成作品。</p><p>这里的内容会随着学习不断更新。欢迎来看看我的新尝试。</p><span class="tag">KEEP LEARNING · KEEP BUILDING</span></div>
+<div class="panel about-card"><h3>学习路线</h3>
+<div class="skill"><div class="skill-top"><span>HTML · 网页结构</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:42%"></div></div></div>
+<div class="skill"><div class="skill-top"><span>CSS · 页面样式</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:32%"></div></div></div>
+<div class="skill"><div class="skill-top"><span>JavaScript · 交互逻辑</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:18%"></div></div></div>
+<p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
+</div></div></section>
+<section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">03 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
+<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！\n输入 help 查看可用命令。\n</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
+<section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">04 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
+</main>
+<footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界</footer>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
 <script>
-const canvas=document.getElementById('stars'),ctx=canvas.getContext('2d');let dots=[],w=0,h=0;
-function resize(){const dpr=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);dots=Array.from({length:Math.min(85,Math.floor(w/10))},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.5+.4}))}
-function animate(){ctx.clearRect(0,0,w,h);for(const p of dots){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(90,190,245,.7)';ctx.fill()}requestAnimationFrame(animate)}
-addEventListener('resize',resize);resize();animate();
-const toast=document.getElementById('toast');let toastTimer;
-function notify(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2300)}
-function showProject(title,desc){document.getElementById('modalTitle').textContent=title;document.getElementById('modalText').textContent=desc;document.getElementById('modal').classList.add('open')}
-function closeModal(){document.getElementById('modal').classList.remove('open')}
-addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-document.getElementById('themeBtn').addEventListener('click',()=>{document.body.classList.toggle('light');notify(document.body.classList.contains('light')?'已切换为浅色主题':'已切换为深色主题')});
-function updateClock(){document.getElementById('clock').textContent=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date())}
-updateClock();setInterval(updateClock,1000);
-function runDemo(cmd){const out=document.getElementById('terminalOutput');const data={help:'可用命令：help / about / date / clear',about:'TAFEI 3.0 — 个人技术展示空间。',date:'当前时间：'+new Date().toLocaleString('zh-CN')};out.textContent=cmd==='clear'?'终端已清空。':data[cmd]||'未知命令。输入 help 查看帮助。'}
-const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.12});
-document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+const $=s=>document.querySelector(s);
+const clock=()=>$('#clock').textContent=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date());
+clock();setInterval(clock,1000);$('#year').textContent=new Date().getFullYear();
+$('#themeBtn').addEventListener('click',()=>{document.body.classList.toggle('light');localStorage.setItem('tafei-theme',document.body.classList.contains('light')?'light':'dark')});
+if(localStorage.getItem('tafei-theme')==='light')document.body.classList.add('light');
+$('#menuBtn').addEventListener('click',()=>$('#navlinks').classList.toggle('open'));
+document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>$('#navlinks').classList.remove('open')));
+const modal=$('#modal');document.querySelectorAll('.detailBtn').forEach(b=>b.addEventListener('click',()=>{$('#modalTitle').textContent=b.dataset.title;$('#modalDesc').textContent=b.dataset.desc;modal.classList.add('show')}));
+$('#closeModal').addEventListener('click',()=>modal.classList.remove('show'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
+const out=$('#termout');$('#termform').addEventListener('submit',e=>{e.preventDefault();const input=$('#command'),cmd=input.value.trim().toLowerCase();if(!cmd)return;let result='未知命令：'+cmd+'。输入 help 查看帮助。';if(cmd==='help')result='可用命令：\nhelp   显示帮助\nabout  关于挞飞\n time  显示当前时间\nclear  清空终端';if(cmd==='about')result='我是挞飞。这里记录学习、实验和作品。';if(cmd==='time')result='当前时间：'+new Date().toLocaleString('zh-CN');if(cmd==='clear'){out.textContent='';input.value='';return;}out.textContent+='visitor@tafei:~$ '+cmd+'\n'+result+'\n\n';input.value='';out.scrollTop=out.scrollHeight;});
+const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+const canvas=$('#stars'),ctx=canvas.getContext('2d');let stars=[];
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:Math.min(100,Math.floor(innerWidth/8))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.3,v:Math.random()*.22+.04,a:Math.random()*.6+.2}))}
+function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){s.y-=s.v;if(s.y<0){s.y=innerHeight;s.x=Math.random()*innerWidth}ctx.globalAlpha=s.a;ctx.fillStyle='#9bdfff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;requestAnimationFrame(draw)}addEventListener('resize',resize);resize();draw();
 </script>
 </body>
 </html>
