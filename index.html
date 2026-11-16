@@ -900,151 +900,490 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
   knowledge:'知识分享'
  };
 
- async function loadFeed(){
-  if(!feedList)return;
-  feedList.textContent='正在加载动态……';
-
-  try{
-   const response=await fetch(
-    FEED_API+'?select=id,user_id,category,content,created_at&order=created_at.desc&limit=50',
-    {headers:{
-     apikey:KEY,
-     Authorization:'Bearer '+(authSession?.access_token||KEY)
-    }}
-   );
-
-   if(!response.ok)throw new Error('动态加载失败，HTTP '+response.status);
-
-   const posts=await response.json();
-   const ids=[...new Set(posts.map(post=>post.user_id).filter(Boolean))];
-   let profiles={};
-
-   if(ids.length){
-    try{
-     const url=PROFILE_API+'?select=id,nickname&id=in.('+encodeURIComponent(ids.join(','))+')';
-     const profileResponse=await fetch(url,{
-      headers:{
-       apikey:KEY,
-       Authorization:'Bearer '+(authSession?.access_token||KEY)
-      }
-     });
-     if(profileResponse.ok){
-      const rows=await profileResponse.json();
-      rows.forEach(profile=>profiles[profile.id]=profile.nickname);
-     }
-    }catch(error){
-     console.warn('昵称加载失败：',error);
-    }
-   }
-
-   feedList.replaceChildren();
-
-   if(!posts.length){
-    const empty=document.createElement('div');
-    empty.className='feed-empty';
-    empty.textContent='这里还没有动态，期待你的第一条分享。';
-    feedList.appendChild(empty);
-    return;
-   }
-
-   posts.forEach(post=>{
-    const article=document.createElement('article');
-    article.className='feed-post';
-
-    const head=document.createElement('div');
-    head.className='feed-post-head';
-
-    const author=document.createElement('span');
-    author.className='feed-author';
-    author.textContent=profiles[post.user_id]||'挞飞用户';
-
-    const meta=document.createElement('span');
-    meta.className='feed-meta';
-    const date=new Date(post.created_at);
-    meta.textContent=Number.isNaN(date.getTime())?'':date.toLocaleString('zh-CN');
-
-    head.append(author,meta);
-
-    const category=document.createElement('span');
-    category.className='feed-category';
-    category.textContent=feedCategories[post.category]||'社区动态';
-
-    const content=document.createElement('p');
-    content.className='feed-content';
-    content.textContent=post.content||'';
-
-    article.append(head,category,content);
-    feedList.appendChild(article);
-   });
-  }catch(error){
-   console.error('动态加载错误：',error);
-   feedList.textContent='动态暂时无法加载，请检查网络后刷新页面。';
-  }
- }
-
- if(feedForm){
-  feedForm.addEventListener('submit',async event=>{
-   event.preventDefault();
-
-   if(!authSession?.access_token||!authSession?.user?.id){
-    feedStatus.textContent='请先进入挞飞社区账户，再发布动态。';
-    return;
-   }
-
-   const category=$id('tafeiFeedCategory').value;
-   const content=$id('tafeiFeedContent').value.trim();
-   const button=$id('tafeiFeedSubmit');
-
-   if(!Object.prototype.hasOwnProperty.call(feedCategories,category)){
-    feedStatus.textContent='请选择有效的动态分类。';
-    return;
-   }
-
-   if(!content||content.length>1000){
-    feedStatus.textContent='动态内容不能为空，最多1000字。';
-    return;
-   }
-
-   button.disabled=true;
-   feedStatus.textContent='正在发布动态……';
-
-   try{
-    const response=await fetch(FEED_API,{
-     method:'POST',
-     headers:{
-      apikey:KEY,
-      Authorization:'Bearer '+authSession.access_token,
-      'Content-Type':'application/json',
-      Prefer:'return=representation'
-     },
-     body:JSON.stringify({
-      user_id:authSession.user.id,
-      category,
-      content
-     })
-    });
-
-    if(!response.ok){
-     const detail=await response.text();
-     throw new Error('发布失败（HTTP '+response.status+'）'+(detail?'：'+detail.slice(0,250):''));
-    }
-
-    $id('tafeiFeedContent').value='';
-    feedStatus.textContent='发布成功！你的动态已经进入挞飞广场。';
-    await loadFeed();
-   }catch(error){
-    console.error('动态发布错误：',error);
-    feedStatus.textContent=error.message||'发布失败，请稍后重试。';
-   }finally{
-    button.disabled=false;
-   }
-  });
- }
-
- loadFeed();
+ async function loadFeed(){ return t12LoadData(); }
+ // TAFEI 12.0 接管动态加载
  // TAFEI 11.0 FEED MODULE END
 
  // TAFEI 11.0 AUTH MODULE END
+
+
+ // TAFEI 12.0 MODULE START
+// TAFEI 12.0 COMMUNITY MODULE
+
+const T12_FEED_API = API.replace('/tafei-cloud', '/tafei_posts');
+const T12_PROFILE_API = API.replace('/tafei-cloud', '/tafei_profiles');
+const T12_COMMENTS_API = API.replace('/tafei-cloud', '/tafei_comments');
+const T12_LIKES_API = API.replace('/tafei-cloud', '/tafei_likes');
+
+let t12Posts = [];
+let t12Profiles = {};
+let t12Comments = [];
+let t12Likes = [];
+
+const t12Headers = () => ({
+  apikey: KEY,
+  Authorization: 'Bearer ' + (authSession?.access_token || KEY)
+});
+
+async function t12Request(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: { ...t12Headers(), ...(options.headers || {}) }
+    });
+
+    if (!response.ok) {
+      throw new Error('请求失败，HTTP ' + response.status);
+    }
+
+    if (response.status === 204) return null;
+
+    const result = await response.text();
+    return result ? JSON.parse(result) : null;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('云端请求超时（15秒），请检查网络或 Supabase 服务。');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function t12Element(tag, className, content) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (content !== undefined) element.textContent = content;
+  return element;
+}
+
+// TAFEI 12.0 BASE END
+
+// TAFEI 12.0 SEARCH CONTROLS
+
+function t12BuildControls() {
+  const list = document.getElementById('tafeiFeedList');
+  if (!list || document.getElementById('t12Toolbar')) return;
+
+  const toolbar = t12Element('div', 't12-toolbar');
+  toolbar.id = 't12Toolbar';
+
+  const search = document.createElement('input');
+  search.id = 't12Search';
+  search.type = 'search';
+  search.placeholder = '搜索动态内容或用户昵称';
+
+  const category = document.createElement('select');
+  category.id = 't12Category';
+
+  const categories = [
+    ['all', '全部分类'],
+    ['daily', '生活日常'],
+    ['learning', '学习成长'],
+    ['tech', '科技技术'],
+    ['help', '寻求帮助'],
+    ['knowledge', '知识分享']
+  ];
+
+  categories.forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    category.appendChild(option);
+  });
+
+  const sort = document.createElement('select');
+  sort.id = 't12Sort';
+
+  [['newest', '最新发布'], ['hottest', '最受欢迎']].forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    sort.appendChild(option);
+  });
+
+  toolbar.append(search, category, sort);
+  list.parentNode.insertBefore(toolbar, list);
+
+  search.addEventListener('input', t12Render);
+  category.addEventListener('change', t12Render);
+  sort.addEventListener('change', t12Render);
+}
+
+// TAFEI 12.0 SEARCH END
+
+// TAFEI 12.0 DATA LOADER
+
+async function t12LoadData() {
+  const list = document.getElementById('tafeiFeedList');
+  if (!list) return;
+
+  list.textContent = '正在加载社区动态……';
+
+  try {
+    const posts = await t12Request(
+      T12_FEED_API +
+      '?select=id,user_id,category,content,created_at&order=created_at.desc&limit=50'
+    );
+
+    t12Posts = posts || [];
+
+    const postIds = t12Posts.map(post => post.id);
+    const userIds = t12Posts.map(post => post.user_id).filter(Boolean);
+
+    t12Comments = [];
+    t12Likes = [];
+    t12Profiles = {};
+
+    if (postIds.length) {
+      const ids = postIds.join(',');
+
+      const results = await Promise.all([
+        t12Request(
+          T12_COMMENTS_API +
+          '?select=id,post_id,user_id,content,created_at&post_id=in.(' +
+          ids + ')&order=created_at.asc&limit=500'
+        ),
+        t12Request(
+          T12_LIKES_API +
+          '?select=post_id,user_id&post_id=in.(' + ids + ')&limit=2000'
+        )
+      ]);
+
+      t12Comments = results[0] || [];
+      t12Likes = results[1] || [];
+
+      userIds.push(...t12Comments.map(item => item.user_id).filter(Boolean));
+    }
+
+    const uniqueUsers = [...new Set(userIds)];
+
+    if (uniqueUsers.length) {
+      const profiles = await t12Request(
+        T12_PROFILE_API +
+        '?select=id,nickname,bio&id=in.(' +
+        uniqueUsers.join(',') + ')'
+      );
+
+      (profiles || []).forEach(profile => {
+        t12Profiles[profile.id] = profile;
+      });
+    }
+
+    t12Render();
+  } catch (error) {
+    console.error('TAFEI 12.0 加载错误：', error);
+    list.textContent = '社区内容暂时无法加载，请检查网络后重试。';
+  }
+}
+
+// TAFEI 12.0 DATA END
+
+// TAFEI 12.0 POST RENDERER
+
+function t12Render() {
+  const list = document.getElementById('tafeiFeedList');
+  if (!list) return;
+
+  const keyword = (document.getElementById('t12Search')?.value || '').trim().toLowerCase();
+  const category = document.getElementById('t12Category')?.value || 'all';
+  const sort = document.getElementById('t12Sort')?.value || 'newest';
+
+  let posts = t12Posts.filter(post => {
+    const nickname = t12Profiles[post.user_id]?.nickname || '';
+    const content = String(post.content || '').toLowerCase();
+
+    return (!keyword || content.includes(keyword) || nickname.toLowerCase().includes(keyword)) &&
+      (category === 'all' || post.category === category);
+  });
+
+  const likeCount = id => t12Likes.filter(item => item.post_id === id).length;
+
+  posts.sort((a, b) => {
+    if (sort === 'hottest') {
+      return likeCount(b.id) - likeCount(a.id) ||
+        new Date(b.created_at) - new Date(a.created_at);
+    }
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  list.replaceChildren();
+
+  if (!posts.length) {
+    list.appendChild(t12Element('div', 'feed-empty', '没有找到符合条件的动态。'));
+    return;
+  }
+
+  posts.forEach(post => {
+    const article = t12Element('article', 'feed-post');
+    const head = t12Element('div', 'feed-post-head');
+
+    const nickname = t12Profiles[post.user_id]?.nickname || '挞飞用户';
+    const author = t12Element('button', 'feed-author t12-author', nickname);
+    author.type = 'button';
+    author.addEventListener('click', () => t12ShowProfile(post.user_id));
+
+    const date = new Date(post.created_at);
+    const meta = t12Element('span', 'feed-meta',
+      Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN'));
+
+    head.append(author, meta);
+
+    const categoryNames = {
+      daily: '生活日常',
+      learning: '学习成长',
+      tech: '科技技术',
+      help: '寻求帮助',
+      knowledge: '知识分享'
+    };
+
+    const tag = t12Element('span', 'feed-category',
+      categoryNames[post.category] || '社区动态');
+
+    const content = t12Element('p', 'feed-content', post.content || '');
+
+    const actions = t12Element('div', 't12-actions');
+    const userId = authSession?.user?.id;
+    const liked = t12Likes.some(item =>
+      item.post_id === post.id && item.user_id === userId);
+
+    const likeButton = t12Element('button', 't12-action',
+      (liked ? '♥ 已点赞 ' : '♡ 点赞 ') + likeCount(post.id));
+    likeButton.type = 'button';
+    likeButton.addEventListener('click', () => t12ToggleLike(post.id));
+
+    const comments = t12Comments.filter(item => item.post_id === post.id);
+    actions.append(likeButton,
+      t12Element('span', 't12-comment-count', '评论 ' + comments.length));
+
+    const commentList = t12Element('div', 't12-comments');
+
+    comments.forEach(comment => {
+      const nickname = t12Profiles[comment.user_id]?.nickname || '挞飞用户';
+      const line = t12Element('p', 't12-comment-text',
+        nickname + '：' + comment.content);
+      commentList.appendChild(line);
+
+      if (userId && userId === comment.user_id) {
+        const remove = t12Element('button', 't12-delete', '删除');
+        remove.type = 'button';
+        remove.addEventListener('click', () => t12DeleteComment(comment.id));
+        commentList.appendChild(remove);
+      }
+    });
+
+    const form = document.createElement('form');
+    form.className = 't12-comment-form';
+
+    const input = document.createElement('input');
+    input.maxLength = 500;
+    input.required = true;
+    input.placeholder = '写下你的评论……';
+
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.textContent = '发送评论';
+
+    form.append(input, submit);
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      t12AddComment(post.id, input.value, submit);
+    });
+
+    article.append(head, tag, content, actions, commentList, form);
+    list.appendChild(article);
+  });
+}
+
+// TAFEI 12.0 POST RENDERER END
+
+// TAFEI 12.0 INTERACTIONS
+
+async function t12ToggleLike(postId) {
+  const userId = authSession?.user?.id;
+  if (!userId) {
+    alert('请先登录后再点赞。');
+    return;
+  }
+
+  const existing = t12Likes.find(item =>
+    item.post_id === postId && item.user_id === userId);
+
+  try {
+    if (existing) {
+      await t12Request(
+        T12_LIKES_API + '?post_id=eq.' + postId + '&user_id=eq.' + userId,
+        { method: 'DELETE' }
+      );
+    } else {
+      await t12Request(T12_LIKES_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ post_id: postId, user_id: userId })
+      });
+    }
+    await t12LoadData();
+  } catch (error) {
+    console.error(error);
+    alert('点赞操作失败，请稍后重试。');
+  }
+}
+
+async function t12AddComment(postId, content, button) {
+  const userId = authSession?.user?.id;
+  const cleanContent = content.trim();
+
+  if (!userId) {
+    alert('请先登录后再评论。');
+    return;
+  }
+  if (!cleanContent || cleanContent.length > 500) {
+    alert('评论需要填写内容，且不能超过500字。');
+    return;
+  }
+
+  button.disabled = true;
+  try {
+    await t12Request(T12_COMMENTS_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({
+        post_id: postId,
+        user_id: userId,
+        content: cleanContent
+      })
+    });
+    await t12LoadData();
+  } catch (error) {
+    console.error(error);
+    alert('评论发送失败，请稍后重试。');
+    button.disabled = false;
+  }
+}
+
+async function t12DeleteComment(commentId) {
+  const userId = authSession?.user?.id;
+  if (!userId || !confirm('确定删除自己的这条评论吗？')) return;
+
+  try {
+    await t12Request(
+      T12_COMMENTS_API + '?id=eq.' + commentId + '&user_id=eq.' + userId,
+      { method: 'DELETE' }
+    );
+    await t12LoadData();
+  } catch (error) {
+    console.error(error);
+    alert('删除评论失败，请稍后重试。');
+  }
+}
+
+// TAFEI 12.0 INTERACTIONS END
+
+// TAFEI 12.0 PROFILE
+
+function t12ShowProfile(userId) {
+  const profile = t12Profiles[userId];
+  if (!profile) {
+    alert('暂时找不到该用户的资料。');
+    return;
+  }
+
+  let panel = document.getElementById('t12ProfilePanel');
+  if (!panel) {
+    panel = t12Element('section', 'feed-form');
+    panel.id = 't12ProfilePanel';
+    const list = document.getElementById('tafeiFeedList');
+    list.parentNode.insertBefore(panel, list);
+  }
+
+  panel.replaceChildren();
+  panel.appendChild(t12Element('h3', '', '用户资料'));
+
+  const nickname = t12Element('p', '', '昵称：' + profile.nickname);
+  const bio = t12Element('p', '', '简介：' + (profile.bio || '这个用户还没有填写简介。'));
+  panel.append(nickname, bio);
+
+  if (authSession?.user?.id === userId) {
+    const form = document.createElement('form');
+    const nameInput = document.createElement('input');
+    nameInput.value = profile.nickname || '';
+    nameInput.maxLength = 30;
+    nameInput.required = true;
+    nameInput.placeholder = '设置昵称';
+
+    const bioInput = document.createElement('textarea');
+    bioInput.value = profile.bio || '';
+    bioInput.maxLength = 200;
+    bioInput.placeholder = '介绍一下自己（最多200字）';
+
+    const save = document.createElement('button');
+    save.type = 'submit';
+    save.textContent = '保存个人资料';
+
+    form.append(nameInput, bioInput, save);
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      t12SaveProfile(userId, nameInput.value, bioInput.value, save);
+    });
+    panel.appendChild(form);
+  }
+}
+
+async function t12SaveProfile(userId, nickname, bio, button) {
+  const cleanName = nickname.trim();
+  const cleanBio = bio.trim();
+
+  if (!cleanName || cleanName.length > 30 || cleanBio.length > 200) {
+    alert('昵称不能为空且最多30字，简介最多200字。');
+    return;
+  }
+
+  button.disabled = true;
+  try {
+    await t12Request(
+      T12_PROFILE_API + '?id=eq.' + userId,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ nickname: cleanName, bio: cleanBio })
+      }
+    );
+
+    t12Profiles[userId] = {
+      ...t12Profiles[userId],
+      nickname: cleanName,
+      bio: cleanBio
+    };
+
+    t12Render();
+    t12ShowProfile(userId);
+    alert('个人资料保存成功！');
+  } catch (error) {
+    console.error(error);
+    alert('保存失败，请稍后重试。');
+    button.disabled = false;
+  }
+}
+
+// TAFEI 12.0 PROFILE END
+
+ // TAFEI 12.0 MODULE END
+
+ t12BuildControls();
+ t12LoadData();
 
  renderProjects();
  loadMessages();
