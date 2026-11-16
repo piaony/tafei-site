@@ -95,7 +95,96 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  .article-area{grid-template-columns:1fr}
  .article-form{padding:17px}
 }
-\n</style>
+\n
+/* TAFEI 10.0 手机固定底部导航 */
+.mobile-bottom-nav{
+ display:none;
+}
+
+@media(max-width:760px){
+ body{
+  padding-bottom:82px;
+ }
+ .mobile-bottom-nav{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:9999;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  padding:9px 4px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(15,24,43,.96);
+  border-top:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(16px);
+ }
+ .mobile-bottom-nav a{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  color:#aabbd1;
+  text-decoration:none;
+  font-size:11px;
+  line-height:1.5;
+ }
+ .mobile-bottom-nav a span:first-child{
+  font-size:20px;
+ }
+ .mobile-bottom-nav a.active{
+  color:#70d9ff;
+  font-weight:700;
+ }
+}
+
+
+/* TAFEI 10.0 求助中心表单 */
+#helpForm{
+ display:grid;
+ gap:12px;
+}
+#helpForm label{
+ color:var(--muted);
+ font-size:14px;
+}
+#helpForm input,
+#helpForm select,
+#helpForm textarea{
+ width:100%;
+ min-width:0;
+ border:1px solid var(--line);
+ border-radius:12px;
+ padding:12px 14px;
+ background:var(--panel2);
+ color:var(--text);
+ font:inherit;
+ outline:none;
+}
+#helpForm input:focus,
+#helpForm select:focus,
+#helpForm textarea:focus{
+ border-color:var(--cyan);
+ box-shadow:0 0 0 3px rgba(103,223,255,.10);
+}
+#helpForm textarea{
+ min-height:130px;
+ resize:vertical;
+}
+#helpForm select{
+ color:var(--text);
+}
+#helpForm button{
+ justify-self:start;
+}
+
+
+/* TAFEI 10.0：应用式页面切换 */
+.app-section-hidden{
+ display:none !important;
+}
+
+</style>
 </head>
 <body>
 <canvas id="stars"></canvas>
@@ -168,6 +257,52 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 </div>
 
 </section>
+
+<section id="help" class="reveal">
+ <div class="section-head">
+  <div>
+   <div class="kicker">02 / TAFEI HELP CENTER</div>
+   <h2>有困难，就来这里说说。</h2>
+  </div>
+  <p>让需要帮助的人找到愿意伸出援手的人。</p>
+ </div>
+
+ <div class="panel" style="padding:24px">
+  <h3>发布求助</h3>
+  <form id="helpForm">
+   <label for="helpNickname">昵称</label>
+   <input id="helpNickname" maxlength="30" required placeholder="给自己取一个昵称">
+
+   <label for="helpCategory">求助类别</label>
+   <select id="helpCategory" required>
+    <option value="">请选择类别</option>
+    <option value="learning">学习问题</option>
+    <option value="tech">技术问题</option>
+    <option value="resources">资源需求</option>
+    <option value="daily">生活问题</option>
+    <option value="other">其他</option>
+   </select>
+
+   <label for="helpTitle">求助标题</label>
+   <input id="helpTitle" maxlength="100" required placeholder="简单描述你需要什么帮助">
+
+   <label for="helpContent">详细描述</label>
+   <textarea id="helpContent" maxlength="2000" required rows="5" placeholder="请描述遇到的问题，以及希望得到什么帮助"></textarea>
+
+   <p class="note">隐私提醒：请勿填写真实姓名、手机号、学校、家庭住址等个人信息。</p>
+   <button class="btn primary" type="submit">提交求助</button>
+   <p id="helpMessage" aria-live="polite"></p>
+  </form>
+ </div>
+
+ <div class="article-list" style="margin-top:24px">
+  <h3>大家的求助</h3>
+  <div id="helpList" aria-live="polite">
+   <div class="article-empty">求助中心正在建设中……</div>
+  </div>
+ </div>
+</section>
+
 <section id="projects" class="reveal">
 <div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
 <div class="grid">
@@ -358,6 +493,7 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
 
 
  const ARTICLES_API='https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_articles';
+ const REPORTS_API='https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_reports';
 
  async function loadArticles(){
   const root=$id('articlesList');
@@ -387,7 +523,105 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
     const meta=document.createElement('div');
     meta.className='article-meta';
     meta.textContent=(m.nickname||'访客')+' · '+(m.created_at?new Date(m.created_at).toLocaleString('zh-CN'):'');
-    card.append(title,content,meta);
+    const reportButton=document.createElement('button');
+    reportButton.type='button';
+    reportButton.textContent='举报这篇文章';
+    reportButton.style.cssText='margin-top:12px;padding:7px 12px;border:1px solid #999;border-radius:8px;background:transparent;cursor:pointer;';
+
+    const reportForm=document.createElement('form');
+    reportForm.hidden=true;
+    reportForm.style.cssText='margin-top:12px;padding:12px;border:1px solid #999;border-radius:10px;';
+
+    const reason=document.createElement('select');
+    reason.required=true;
+    reason.style.cssText='display:block;width:100%;padding:9px;margin-bottom:9px;';
+    [
+     ['','请选择举报原因'],
+     ['spam','垃圾广告或 spam'],
+     ['abuse','辱骂、骚扰或攻击'],
+     ['misinformation','疑似虚假或误导信息'],
+     ['privacy','泄露个人隐私'],
+     ['other','其他问题']
+    ].forEach(([value,label])=>{
+     const option=document.createElement('option');
+     option.value=value;
+     option.textContent=label;
+     reason.append(option);
+    });
+
+    const description=document.createElement('textarea');
+    description.maxLength=500;
+    description.rows=3;
+    description.placeholder='补充说明（选填，最多500字）';
+    description.style.cssText='display:block;width:100%;box-sizing:border-box;padding:9px;margin-bottom:9px;';
+
+    const submitReport=document.createElement('button');
+    submitReport.type='submit';
+    submitReport.textContent='提交举报';
+    submitReport.style.cssText='padding:8px 14px;border:0;border-radius:8px;cursor:pointer;';
+
+    const reportStatus=document.createElement('p');
+    reportStatus.setAttribute('role','status');
+
+    reportForm.append(reason,description,submitReport,reportStatus);
+
+    reportButton.addEventListener('click',()=>{
+     reportForm.hidden=!reportForm.hidden;
+    });
+
+    reportForm.addEventListener('submit',async ev=>{
+     ev.preventDefault();
+     const articleId=Number(m.id);
+     const detail=description.value.trim();
+
+     if(!Number.isSafeInteger(articleId)||articleId<=0){
+      reportStatus.textContent='文章编号无效，无法提交。';
+      return;
+     }
+     if(!reason.value){
+      reportStatus.textContent='请先选择举报原因。';
+      return;
+     }
+     if(detail.length>500){
+      reportStatus.textContent='补充说明最多500字。';
+      return;
+     }
+
+     submitReport.disabled=true;
+     submitReport.textContent='正在提交……';
+     reportStatus.textContent='';
+
+     try{
+      const response=await fetch(REPORTS_API,{
+       method:'POST',
+       headers:{
+        apikey:KEY,
+        Authorization:'Bearer '+KEY,
+        'Content-Type':'application/json',
+        Prefer:'return=minimal'
+       },
+       body:JSON.stringify({
+        article_id:articleId,
+        reason:reason.value,
+        description:detail||null
+       })
+      });
+
+      if(!response.ok)throw new Error(await response.text());
+
+      reportStatus.textContent='举报已提交，感谢你帮助维护社区。';
+      submitReport.textContent='已提交';
+      submitReport.disabled=true;
+      reportButton.disabled=true;
+     }catch(error){
+      console.error(error);
+      reportStatus.textContent='提交失败，请稍后重试。';
+      submitReport.disabled=false;
+      submitReport.textContent='重新提交';
+     }
+    });
+
+    card.append(title,content,meta,reportButton,reportForm);
     root.append(card);
    });
   }catch(e){
@@ -448,5 +682,62 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
 })();
 
 </script>
+
+<nav class="mobile-bottom-nav" aria-label="手机底部导航">
+ <a href="#home" data-view="home" class="active" aria-current="page"><span>⌂</span><span>首页</span></a>
+ <a href="#community" data-view="community"><span>♧</span><span>互助</span></a>
+ <a href="#help" data-view="help"><span>♡</span><span>求助</span></a>
+ <a href="#projects" data-view="projects"><span>▣</span><span>作品</span></a>
+ <a href="#about" data-view="founder"><span>♙</span><span>发起人</span></a>
+</nav>
+
+
+<script>
+/* TAFEI 10.0：五个独立界面 */
+(()=>{
+ const pages={
+  home:['home'],
+  community:['community','guestbook'],
+  help:['help'],
+  projects:['projects','lab','studio'],
+  founder:['about','contact']
+ };
+
+ const sections=[...document.querySelectorAll('main > section')];
+ const links=[...document.querySelectorAll('.mobile-bottom-nav a[data-view]')];
+
+ function showPage(name){
+  if(!pages[name]) name='home';
+  const visible=new Set(pages[name]);
+
+  sections.forEach(section=>{
+   const show=visible.has(section.id);
+   section.classList.toggle('app-section-hidden',!show);
+   if(show && section.classList.contains('reveal')){
+    section.classList.add('visible');
+   }
+  });
+
+  links.forEach(link=>{
+   const active=link.dataset.view===name;
+   link.classList.toggle('active',active);
+   if(active) link.setAttribute('aria-current','page');
+   else link.removeAttribute('aria-current');
+  });
+
+  window.scrollTo(0,0);
+ }
+
+ links.forEach(link=>{
+  link.addEventListener('click',event=>{
+   event.preventDefault();
+   showPage(link.dataset.view);
+  });
+ });
+
+ showPage('home');
+})();
+</script>
+
 </body>
 </html>
