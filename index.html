@@ -184,6 +184,32 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  display:none !important;
 }
 
+
+/* TAFEI 11.0 FEED STYLES */
+.feed-section{margin:32px 0}
+.feed-heading{margin-bottom:18px}
+.feed-heading h3{font-size:1.5rem;margin:0 0 8px}
+.feed-heading p{color:var(--muted);line-height:1.7}
+.feed-form{padding:22px;margin-bottom:24px}
+.feed-form h3{margin-top:0}
+.feed-field{display:block;margin:16px 0}
+.feed-field span{display:block;margin-bottom:8px;color:var(--muted)}
+.feed-field select,.feed-field textarea{
+ width:100%;box-sizing:border-box;padding:13px;
+ border:1px solid var(--line);border-radius:12px;
+ background:var(--panel);color:var(--text);font:inherit
+}
+.feed-field textarea{min-height:120px;resize:vertical}
+.feed-status{color:var(--muted);font-size:.9rem;line-height:1.6}
+.feed-list{display:grid;gap:14px}
+.feed-post{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.feed-post-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.feed-author{font-weight:700}
+.feed-meta{font-size:.82rem;color:var(--muted)}
+.feed-category{display:inline-block;padding:4px 9px;border-radius:20px;background:rgba(80,160,255,.12);font-size:.8rem;color:var(--accent)}
+.feed-content{line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.feed-empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+
 </style>
 </head>
 <body>
@@ -198,7 +224,7 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <div><div class="status"><i class="dot"></i> PUBLIC COMMUNITY · 7.0</div><div class="eyebrow" style="margin-top:22px">HELLO, WORLD</div>
 <h1>让互联网，<br><span class="gradient">温暖每一个人。</span></h1>
 <p>欢迎来到挞飞。这里希望成为一个免费、友善、开放的互联网空间，让普通人分享知识、交流经验、互相帮助。</p>
-<div class="actions"><a class="btn primary" href="#community">进入交流空间 ↗</a><a class="btn" href="about.html">认识发起人</a></div>
+<div class="actions"><a class="btn primary" href="#community" onclick="event.preventDefault();document.querySelector('.mobile-bottom-nav a[data-view=community]').click()">进入交流空间 ↗</a><a class="btn" href="about.html">认识发起人</a></div>
 <p class="note" style="margin-top:24px">LOCAL TIME · <span id="clock">正在读取时间…</span></p></div>
 <div class="orb-wrap"><div class="orb" aria-label="科技感发光球体"></div></div>
 </section>
@@ -228,6 +254,55 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <p>分享生活、表达想法，让每一次真诚交流都有意义。</p>
 <div class="bottom"><span class="tag">现已开放</span><a class="textbtn" href="#guestbook">进入留言墙 ↗</a></div>
 </article>
+</div>
+
+
+<div class="panel article-form" id="tafeiAuthPanel">
+ <h3>♙ 挞飞社区账户</h3>
+ <div id="tafeiAuthLoggedOut">
+  <form id="tafeiGuestForm">
+   <h4>欢迎来到挞飞</h4>
+   <label class="article-field">
+    <span>给自己取一个社区昵称（最多30字）</span>
+    <input id="tafeiSignupNickname" maxlength="30" required placeholder="例如：小飞、热爱生活">
+   </label>
+   <button class="btn primary" type="submit">进入挞飞 ↗</button>
+  </form>
+ </div>
+ <div id="tafeiAuthLoggedIn" hidden>
+  <p>欢迎回来，<strong id="tafeiCurrentNickname"></strong>！</p>
+  <p>这是当前浏览器中的匿名账户。请勿清除浏览器网站数据，否则可能无法找回。</p>
+ </div>
+ <p id="tafeiAuthStatus" role="status">未登录也可以浏览社区，登录后即可发布动态。</p>
+</div>
+
+<div class="feed-section" id="tafeiFeed">
+ <div class="feed-heading">
+  <h3>✦ 动态广场</h3>
+  <p>分享生活、学习心得、技术经验和需要帮助的问题。</p>
+ </div>
+ <form class="panel feed-form" id="tafeiFeedForm">
+  <h3>发布一条动态</h3>
+  <label class="feed-field">
+   <span>选择动态分类</span>
+   <select id="tafeiFeedCategory" required>
+    <option value="daily">生活日常</option>
+    <option value="learning">学习成长</option>
+    <option value="tech">科技技术</option>
+    <option value="help">寻求帮助</option>
+    <option value="knowledge">知识分享</option>
+   </select>
+  </label>
+  <label class="feed-field">
+   <span>动态内容（最多1000字）</span>
+   <textarea id="tafeiFeedContent" maxlength="1000" required placeholder="此刻，你想分享什么？"></textarea>
+  </label>
+  <button class="btn primary" id="tafeiFeedSubmit" type="submit">发布动态 ↗</button>
+  <p class="feed-status" id="tafeiFeedStatus" role="status">登录社区账户后即可发布，所有访客都可以浏览。</p>
+ </form>
+ <div class="feed-list" id="tafeiFeedList" aria-live="polite">
+  <div class="feed-empty">正在加载动态……</div>
+ </div>
 </div>
 
 <div class="article-area">
@@ -675,6 +750,301 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
    button.textContent='发布文章 ↗';
   }
  });
+
+
+ // TAFEI 11.0 AUTH MODULE
+ const AUTH_URL='https://kwkewmhmxyjmzdjyutwa.supabase.co/auth/v1';
+ const AUTH_STORAGE='tafei-auth-session';
+ let authSession=null;
+
+ const authStatus=$id('tafeiAuthStatus');
+ const authLoggedOut=$id('tafeiAuthLoggedOut');
+ const authLoggedIn=$id('tafeiAuthLoggedIn');
+
+ function authMessage(message){
+  if(authStatus)authStatus.textContent=message;
+ }
+
+ function showAuth(session){
+  authSession=session;
+  if(session){
+   const user=session.user||{};
+   const nickname=user.user_metadata?.nickname||user.email?.split('@')[0]||'挞飞用户';
+   authLoggedOut.hidden=true;
+   authLoggedIn.hidden=false;
+   $id('tafeiCurrentNickname').textContent=nickname;
+   authMessage('登录成功！现在可以参与社区交流。');
+  }else{
+   authLoggedOut.hidden=false;
+   authLoggedIn.hidden=true;
+   authMessage('未登录也可以浏览社区，登录后即可发布动态。');
+  }
+ }
+
+ async function authRequest(path,data,token){
+  const headers={
+   apikey:KEY,
+   'Content-Type':'application/json'
+  };
+  if(token)headers.Authorization='Bearer '+token;
+  const response=await fetch(AUTH_URL+path,{
+   method:'POST',
+   headers,
+   body:JSON.stringify(data)
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok){
+   throw new Error(result.msg||result.message||result.error_description||result.error||'请求失败，请稍后重试。');
+  }
+  return result;
+ }
+
+ function saveAuth(session){
+  authSession=session;
+  localStorage.setItem(AUTH_STORAGE,JSON.stringify(session));
+  showAuth(session);
+ }
+
+ $id('tafeiGuestForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+
+  const nickname=$id('tafeiSignupNickname').value.trim();
+
+  if(!nickname||nickname.length>30){
+   authMessage('昵称不能为空，最多30个字。');
+   return;
+  }
+
+  const button=event.submitter||event.currentTarget.querySelector('button[type="submit"]');
+  button.disabled=true;
+  authMessage('正在进入挞飞……');
+
+  try{
+   const result=await authRequest('/signup',{
+    data:{nickname}
+   });
+
+   if(!result.access_token||!result.user){
+    throw new Error('账户创建未完成，请稍后重试。');
+   }
+
+   saveAuth(result);
+   authMessage('欢迎来到挞飞！');
+  }catch(error){
+   authMessage('进入失败：'+error.message);
+  }finally{
+   button.disabled=false;
+  }
+ });
+
+ // 恢复当前浏览器保存的匿名账户
+ (async()=>{
+  try{
+   const saved=localStorage.getItem(AUTH_STORAGE);
+
+   if(saved){
+    let session=JSON.parse(saved);
+
+    // access token 即将过期时，尝试刷新
+    if(session.refresh_token&&session.expires_at&&
+       session.expires_at*1000<=Date.now()+60000){
+     session=await authRequest('/token?grant_type=refresh_token',{
+      refresh_token:session.refresh_token
+     });
+    }
+
+    if(session.access_token){
+     const response=await fetch(AUTH_URL+'/user',{
+      headers:{
+       apikey:KEY,
+       Authorization:'Bearer '+session.access_token
+      }
+     });
+
+     if(response.ok){
+      session.user=await response.json();
+      authSession=session;
+      localStorage.setItem(AUTH_STORAGE,JSON.stringify(session));
+      showAuth(session);
+     }else{
+      localStorage.removeItem(AUTH_STORAGE);
+      authSession=null;
+      showAuth(null);
+     }
+    }else{
+     showAuth(null);
+    }
+   }else{
+    showAuth(null);
+   }
+  }catch(error){
+   localStorage.removeItem(AUTH_STORAGE);
+   authSession=null;
+   showAuth(null);
+  }
+ })();
+
+
+ // TAFEI 11.0 FEED MODULE
+ const FEED_API=API.replace('/tafei-cloud','/tafei_posts');
+ const PROFILE_API=API.replace('/tafei-cloud','/tafei_profiles');
+ const feedForm=$id('tafeiFeedForm');
+ const feedList=$id('tafeiFeedList');
+ const feedStatus=$id('tafeiFeedStatus');
+
+ const feedCategories={
+  daily:'生活日常',
+  learning:'学习成长',
+  tech:'科技技术',
+  help:'寻求帮助',
+  knowledge:'知识分享'
+ };
+
+ async function loadFeed(){
+  if(!feedList)return;
+  feedList.textContent='正在加载动态……';
+
+  try{
+   const response=await fetch(
+    FEED_API+'?select=id,user_id,category,content,created_at&order=created_at.desc&limit=50',
+    {headers:{
+     apikey:KEY,
+     Authorization:'Bearer '+(authSession?.access_token||KEY)
+    }}
+   );
+
+   if(!response.ok)throw new Error('动态加载失败，HTTP '+response.status);
+
+   const posts=await response.json();
+   const ids=[...new Set(posts.map(post=>post.user_id).filter(Boolean))];
+   let profiles={};
+
+   if(ids.length){
+    try{
+     const url=PROFILE_API+'?select=id,nickname&id=in.('+encodeURIComponent(ids.join(','))+')';
+     const profileResponse=await fetch(url,{
+      headers:{
+       apikey:KEY,
+       Authorization:'Bearer '+(authSession?.access_token||KEY)
+      }
+     });
+     if(profileResponse.ok){
+      const rows=await profileResponse.json();
+      rows.forEach(profile=>profiles[profile.id]=profile.nickname);
+     }
+    }catch(error){
+     console.warn('昵称加载失败：',error);
+    }
+   }
+
+   feedList.replaceChildren();
+
+   if(!posts.length){
+    const empty=document.createElement('div');
+    empty.className='feed-empty';
+    empty.textContent='这里还没有动态，期待你的第一条分享。';
+    feedList.appendChild(empty);
+    return;
+   }
+
+   posts.forEach(post=>{
+    const article=document.createElement('article');
+    article.className='feed-post';
+
+    const head=document.createElement('div');
+    head.className='feed-post-head';
+
+    const author=document.createElement('span');
+    author.className='feed-author';
+    author.textContent=profiles[post.user_id]||'挞飞用户';
+
+    const meta=document.createElement('span');
+    meta.className='feed-meta';
+    const date=new Date(post.created_at);
+    meta.textContent=Number.isNaN(date.getTime())?'':date.toLocaleString('zh-CN');
+
+    head.append(author,meta);
+
+    const category=document.createElement('span');
+    category.className='feed-category';
+    category.textContent=feedCategories[post.category]||'社区动态';
+
+    const content=document.createElement('p');
+    content.className='feed-content';
+    content.textContent=post.content||'';
+
+    article.append(head,category,content);
+    feedList.appendChild(article);
+   });
+  }catch(error){
+   console.error('动态加载错误：',error);
+   feedList.textContent='动态暂时无法加载，请检查网络后刷新页面。';
+  }
+ }
+
+ if(feedForm){
+  feedForm.addEventListener('submit',async event=>{
+   event.preventDefault();
+
+   if(!authSession?.access_token||!authSession?.user?.id){
+    feedStatus.textContent='请先进入挞飞社区账户，再发布动态。';
+    return;
+   }
+
+   const category=$id('tafeiFeedCategory').value;
+   const content=$id('tafeiFeedContent').value.trim();
+   const button=$id('tafeiFeedSubmit');
+
+   if(!Object.prototype.hasOwnProperty.call(feedCategories,category)){
+    feedStatus.textContent='请选择有效的动态分类。';
+    return;
+   }
+
+   if(!content||content.length>1000){
+    feedStatus.textContent='动态内容不能为空，最多1000字。';
+    return;
+   }
+
+   button.disabled=true;
+   feedStatus.textContent='正在发布动态……';
+
+   try{
+    const response=await fetch(FEED_API,{
+     method:'POST',
+     headers:{
+      apikey:KEY,
+      Authorization:'Bearer '+authSession.access_token,
+      'Content-Type':'application/json',
+      Prefer:'return=representation'
+     },
+     body:JSON.stringify({
+      user_id:authSession.user.id,
+      category,
+      content
+     })
+    });
+
+    if(!response.ok){
+     const detail=await response.text();
+     throw new Error('发布失败（HTTP '+response.status+'）'+(detail?'：'+detail.slice(0,250):''));
+    }
+
+    $id('tafeiFeedContent').value='';
+    feedStatus.textContent='发布成功！你的动态已经进入挞飞广场。';
+    await loadFeed();
+   }catch(error){
+    console.error('动态发布错误：',error);
+    feedStatus.textContent=error.message||'发布失败，请稍后重试。';
+   }finally{
+    button.disabled=false;
+   }
+  });
+ }
+
+ loadFeed();
+ // TAFEI 11.0 FEED MODULE END
+
+ // TAFEI 11.0 AUTH MODULE END
 
  renderProjects();
  loadMessages();
