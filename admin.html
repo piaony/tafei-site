@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>挞飞 · 管理员后台</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#101827;color:#edf3ff;font-family:Arial,sans-serif}
+main{max-width:850px;margin:35px auto}
+.panel{background:#1b2940;padding:22px;border-radius:16px;margin:18px 0}
+h1{color:#80caff}
+input,textarea,button{width:100%;padding:13px;margin:8px 0;border-radius:8px;border:0;font-size:15px}
+textarea{min-height:75px;resize:vertical}
+button{background:#62b5f5;color:#102033;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.report{background:#263750;padding:16px;border-radius:12px;margin:14px 0;overflow-wrap:anywhere}
+small{color:#aabbd1}
+.status{font-weight:bold;color:#ffd479}
+.handled{color:#8de0ae}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>TAFEI 挞飞</h1>
+<p>9.1 · 社区安全管理中心</p>
+
+<section class="panel" id="login">
+<h2>管理员登录</h2>
+<input id="email" type="email" placeholder="管理员邮箱">
+<input id="password" type="password" placeholder="管理员密码">
+<button id="loginBtn">登录管理后台</button>
+<p id="loginMsg"></p>
+</section>
+
+<section class="panel hidden" id="dashboard">
+<h2>公告管理</h2>
+<input id="announcementTitle" type="text" placeholder="公告标题">
+<textarea id="announcementContent" placeholder="公告内容" rows="5"></textarea>
+<button id="publishAnnouncementBtn">发布新公告</button>
+<p id="announcementStatus"></p>
+<div id="announcements"></div>
+
+<h2>举报管理</h2>
+<p id="status">正在加载举报……</p>
+<button id="refreshBtn">刷新举报</button>
+<div id="reports"></div>
+<button id="logoutBtn">退出登录</button>
+</section>
+</main>
+
+<script>
+const URL='https://kwkewmhmxyjmzdjyutwa.supabase.co';
+const KEY='sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
+
+let accessToken=null;
+const $=id=>document.getElementById(id);
+
+function message(text){
+ $('loginMsg').textContent=text;
+}
+
+async function login(){
+ const email=$('email').value.trim();
+ const password=$('password').value;
+
+ if(!email||!password){
+  message('请填写邮箱和密码。');
+  return;
+ }
+
+ $('loginBtn').disabled=true;
+ message('正在验证账号……');
+
+ try{
+  const res=await fetch(URL+'/auth/v1/token?grant_type=password',{
+   method:'POST',
+   headers:{apikey:KEY,'Content-Type':'application/json'},
+   body:JSON.stringify({email,password})
+  });
+
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.msg||data.message||'登录失败');
+
+  accessToken=data.access_token;
+
+  const adminRes=await fetch(URL+'/rest/v1/rpc/is_tafei_admin',{
+   method:'POST',
+   headers:{
+    apikey:KEY,
+    Authorization:'Bearer '+accessToken,
+    'Content-Type':'application/json'
+   },
+   body:'{}'
+  });
+
+  const isAdmin=await adminRes.json();
+  if(!adminRes.ok || isAdmin!==true){
+   throw new Error('当前账号不是挞飞管理员，无法进入后台。');
+  }
+
+  $('login').classList.add('hidden');
+  $('dashboard').classList.remove('hidden');
+  await loadReports();
+  await loadAnnouncements();
+
+ }catch(e){
+  accessToken=null;
+  message('登录失败：'+e.message);
+ }finally{
+  $('loginBtn').disabled=false;
+ }
+}
+
+async function loadAnnouncements(){
+ const box=$('announcements');
+ const status=$('announcementStatus');
+ box.replaceChildren();
+ status.textContent='正在读取公告……';
+
+ try{
+  const res=await fetch(
+   URL+'/rest/v1/tafei_announcements?select=id,title,content,version,is_active,created_at&order=version.desc',
+   {headers:{
+    apikey:KEY,
+    Authorization:'Bearer '+accessToken
+   }}
+  );
+
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.message||'读取公告失败');
+
+  status.textContent='共 '+data.length+' 条公告';
+
+  if(data.length===0){
+   box.textContent='目前还没有公告。';
+   return;
+  }
+
+  data.forEach(item=>{
+   const card=document.createElement('article');
+   card.style.cssText='padding:12px;margin:10px 0;border:1px solid #888;border-radius:10px;';
+
+   const heading=document.createElement('h3');
+   heading.textContent='V'+item.version+' · '+item.title;
+
+   const state=document.createElement('p');
+   state.textContent=item.is_active?'当前生效':'历史公告';
+
+   const content=document.createElement('p');
+   content.textContent=item.content;
+   content.style.whiteSpace='pre-wrap';
+
+   card.append(heading,state,content);
+   box.append(card);
+  });
+ }catch(e){
+  status.textContent='公告读取失败：'+e.message;
+ }
+}
+
+async function loadReports(){
+ $('status').textContent='正在读取举报记录……';
+ $('reports').replaceChildren();
+
+ try{
+  const res=await fetch(
+   URL+'/rest/v1/tafei_reports?select=id,article_id,reason,description,created_at,status,admin_note,handled_at&order=created_at.desc',
+   {headers:{
+    apikey:KEY,
+    Authorization:'Bearer '+accessToken
+   }}
+  );
+
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.message||'读取失败');
+
+  $('status').textContent='共收到 '+data.length+' 条举报';
+
+  if(data.length===0){
+   $('reports').textContent='目前没有举报记录。';
+   return;
+  }
+
+  data.forEach(item=>{
+   const card=document.createElement('div');
+   card.className='report';
+
+   const title=document.createElement('h3');
+   title.textContent='举报文章 ID：'+item.article_id;
+
+   const reason=document.createElement('p');
+   reason.textContent='举报原因：'+item.reason;
+
+   const desc=document.createElement('p');
+   desc.textContent='补充说明：'+(item.description||'无');
+
+   const date=document.createElement('small');
+   date.textContent='提交时间：'+new Date(item.created_at).toLocaleString();
+
+   const state=document.createElement('p');
+   state.className='status '+(item.status==='handled'?'handled':'');
+   state.textContent=item.status==='handled'?'状态：已处理':'状态：待处理';
+
+   const note=document.createElement('p');
+   note.textContent='处理备注：'+(item.admin_note||'暂无');
+
+   card.append(title,reason,desc,date,state,note);
+
+   if(item.handled_at){
+    const handledDate=document.createElement('small');
+    handledDate.textContent='处理时间：'+new Date(item.handled_at).toLocaleString();
+    card.append(handledDate);
+   }
+
+   if(item.status!=='handled'){
+    const textarea=document.createElement('textarea');
+    textarea.placeholder='填写处理备注（最多500字）';
+    textarea.maxLength=500;
+
+    const btn=document.createElement('button');
+    btn.textContent='标记为已处理';
+
+    btn.addEventListener('click',async()=>{
+     await markHandled(item.id,textarea.value,btn);
+    });
+
+    card.append(textarea,btn);
+   }
+
+   $('reports').append(card);
+  });
+
+ }catch(e){
+  $('status').textContent='读取失败：'+e.message;
+ }
+}
+
+async function markHandled(id,note,button){
+ if(note.length>500){
+  alert('处理备注不能超过500字。');
+  return;
+ }
+
+ if(!confirm('确定将这条举报标记为已处理吗？')) return;
+
+ button.disabled=true;
+ button.textContent='正在保存……';
+
+ try{
+  const res=await fetch(
+   URL+'/rest/v1/tafei_reports?id=eq.'+encodeURIComponent(id),
+   {
+    method:'PATCH',
+    headers:{
+     apikey:KEY,
+     Authorization:'Bearer '+accessToken,
+     'Content-Type':'application/json',
+     Prefer:'return=minimal'
+    },
+    body:JSON.stringify({
+     status:'handled',
+     admin_note:note,
+     handled_at:new Date().toISOString()
+})
+}
+);
+if(!res.ok){
+ const data=await res.json();
+ throw new Error(data.message||'保存失败');
+}
+alert('举报处理状态已保存！');
+await loadReports();
+}catch(e){
+ alert('保存失败：'+e.message);
+ button.disabled=false;
+ button.textContent='标记为已处理';
+}
+}
+
+
+async function publishAnnouncement(){
+ const title=$('announcementTitle').value.trim();
+ const content=$('announcementContent').value.trim();
+ const status=$('announcementStatus');
+
+ if(!title || !content){
+  status.textContent='请填写公告标题和内容。';
+  return;
+ }
+
+ if(!confirm('确定发布这条新公告吗？发布后所有访客都需要重新确认。')){
+  return;
+ }
+
+ const button=$('publishAnnouncementBtn');
+ button.disabled=true;
+ status.textContent='正在发布……';
+
+ try{
+  const res=await fetch(URL+'/rest/v1/rpc/publish_tafei_announcement',{
+   method:'POST',
+   headers:{
+    apikey:KEY,
+    Authorization:'Bearer '+accessToken,
+    'Content-Type':'application/json'
+   },
+   body:JSON.stringify({
+    p_title:title,
+    p_content:content
+   })
+  });
+
+  const data=await res.json();
+  if(!res.ok){
+   throw new Error(data.message||data.msg||'发布失败');
+  }
+
+  $('announcementTitle').value='';
+  $('announcementContent').value='';
+  status.textContent='公告发布成功！公告编号：'+data;
+  await loadAnnouncements();
+ }catch(e){
+  status.textContent='发布失败：'+e.message;
+ }finally{
+  button.disabled=false;
+ }
+}
+
+function logout(){
+ accessToken=null;
+ $('password').value='';
+ $('dashboard').classList.add('hidden');
+ $('login').classList.remove('hidden');
+ message('已退出登录。');
+}
+
+$('publishAnnouncementBtn').addEventListener('click',publishAnnouncement);
+$('loginBtn').addEventListener('click',login);
+$('refreshBtn').addEventListener('click',loadReports);
+$('logoutBtn').addEventListener('click',logout);
+</script>
+</body>
+</html>
