@@ -42,6 +42,34 @@ small{color:#aabbd1}
 <p id="announcementStatus"></p>
 <div id="announcements"></div>
 
+<h2>商品管理</h2>
+<div class="report">
+<input id="productName" placeholder="商品名称">
+<input id="productCategory" placeholder="商品分类">
+<input id="productPrice" type="number" min="0" step="0.01" placeholder="商品价格">
+<textarea id="productDescription" placeholder="商品介绍"></textarea>
+<input id="productImage" placeholder="商品图片链接（可留空）">
+<button id="saveProductBtn">添加商品</button>
+<button id="cancelEditBtn" type="button" hidden>取消编辑</button>
+<p id="editStatus"></p>
+<p id="productStatus"></p>
+</div>
+<button id="refreshProductsBtn">刷新商品列表</button>
+<div id="products"></div>
+
+<h2>社区内容管理</h2>
+<div class="report">
+<select id="contentType">
+<option value="tafei_posts">社区动态</option>
+<option value="tafei_comments">动态评论</option>
+<option value="tafei_articles">知识分享文章</option>
+<option value="tafei-cloud">留言板留言</option>
+</select>
+<button id="refreshContentBtn">查看社区内容</button>
+<p id="contentStatus"></p>
+<div id="communityContent"></div>
+</div>
+
 <h2>举报管理</h2>
 <p id="status">正在加载举报……</p>
 <button id="refreshBtn">刷新举报</button>
@@ -104,6 +132,7 @@ async function login(){
   $('dashboard').classList.remove('hidden');
   await loadReports();
   await loadAnnouncements();
+  await loadProducts();
 
  }catch(e){
   accessToken=null;
@@ -336,10 +365,204 @@ function logout(){
  message('已退出登录。');
 }
 
+
+const PRODUCTS_API = URL + '/rest/v1/tafei_products';
+
+let editingProductId=null;
+
+async function loadProducts(){
+ const root = $('products');
+ const status = $('productStatus');
+ root.textContent = '正在加载商品……';
+ try{
+  const res = await fetch(PRODUCTS_API + '?select=*&order=id.desc',{
+   headers:{apikey:KEY,Authorization:'Bearer '+accessToken}
+  });
+  const rows = await res.json();
+  if(!res.ok) throw new Error(rows.message || '读取失败');
+  root.replaceChildren();
+  if(!rows.length) root.textContent='目前还没有商品。';
+  rows.forEach(item=>{
+   const card=document.createElement('div');
+   card.className='report';
+   const title=document.createElement('h3');
+   title.textContent=item.name+' · ¥'+item.price;
+   const detail=document.createElement('p');
+   detail.textContent=item.category+'：'+item.description;
+   const state=document.createElement('p');
+   state.textContent=item.is_active?'已上架':'已下架';
+   const edit=document.createElement('button');
+   edit.textContent='编辑商品';
+   edit.addEventListener('click',()=>{
+    editingProductId=item.id;
+    $('productName').value=item.name||'';
+    $('productCategory').value=item.category||'';
+    $('productPrice').value=item.price??'';
+    $('productDescription').value=item.description||'';
+    $('productImage').value=item.image_url||'';
+    $('saveProductBtn').textContent='保存修改';
+    $('cancelEditBtn').hidden=false;
+    $('editStatus').textContent='正在编辑：'+item.name;
+    $('productStatus').textContent='修改完成后点击保存修改。';
+    window.scrollTo({top:0,behavior:'smooth'});
+   });
+   const toggle=document.createElement('button');
+   toggle.textContent=item.is_active?'下架商品':'上架商品';
+   toggle.addEventListener('click',()=>toggleProduct(item.id,!item.is_active));
+   card.append(title,detail,state,edit,toggle);
+   root.appendChild(card);
+  });
+  status.textContent='商品列表已更新。';
+ }catch(e){
+  root.textContent='加载失败：'+e.message;
+ }
+}
+
+async function toggleProduct(id,active){
+ if(!confirm(active?'确定上架这件商品吗？':'确定下架这件商品吗？')) return;
+ try{
+  const res=await fetch(PRODUCTS_API+'?id=eq.'+id,{
+   method:'PATCH',
+   headers:{apikey:KEY,Authorization:'Bearer '+accessToken,
+    'Content-Type':'application/json',Prefer:'return=minimal'},
+   body:JSON.stringify({is_active:active,updated_at:new Date().toISOString()})
+  });
+  if(!res.ok) throw new Error('修改失败，HTTP '+res.status);
+  await loadProducts();
+ }catch(e){$('productStatus').textContent=e.message;}
+}
+
+async function saveProduct(){
+ const name=$('productName').value.trim();
+ const category=$('productCategory').value.trim();
+ const price=Number($('productPrice').value);
+ if(!name||!category||$('productPrice').value===''||!Number.isFinite(price)||price<0){
+  $('productStatus').textContent='请填写商品名称、分类和有效价格。';
+  return;
+ }
+ const button=$('saveProductBtn');
+ button.disabled=true;
+ try{
+  const editing=editingProductId!==null;
+  const res=await fetch(
+   editing?PRODUCTS_API+'?id=eq.'+encodeURIComponent(editingProductId):PRODUCTS_API,
+   {
+    method:editing?'PATCH':'POST',
+    headers:{apikey:KEY,Authorization:'Bearer '+accessToken,
+     'Content-Type':'application/json',Prefer:'return=minimal'},
+    body:JSON.stringify({
+     name,category,price,
+     description:$('productDescription').value.trim(),
+     image_url:$('productImage').value.trim(),
+     updated_at:new Date().toISOString(),
+     ...(editing?{}:{is_active:false})
+    })
+   }
+  );
+  if(!res.ok){
+   const data=await res.json();
+   throw new Error(data.message||'保存失败，HTTP '+res.status);
+  }
+  editingProductId=null;
+  $('saveProductBtn').textContent='添加商品';
+  $('cancelEditBtn').hidden=true;
+  $('editStatus').textContent='';
+  $('productName').value='';
+  $('productCategory').value='';
+  $('productPrice').value='';
+  $('productDescription').value='';
+  $('productImage').value='';
+  $('productStatus').textContent='商品已保存，当前默认下架。';
+  await loadProducts();
+ }catch(e){
+  $('productStatus').textContent='添加失败：'+e.message;
+ }finally{button.disabled=false;}
+}
+
+
+const CONTENT_TABLES = {
+ tafei_posts:{label:'社区动态',fields:'id,user_id,category,content,created_at'},
+ tafei_comments:{label:'动态评论',fields:'id,post_id,user_id,content,created_at'},
+ tafei_articles:{label:'知识分享',fields:'id,nickname,title,content,created_at'},
+ 'tafei-cloud':{label:'留言板',fields:'id,nickname,content,created_at'}
+};
+
+async function loadContent(){
+ const type=$('contentType').value;
+ const config=CONTENT_TABLES[type];
+ const root=$('communityContent');
+ $('contentStatus').textContent='正在读取……';
+ root.replaceChildren();
+ try{
+  const res=await fetch(URL+'/rest/v1/'+type+'?select='+config.fields+'&order=created_at.desc&limit=100',{
+   headers:{apikey:KEY,Authorization:'Bearer '+accessToken}
+  });
+  const rows=await res.json();
+  if(!res.ok) throw new Error(rows.message||'读取失败，HTTP '+res.status);
+  $('contentStatus').textContent=config.label+'：共 '+rows.length+' 条';
+  if(!rows.length){root.textContent='暂无内容';return;}
+  rows.forEach(item=>{
+   const card=document.createElement('div');
+   card.className='report';
+   const heading=document.createElement('h3');
+   heading.textContent=item.title||item.nickname||item.category||config.label;
+   const meta=document.createElement('small');
+   meta.textContent='ID：'+item.id+' · '+(item.created_at||'');
+   const body=document.createElement('p');
+   body.textContent=item.content||'';
+   const del=document.createElement('button');
+   del.textContent='删除这条内容';
+   del.addEventListener('click',()=>deleteContent(type,item));
+   card.append(heading,meta,body,del);
+   root.appendChild(card);
+  });
+ }catch(e){
+  $('contentStatus').textContent='读取失败：'+e.message;
+ }
+}
+
+async function deleteContent(type,item){
+ const config=CONTENT_TABLES[type];
+ if(!confirm('确定删除这条'+config.label+'吗？此操作无法撤销。')) return;
+ try{
+  const headers={apikey:KEY,Authorization:'Bearer '+accessToken,
+   Prefer:'return=minimal'};
+  if(type==='tafei_posts'){
+   const comments=await fetch(URL+'/rest/v1/tafei_comments?post_id=eq.'+encodeURIComponent(item.id),{
+    method:'DELETE',headers
+   });
+   if(!comments.ok) throw new Error('删除动态评论失败，HTTP '+comments.status);
+  }
+  const res=await fetch(URL+'/rest/v1/'+type+'?id=eq.'+encodeURIComponent(item.id),{
+   method:'DELETE',headers
+  });
+  if(!res.ok) throw new Error('删除失败，HTTP '+res.status);
+  $('contentStatus').textContent='删除成功';
+  await loadContent();
+ }catch(e){
+  $('contentStatus').textContent='操作失败：'+e.message;
+ }
+}
+
 $('publishAnnouncementBtn').addEventListener('click',publishAnnouncement);
 $('loginBtn').addEventListener('click',login);
 $('refreshBtn').addEventListener('click',loadReports);
 $('logoutBtn').addEventListener('click',logout);
+$('cancelEditBtn').addEventListener('click',()=>{
+ editingProductId=null;
+ $('productName').value='';
+ $('productCategory').value='';
+ $('productPrice').value='';
+ $('productDescription').value='';
+ $('productImage').value='';
+ $('saveProductBtn').textContent='添加商品';
+ $('cancelEditBtn').hidden=true;
+ $('editStatus').textContent='';
+ $('productStatus').textContent='已取消编辑。';
+});
+$('saveProductBtn').addEventListener('click',saveProduct);
+$('refreshProductsBtn').addEventListener('click',loadProducts);
+$('refreshContentBtn').addEventListener('click',loadContent);
 </script>
 </body>
 </html>
