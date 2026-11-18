@@ -270,7 +270,13 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <canvas id="stars"></canvas>
 <header><div class="wrap nav">
 <a class="brand" href="#home">TAFEI<span>.</span></a>
-<nav class="navlinks" id="navlinks"><a href="#home">首页</a><a href="#community">社区</a><a href="shop.html">商城</a><a href="#projects">发起人作品</a><a href="#about">关于挞飞</a><a href="about.html">认识飘飘</a><a href="#lab">交互实验室</a><a href="#studio">项目管理</a><a href="#guestbook">留言板</a><a href="#contact">联系</a></nav>
+<nav class="navlinks" id="navlinks">
+<a href="#home" data-view="home">首页</a>
+<a href="#info" data-view="info">信息</a>
+<a href="#community" data-view="community">社区</a>
+<a href="shop.html">商城</a>
+<a href="#profile" data-view="profile">个人中心</a>
+</nav>
 <div class="navright"><button class="iconbtn" id="themeBtn" aria-label="切换主题">☼</button><button class="menuBtn" id="menuBtn" aria-label="打开菜单">☰</button></div>
 </div></header>
 <main class="wrap">
@@ -281,6 +287,14 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <div class="actions"><a class="btn primary" href="#community" onclick="event.preventDefault();document.querySelector('.mobile-bottom-nav a[data-view=community]').click()">进入交流空间 ↗</a><a class="btn" href="about.html">认识发起人</a></div>
 <p class="note" style="margin-top:24px">LOCAL TIME · <span id="clock">正在读取时间…</span></p></div>
 <div class="orb-wrap"><div class="orb" aria-label="科技感发光球体"></div></div>
+</section>
+
+<section id="home-tools" class="reveal">
+ <div class="panel" style="padding:24px">
+  <h3>留言墙</h3>
+  <p>想说些什么？也可以看看大家留下的留言。</p>
+  <button class="btn primary" type="button" data-open-view="guestbook">打开留言墙 ↗</button>
+ </div>
 </section>
 
 <section id="community" class="reveal">
@@ -330,112 +344,7 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  <button type="button" class="community-tab" data-community-tab="discussion">💬 讨论</button>
 </div>
 
-<div class="panel article-form" id="tafeiAuthPanel">
- <h3>♙ 挞飞社区账户</h3>
 
- <div id="tafeiAuthLoggedOut">
-  <form id="tafeiGuestForm">
-   <h4>创建挞飞账户</h4>
-
-   <label class="article-field">
-    <span>社区用户名（3–20位，英文字母、数字或下划线）</span>
-    <input id="tafeiSignupUsername" minlength="3" maxlength="20"
-     pattern="[A-Za-z0-9_]{3,20}" required
-     autocomplete="username" placeholder="例如：Piaoyi_01">
-   </label>
-
-   <label class="article-field">
-    <span>社区昵称（最多30字）</span>
-    <input id="tafeiSignupNickname" maxlength="30"
-     required placeholder="例如：热爱生活的小飞">
-   </label>
-
-   <label class="article-field">
-    <span>邮箱</span>
-    <input id="tafeiSignupEmail" type="email"
-     required autocomplete="email" placeholder="你的邮箱地址">
-   </label>
-
-   <label class="article-field">
-    <span>密码（至少8位）</span>
-    <input id="tafeiSignupPassword" type="password"
-     minlength="8" required autocomplete="new-password"
-     placeholder="设置登录密码">
-   </label>
-
-   <label class="article-field">
-    <span>确认密码</span>
-    <input id="tafeiSignupPasswordConfirm" type="password"
-     minlength="8" required autocomplete="new-password"
-     placeholder="再次输入登录密码">
-   </label>
-
-   <button class="btn primary" type="submit">注册挞飞账户 ↗</button>
-  </form>
-
-  <hr>
-
-  <form id="tafeiLoginForm">
-   <h4>已有账户？登录</h4>
-
-   <label class="article-field">
-    <span>邮箱</span>
-    <input id="tafeiLoginEmail" type="email"
-     required autocomplete="email" placeholder="注册时使用的邮箱">
-   </label>
-
-   <label class="article-field">
-    <span>密码</span>
-    <input id="tafeiLoginPassword" type="password"
-     required autocomplete="current-password" placeholder="账户密码">
-   </label>
-
-   <button class="btn primary" type="submit">登录挞飞 ↗</button>
-  </form>
- </div>
-
- <div id="tafeiAuthLoggedIn" hidden>
-  <p>欢迎回来，<strong id="tafeiCurrentNickname"></strong>！</p>
-  <p>你已经登录挞飞，可以继续参与社区交流。</p>
-  <button class="btn" id="tafeiLogoutBtn" type="button">退出登录</button>
-
-  <form id="tafeiUpgradeForm">
-   <h4>完善账户：绑定邮箱和密码</h4>
-
-   <label class="article-field">
-    <span>社区用户名（3–20位，英文字母、数字或下划线）</span>
-    <input id="tafeiUpgradeUsername" minlength="3" maxlength="20"
-     pattern="[A-Za-z0-9_]{3,20}" required
-     autocomplete="username" placeholder="例如：Piaoyi_01">
-   </label>
-
-   <label class="article-field">
-    <span>社区昵称（最多30字）</span>
-    <input id="tafeiUpgradeNickname" maxlength="30"
-     required placeholder="你的社区昵称">
-   </label>
-
-   <label class="article-field">
-    <span>邮箱</span>
-    <input id="tafeiUpgradeEmail" type="email"
-     required autocomplete="email" placeholder="你的邮箱地址">
-   </label>
-
-   <label class="article-field">
-    <span>设置密码（至少8位）</span>
-    <input id="tafeiUpgradePassword" type="password"
-     minlength="8" required autocomplete="new-password"
-     placeholder="设置登录密码">
-   </label>
-
-   <button class="btn primary" type="submit">完善账户 ↗</button>
-  </form>
- </div>
-
- <p id="tafeiAuthStatus" role="status">
-  未登录也可以浏览社区，登录后即可发布动态。
- </p>
-</div>
 <div class="feed-section" id="tafeiFeed">
  <div class="feed-heading">
   <h3>✦ 动态广场</h3>
@@ -597,6 +506,131 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 </section>
 
 <section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
+
+<section id="info" class="reveal">
+ <div class="section-head">
+  <div><div class="kicker">TAFEI INFORMATION</div><h2>信息中心</h2></div>
+  <p>公告、私信和商城通知的集中入口。</p>
+ </div>
+ <div class="panel" style="padding:24px">
+  <h3>公告与通知</h3>
+  <p>信息中心正在升级，公告历史与消息功能将逐步开放。</p>
+ </div>
+</section>
+
+<section id="profile" class="reveal">
+ <div class="section-head">
+  <div><div class="kicker">TAFEI PERSONAL CENTER</div><h2>个人中心</h2></div>
+  <p>注册、登录并管理你的挞飞账户。</p>
+ </div>
+<div class="panel article-form" id="tafeiAuthPanel">
+ <h3>♙ 挞飞社区账户</h3>
+
+ <div id="tafeiAuthLoggedOut">
+  <form id="tafeiGuestForm">
+   <h4>创建挞飞账户</h4>
+
+   <label class="article-field">
+    <span>社区用户名（3–20位，英文字母、数字或下划线）</span>
+    <input id="tafeiSignupUsername" minlength="3" maxlength="20"
+     pattern="[A-Za-z0-9_]{3,20}" required
+     autocomplete="username" placeholder="例如：Piaoyi_01">
+   </label>
+
+   <label class="article-field">
+    <span>社区昵称（最多30字）</span>
+    <input id="tafeiSignupNickname" maxlength="30"
+     required placeholder="例如：热爱生活的小飞">
+   </label>
+
+   <label class="article-field">
+    <span>邮箱</span>
+    <input id="tafeiSignupEmail" type="email"
+     required autocomplete="email" placeholder="你的邮箱地址">
+   </label>
+
+   <label class="article-field">
+    <span>密码（至少8位）</span>
+    <input id="tafeiSignupPassword" type="password"
+     minlength="8" required autocomplete="new-password"
+     placeholder="设置登录密码">
+   </label>
+
+   <label class="article-field">
+    <span>确认密码</span>
+    <input id="tafeiSignupPasswordConfirm" type="password"
+     minlength="8" required autocomplete="new-password"
+     placeholder="再次输入登录密码">
+   </label>
+
+   <button class="btn primary" type="submit">注册挞飞账户 ↗</button>
+  </form>
+
+  <hr>
+
+  <form id="tafeiLoginForm">
+   <h4>已有账户？登录</h4>
+
+   <label class="article-field">
+    <span>邮箱</span>
+    <input id="tafeiLoginEmail" type="email"
+     required autocomplete="email" placeholder="注册时使用的邮箱">
+   </label>
+
+   <label class="article-field">
+    <span>密码</span>
+    <input id="tafeiLoginPassword" type="password"
+     required autocomplete="current-password" placeholder="账户密码">
+   </label>
+
+   <button class="btn primary" type="submit">登录挞飞 ↗</button>
+  </form>
+ </div>
+
+ <div id="tafeiAuthLoggedIn" hidden>
+  <p>欢迎回来，<strong id="tafeiCurrentNickname"></strong>！</p>
+  <p>你已经登录挞飞，可以继续参与社区交流。</p>
+  <button class="btn" id="tafeiLogoutBtn" type="button">退出登录</button>
+
+  <form id="tafeiUpgradeForm">
+   <h4>完善账户：绑定邮箱和密码</h4>
+
+   <label class="article-field">
+    <span>社区用户名（3–20位，英文字母、数字或下划线）</span>
+    <input id="tafeiUpgradeUsername" minlength="3" maxlength="20"
+     pattern="[A-Za-z0-9_]{3,20}" required
+     autocomplete="username" placeholder="例如：Piaoyi_01">
+   </label>
+
+   <label class="article-field">
+    <span>社区昵称（最多30字）</span>
+    <input id="tafeiUpgradeNickname" maxlength="30"
+     required placeholder="你的社区昵称">
+   </label>
+
+   <label class="article-field">
+    <span>邮箱</span>
+    <input id="tafeiUpgradeEmail" type="email"
+     required autocomplete="email" placeholder="你的邮箱地址">
+   </label>
+
+   <label class="article-field">
+    <span>设置密码（至少8位）</span>
+    <input id="tafeiUpgradePassword" type="password"
+     minlength="8" required autocomplete="new-password"
+     placeholder="设置登录密码">
+   </label>
+
+   <button class="btn primary" type="submit">完善账户 ↗</button>
+  </form>
+ </div>
+
+ <p id="tafeiAuthStatus" role="status">
+  未登录也可以浏览社区，登录后即可发布动态。
+ </p>
+</div>
+</section>
+
 </main>
 <footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界</footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
@@ -1829,10 +1863,11 @@ async function t12SaveProfile(userId, nickname, bio, button) {
 </script>
 
 <nav class="mobile-bottom-nav" aria-label="手机底部导航">
- <a href="#home" data-view="home" class="active" aria-current="page"><span>⌂</span><span>首页</span></a>
+ <a href="#home" data-view="home" class="active"><span>⌂</span><span>首页</span></a>
+ <a href="#info" data-view="info"><span>✉</span><span>信息</span></a>
  <a href="#community" data-view="community"><span>♧</span><span>社区</span></a>
  <a href="shop.html"><span>🛍</span><span>商城</span></a>
- <a href="#about" data-view="founder"><span>♙</span><span>关于</span></a>
+ <a href="#profile" data-view="profile"><span>♙</span><span>个人中心</span></a>
 </nav>
 
 
@@ -1840,14 +1875,15 @@ async function t12SaveProfile(userId, nickname, bio, button) {
 /* TAFEI 18.0：社区整合界面 */
 (()=>{
  const pages={
-  home:['home'],
-  community:['community','guestbook','help'],
-  founder:['about','contact'],
-  shop:[]
+  home:['home','home-tools','projects','about','lab','studio','contact'],
+  info:['info'],
+  community:['community','help'],
+  guestbook:['guestbook'],
+  profile:['profile']
  };
 
  const sections=[...document.querySelectorAll('main > section')];
- const links=[...document.querySelectorAll('.mobile-bottom-nav a[data-view]')];
+ const links=[...document.querySelectorAll('.mobile-bottom-nav a[data-view],.navlinks a[data-view]')];
 
  function showPage(name){
   if(!pages[name]) name='home';
@@ -1870,6 +1906,12 @@ async function t12SaveProfile(userId, nickname, bio, button) {
 
   window.scrollTo(0,0);
  }
+
+ document.querySelectorAll('[data-open-view]').forEach(button=>{
+  button.addEventListener('click',()=>{
+   showPage(button.dataset.openView);
+  });
+ });
 
  links.forEach(link=>{
   link.addEventListener('click',event=>{
