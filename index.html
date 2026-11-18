@@ -324,6 +324,7 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  <div id="tafeiAuthLoggedIn" hidden>
   <p>欢迎回来，<strong id="tafeiCurrentNickname"></strong>！</p>
   <p>你已经登录挞飞，可以继续参与社区交流。</p>
+  <button class="btn" id="tafeiLogoutBtn" type="button">退出登录</button>
 
   <form id="tafeiUpgradeForm">
    <h4>完善账户：绑定邮箱和密码</h4>
@@ -908,10 +909,86 @@ async function authRequest(path, data, token, method = 'POST') {
 }
 
 function saveAuth(session) {
+  try {
+    localStorage.setItem(AUTH_STORAGE, JSON.stringify(session));
+  } catch (error) {
+    authSession = null;
+    showAuth(null);
+    throw new Error('无法安全保存登录状态，请检查手机存储权限或空间。');
+  }
+
   authSession = session;
-  localStorage.setItem(AUTH_STORAGE, JSON.stringify(session));
   showAuth(session);
 }
+
+// TAFEI 17.0 SECURE LOGOUT
+$id('tafeiLogoutBtn').addEventListener('click', async event => {
+  const button = event.currentTarget;
+  const session = authSession;
+
+  if (!session?.access_token) {
+    let cleared = true;
+    try {
+      localStorage.removeItem(AUTH_STORAGE);
+    } catch (error) {
+      cleared = false;
+      console.warn('本地会话清理失败：', error);
+    }
+
+    authSession = null;
+    showAuth(null);
+    authMessage(
+      cleared
+        ? '登录状态已清除。'
+        : '页面已退出，但本地凭证未能清除，请检查存储权限。'
+    );
+    return;
+  }
+
+  button.disabled = true;
+  authMessage('正在安全退出……');
+
+  let remoteLogoutSucceeded = false;
+
+  const logoutController = new AbortController();
+  const logoutTimeout = setTimeout(() => logoutController.abort(), 10000);
+
+  try {
+    const response = await fetch(AUTH_URL + '/logout', {
+      method: 'POST',
+      headers: {
+        apikey: KEY,
+        Authorization: 'Bearer ' + session.access_token
+      },
+      signal: logoutController.signal
+    });
+    remoteLogoutSucceeded = response.ok;
+  } catch (error) {
+    console.warn('远程注销请求失败或超时：', error);
+  } finally {
+    clearTimeout(logoutTimeout);
+    authSession = null;
+    showAuth(null);
+
+    let localLogoutSucceeded = true;
+    try {
+      localStorage.removeItem(AUTH_STORAGE);
+    } catch (error) {
+      localLogoutSucceeded = false;
+      console.warn('本地会话清理失败：', error);
+    }
+
+    if (!localLogoutSucceeded) {
+      authMessage('页面已退出，但手机未能清除本地登录凭证，请检查存储权限。');
+    } else if (remoteLogoutSucceeded) {
+      authMessage('已安全退出登录。');
+    } else {
+      authMessage('本地登录状态已清除；远程注销未能确认，请检查网络。');
+    }
+
+    button.disabled = false;
+  }
+});
 
 // TAFEI 13.0 AUTH BASE END
 
@@ -1097,7 +1174,12 @@ $id('tafeiUpgradeForm').addEventListener('submit', async event => {
     authMessage('登录状态已恢复，欢迎回来！');
 
   } catch (error) {
-    localStorage.removeItem(AUTH_STORAGE);
+    try {
+      localStorage.removeItem(AUTH_STORAGE);
+    } catch (storageError) {
+      console.warn('恢复登录失败，且本地凭证清理失败：', storageError);
+    }
+
     authSession = null;
     showAuth(null);
   }

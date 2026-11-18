@@ -89,6 +89,14 @@ function message(text){
  $('loginMsg').textContent=text;
 }
 
+function handleAdminAuthFailure(messageText){
+ accessToken=null;
+ $('dashboard').classList.add('hidden');
+ $('login').classList.remove('hidden');
+ $('password').value='';
+ message(messageText || '管理员登录已失效，请重新登录。');
+}
+
 async function login(){
  const email=$('email').value.trim();
  const password=$('password').value;
@@ -158,6 +166,12 @@ async function loadAnnouncements(){
   );
 
   const data=await res.json();
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok) throw new Error(data.message||'读取公告失败');
 
   status.textContent='共 '+data.length+' 条公告';
@@ -203,6 +217,12 @@ async function loadReports(){
   );
 
   const data=await res.json();
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok) throw new Error(data.message||'读取失败');
 
   $('status').textContent='共收到 '+data.length+' 条举报';
@@ -295,6 +315,10 @@ async function markHandled(id,note,button){
 })
 }
 );
+if(res.status===401){
+ handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+ return;
+}
 if(!res.ok){
  const data=await res.json();
  throw new Error(data.message||'保存失败');
@@ -342,6 +366,12 @@ async function publishAnnouncement(){
   });
 
   const data=await res.json();
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok){
    throw new Error(data.message||data.msg||'发布失败');
   }
@@ -379,6 +409,12 @@ async function loadProducts(){
    headers:{apikey:KEY,Authorization:'Bearer '+accessToken}
   });
   const rows = await res.json();
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok) throw new Error(rows.message || '读取失败');
   root.replaceChildren();
   if(!rows.length) root.textContent='目前还没有商品。';
@@ -427,6 +463,12 @@ async function toggleProduct(id,active){
     'Content-Type':'application/json',Prefer:'return=minimal'},
    body:JSON.stringify({is_active:active,updated_at:new Date().toISOString()})
   });
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok) throw new Error('修改失败，HTTP '+res.status);
   await loadProducts();
  }catch(e){$('productStatus').textContent=e.message;}
@@ -459,6 +501,11 @@ async function saveProduct(){
     })
    }
   );
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok){
    const data=await res.json();
    throw new Error(data.message||'保存失败，HTTP '+res.status);
@@ -498,6 +545,12 @@ async function loadContent(){
    headers:{apikey:KEY,Authorization:'Bearer '+accessToken}
   });
   const rows=await res.json();
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok) throw new Error(rows.message||'读取失败，HTTP '+res.status);
   $('contentStatus').textContent=config.label+'：共 '+rows.length+' 条';
   if(!rows.length){root.textContent='暂无内容';return;}
@@ -531,11 +584,23 @@ async function deleteContent(type,item){
    const comments=await fetch(URL+'/rest/v1/tafei_comments?post_id=eq.'+encodeURIComponent(item.id),{
     method:'DELETE',headers
    });
+
+   if(comments.status===401){
+    handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+    return;
+   }
+
    if(!comments.ok) throw new Error('删除动态评论失败，HTTP '+comments.status);
   }
   const res=await fetch(URL+'/rest/v1/'+type+'?id=eq.'+encodeURIComponent(item.id),{
    method:'DELETE',headers
   });
+
+  if(res.status===401){
+   handleAdminAuthFailure('管理员登录已失效，请重新登录。');
+   return;
+  }
+
   if(!res.ok) throw new Error('删除失败，HTTP '+res.status);
   $('contentStatus').textContent='删除成功';
   await loadContent();
