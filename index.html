@@ -139,7 +139,61 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 }
 
 
-/* TAFEI 10.0 求助中心表单 */
+/* TAFEI 18.0 社区分类栏 */
+.community-tabs{
+ display:flex;
+ flex-wrap:wrap;
+ gap:10px;
+ margin:24px 0;
+ padding:8px;
+ border:1px solid rgba(255,255,255,.10);
+ border-radius:16px;
+ background:rgba(15,24,43,.72);
+}
+.community-tab{
+ flex:1;
+ min-width:72px;
+ padding:11px 14px;
+ border:1px solid transparent;
+ border-radius:11px;
+ background:transparent;
+ color:#aabbd1;
+ cursor:pointer;
+ font:inherit;
+ transition:.2s ease;
+}
+.community-tab:hover{
+ color:#fff;
+ background:rgba(112,217,255,.08);
+}
+.community-tab.active{
+ color:#06111f;
+ background:#70d9ff;
+ font-weight:700;
+ box-shadow:0 0 18px rgba(112,217,255,.18);
+ transform:translateY(-1px);
+}
+
+.community-tab:active{
+ transform:scale(.97);
+}
+
+@media(max-width:760px){
+ .community-tabs{
+  gap:6px;
+  margin:18px 0;
+  padding:6px;
+  border-radius:14px;
+ }
+ .community-tab{
+  min-width:0;
+  padding:10px 6px;
+  font-size:13px;
+  white-space:nowrap;
+ }
+}
+
+ /* TAFEI 10.0 求助中心表单 */
 #helpForm{
  display:grid;
  gap:12px;
@@ -235,27 +289,46 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <h2>在这里，让善意相遇。</h2></div>
 <p>一个面向普通人的免费互联网空间。分享知识、互相帮助、友善交流。</p>
 </div>
-<div class="grid">
-<article class="panel project">
-<div class="symbol">✦</div>
-<h3>知识分享</h3>
-<p>分享经验、学习方法和实用知识，让有价值的信息自由流动。</p>
-<div class="bottom"><span class="tag">建设中</span><span class="textbtn">即将开放</span></div>
+<div class="grid" id="tafeiCommunityCategories">
+
+<article class="panel project community-category" data-community-filter="help">
+<div class="symbol">🛟</div>
+<h3>求助</h3>
+<p>遇到不会的问题？把它说出来，让懂的人来帮助你。</p>
+<div class="bottom">
+<span class="tag">互相帮助</span>
+<button class="textbtn community-filter-btn" type="button" data-filter="help">进入求助 ↗</button>
+</div>
 </article>
-<article class="panel project">
-<div class="symbol">♡</div>
-<h3>互相帮助</h3>
-<p>把遇到的问题说出来，让愿意帮助的人找到你。</p>
-<div class="bottom"><span class="tag">建设中</span><span class="textbtn">即将开放</span></div>
+
+<article class="panel project community-category" data-community-filter="knowledge">
+<div class="symbol">📚</div>
+<h3>知识</h3>
+<p>分享经验、技巧和实用知识，让有价值的信息留下来。</p>
+<div class="bottom">
+<span class="tag">知识沉淀</span>
+<button class="textbtn community-filter-btn" type="button" data-filter="knowledge">浏览知识 ↗</button>
+</div>
 </article>
-<article class="panel project">
-<div class="symbol">☼</div>
-<h3>友善交流</h3>
-<p>分享生活、表达想法，让每一次真诚交流都有意义。</p>
-<div class="bottom"><span class="tag">现已开放</span><a class="textbtn" href="#guestbook">进入留言墙 ↗</a></div>
+
+<article class="panel project community-category" data-community-filter="discussion">
+<div class="symbol">💬</div>
+<h3>讨论</h3>
+<p>分享生活、学习、科技和想法，让每一次交流都有意义。</p>
+<div class="bottom">
+<span class="tag">自由交流</span>
+<button class="textbtn community-filter-btn" type="button" data-filter="discussion">进入讨论 ↗</button>
+</div>
 </article>
+
 </div>
 
+<div class="community-tabs" id="communityTabs" role="tablist" aria-label="社区内容分类">
+ <button type="button" class="community-tab active" data-community-tab="all">全部</button>
+ <button type="button" class="community-tab" data-community-tab="help">🛟 求助</button>
+ <button type="button" class="community-tab" data-community-tab="knowledge">📚 知识</button>
+ <button type="button" class="community-tab" data-community-tab="discussion">💬 讨论</button>
+</div>
 
 <div class="panel article-form" id="tafeiAuthPanel">
  <h3>♙ 挞飞社区账户</h3>
@@ -1282,12 +1355,12 @@ function t12BuildControls() {
   category.id = 't12Category';
 
   const categories = [
-    ['all', '全部分类'],
-    ['daily', '生活日常'],
-    ['learning', '学习成长'],
-    ['tech', '科技技术'],
-    ['help', '寻求帮助'],
-    ['knowledge', '知识分享']
+    ['all', '全部内容'],
+    ['daily', '讨论'],
+    ['learning', '讨论'],
+    ['tech', '讨论'],
+    ['help', '求助'],
+    ['knowledge', '知识']
   ];
 
   categories.forEach(([value, label]) => {
@@ -1307,7 +1380,7 @@ function t12BuildControls() {
     sort.appendChild(option);
   });
 
-  toolbar.append(search, category, sort);
+  toolbar.append(search, sort);
   list.parentNode.insertBefore(toolbar, list);
 
   search.addEventListener('input', t12Render);
@@ -1316,6 +1389,60 @@ function t12BuildControls() {
 }
 
 // TAFEI 12.0 SEARCH END
+
+
+// TAFEI 18.0 COMMUNITY CATEGORY BRIDGE
+let t18CommunityFilter = 'all';
+
+function t18SetCommunityFilter(filter) {
+  const category = document.getElementById('t12Category');
+  const search = document.getElementById('t12Search');
+  const list = document.getElementById('tafeiFeedList');
+
+  if (!list) return;
+
+  t18CommunityFilter = filter || 'all';
+
+  if (category) {
+    category.value = 'all';
+  }
+
+  if (search) search.value = '';
+
+  document.querySelectorAll('.community-tab').forEach(tab => {
+    const active = tab.dataset.communityTab === t18CommunityFilter;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+
+  t12Render();
+
+  list.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+}
+
+document.querySelectorAll('.community-filter-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    t18SetCommunityFilter(button.dataset.filter);
+  });
+});
+
+document.querySelectorAll('.community-tab').forEach(button => {
+  button.setAttribute(
+    'aria-selected',
+    button.classList.contains('active') ? 'true' : 'false'
+  );
+
+  button.addEventListener('click', () => {
+    t18SetCommunityFilter(button.dataset.communityTab);
+  });
+});
+
+// TAFEI 18.0 COMMUNITY CATEGORY BRIDGE END
+
+// TAFEI 18.0 COMMUNITY CATEGORY BRIDGE END
 
 // TAFEI 12.0 DATA LOADER
 
@@ -1398,8 +1525,16 @@ function t12Render() {
     const nickname = t12Profiles[post.user_id]?.nickname || '';
     const content = String(post.content || '').toLowerCase();
 
+    const communityMatch =
+      t18CommunityFilter === 'all' ||
+      (t18CommunityFilter === 'help' && post.category === 'help') ||
+      (t18CommunityFilter === 'knowledge' && post.category === 'knowledge') ||
+      (t18CommunityFilter === 'discussion' &&
+        ['daily', 'learning', 'tech'].includes(post.category));
+
     return (!keyword || content.includes(keyword) || nickname.toLowerCase().includes(keyword)) &&
-      (category === 'all' || post.category === category);
+      (category === 'all' || post.category === category) &&
+      communityMatch;
   });
 
   const likeCount = id => t12Likes.filter(item => item.post_id === id).length;
@@ -1435,11 +1570,11 @@ function t12Render() {
     head.append(author, meta);
 
     const categoryNames = {
-      daily: '生活日常',
-      learning: '学习成长',
-      tech: '科技技术',
-      help: '寻求帮助',
-      knowledge: '知识分享'
+      daily: '讨论',
+      learning: '讨论',
+      tech: '讨论',
+      help: '求助',
+      knowledge: '知识'
     };
 
     const tag = t12Element('span', 'feed-category',
@@ -1695,23 +1830,20 @@ async function t12SaveProfile(userId, nickname, bio, button) {
 
 <nav class="mobile-bottom-nav" aria-label="手机底部导航">
  <a href="#home" data-view="home" class="active" aria-current="page"><span>⌂</span><span>首页</span></a>
- <a href="#community" data-view="community"><span>♧</span><span>互助</span></a>
- <a href="#help" data-view="help"><span>♡</span><span>求助</span></a>
+ <a href="#community" data-view="community"><span>♧</span><span>社区</span></a>
  <a href="shop.html"><span>🛍</span><span>商城</span></a>
- <a href="#projects" data-view="projects"><span>▣</span><span>作品</span></a>
- <a href="#about" data-view="founder"><span>♙</span><span>发起人</span></a>
+ <a href="#about" data-view="founder"><span>♙</span><span>关于</span></a>
 </nav>
 
 
 <script>
-/* TAFEI 10.0：五个独立界面 */
+/* TAFEI 18.0：社区整合界面 */
 (()=>{
  const pages={
   home:['home'],
-  community:['community','guestbook'],
-  help:['help'],
-  projects:['projects','lab','studio'],
-  founder:['about','contact']
+  community:['community','guestbook','help'],
+  founder:['about','contact'],
+  shop:[]
  };
 
  const sections=[...document.querySelectorAll('main > section')];
