@@ -148,6 +148,10 @@
     const m = hash.match(/^#\/article\/(.+)$/);
     if (m) { openArticle(decodeURIComponent(m[1])); } else { renderList(null); }
 
+    if (hash === '#articles') {
+      setTimeout(() => root.scrollIntoView({ behavior: 'smooth', block: 'start' }), 260);
+    }
+
     window.addEventListener('hashchange', () => {
       const hm = location.hash.match(/^#\/article\/(.+)$/);
       if (hm) openArticle(decodeURIComponent(hm[1]));

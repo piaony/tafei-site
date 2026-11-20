@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#080d1b">
+<meta name="description" content="挞飞机型库：逐台整理解锁方式、Root 路线、模块建议、常见故障与实测记录，先按机型查，再决定要不要折腾。">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/device.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="机型库 · 挞飞 TAFEI">
+<meta property="og:description" content="按机型查解锁、Root、模块与故障处置，一台机一页档案。">
+<meta property="og:url" content="https://piaony.github.io/tafei-site/device.html">
+<title>机型库 · 挞飞 TAFEI</title>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/pages.css?v=1">
+</head>
+<body class="page-inner">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#articles">文章</a>
+    <a href="device.html" aria-current="page">机型库</a>
+    <a href="service.html">技术服务</a>
+    <a href="shop.html">商城</a>
+  </nav>
+</div></header>
+
+<main class="pw" id="app">
+  <section class="pg-hero" id="listHero">
+    <p class="pg-eyebrow">DEVICE LIBRARY</p>
+    <h1 class="pg-title">一台机，<br><em>一页档案</em></h1>
+    <p class="pg-lead">解锁方式、Root 路线、模块建议、常见故障处置，按机型归档。先查再动手，比看十个帖子靠谱。</p>
+  </section>
+
+  <section class="pg-sec" id="listSection">
+    <div class="pg-sec-head">
+      <div><p class="pg-kicker">ALL DEVICES</p><h2>机型列表</h2></div>
+      <p>带“已验证”标记的，是站长在自己或客户机器上实测过的条目。</p>
+    </div>
+    <div class="dev-grid" id="deviceGrid" aria-live="polite"></div>
+  </section>
+
+  <section class="pg-sec">
+    <div class="pg-card" style="display:grid;gap:10px">
+      <h3 style="margin:0">没找到你的机型？</h3>
+      <p>机型库还在补。把你的机型、系统版本和遇到的问题发过来，我可以为它单独建一页档案；紧急的变砖问题走技术服务更快。</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+        <a class="btn primary" href="service.html#book">提交服务预约 ↗</a>
+        <a class="btn" href="service.html">看看能做什么</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<main class="pw" id="detail" hidden></main>
+
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · 机型库 · <a href="index.html">返回首页</a></div></footer>
+
+<script>
+(() => {
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const grid = document.getElementById('deviceGrid');
+
+  const listView = document.getElementById('listSection');
+  const listHero = document.getElementById('listHero');
+  const detail = document.getElementById('detail');
+
+  function card(dev) {
+    const state = dev.verified
+      ? '<span class="dev-state verified">已验证</span>'
+      : '<span class="dev-state">模板样例</span>';
+    return `<a class="pg-card dev-card" href="device.html?m=${encodeURIComponent(dev.id)}">
+      ${state}
+      <h3>${esc(dev.name)}</h3>
+      <span class="dev-soc">${esc(dev.brand)} · ${esc(dev.soc)} · ${esc(dev.released)}</span>
+      <p>${esc(dev.summary)}</p>
+      <span class="dev-specs">${(dev.specs || []).map(esc).join(' · ')}</span>
+    </a>`;
+  }
+
+  function renderBlock(block) {
+    const body = () => {
+      if (block.type === 'list') {
+        return `<ul>${(block.items || []).map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`;
+      }
+      if (block.type === 'kv') {
+        return `<dl class="dev-kv">${(block.items || []).map((i) => `<dt>${esc(i.k)}</dt><dd>${esc(i.v)}</dd>`).join('')}</dl>`;
+      }
+      if (block.type === 'note') return `<div class="dev-note">${esc(block.text)}</div>`;
+      if (block.type === 'warn') return `<div class="dev-warn">${esc(block.text)}</div>`;
+      return `<p style="color:var(--tf-muted);margin:0">${esc(block.text)}</p>`;
+    };
+    return `<div class="dev-block"><h2>${esc(block.title)}</h2>${body()}</div>`;
+  }
+
+  function renderDetail(dev, all) {
+    listHero.hidden = true;
+    listView.hidden = true;
+    detail.hidden = false;
+
+    const others = all.filter((d) => d.id !== dev.id).slice(0, 3);
+    const othersHtml = others.length
+      ? `<div class="pg-sec"><div class="pg-sec-head"><div><p class="pg-kicker">MORE</p><h2>其它机型</h2></div></div>
+         <div class="dev-grid">${others.map(card).join('')}</div></div>`
+      : '';
+
+    detail.innerHTML = `
+      <section class="pg-hero dev-read" style="padding-bottom:16px">
+        <p class="pg-eyebrow"><a href="device.html">机型库</a> / ${esc(dev.brand)}</p>
+        <div class="dev-page">
+          <div class="dev-head">
+            <h1>${esc(dev.name)}</h1>
+            <div class="dev-spec-strip">${(dev.specs || []).map((s) => `<span>${esc(s)}</span>`).join('')}</div>
+            <p class="pg-lead" style="margin-top:8px">${esc(dev.summary)}</p>
+            ${dev.verified ? '' : '<div class="dev-warn">本页为模板样例：结构已就绪，机型实测数据待站长补充后再标记为「已验证」。</div>'}
+          </div>
+        </div>
+      </section>
+      <section class="pg-sec dev-read" style="display:grid;gap:22px">
+        ${(dev.blocks || []).map(renderBlock).join('')}
+      </section>
+      <section class="pg-sec">
+        <div class="pg-card" style="display:grid;gap:10px">
+          <h3 style="margin:0">这台机想动手了？</h3>
+          <p>解锁、Root、模块、救砖都可以远程做，先报机型和系统版本，我判断可不可行再报价。</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+            <a class="btn primary" href="service.html#book">提交服务预约 ↗</a>
+            <a class="btn" href="index.html#articles">先看相关文章</a>
+          </div>
+        </div>
+      </section>
+      ${othersHtml}
+    `;
+    document.title = `${dev.name} · 机型档案 · 挞飞`;
+  }
+
+  async function init() {
+    try {
+      const res = await fetch('data/devices.json', { cache: 'no-store' });
+      const json = await res.json();
+      const devices = json.devices || [];
+      grid.innerHTML = devices.map(card).join('') || '<div class="pg-card">机型库整理中。</div>';
+
+      const id = new URLSearchParams(location.search).get('m');
+      if (id) {
+        const dev = devices.find((d) => d.id === id);
+        if (dev) renderDetail(dev, devices);
+        else grid.innerHTML = '<div class="pg-card">没有找到这台机型的档案。</div>';
+      }
+    } catch (e) {
+      grid.innerHTML = '<div class="pg-card">机型数据加载失败，请稍后刷新。</div>';
+    }
+  }
+
+  init();
+})();
+</script>
+<script src="js/tafei-ui.js" defer></script>
+</body>
+</html>

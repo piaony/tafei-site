@@ -2,264 +2,209 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#080d1b">
-<title>挞飞商城 · TAFEI</title>
-<style>
-:root{--bg:#080d1b;--panel:#111d37;--text:#eef4ff;--muted:#9aaccb;--line:rgba(130,170,255,.2);--cyan:#64e8ff}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at 15% 0%,#17284b,transparent 42%),var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.6}
-a{color:inherit;text-decoration:none}
-button,input{font:inherit}
-.wrap{width:min(1100px,calc(100% - 32px));margin:auto}
-header{padding:15px;border-bottom:1px solid var(--line)}
-.nav{display:flex;justify-content:space-between;align-items:center}
-.brand{font-size:20px;font-weight:800;letter-spacing:2px}
-.brand span,h1 span{color:var(--cyan)}
-.btn{padding:10px 15px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);cursor:pointer}
-.hero{padding:45px 0 25px}
-h1{font-size:clamp(34px,7vw,56px);line-height:1.2}
-.muted{color:var(--muted)}
-input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:white}
-.categories{display:flex;gap:8px;overflow:auto;padding:18px 0}
-.category{white-space:nowrap}
-.category.active,.primary{background:#315a9a;color:white}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;padding-bottom:45px}
-.card{border:1px solid var(--line);border-radius:17px;background:var(--panel);overflow:hidden}
-.visual{height:120px;display:grid;place-items:center;font-size:44px;background:#192b4b}
-.cardbody{padding:15px}
-.card h3{margin:8px 0}
-.price{color:var(--cyan);font-size:21px;font-weight:bold;margin:12px 0}
-footer{padding:25px 0;border-top:1px solid var(--line);color:var(--muted)}
-@media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:420px){.grid{grid-template-columns:1fr}}
-</style>
+<meta name="description" content="挞飞商城：技术服务预约、机型资料包与折腾工具。看中就联系站长确认，不走平台购物车流程。">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/shop.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="挞飞商城 · 技术服务与资料">
+<meta property="og:description" content="技术服务、机型资料包与折腾工具，联系站长确认后交付。">
+<meta property="og:url" content="https://piaony.github.io/tafei-site/shop.html">
+<title>商城 · 挞飞 TAFEI</title>
 <link rel="stylesheet" href="css/tafei-ui.css">
-<link rel="stylesheet" href="css/tafei-features.css">
+<link rel="stylesheet" href="css/pages.css?v=1">
+<style>
+.shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.pcard{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.pcard .pvis{height:132px;display:grid;place-items:center;font-size:38px;background:linear-gradient(150deg,rgba(58,110,220,.32),rgba(120,90,220,.18));border-bottom:1px solid var(--tf-line)}
+.pcard .pvis img{width:100%;height:100%;object-fit:cover}
+.pcard .pbody{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.pcard .pbody h3{margin:0;font-size:17px;line-height:1.4}
+.pcard .pcat{font-size:11.5px;color:var(--tf-cyan);letter-spacing:.06em}
+.pcard .pdesc{margin:0;color:var(--tf-muted);font-size:13.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcard .pfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:6px}
+.pcard .pprice{color:var(--tf-cyan);font-weight:700;font-size:19px}
+.pcard .pprice small{font-size:12px;color:var(--tf-muted);font-weight:400;margin-left:4px}
+.pbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.pbar input{flex:1 1 240px;padding:12px 14px;border-radius:var(--tf-r-sm);border:1px solid var(--tf-line);background:rgba(12,20,38,.86);color:var(--tf-text);font:inherit;font-size:14.5px;min-height:46px}
+.pbar input:focus{outline:none;border-color:rgba(100,232,255,.58);box-shadow:var(--tf-e-focus)}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.cats::-webkit-scrollbar{height:0}
+.cat{padding:8px 15px;border-radius:var(--tf-r-pill);border:1px solid var(--tf-line);background:rgba(17,29,55,.6);color:var(--tf-muted);font-size:13px;white-space:nowrap;cursor:pointer;transition:all var(--tf-dur-2) var(--tf-ease)}
+.cat.active{background:var(--tf-grad-action);border-color:transparent;color:#fff;box-shadow:var(--tf-glow-brand)}
+.quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+@media(max-width:860px){.shop-grid,.quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.shop-grid,.quick{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="page-shop">
-<header><div class="nav wrap">
-<a class="brand" href="index.html">TAFEI <span>· 挞飞</span></a>
-<a class="btn" href="index.html">返回社区</a>
+<body class="page-inner">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#articles">文章</a>
+    <a href="device.html">机型库</a>
+    <a href="service.html">技术服务</a>
+    <a href="shop.html" aria-current="page">商城</a>
+  </nav>
 </div></header>
-<main class="wrap">
-<section class="hero">
-<p style="color:var(--cyan)">TAFEI DIGITAL STORE</p>
-<h1>挞飞商城<br><span>发现好用的工具</span></h1>
-<p class="muted">软件工具 · 网络服务 · 学习用品 · 网页搭建</p>
-<input id="search" placeholder="搜索商品…" oninput="renderProducts()">
-<div id="categories" class="categories"></div>
-</section>
-<div id="products" class="grid"></div>
-<section class="panel" style="margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel)">
-<h2>我的购物车</h2>
-<div id="cartItems"></div>
-<p id="cartTotal" class="price">合计：¥0.00</p>
-</section>
 
+<main class="pw">
+  <section class="pg-hero">
+    <p class="pg-eyebrow">STORE · 联系确认后交付</p>
+    <h1 class="pg-title">技术服务、<br><em>资料与工具</em></h1>
+    <p class="pg-lead">这里的商品以服务和资料为主：技术服务预约、机型资料包、折腾工具。看中后点“联系站长”，带上商品名和价格，确认方案再付款。</p>
+    <div class="quick">
+      <a class="pg-card" href="service.html" style="display:grid;gap:6px">
+        <span class="pcat">SERVICE</span><h3 style="margin:0">技术服务预约</h3>
+        <p>解 BL、Root、模块、内核、救砖，先检测再报价。</p>
+      </a>
+      <a class="pg-card" href="device.html" style="display:grid;gap:6px">
+        <span class="pcat">DEVICE</span><h3 style="margin:0">机型档案库</h3>
+        <p>按机型查解锁路线、模块建议与故障处置。</p>
+      </a>
+      <a class="pg-card" href="index.html#articles" style="display:grid;gap:6px">
+        <span class="pcat">ARTICLE</span><h3 style="margin:0">免费教程</h3>
+        <p>能自己解决的，先看文章，不花钱。</p>
+      </a>
+    </div>
+  </section>
 
-<section class="panel" style="margin:24px 0;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel)">
-<h2>联系卖家</h2>
-<p class="muted">有商品问题或购买需求？欢迎通过以下方式联系站长。</p>
-<div style="display:grid;gap:12px">
-<div class="report" style="padding:12px">
-<strong>QQ</strong>
-<p>2026759743</p>
-<a class="btn primary" href="https://wpa.qq.com/msgrd?v=3&amp;uin=2026759743&amp;site=qq&amp;menu=yes">直接联系 QQ</a>
-<button class="btn" onclick="copyContact('2026759743')">复制 QQ 号码</button>
-</div>
-<div class="report" style="padding:12px">
-<strong>微信</strong>
-<p>piaopiaony</p>
-<a class="btn primary" href="weixin://">尝试打开微信</a>
-<button class="btn" onclick="copyContact('piaopiaony')">复制微信号</button>
-<p class="muted">打开微信后，在搜索中输入 piaopiaony 添加联系。</p>
-</div>
-<div class="report" style="padding:12px">
-<strong>邮箱</strong>
-<p>piaop443@gmail.com</p>
-<a class="btn" href="mailto:piaop443@gmail.com">发送邮件</a>
-<button class="btn" onclick="copyContact('piaop443@gmail.com')">复制邮箱</button>
-</div>
-<div class="report" style="padding:16px;border:2px solid #2688ff;border-radius:12px">
-<strong>Telegram <span style="background:#2688ff;color:white;padding:4px 8px;border-radius:8px;font-size:12px">站长推荐</span></strong>
-<p>@piaopiaony</p>
-<a class="btn primary" href="https://t.me/piaopiaony" target="_blank" rel="noopener">通过 Telegram 联系站长</a>
-<button class="btn" onclick="copyContact('@piaopiaony')">复制 Telegram 用户名</button>
-</div>
-</div>
-</section>
+  <section class="pg-sec">
+    <div class="pg-sec-head">
+      <div><p class="pg-kicker">PRODUCTS</p><h2>在售项目</h2></div>
+      <p id="count">加载中…</p>
+    </div>
+    <div class="pbar">
+      <input id="search" placeholder="搜索：机型、模块、资料包…" oninput="renderProducts()" aria-label="搜索商品">
+    </div>
+    <div id="categories" class="cats" style="margin-top:12px"></div>
+    <div id="products" class="shop-grid" style="margin-top:16px"></div>
+  </section>
+
+  <section class="pg-sec" id="contact">
+    <div class="pg-sec-head">
+      <div><p class="pg-kicker">CONTACT</p><h2>联系站长</h2></div>
+      <p>下单、咨询、售后都走这里。把商品名发过来最省时间。</p>
+    </div>
+    <div class="pg-card" style="display:grid;gap:12px">
+      <div class="pg-trust" style="margin-top:0">
+        <div><b>QQ</b><span>2026759743</span></div>
+        <div><b>Telegram</b><span>@piaopiaony</span></div>
+        <div><b>邮箱</b><span>piaop443@gmail.com</span></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn primary" href="https://wpa.qq.com/msgrd?v=3&amp;uin=2026759743&amp;site=qq&amp;menu=yes" target="_blank" rel="noopener">通过 QQ 联系 ↗</a>
+        <a class="btn" href="https://t.me/piaopiaony" target="_blank" rel="noopener">通过 Telegram 联系 ↗</a>
+        <button class="btn" type="button" data-copy="piaop443@gmail.com">复制邮箱</button>
+      </div>
+      <div class="dev-warn">不提供游戏外挂、破解付费软件、代实名等违规内容；发现此类需求一律不接并保留记录。</div>
+    </div>
+  </section>
 </main>
-<footer><div class="wrap">TAFEI 挞飞商城 · 免费、友善、开放</div></footer>
+
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · 商城 · <a href="index.html">返回首页</a></div></footer>
+
 <script>
-function copyContact(value){
- if(navigator.clipboard&&window.isSecureContext){
-  navigator.clipboard.writeText(value).then(()=>alert('已复制：'+value)).catch(()=>alert('复制失败，请手动复制：'+value));
- }else{
-  alert('请手动复制：'+value);
- }
-}
+const API = 'https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_products';
+const KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
+const QQ = '2026759743';
+let products = [];
+let category = '全部';
 
-const API='https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_products';
-const KEY='sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
-let products=[];
-let category='全部商品';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-async function loadProducts(){
- const root=document.getElementById('products');
- root.textContent='正在加载商品……';
- try{
-  const res=await fetch(API+'?select=id,name,category,price,description,image_url&is_active=eq.true&order=created_at.desc',{
-   headers:{apikey:KEY}
+document.querySelectorAll('[data-copy]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(btn.dataset.copy); btn.textContent = '已复制'; }
+    catch (e) { window.prompt('请手动复制', btn.dataset.copy); }
   });
-  if(!res.ok) throw new Error('HTTP '+res.status);
-  products=await res.json();
-  renderCategories();
-  renderProducts();
- }catch(e){
-  root.textContent='商品暂时无法加载，请稍后重试。';
-  console.error(e);
- }
-}
+});
 
-function renderCategories(){
- const categories=['全部商品',...new Set(products.map(p=>p.category).filter(Boolean))];
- if(category!=='全部商品'&&!categories.includes(category)) category='全部商品';
- document.getElementById('categories').replaceChildren();
- categories.forEach(c=>{
-  const button=document.createElement('button');
-  button.className='btn category'+(c===category?' active':'');
-  button.textContent=c;
-  button.addEventListener('click',()=>{
-   category=c;
-   renderCategories();
-   renderProducts();
-  });
-  document.getElementById('categories').appendChild(button);
- });
-}
-
-function renderProducts(){
- const q=document.getElementById('search').value.trim().toLowerCase();
- const root=document.getElementById('products');
- const list=products.filter(p=>
-  (category==='全部商品'||p.category===category)&&
-  (p.name+' '+(p.description||'')+' '+p.category).toLowerCase().includes(q)
- );
- root.replaceChildren();
- if(!list.length){
-  root.textContent=products.length?'没有找到符合条件的商品。':'商城暂时没有上架商品。';
-  return;
- }
- list.forEach(p=>{
-  const card=document.createElement('article');
-  card.className='card';
-  const visual=document.createElement('div');
-  visual.className='visual';
-  if(p.image_url){
-   const img=document.createElement('img');
-   img.src=p.image_url;
-   img.alt=p.name;
-   img.loading='lazy';
-   img.style='width:100%;height:100%;object-fit:cover';
-   visual.appendChild(img);
-  }else{
-   visual.textContent='🛍️';
+async function loadProducts() {
+  const root = document.getElementById('products');
+  root.innerHTML = '<div class="pg-card">正在加载…</div>';
+  try {
+    const res = await fetch(API + '?select=id,name,category,price,description,image_url&is_active=eq.true&order=created_at.desc', { headers: { apikey: KEY } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    products = await res.json();
+    renderCategories();
+    renderProducts();
+  } catch (e) {
+    root.innerHTML = '<div class="pg-card">商品暂时无法加载，稍后刷新试试。急事可以直接联系站长。</div>';
+    document.getElementById('count').textContent = '加载失败';
   }
-  const body=document.createElement('div');
-  body.className='cardbody';
-  const tag=document.createElement('small');
-  tag.className='muted';
-  tag.textContent=p.category;
-  const title=document.createElement('h3');
-  title.textContent=p.name;
-  const desc=document.createElement('p');
-  desc.className='muted';
-  desc.textContent=p.description||'';
-  const price=document.createElement('div');
-  price.className='price';
-  price.textContent='¥'+Number(p.price).toFixed(2);
-  const add=document.createElement('button');
-  add.className='btn primary';
-  add.textContent='加入购物车';
-  add.addEventListener('click',()=>addToCart(p.id));
-  body.append(tag,title,desc,price,add);
-  card.append(visual,body);
-  root.appendChild(card);
- });
 }
 
-let cart=[];
-try{
- const saved=JSON.parse(localStorage.getItem('tafei-shop-cart')||'[]');
- cart=saved.map(item=>typeof item==='object'?item:{id:item,qty:1});
-}catch(e){cart=[];}
-
-function saveCart(){
- localStorage.setItem('tafei-shop-cart',JSON.stringify(cart));
- renderCart();
-}
-
-function addToCart(id){
- const item=cart.find(x=>String(x.id)===String(id));
- if(item)item.qty++;
- else cart.push({id,qty:1});
- saveCart();
- alert('已加入购物车！');
-}
-
-function renderCart(){
- const root=document.getElementById('cartItems');
- const total=document.getElementById('cartTotal');
- root.replaceChildren();
- let sum=0;
- if(!cart.length){
-  root.textContent='购物车还是空的，去挑选商品吧。';
- }
- cart.forEach(item=>{
-  const product=products.find(p=>String(p.id)===String(item.id));
-  const line=document.createElement('div');
-  line.className='report';
-  line.style='padding:12px;border-bottom:1px solid var(--line)';
-  const name=document.createElement('strong');
-  name.textContent=product?product.name:'商品已下架或不存在';
-  const detail=document.createElement('p');
-  detail.className='muted';
-  detail.textContent=product?'单价：¥'+Number(product.price).toFixed(2):'该商品目前无法购买';
-  const controls=document.createElement('div');
-  controls.style='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
-  const minus=document.createElement('button');
-  minus.className='btn';
-  minus.textContent='−';
-  minus.addEventListener('click',()=>{
-   item.qty--;
-   if(item.qty<=0)cart=cart.filter(x=>x!==item);
-   saveCart();
+function renderCategories() {
+  const cats = ['全部', ...new Set(products.map((p) => p.category).filter(Boolean))];
+  if (category !== '全部' && !cats.includes(category)) category = '全部';
+  const box = document.getElementById('categories');
+  box.replaceChildren();
+  cats.forEach((c) => {
+    const b = document.createElement('button');
+    b.className = 'cat' + (c === category ? ' active' : '');
+    b.textContent = c;
+    b.addEventListener('click', () => { category = c; renderCategories(); renderProducts(); });
+    box.appendChild(b);
   });
-  const count=document.createElement('span');
-  count.textContent='数量：'+item.qty;
-  const plus=document.createElement('button');
-  plus.className='btn';
-  plus.textContent='+';
-  plus.addEventListener('click',()=>{item.qty++;saveCart();});
-  const remove=document.createElement('button');
-  remove.className='btn';
-  remove.textContent='移除';
-  remove.addEventListener('click',()=>{
-   cart=cart.filter(x=>x!==item);
-   saveCart();
+}
+
+function orderText(p) {
+  return `【挞飞商城】想了解这个项目：\n${p.name}\n分类：${p.category || '未分类'}\n价格：¥${Number(p.price).toFixed(2)}${Number(p.price) % 1 === 0 ? '' : ''}\n我的机型/需求：`;
+}
+
+async function inquire(p) {
+  const text = orderText(p);
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    window.prompt('请手动复制这段内容发给站长', text);
+    return;
+  }
+  window.open(`https://wpa.qq.com/msgrd?v=3&uin=${QQ}&site=qq&menu=yes`, '_blank', 'noopener');
+}
+
+function renderProducts() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const root = document.getElementById('products');
+  const count = document.getElementById('count');
+  const list = products.filter((p) =>
+    (category === '全部' || p.category === category) &&
+    (p.name + ' ' + (p.description || '') + ' ' + (p.category || '')).toLowerCase().includes(q)
+  );
+
+  count.textContent = list.length ? `${list.length} 个项目` : '暂无匹配';
+  root.replaceChildren();
+
+  if (!list.length) {
+    root.innerHTML = '<div class="pg-card" style="grid-column:1/-1">没有找到符合条件的项目。换个关键词，或直接联系站长说明需求。</div>';
+    return;
+  }
+
+  list.forEach((p) => {
+    const card = document.createElement('article');
+    card.className = 'pg-card pcard';
+    const price = Number(p.price);
+    const priceText = price % 1 === 0 ? String(price) : price.toFixed(2);
+    card.innerHTML = `
+      <div class="pvis">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">` : '📦'}</div>
+      <div class="pbody">
+        <span class="pcat">${esc(p.category || '未分类')}</span>
+        <h3>${esc(p.name)}</h3>
+        <p class="pdesc">${esc(p.description || '')}</p>
+        <div class="pfoot">
+          <span class="pprice">¥${esc(priceText)}<small>联系确认</small></span>
+          <button class="btn primary" type="button">联系站长</button>
+        </div>
+      </div>`;
+    card.querySelector('button').addEventListener('click', () => inquire(p));
+    root.appendChild(card);
   });
-  controls.append(minus,count,plus,remove);
-  line.append(name,detail,controls);
-  root.appendChild(line);
-  if(product)sum+=Number(product.price)*item.qty;
- });
- total.textContent='合计：¥'+sum.toFixed(2);
 }
 
 loadProducts();
 </script>
 <script src="js/tafei-ui.js" defer></script>
-<script src="js/tafei-features.js" defer></script>
 </body>
 </html>
