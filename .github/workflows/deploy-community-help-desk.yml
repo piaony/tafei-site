@@ -1,5 +1,5 @@
 name: deploy-community-help-desk
-run-name: deploy-community-help-desk-${{ github.run_id }}
+run-name: deploy-community-help-desk-run-${{ github.run_id }}
 
 on:
   push:
