@@ -4,12 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#080d1b">
-<meta name="description" content="挞飞，一个免费、友善、开放的互联网社区。分享知识、交流经验、互相帮助，让互联网温暖每一个人。">
-<title>挞飞 · 个人数字空间</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'/%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<meta name="description" content="挞飞 TAFEI：手机折腾与高中学习笔记。分享机型实测、Root 与性能优化、高中答题框架和复盘方法，免费阅读，注册可评论与私信。">
+<meta name="og:type" content="website">
+<meta name="og:title" content="挞飞 TAFEI · 手机折腾与高中资料">
+<meta name="og:description" content="手机折腾为主线，高中资料为副线；免费阅读的个人内容站。">
+<meta name="og:url" content="https://piaony.github.io/tafei-site/">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/">
+<title>挞飞 TAFEI · 手机折腾与高中资料</title>
 <link rel="stylesheet" href="css/home.css?v=2">
 <link rel="stylesheet" href="css/tafei-ui.css">
 <link rel="stylesheet" href="css/tafei-features.css">
 <link rel="stylesheet" href="css/tafei-inbox.css?v=3">
+<link rel="stylesheet" href="css/articles.css?v=1">
 </head>
 <body class="page-home">
 <canvas id="stars"></canvas>
@@ -17,6 +24,7 @@
 <a class="brand" href="#home">TAFEI<span>.</span></a>
 <nav class="navlinks" id="navlinks">
 <a href="#home" data-view="home">首页</a>
+<a href="#articles" data-view="articles">文章</a>
 <a href="#info" data-view="info">信息</a>
 <a href="#community" data-view="community">社区</a>
 <a href="shop.html">商城</a>
@@ -26,12 +34,26 @@
 </div></header>
 <main class="wrap">
 <section class="hero" id="home">
-<div><div class="status"><i class="dot"></i> PUBLIC COMMUNITY · 20.0</div><div class="eyebrow" style="margin-top:22px">HELLO, WORLD</div>
-<h1>让互联网，<br><span class="gradient">温暖每一个人。</span></h1>
-<p>欢迎来到挞飞。这里希望成为一个免费、友善、开放的互联网空间，让普通人分享知识、交流经验、互相帮助。</p>
-<div class="actions"><a class="btn primary" href="#community" onclick="event.preventDefault();document.querySelector('.mobile-bottom-nav a[data-view=community]').click()">进入交流空间 ↗</a><a class="btn" href="about.html">认识发起人</a></div>
+<div><div class="status"><i class="dot"></i> CONTENT STATION · 20.0</div><div class="eyebrow" style="margin-top:22px">手机折腾 / 高中资料</div>
+<h1>把折腾和学习，<br><span class="gradient">写成可分享的笔记。</span></h1>
+<p>挞飞是一个个人内容站：主线记录手机机型实测、刷机与性能优化；副线整理高中答题框架、复盘方法和自己用过的学习资料。内容免费阅读，注册后可评论与私信。</p>
+<div class="actions">
+ <a class="btn primary" href="#articles" onclick="event.preventDefault();window.TAFEIArticles&&TAFEIArticles.openColumn('phone')">手机折腾 ↗</a>
+ <a class="btn" href="#articles" onclick="event.preventDefault();window.TAFEIArticles&&TAFEIArticles.openColumn('study')">高中资料</a>
+</div>
 <p class="note" style="margin-top:24px">LOCAL TIME · <span id="clock">正在读取时间…</span></p></div>
 <div class="orb-wrap"><div class="orb" aria-label="科技感发光球体"></div></div>
+</section>
+
+<section id="articles" class="reveal" aria-label="文章内容"></section>
+
+<section id="changelog" class="reveal">
+ <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
+ <div class="panel" style="padding:24px;display:grid;gap:18px">
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.0</span><span class="af-date">2026-11-21</span></div><p>首页改为内容优先：新增文章系统，上线手机折腾与高中资料两个栏目，首批 6 篇范文；补齐 SEO 基础（sitemap、robots、社交卡片）。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v19.0</span><span class="af-date">2026-11-20</span></div><p>上线信息中心：系统通知、公告与私信；站长审查后台支持账号列表、私信核查、封禁与解封；注册需同意社区规范。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v18.0</span><span class="af-date">2026-11 上旬</span></div><p>页面拆分重构，新增站内指令面板、快捷键与搜索视图记忆；留言墙、社区、项目展示整合到统一界面。</p></div>
+ </div>
 </section>
 
 <section id="home-tools" class="reveal">
@@ -430,6 +452,7 @@
 
 
 <script src="js/home-views.js"></script>
+<script src="js/articles.js?v=1"></script>
 
 <script src="announcement.js"></script>
 <script src="js/tafei-ui.js" defer></script>

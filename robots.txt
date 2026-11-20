@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-audit.html
+
+Sitemap: https://piaony.github.io/tafei-site/sitemap.xml
