@@ -1,7 +1,7 @@
 /* TAFEI 18.0：社区整合界面 */
 (()=>{
  const pages={
-  home:['home','home-tools','articles','changelog','projects','about','lab','studio','contact'],
+  home:['home','home-tools','service-entry','articles','changelog','projects','about','lab','studio','contact'],
   articles:['articles'],
   info:['info'],
   community:['community','help'],

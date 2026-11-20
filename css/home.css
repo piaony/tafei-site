@@ -258,3 +258,10 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 .feed-category{display:inline-block;padding:4px 9px;border-radius:20px;background:rgba(80,160,255,.12);font-size:.8rem;color:var(--accent)}
 .feed-content{line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
 .feed-empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+
+/* 技术服务入口条 */
+.service-strip{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px 26px;border:1px solid rgba(100,232,255,.3);background:linear-gradient(120deg,rgba(59,143,255,.14),rgba(132,107,255,.12));flex-wrap:wrap}
+.service-strip h3{margin:6px 0 8px;font-size:clamp(18px,2.3vw,23px)}
+.service-strip p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+.service-strip .ss-actions{display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:760px){.service-strip{padding:18px 18px}.service-strip .ss-actions{width:100%}.service-strip .ss-actions .btn{flex:1 1 auto;justify-content:center}}
