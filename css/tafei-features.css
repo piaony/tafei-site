@@ -103,3 +103,7 @@ body.light .tf2-item[aria-selected="true"],body.light .tf2-item:hover{background
 
 /* ---------- 打印时隐藏交互层 ---------- */
 @media print{.tf2-layer,.tf2-fab,.tf2-toast{display:none!important}}
+
+/* ---------- 子页面（无底部导航）时把入口贴底，避免遮挡正文 ---------- */
+body.tf2-nobnav .tf2-fab{bottom:calc(18px + env(safe-area-inset-bottom));opacity:.94}
+body.tf2-nobnav .tf2-toast{bottom:calc(24px + env(safe-area-inset-bottom))}

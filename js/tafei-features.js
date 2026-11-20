@@ -385,6 +385,7 @@
 
   /* ---------------- 启动 ---------------- */
   function boot() {
+    if (!doc.querySelector('.mobile-bottom-nav')) body.classList.add('tf2-nobnav');
     mountFab();
     restoreView();
   }
