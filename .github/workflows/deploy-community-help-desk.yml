@@ -1,0 +1,48 @@
+name: deploy-community-help-desk
+run-name: deploy-community-help-desk-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-community-help-desk.yml'
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-community-help-desk]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download from CDN
+        run: |
+          set -e
+          curl -fsSL --retry 3 --retry-delay 2 -o index.html "https://aka.doubaocdn.com/s/Ul9eL4JdUa"
+          curl -fsSL --retry 3 --retry-delay 2 -o css/community.css "https://aka.doubaocdn.com/s/yIVOeeQVsG"
+          curl -fsSL --retry 3 --retry-delay 2 -o js/community-help.js "https://aka.doubaocdn.com/s/LTSBAGsnVW"
+          curl -fsSL --retry 3 --retry-delay 2 -o js/home-views.js "https://aka.doubaocdn.com/s/lZWu8evXSI"
+          curl -fsSL --retry 3 --retry-delay 2 -o service.html "https://aka.doubaocdn.com/s/TJFfUtHIkz"
+          ls -l index.html css/community.css js/community-help.js js/home-views.js service.html
+
+      - name: Verify bytes
+        run: |
+          set -e
+          cat > /tmp/SHA256SUMS <<'EOF'
+          285526113b62e0e2c2c9eeec14510aba4445c7dd7f639d8cb398869c4a4cd27f  index.html
+          e3cec945a55ea0ee0b536db3d910a4f0f17f57c8a74f62a915b3370347b3bddf  css/community.css
+          0578887a08d1a7cf2d7ee5d9e2806a2e6649846a3700328674ef7fd4a329bdde  js/community-help.js
+          7324c89fbdfcda5969584ce6a56ff640228f29fbc22f7a6d3b71a6d456dfe77d  js/home-views.js
+          976d56a36e78ce866f37b504222350d66538c42f95a1f4ebf732da64644fda30  service.html
+          EOF
+          sha256sum -c /tmp/SHA256SUMS
+
+      - name: Commit and push
+        run: |
+          set -e
+          git config user.name "tafei-bot"
+          git config user.email "3659229103@qq.com"
+          git rm -q .github/workflows/deploy-community-help-desk.yml
+          git add index.html css/community.css js/community-help.js js/home-views.js service.html
+          git commit -m "deploy: v20.3 社区求助工单池上线 [deploy-community-help-desk]"
+          git push origin HEAD:main
