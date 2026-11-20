@@ -1,10 +1,13 @@
 name: deploy-community-help-desk
-run-name: deploy-community-help-desk-run-${{ github.run_id }}
+run-name: deploy-community-help-desk-3-${{ github.run_id }}
 
 on:
   push:
     paths:
       - '.github/workflows/deploy-community-help-desk.yml'
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -38,6 +41,8 @@ jobs:
           sha256sum -c /tmp/SHA256SUMS
 
       - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           git config user.name "tafei-bot"
@@ -45,4 +50,4 @@ jobs:
           git rm -q .github/workflows/deploy-community-help-desk.yml
           git add index.html css/community.css js/community-help.js js/home-views.js service.html
           git commit -m "deploy: v20.3 社区求助工单池上线 [deploy-community-help-desk]"
-          git push origin HEAD:main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
