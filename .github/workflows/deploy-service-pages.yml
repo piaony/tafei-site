@@ -1,0 +1,37 @@
+name: deploy-service-pages
+run-name: "[auto-deploy v20.1] service + device pages"
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/deploy-service-pages.yml"]
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify artifacts
+        run: |
+          set -euo pipefail
+          fetch() {
+            curl -fsSL "$1" -o "$2"
+            echo "$3  $2" | sha256sum -c -
+          }
+          fetch "https://aka.doubaocdn.com/s/GCkVfQEYqf" index.html 2a4e8b9c8ce7267b460ba78c6a34c3a904913081aae4e85c7cdf6ca5dfc6014c
+          fetch "https://aka.doubaocdn.com/s/D8H5JOAVaI" service.html 8c70a6369084de31468cb042578ca0344a3b5081645c6d5f754e559043409f81
+          fetch "https://aka.doubaocdn.com/s/9Ik1tNS7zL" device.html 3604a5ec76f903347400bb712f1bf2cc8ecff3bff4e9f9fc8184f4ac068dc472
+          fetch "https://aka.doubaocdn.com/s/eBRLDbbUuE" shop.html 811ee0d757aa281c8b6b3a74af67d3070ffb5097ea62a58a18feb86eacaae482
+          fetch "https://aka.doubaocdn.com/s/Z2lJAVsb3X" css/pages.css 400bd05f5dd4a0ff61f90bbe2bae8010d8b05c04ee0a3bbdcf5537ec98470b46
+          fetch "https://aka.doubaocdn.com/s/vRW7VR5Z00" data/devices.json 209969bd07e2593ec0774cdc06b44517b8b479f1dc75ebbd7508dd21b83ec960
+          fetch "https://aka.doubaocdn.com/s/VfVIsitFzk" js/articles.js fab878531f6ea3b79ca2bb0c4ec2530ec19333cba994f40bbfd40187c906beb4
+          fetch "https://aka.doubaocdn.com/s/rgZOU8Y4Oy" sitemap.xml f9a1c56c12be4b4ffa5ee07031c6b72a8680392e4573dcca1ed6a97b0b4fb0ce
+          fetch "https://aka.doubaocdn.com/s/PhFU39Wqfz" supabase/service_requests.sql 5fae5dc0427bc2d1ac51b8b28a4925db32d7d559ba43485bfe6a558dbe3279be
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          git add index.html service.html device.html shop.html css/pages.css data/devices.json js/articles.js sitemap.xml supabase/service_requests.sql
+          git rm -f .github/workflows/deploy-service-pages.yml
+          git commit -m "feat(service): service booking page, device library, store rework [SERVICE-V201]"
+          git push
