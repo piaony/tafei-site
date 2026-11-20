@@ -1,0 +1,23 @@
+name: refactor-split
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: write
+jobs:
+  split:
+    if: contains(github.event.head_commit.message, 'RUN-SPLIT')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: split index.html and wire features layer
+        run: python3 tools/split_once.py .
+      - name: commit and self-clean
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          rm -f tools/split_once.py .github/workflows/refactor-split.yml
+          rmdir tools 2>/dev/null || true
+          git add -A
+          git commit -m "refactor(index): split inline css/js into files, wire features layer"
+          git push
