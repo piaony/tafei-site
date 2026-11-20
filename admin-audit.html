@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>挞飞 · 账号与私信审查</title>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<style>
+  body{margin:0;padding:20px 16px 60px;background:var(--tf-bg,#0b1220);color:var(--tf-text,#eef4ff);font-family:inherit}
+  main{max-width:900px;margin:20px auto}
+  .kicker{color:var(--tf-cyan,#64e8ff);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  h1{margin:6px 0 4px;font-size:26px}
+  .lead{color:var(--tf-muted,#9aaccb);font-size:13.5px;line-height:1.7;margin:0 0 18px}
+  .card{background:var(--tf-panel,rgba(16,25,48,.78));border:1px solid var(--tf-line,rgba(130,170,255,.18));
+    border-radius:var(--tf-r-lg,22px);padding:18px;margin:14px 0;box-shadow:var(--tf-e2,0 12px 32px rgba(4,10,25,.34))}
+  body.light .card{background:#fff}
+  h2{margin:0 0 12px;font-size:16px}
+  label{display:block;margin:10px 0 4px;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  input,select{width:100%;min-height:44px;padding:0 12px;border-radius:12px;font:inherit;font-size:14px;
+    border:1px solid var(--tf-line,rgba(130,170,255,.18));background:var(--tf-panel2,#111d37);color:inherit;outline:none}
+  body.light input,body.light select{background:#fff;color:#15213b}
+  input:focus,select:focus{border-color:var(--tf-cyan,#64e8ff);box-shadow:0 0 0 3px rgba(100,232,255,.25)}
+  button{min-height:44px;padding:0 18px;margin-top:12px;cursor:pointer;border:0;border-radius:12px;font:inherit;font-size:14px;
+    font-weight:600;color:#fff;background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff))}
+  button.ghost{background:transparent;color:var(--tf-muted,#9aaccb);border:1px solid var(--tf-line,rgba(130,170,255,.18));font-weight:400}
+  button:disabled{opacity:.5;cursor:default}
+  .msg{margin:10px 0 0;font-size:13px;color:var(--tf-muted,#9aaccb);min-height:18px}
+  .msg.err{color:#ff8f8f}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--tf-line,rgba(130,170,255,.14));vertical-align:top}
+  th{font-weight:600;color:var(--tf-muted,#9aaccb);font-size:12px;white-space:nowrap}
+  td.email{overflow-wrap:anywhere}
+  .dm{border:1px solid var(--tf-line,rgba(130,170,255,.18));border-radius:14px;padding:12px 14px;margin:10px 0;background:rgba(100,232,255,.03)}
+  .dm-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  .dm-top b{color:var(--tf-text,#eef4ff);font-size:13px;font-weight:600}
+  .dm-body{margin:8px 0 0;font-size:14px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+  .dm-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--tf-muted,#9aaccb)}
+  .dm-foot span{overflow-wrap:anywhere}
+  .dm-foot button{margin:0;min-height:32px;padding:0 12px;font-size:12px;font-weight:500;white-space:nowrap;
+    background:transparent;color:#ff9d9d;border:1px solid rgba(255,120,120,.35)}
+  .tabs{display:flex;gap:6px;margin:6px 0 4px;flex-wrap:wrap}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  td.time{white-space:nowrap}
+  @media (max-width:560px){
+    .row{grid-template-columns:1fr}
+    thead,.acc-head{display:none}
+    #accTable,#accTable tbody{display:block}
+    #accTable tr{display:block;padding:10px 0;border-bottom:1px solid var(--tf-line,rgba(130,170,255,.14))}
+    #accTable tr.acc-head{display:none}
+    #accTable td{display:flex;gap:8px;padding:3px 0;border:0;font-size:13px}
+    #accTable td:before{content:attr(data-label);flex:0 0 74px;color:var(--tf-muted,#9aaccb);font-size:12px}
+    #accTable td.email{overflow-wrap:anywhere}
+    td.time{white-space:normal}
+    .dm-foot{flex-direction:column;align-items:flex-start}
+    .dm-foot button{align-self:flex-end}
+  }
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">TAFEI ADMIN</div>
+  <h1>账号与私信审查</h1>
+  <p class="lead">只有站长邮箱可以进入。这里能看到注册账号、成员之间最近的真实私信，并能删除违规消息。</p>
+
+  <section class="card" id="login">
+    <h2>站长登录</h2>
+    <label for="email">邮箱</label>
+    <input id="email" type="email" placeholder="3659229103@qq.com" autocomplete="username">
+    <label for="password">密码</label>
+    <input id="password" type="password" placeholder="账号密码" autocomplete="current-password">
+    <button id="loginBtn">登录</button>
+    <p class="msg" id="loginMsg"></p>
+  </section>
+
+  <section class="hidden" id="dash">
+    <div class="card">
+      <h2>注册账号</h2>
+      <div class="row">
+        <div>
+          <label for="accSearch">快速筛选</label>
+          <input id="accSearch" placeholder="邮箱或昵称，可留空">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="ghost" id="refreshAccounts">刷新账号</button>
+        </div>
+      </div>
+      <p class="msg" id="accMsg">正在读取……</p>
+      <div style="overflow-x:auto"><table id="accTable"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>私信审查</h2>
+      <div class="row">
+        <div>
+          <label for="dmQuery">搜索</label>
+          <input id="dmQuery" placeholder="关键词 / 邮箱 / 昵称">
+        </div>
+        <div>
+          <label for="dmLimit">查看条数</label>
+          <select id="dmLimit">
+            <option value="50">最近 50 条</option>
+            <option value="100" selected>最近 100 条</option>
+            <option value="300">最近 300 条</option>
+            <option value="500">最近 500 条</option>
+          </select>
+        </div>
+      </div>
+      <button id="searchBtn">查询私信</button>
+      <p class="msg" id="dmMsg">正在读取……</p>
+      <div id="dmList"></div>
+    </div>
+
+    <button class="ghost" id="logoutBtn">退出登录</button>
+  </section>
+</main>
+
+<script>
+const URL = 'https://kwkewmhmxyjmzdjyutwa.supabase.co';
+const KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
+const TOKEN_KEY = 'tafei-admin-audit-token';
+
+let token = sessionStorage.getItem(TOKEN_KEY) || null;
+let accounts = [];
+let timer = null;
+
+const $ = function (id) { return document.getElementById(id); };
+const esc = function (s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+};
+const when = function (v) {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (isNaN(d)) return '—';
+  const p = function (n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+};
+
+async function rpc(name, body) {
+  const res = await fetch(URL + '/rest/v1/rpc/' + name, {
+    method: 'POST',
+    headers: { apikey: KEY, Authorization: 'Bearer ' + (token || KEY), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {})
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+  if (!res.ok) {
+    const m = (data && (data.message || data.hint)) || ('请求失败（' + res.status + '）');
+    const err = new Error(m);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+async function login() {
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if (!email || !password) { $('loginMsg').textContent = '请填写邮箱和密码。'; return; }
+  $('loginBtn').disabled = true;
+  $('loginMsg').className = 'msg';
+  $('loginMsg').textContent = '正在验证……';
+  try {
+    const res = await fetch(URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || data.error_description || data.message || '登录失败');
+    token = data.access_token;
+    sessionStorage.setItem(TOKEN_KEY, token);
+    await boot();
+  } catch (e) {
+    token = null;
+    sessionStorage.removeItem(TOKEN_KEY);
+    $('dash').classList.add('hidden');
+    $('loginMsg').className = 'msg err';
+    $('loginMsg').textContent = '登录失败：' + e.message;
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+}
+
+async function boot() {
+  try {
+    await loadAccounts();
+  } catch (e) {
+    if (e.status === 404 || /Could not find the function|does not exist/i.test(e.message)) {
+      token = null;
+      sessionStorage.removeItem(TOKEN_KEY);
+      $('dash').classList.add('hidden');
+      $('login').classList.remove('hidden');
+      $('loginMsg').className = 'msg err';
+      $('loginMsg').textContent = '后台接口还没部署：请先到 Supabase 控制台 → SQL Editor 跑一次 supabase/admin_audit.sql。';
+      return;
+    }
+    if (e.status === 401 || e.status === 403 || /42501|只有站长/.test(e.message)) {
+      token = null;
+      sessionStorage.removeItem(TOKEN_KEY);
+      $('dash').classList.add('hidden');
+      $('login').classList.remove('hidden');
+      $('loginMsg').className = 'msg err';
+      $('loginMsg').textContent = '这个账号不是站长，无法查看审查数据。';
+      return;
+    }
+    $('accMsg').className = 'msg err';
+    $('accMsg').textContent = '读取失败：' + e.message;
+    return;
+  }
+  $('login').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  loadMessages();
+}
+
+function renderAccounts(filter) {
+  const q = (filter || '').trim().toLowerCase();
+  const rows = accounts.filter(function (a) {
+    if (!q) return true;
+    return (a.email || '').toLowerCase().indexOf(q) >= 0 || (a.nickname || '').toLowerCase().indexOf(q) >= 0;
+  });
+  if (!rows.length) {
+    $('accTable').innerHTML = '<tr><td style="color:var(--tf-muted,#9aaccb)">没有匹配的账号。</td></tr>';
+    return;
+  }
+  let html = '<tr class="acc-head"><th>账号</th><th>昵称</th><th>注册 / 最后登录</th><th>私信数</th></tr>';
+  rows.forEach(function (a) {
+    html += '<tr><td class="email" data-label="账号">' + esc(a.email || a.uid) + '</td>'
+      + '<td data-label="昵称">' + esc(a.nickname || '—') + '</td>'
+      + '<td class="time" data-label="时间">' + esc(when(a.created_at)) + '<br><small style="color:var(--tf-muted,#9aaccb)">最后登录 ' + esc(when(a.last_sign_in_at)) + '</small></td>'
+      + '<td data-label="私信数">' + esc(a.msg_count) + '</td></tr>';
+  });
+  $('accTable').innerHTML = html;
+}
+
+async function loadAccounts() {
+  $('accMsg').className = 'msg';
+  $('accMsg').textContent = '正在读取……';
+  const rows = await rpc('tafei_admin_accounts', {});
+  accounts = Array.isArray(rows) ? rows : [];
+  $('accMsg').textContent = '共 ' + accounts.length + ' 个注册账号。';
+  renderAccounts($('accSearch').value);
+}
+
+function renderMessages(rows) {
+  if (!rows.length) {
+    $('dmList').innerHTML = '<p style="color:var(--tf-muted,#9aaccb);font-size:13px">没有匹配的私信。</p>';
+    return;
+  }
+  let html = '';
+  rows.forEach(function (m) {
+    html += '<article class="dm" data-id="' + esc(m.id) + '">'
+      + '<div class="dm-top"><b>' + esc(m.sender_name) + '</b><span>→</span><b>' + esc(m.recipient_name) + '</b>'
+      + '<span>· ' + esc(when(m.created_at)) + (m.read_at ? ' · 已读' : ' · 未读') + '</span></div>'
+      + '<p class="dm-body">' + esc(m.body) + '</p>'
+      + '<div class="dm-foot"><span>' + esc(m.sender_email) + ' → ' + esc(m.recipient_email) + '</span>'
+      + '<button type="button" data-del="' + esc(m.id) + '">删除这条</button></div></article>';
+  });
+  $('dmList').innerHTML = html;
+}
+
+async function loadMessages() {
+  $('dmMsg').className = 'msg';
+  $('dmMsg').textContent = '正在读取……';
+  try {
+    const rows = await rpc('tafei_admin_messages', {
+      p_query: ($('dmQuery').value || '').trim(),
+      p_limit: parseInt($('dmLimit').value, 10) || 100
+    });
+    const list = Array.isArray(rows) ? rows : [];
+    $('dmMsg').textContent = '读到 ' + list.length + ' 条私信。' + ((($('dmQuery').value || '').trim()) ? '（已按关键词过滤）' : '');
+    renderMessages(list);
+  } catch (e) {
+    $('dmMsg').className = 'msg err';
+    $('dmMsg').textContent = '读取失败：' + e.message;
+    $('dmList').innerHTML = '';
+  }
+}
+
+async function removeMessage(id) {
+  if (!confirm('确认删除这条私信？删除后双方都看不到了。')) return;
+  try {
+    await rpc('tafei_admin_delete_message', { p_id: parseInt(id, 10) });
+    $('dmMsg').className = 'msg';
+    $('dmMsg').textContent = '已删除第 ' + id + ' 条私信。';
+    loadMessages();
+    loadAccounts();
+  } catch (e) {
+    $('dmMsg').className = 'msg err';
+    $('dmMsg').textContent = '删除失败：' + e.message;
+  }
+}
+
+document.addEventListener('click', function (e) {
+  const del = e.target.closest('[data-del]');
+  if (del) removeMessage(del.getAttribute('data-del'));
+});
+
+$('loginBtn').addEventListener('click', login);
+$('password').addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
+$('refreshAccounts').addEventListener('click', loadAccounts);
+$('accSearch').addEventListener('input', function () { renderAccounts(this.value); });
+$('searchBtn').addEventListener('click', loadMessages);
+$('dmQuery').addEventListener('input', function () {
+  clearTimeout(timer);
+  timer = setTimeout(loadMessages, 900);
+});
+$('dmLimit').addEventListener('change', loadMessages);
+$('logoutBtn').addEventListener('click', function () {
+  token = null;
+  sessionStorage.removeItem(TOKEN_KEY);
+  $('dash').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('loginMsg').className = 'msg';
+  $('loginMsg').textContent = '已退出。';
+});
+
+if (token) boot();
+</script>
+</body>
+</html>
