@@ -1,0 +1,38 @@
+name: polish-fab
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: write
+jobs:
+  polish:
+    if: contains(github.event.head_commit.message, 'POLISH-FAB')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: patch features layer
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          j = pathlib.Path("js/tafei-features.js")
+          s = j.read_text(encoding="utf-8")
+          old = "  function boot() {\n    mountFab();"
+          assert old in s, "pattern missing"
+          if "tf2-nobnav" not in s:
+              s = s.replace(old, "  function boot() {\n    if (!doc.querySelector('.mobile-bottom-nav')) body.classList.add('tf2-nobnav');\n    mountFab();")
+              j.write_text(s, encoding="utf-8")
+          c = pathlib.Path("css/tafei-features.css")
+          t = c.read_text(encoding="utf-8")
+          if "tf2-nobnav" not in t:
+              t = t.rstrip("\n") + "\n\n/* ---------- 子页面（无底部导航）时把入口贴底，避免遮挡正文 ---------- */\nbody.tf2-nobnav .tf2-fab{bottom:calc(18px + env(safe-area-inset-bottom));opacity:.94}\nbody.tf2-nobnav .tf2-toast{bottom:calc(24px + env(safe-area-inset-bottom))}\n"
+              c.write_text(t, encoding="utf-8")
+          print("patched")
+          PY
+      - name: commit and self-clean
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          rm -f .github/workflows/polish-fab.yml
+          git add -A
+          git commit -m "polish(ui): keep search entry clear of content on subpages"
+          git push
