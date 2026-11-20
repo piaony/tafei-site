@@ -41,13 +41,19 @@
   .tabs{display:flex;gap:6px;margin:6px 0 4px;flex-wrap:wrap}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   td.time{white-space:nowrap}
+  .bad{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;flex:0 0 auto;
+    background:rgba(100,232,255,.14);color:var(--tf-cyan,#64e8ff);white-space:nowrap}
+  .bad.is-ban{background:rgba(255,120,120,.16);color:#ff9d9d}
+  td.ops{white-space:nowrap}
+  button.mini{margin:8px 0 0;min-height:32px;padding:0 12px;font-size:12px;font-weight:500;display:inline-block}
+  button.mini.ghost{font-weight:500}
   @media (max-width:560px){
     .row{grid-template-columns:1fr}
     thead,.acc-head{display:none}
     #accTable,#accTable tbody{display:block}
     #accTable tr{display:block;padding:10px 0;border-bottom:1px solid var(--tf-line,rgba(130,170,255,.14))}
     #accTable tr.acc-head{display:none}
-    #accTable td{display:flex;gap:8px;padding:3px 0;border:0;font-size:13px}
+    #accTable td{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:3px 0;border:0;font-size:13px}
     #accTable td:before{content:attr(data-label);flex:0 0 74px;color:var(--tf-muted,#9aaccb);font-size:12px}
     #accTable td.email{overflow-wrap:anywhere}
     td.time{white-space:normal}
@@ -61,7 +67,7 @@
 <main>
   <div class="kicker">TAFEI ADMIN</div>
   <h1>账号与私信审查</h1>
-  <p class="lead">只有站长邮箱可以进入。这里能看到注册账号、成员之间最近的真实私信，并能删除违规消息。</p>
+  <p class="lead">只有站长邮箱可以进入。能看注册账号、成员之间的私信，删除违规消息，封禁或解封账号。</p>
 
   <section class="card" id="login">
     <h2>站长登录</h2>
@@ -82,10 +88,16 @@
           <input id="accSearch" placeholder="邮箱或昵称，可留空">
         </div>
         <div>
-          <label>&nbsp;</label>
-          <button class="ghost" id="refreshAccounts">刷新账号</button>
+          <label for="banDays">封禁时长</label>
+          <select id="banDays">
+            <option value="7">7 天</option>
+            <option value="30" selected>30 天</option>
+            <option value="365">1 年</option>
+            <option value="36500">永久</option>
+          </select>
         </div>
       </div>
+      <button class="ghost" id="refreshAccounts">刷新账号</button>
       <p class="msg" id="accMsg">正在读取……</p>
       <div style="overflow-x:auto"><table id="accTable"></table></div>
     </div>
@@ -111,7 +123,6 @@
       <p class="msg" id="dmMsg">正在读取……</p>
       <div id="dmList"></div>
     </div>
-
     <button class="ghost" id="logoutBtn">退出登录</button>
   </section>
 </main>
@@ -227,12 +238,20 @@ function renderAccounts(filter) {
     $('accTable').innerHTML = '<tr><td style="color:var(--tf-muted,#9aaccb)">没有匹配的账号。</td></tr>';
     return;
   }
-  let html = '<tr class="acc-head"><th>账号</th><th>昵称</th><th>注册 / 最后登录</th><th>私信数</th></tr>';
+  let html = '<tr class="acc-head"><th>账号</th><th>昵称</th><th>注册 / 最后登录</th><th>私信数</th><th>状态</th></tr>';
   rows.forEach(function (a) {
+    const banned = a.banned_until && new Date(a.banned_until) > new Date();
     html += '<tr><td class="email" data-label="账号">' + esc(a.email || a.uid) + '</td>'
       + '<td data-label="昵称">' + esc(a.nickname || '—') + '</td>'
       + '<td class="time" data-label="时间">' + esc(when(a.created_at)) + '<br><small style="color:var(--tf-muted,#9aaccb)">最后登录 ' + esc(when(a.last_sign_in_at)) + '</small></td>'
-      + '<td data-label="私信数">' + esc(a.msg_count) + '</td></tr>';
+      + '<td data-label="私信数">' + esc(a.msg_count) + '</td>'
+      + '<td class="ops" data-label="状态">'
+      + (banned
+        ? '<span class="bad is-ban">已封禁至 ' + esc(when(a.banned_until)) + '</span>'
+          + '<button type="button" class="mini ghost" data-unban="' + esc(a.uid) + '">解封</button>'
+        : '<span class="bad">正常</span>'
+          + '<button type="button" class="mini" data-ban="' + esc(a.uid) + '">封禁</button>')
+      + '</td></tr>';
   });
   $('accTable').innerHTML = html;
 }
@@ -295,9 +314,43 @@ async function removeMessage(id) {
   }
 }
 
+async function banUser(uid) {
+  const email = (accounts.find(function (a) { return a.uid === uid; }) || {}).email || uid;
+  const days = parseInt($('banDays').value, 10) || 30;
+  const label = days >= 36500 ? '永久' : days + ' 天';
+  if (!confirm('确认封禁 ' + email + ' ？封禁 ' + label + '，期间无法登录。')) return;
+  try {
+    await rpc('tafei_admin_ban', { p_uid: uid, p_days: days });
+    $('accMsg').className = 'msg';
+    $('accMsg').textContent = '已封禁 ' + email + '（' + label + '）。';
+    loadAccounts();
+  } catch (e) {
+    $('accMsg').className = 'msg err';
+    $('accMsg').textContent = '封禁失败：' + e.message;
+  }
+}
+
+async function unbanUser(uid) {
+  const email = (accounts.find(function (a) { return a.uid === uid; }) || {}).email || uid;
+  if (!confirm('确认解封 ' + email + ' ？')) return;
+  try {
+    await rpc('tafei_admin_unban', { p_uid: uid });
+    $('accMsg').className = 'msg';
+    $('accMsg').textContent = '已解封 ' + email + '。';
+    loadAccounts();
+  } catch (e) {
+    $('accMsg').className = 'msg err';
+    $('accMsg').textContent = '解封失败：' + e.message;
+  }
+}
+
 document.addEventListener('click', function (e) {
   const del = e.target.closest('[data-del]');
-  if (del) removeMessage(del.getAttribute('data-del'));
+  if (del) { removeMessage(del.getAttribute('data-del')); return; }
+  const ban = e.target.closest('[data-ban]');
+  if (ban) { banUser(ban.getAttribute('data-ban')); return; }
+  const unb = e.target.closest('[data-unban]');
+  if (unb) unbanUser(unb.getAttribute('data-unban'));
 });
 
 $('loginBtn').addEventListener('click', login);
