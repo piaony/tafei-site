@@ -481,7 +481,7 @@
     });
     var sendBtn = $('[data-role="send"]', root);
     var input = $('#tf3Input', root);
-    function doSend() { sendMessage(input && input.value, null, sendBtn, input); }
+    function doSend() { sendMessage(input && input.value, state.peer, sendBtn, input); }
     if (sendBtn) sendBtn.addEventListener('click', doSend);
     if (input) input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSend(); }
