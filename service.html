@@ -228,6 +228,17 @@
     status.className = 'form-status' + (kind ? ' ' + kind : '');
   };
 
+  // 从求助台带机型与问题过来时预填
+  const params = new URLSearchParams(location.search);
+  const preDevice = params.get('device');
+  const preIssue = params.get('issue');
+  if (preDevice) document.getElementById('f-device').value = preDevice;
+  if (preIssue) document.getElementById('f-note').value = '来自求助台：' + preIssue;
+  if (params.get('device')) {
+    const sel = document.getElementById('f-service');
+    if (sel) sel.value = '还不确定，先咨询';
+  }
+
   document.querySelectorAll('[data-copy]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const value = btn.dataset.copy;

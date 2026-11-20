@@ -4,7 +4,7 @@
   home:['home','home-tools','service-entry','articles','changelog','projects','about','lab','studio','contact'],
   articles:['articles'],
   info:['info'],
-  community:['community','help'],
+  community:['community'],
   guestbook:['guestbook'],
   profile:['profile']
  };

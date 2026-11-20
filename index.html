@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="css/tafei-features.css">
 <link rel="stylesheet" href="css/tafei-inbox.css?v=3">
 <link rel="stylesheet" href="css/articles.css?v=1">
+<link rel="stylesheet" href="css/community.css?v=1">
 </head>
 <body class="page-home">
 <canvas id="stars"></canvas>
@@ -67,6 +68,8 @@
 <section id="changelog" class="reveal">
  <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
  <div class="panel" style="padding:24px;display:grid;gap:18px">
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.3</span><span class="af-date">2026-11-21</span></div><p>社区改为「求助工单池」：发帖必须写清机型、系统版本与问题，按机型号归档聚合，没人回答的贴在前面，一条求助可一键转站长服务预约。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.2</span><span class="af-date">2026-11-21</span></div><p>技术服务入口上提：底部导航「商城」换成「服务」，首页首屏下加一条服务说明，手机上不用先点商城才能找到服务。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.1</span><span class="af-date">2026-11-21</span></div><p>上线技术服务页（解 BL、Root、模块、内核、救砖，含预约表单）与机型档案库；商城改为「联系站长确认」模式，去掉无法结算的购物车。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.0</span><span class="af-date">2026-11-21</span></div><p>首页改为内容优先：新增文章系统，上线手机折腾与高中资料两个栏目，首批 6 篇范文；补齐 SEO 基础（sitemap、robots、社交卡片）。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v19.0</span><span class="af-date">2026-11-20</span></div><p>上线信息中心：系统通知、公告与私信；站长审查后台支持账号列表、私信核查、封禁与解封；注册需同意社区规范。</p></div>
@@ -84,152 +87,50 @@
 
 <section id="community" class="reveal">
 <div class="section-head">
-<div><div class="kicker">01 / TAFEI COMMUNITY</div>
-<h2>在这里，让善意相遇。</h2></div>
-<p>一个面向普通人的免费互联网空间。分享知识、互相帮助、友善交流。</p>
-</div>
-<div class="grid" id="tafeiCommunityCategories">
-
-<article class="panel project community-category" data-community-filter="help">
-<div class="symbol">🛟</div>
-<h3>求助</h3>
-<p>遇到不会的问题？把它说出来，让懂的人来帮助你。</p>
-<div class="bottom">
-<span class="tag">互相帮助</span>
-<button class="textbtn community-filter-btn" type="button" data-filter="help">进入求助 ↗</button>
-</div>
-</article>
-
-<article class="panel project community-category" data-community-filter="knowledge">
-<div class="symbol">📚</div>
-<h3>知识</h3>
-<p>分享经验、技巧和实用知识，让有价值的信息留下来。</p>
-<div class="bottom">
-<span class="tag">知识沉淀</span>
-<button class="textbtn community-filter-btn" type="button" data-filter="knowledge">浏览知识 ↗</button>
-</div>
-</article>
-
-<article class="panel project community-category" data-community-filter="discussion">
-<div class="symbol">💬</div>
-<h3>讨论</h3>
-<p>分享生活、学习、科技和想法，让每一次交流都有意义。</p>
-<div class="bottom">
-<span class="tag">自由交流</span>
-<button class="textbtn community-filter-btn" type="button" data-filter="discussion">进入讨论 ↗</button>
-</div>
-</article>
-
+<div><div class="kicker">01 / HELP DESK</div>
+<h2>手机出问题，先把机型说清楚。</h2></div>
+<p>按机型归档的求助台。写明机型和系统版本，能自己解决的给你步骤，需要远程处理的直接转服务预约。</p>
 </div>
 
-<div class="community-tabs" id="communityTabs" role="tablist" aria-label="社区内容分类">
- <button type="button" class="community-tab active" data-community-tab="all">全部</button>
- <button type="button" class="community-tab" data-community-tab="help">🛟 求助</button>
- <button type="button" class="community-tab" data-community-tab="knowledge">📚 知识</button>
- <button type="button" class="community-tab" data-community-tab="discussion">💬 讨论</button>
+<div class="help-tools">
+ <input id="helpSearch" type="search" placeholder="搜机型或关键词，如「掉帧」「卡 logo」" aria-label="搜索求助">
+ <select id="helpSort" aria-label="排序方式">
+  <option value="newest">最新发布</option>
+  <option value="active">回答最多</option>
+  <option value="open">只看没解决的</option>
+ </select>
 </div>
 
-
-<div class="feed-section" id="tafeiFeed">
- <div class="feed-heading">
-  <h3>✦ 动态广场</h3>
-  <p>分享生活、学习心得、技术经验和需要帮助的问题。</p>
- </div>
- <form class="panel feed-form" id="tafeiFeedForm">
-  <h3>发布一条动态</h3>
-  <label class="feed-field">
-   <span>选择动态分类</span>
-   <select id="tafeiFeedCategory" required>
-    <option value="daily">生活日常</option>
-    <option value="learning">学习成长</option>
-    <option value="tech">科技技术</option>
-    <option value="help">寻求帮助</option>
-    <option value="knowledge">知识分享</option>
-   </select>
-  </label>
-  <label class="feed-field">
-   <span>动态内容（最多1000字）</span>
-   <textarea id="tafeiFeedContent" maxlength="1000" required placeholder="此刻，你想分享什么？"></textarea>
-  </label>
-  <button class="btn primary" id="tafeiFeedSubmit" type="submit">发布动态 ↗</button>
-  <p class="feed-status" id="tafeiFeedStatus" role="status">登录社区账户后即可发布，所有访客都可以浏览。</p>
- </form>
- <div class="feed-list" id="tafeiFeedList" aria-live="polite">
-  <div class="feed-empty">正在加载动态……</div>
- </div>
-</div>
-
-<div class="article-area">
- <form class="panel article-form" id="articleForm">
-  <h3>✦ 分享一篇知识</h3>
-  <label class="article-field">
-   <span>作者昵称（1—30字）</span>
-   <input id="articleName" maxlength="30" required placeholder="给自己取一个昵称">
-  </label>
-  <label class="article-field">
-   <span>文章标题（1—100字）</span>
-   <input id="articleTitle" maxlength="100" required placeholder="这篇文章想分享什么？">
-  </label>
-  <label class="article-field">
-   <span>文章正文（最多5000字）</span>
-   <textarea id="articleContent" maxlength="5000" required placeholder="写下你的知识、经验或学习心得……"></textarea>
-  </label>
-  <button class="btn primary article-submit" id="publishArticle" type="submit">发布文章 ↗</button>
-  <p class="article-status" id="articleStatus" role="status">发布的文章将公开展示，请勿填写个人隐私。</p>
- </form>
- <div class="article-list">
-  <h3>最新知识分享</h3>
-  <div id="articlesList" aria-live="polite">
-   <div class="article-empty">正在加载文章……</div>
+<form class="panel help-form" id="helpForm" novalidate>
+ <h3>发一条求助</h3>
+ <div class="help-row">
+  <div class="field">
+   <label for="helpDevice">机型 <span class="req">*</span></label>
+   <input id="helpDevice" required maxlength="30" placeholder="例如 Redmi K40 / OPPO Reno11 Pro" list="helpDeviceList" autocomplete="off">
+   <datalist id="helpDeviceList"></datalist>
+  </div>
+  <div class="field">
+   <label for="helpOs">系统版本</label>
+   <input id="helpOs" maxlength="40" placeholder="例如 HyperOS 2.0 / ColorOS 15" autocomplete="off">
   </div>
  </div>
+ <div class="field">
+  <label for="helpProblem">问题描述 <span class="req">*</span></label>
+  <textarea id="helpProblem" required maxlength="600" placeholder="什么现象、什么时候开始、系统有没有提示。越具体越好判断。"></textarea>
+ </div>
+ <div class="field">
+  <label for="helpTried">已经试过什么</label>
+  <input id="helpTried" maxlength="120" placeholder="例如：清过缓存、重启过、刷过一次模块" autocomplete="off">
+ </div>
+ <div class="help-actions">
+  <button class="btn primary" type="submit" id="helpSubmit">发布求助</button>
+  <span class="form-status" id="helpStatus" role="status" aria-live="polite">登录后可发布，访客也能看全部求助。</span>
+ </div>
+</form>
+
+<div class="help-board" id="helpBoard" aria-live="polite">
+ <div class="feed-empty">正在加载求助……</div>
 </div>
-
-</section>
-
-<section id="help" class="reveal">
- <div class="section-head">
-  <div>
-   <div class="kicker">02 / TAFEI HELP CENTER</div>
-   <h2>有困难，就来这里说说。</h2>
-  </div>
-  <p>让需要帮助的人找到愿意伸出援手的人。</p>
- </div>
-
- <div class="panel" style="padding:24px">
-  <h3>发布求助</h3>
-  <form id="helpForm">
-   <label for="helpNickname">昵称</label>
-   <input id="helpNickname" maxlength="30" required placeholder="给自己取一个昵称">
-
-   <label for="helpCategory">求助类别</label>
-   <select id="helpCategory" required>
-    <option value="">请选择类别</option>
-    <option value="learning">学习问题</option>
-    <option value="tech">技术问题</option>
-    <option value="resources">资源需求</option>
-    <option value="daily">生活问题</option>
-    <option value="other">其他</option>
-   </select>
-
-   <label for="helpTitle">求助标题</label>
-   <input id="helpTitle" maxlength="100" required placeholder="简单描述你需要什么帮助">
-
-   <label for="helpContent">详细描述</label>
-   <textarea id="helpContent" maxlength="2000" required rows="5" placeholder="请描述遇到的问题，以及希望得到什么帮助"></textarea>
-
-   <p class="note">隐私提醒：请勿填写真实姓名、手机号、学校、家庭住址等个人信息。</p>
-   <button class="btn primary" type="submit">提交求助</button>
-   <p id="helpMessage" aria-live="polite"></p>
-  </form>
- </div>
-
- <div class="article-list" style="margin-top:24px">
-  <h3>大家的求助</h3>
-  <div id="helpList" aria-live="polite">
-   <div class="article-empty">求助中心正在建设中……</div>
-  </div>
- </div>
 </section>
 
 <section id="projects" class="reveal">
@@ -471,6 +372,7 @@
 
 <script src="js/home-views.js"></script>
 <script src="js/articles.js?v=1"></script>
+<script src="js/community-help.js?v=1"></script>
 
 <script src="announcement.js"></script>
 <script src="js/tafei-ui.js" defer></script>
