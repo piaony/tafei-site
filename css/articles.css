@@ -52,3 +52,14 @@
   .af-pager { grid-template-columns: 1fr; }
   .af-body { font-size: 15.5px; }
 }
+
+
+/* 正文里的机型名自动链到机型档案 */
+.af-devlink{
+  color: var(--tf-cyan, #64e8ff);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(100, 232, 255, .45);
+  padding-bottom: 1px;
+}
+.af-devlink:hover{ border-bottom-style: solid; }
+body.light .af-devlink{ color: #1b74d8; border-bottom-color: rgba(27, 116, 216, .4); }

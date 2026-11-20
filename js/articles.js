@@ -4,6 +4,34 @@
   if (!root) return;
 
   const DATA = { columns: [], articles: [] };
+  let TERMS = [];
+
+  const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  function buildTerms(devices) {
+    const list = [];
+    (devices || []).forEach((d) => {
+      [d.name].concat(d.aliases || []).forEach((t) => {
+        const term = String(t || '').trim();
+        if (term.length >= 3 && /[a-z0-9]/i.test(term)) list.push({ term, id: d.id });
+      });
+    });
+    list.sort((a, b) => b.term.length - a.term.length);
+    TERMS = list;
+  }
+
+  function linkify(text) {
+    const html = esc(text);
+    if (!TERMS.length) return html;
+    const map = new Map();
+    const alts = TERMS.map((t) => { map.set(t.term.toLowerCase(), t.id); return escRe(esc(t.term)); });
+    try {
+      return html.replace(new RegExp('(' + alts.join('|') + ')', 'gi'), (m) => {
+        const id = map.get(m.toLowerCase());
+        return id ? `<a class="af-devlink" href="device.html?m=${encodeURIComponent(id)}">${m}</a>` : m;
+      });
+    } catch (e) { return html; }
+  }
   const state = { mode: 'list', column: null, current: null };
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
@@ -21,11 +49,11 @@
     switch (b.type) {
       case 'h2': return `<h2 class="af-h2">${esc(b.text)}</h2>`;
       case 'list':
-        return `<ul class="af-list">${(b.items || []).map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`;
-      case 'quote': return `<blockquote class="af-quote">${esc(b.text)}</blockquote>`;
+        return `<ul class="af-list">${(b.items || []).map((i) => `<li>${linkify(i)}</li>`).join('')}</ul>`;
+      case 'quote': return `<blockquote class="af-quote">${linkify(b.text)}</blockquote>`;
       case 'code': return `<pre class="af-code"><code>${esc(b.text)}</code></pre>`;
-      case 'tip': return `<aside class="af-tip">${esc(b.text)}</aside>`;
-      default: return `<p class="af-p">${esc(b.text)}</p>`;
+      case 'tip': return `<aside class="af-tip">${linkify(b.text)}</aside>`;
+      default: return `<p class="af-p">${linkify(b.text)}</p>`;
     }
   }
 
@@ -143,6 +171,12 @@
       root.innerHTML = '<div class="empty-state">文章加载失败，请稍后刷新。</div>';
       return;
     }
+
+    try {
+      const devRes = await fetch('data/devices.json', { cache: 'no-store' });
+      const devJson = await devRes.json();
+      buildTerms(devJson.devices || []);
+    } catch (e) { TERMS = []; }
 
     const hash = location.hash;
     const m = hash.match(/^#\/article\/(.+)$/);

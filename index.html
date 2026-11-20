@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="css/tafei-ui.css">
 <link rel="stylesheet" href="css/tafei-features.css">
 <link rel="stylesheet" href="css/tafei-inbox.css?v=3">
-<link rel="stylesheet" href="css/articles.css?v=1">
+<link rel="stylesheet" href="css/articles.css?v=2">
 <link rel="stylesheet" href="css/community.css?v=1">
 </head>
 <body class="page-home">
@@ -26,6 +26,7 @@
 <nav class="navlinks" id="navlinks">
 <a href="#home" data-view="home">首页</a>
 <a href="#articles" data-view="articles">文章</a>
+<a href="search.html">搜索</a>
 <a href="device.html">机型库</a>
 <a href="service.html">技术服务</a>
 <a href="#info" data-view="info">信息</a>
@@ -37,7 +38,7 @@
 </div></header>
 <main class="wrap">
 <section class="hero" id="home">
-<div><div class="status"><i class="dot"></i> CONTENT STATION · 20.0</div><div class="eyebrow" style="margin-top:22px">手机折腾 / 高中资料</div>
+<div><div class="status"><i class="dot"></i> CONTENT STATION · 20.4</div><div class="eyebrow" style="margin-top:22px">手机折腾 / 高中资料</div>
 <h1 style="font-size:clamp(36px,5.2vw,66px)">把折腾和学习，<br><span class="gradient">写成可分享的笔记。</span></h1>
 <p>挞飞是一个个人内容站：主线记录手机机型实测、刷机与性能优化；副线整理高中答题框架、复盘方法和自己用过的学习资料。内容免费阅读，注册后可评论与私信。</p>
 <div class="actions">
@@ -68,6 +69,7 @@
 <section id="changelog" class="reveal">
  <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
  <div class="panel" style="padding:24px;display:grid;gap:18px">
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.4</span><span class="af-date">2026-11-21</span></div><p>新站内搜索：文章、机型档案和社区求助一次搜完；文章正文里的机型名可以直接点进档案，机型档案页也会列出这台机器的求助。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.3</span><span class="af-date">2026-11-21</span></div><p>社区改为「求助工单池」：发帖必须写清机型、系统版本与问题，按机型号归档聚合，没人回答的贴在前面，一条求助可一键转站长服务预约。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.2</span><span class="af-date">2026-11-21</span></div><p>技术服务入口上提：底部导航「商城」换成「服务」，首页首屏下加一条服务说明，手机上不用先点商城才能找到服务。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.1</span><span class="af-date">2026-11-21</span></div><p>上线技术服务页（解 BL、Root、模块、内核、救砖，含预约表单）与机型档案库；商城改为「联系站长确认」模式，去掉无法结算的购物车。</p></div>
@@ -371,7 +373,7 @@
 
 
 <script src="js/home-views.js"></script>
-<script src="js/articles.js?v=1"></script>
+<script src="js/articles.js?v=2"></script>
 <script src="js/community-help.js?v=1"></script>
 
 <script src="announcement.js"></script>

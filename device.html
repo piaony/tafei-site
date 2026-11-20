@@ -121,6 +121,13 @@
       <section class="pg-sec dev-read" style="display:grid;gap:22px">
         ${(dev.blocks || []).map(renderBlock).join('')}
       </section>
+      <section class="pg-sec" id="devHelpSec">
+        <div class="pg-sec-head">
+          <div><p class="pg-kicker">COMMUNITY</p><h2>这台机的求助</h2></div>
+          <p>社区求助台按机型归档，这里只列这台机器的问题。</p>
+        </div>
+        <div id="devHelpBox" class="pg-card">正在读取这台机的求助……</div>
+      </section>
       <section class="pg-sec">
         <div class="pg-card" style="display:grid;gap:10px">
           <h3 style="margin:0">这台机想动手了？</h3>
@@ -134,6 +141,58 @@
       ${othersHtml}
     `;
     document.title = `${dev.name} · 机型档案 · 挞飞`;
+    loadDeviceHelp(dev);
+  }
+
+  async function loadDeviceHelp(dev) {
+    const box = document.getElementById('devHelpBox');
+    if (!box) return;
+    const key = (s) => String(s || '').toLowerCase().replace(/\s+/g, '');
+    const names = [dev.name].concat(dev.aliases || []).map(key).filter(Boolean);
+    const linkIssue = 'service.html?device=' + encodeURIComponent(dev.name);
+    try {
+      const res = await fetch('https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_posts?select=id,category,content,created_at&order=created_at.desc&limit=200', {
+        headers: { apikey: 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV' },
+        cache: 'no-store'
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const posts = await res.json();
+      const hits = (Array.isArray(posts) ? posts : []).filter((p) => names.includes(key(p.category)));
+      if (!hits.length) {
+        box.innerHTML = `<div style="display:grid;gap:10px">
+          <p style="margin:0;color:var(--tf-muted,#9aaccb)">这台机还没有人提问。第一个问题留给你，写清系统版本和现象就行。</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a class="btn primary" href="index.html#community">去求助台发一条 ↗</a>
+            <a class="btn" href="${linkIssue}">直接找站长处理</a>
+          </div></div>`;
+        return;
+      }
+      const rows = hits.slice(0, 5).map((p) => {
+        const raw = String(p.content || '');
+        const lines = raw.split('\n').map((x) => x.trim()).filter(Boolean);
+        let os = '';
+        let problem = [];
+        lines.forEach((t) => {
+          if (t.startsWith('系统版本：')) os = t.slice(5).trim();
+          else if (t.startsWith('问题：')) problem.push(t.slice(3).trim());
+          else if (t.startsWith('已试：')) return;
+          else problem.push(t);
+        });
+        return `<a class="pg-card" style="display:grid;gap:6px;text-decoration:none;color:inherit" href="index.html#community">
+          <span style="font-size:12px;color:var(--tf-cyan,#64e8ff)">${os ? '系统 ' + esc(os) : '未写系统版本'} · ${esc(String(p.created_at || '').slice(0, 10))}</span>
+          <strong style="font-size:14.5px;line-height:1.6">${esc(problem.join(' ').slice(0, 120) || '（无问题描述）')}</strong>
+        </a>`;
+      }).join('');
+      box.innerHTML = `<div style="display:grid;gap:10px">
+        <span style="font-size:13px;color:var(--tf-muted,#9aaccb)">${dev.name} 在求助台有 ${hits.length} 条问题${hits.length > 5 ? '，这里显示最近 5 条' : ''}。</span>
+        ${rows}
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+          <a class="btn primary" href="index.html#community">去求助台看全部 ↗</a>
+          <a class="btn" href="search.html?q=${encodeURIComponent(dev.name)}">搜这台机的其它内容</a>
+        </div></div>`;
+    } catch (e) {
+      box.innerHTML = `<p style="margin:0;color:var(--tf-muted,#9aaccb)">求助数据暂时读不到（${esc(e.message)}）。可以直接去 <a href="index.html#community" style="color:var(--tf-cyan,#64e8ff)">求助台</a> 看看。</p>`;
+    }
   }
 
   async function init() {
