@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/tafei-ui.css">
 <link rel="stylesheet" href="css/tafei-features.css">
+<link rel="stylesheet" href="css/tafei-inbox.css">
 </head>
 <body class="page-home">
 <canvas id="stars"></canvas>
@@ -256,13 +257,45 @@
 <section id="info" class="reveal">
  <div class="section-head">
   <div><div class="kicker">TAFEI INFORMATION</div><h2>信息中心</h2></div>
-  <p>公告、私信和商城通知的集中入口。</p>
+  <p>系统通知、站内公告和私信，都收在这里。</p>
  </div>
- <div class="panel" style="padding:24px">
-  <h3>公告与通知</h3>
-  <p>信息中心正在升级，公告历史与消息功能将逐步开放。</p>
+
+ <div class="tf3" id="tf3Inbox">
+  <div class="tf3-bar">
+   <div class="tf3-tabs" role="tablist" aria-label="信息中心分类">
+    <button type="button" class="tf3-tab is-active" role="tab" aria-selected="true" data-pane="system">
+     系统通知<span class="tf3-badge" data-badge="system" hidden>0</span>
+    </button>
+    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="notice">
+     公告通知<span class="tf3-badge" data-badge="notice" hidden>0</span>
+    </button>
+    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="dm">
+     私信<span class="tf3-badge" data-badge="dm" hidden>0</span>
+    </button>
+   </div>
+   <button type="button" class="tf3-readall" id="tf3ReadAll">全部标为已读</button>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="system" role="tabpanel">
+   <div class="tf3-list" id="tf3SystemList">
+    <div class="tf3-hint">正在读取系统通知…</div>
+   </div>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="notice" role="tabpanel" hidden>
+   <div class="tf3-list" id="tf3NoticeList">
+    <div class="tf3-hint">正在读取公告…</div>
+   </div>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="dm" role="tabpanel" hidden>
+   <div class="tf3-list" id="tf3DmWrap">
+    <div class="tf3-hint">正在检查私信状态…</div>
+   </div>
+  </div>
  </div>
 </section>
+
 
 <section id="profile" class="reveal">
  <div class="section-head">
@@ -396,5 +429,6 @@
 <script src="announcement.js"></script>
 <script src="js/tafei-ui.js" defer></script>
 <script src="js/tafei-features.js" defer></script>
+<script src="js/tafei-inbox.js" defer></script>
 </body>
 </html>
