@@ -1,0 +1,31 @@
+name: deploy-service-entry
+run-name: "[auto-deploy v20.2] service entry"
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/deploy-service-entry.yml"]
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify artifacts
+        run: |
+          set -euo pipefail
+          fetch() {
+            curl -fsSL "$1" -o "$2"
+            echo "$3  $2" | sha256sum -c -
+          }
+          fetch "https://aka.doubaocdn.com/s/xLdLVjIfNS" index.html 5f180fd2974fb5ebc81f6df5512ff0075cd532ad6db44b96480fdbeeed3f7647
+          fetch "https://aka.doubaocdn.com/s/APdv25uad0" css/home.css e84f09717d7fc6937883b9878e81e542e6ed5ce2f8759869aa22a939b5223b49
+          fetch "https://aka.doubaocdn.com/s/U1KWShkm1Z" js/home-views.js a8a11b73bf3176c37f0b9c28ce0c19ca9f312f61f8d862ef0ae1426154b5d0b3
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          git add index.html css/home.css js/home-views.js
+          git rm -f .github/workflows/deploy-service-entry.yml
+          git commit -m "feat(entry): surface tech service on home and mobile tab bar [SERVICE-ENTRY]"
+          git push
