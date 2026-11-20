@@ -95,7 +95,6 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  .article-area{grid-template-columns:1fr}
  .article-form{padding:17px}
 }
-\n
 /* TAFEI 10.0 手机固定底部导航 */
 .mobile-bottom-nav{
  display:none;
@@ -265,8 +264,9 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 .feed-empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
 
 </style>
+<link rel="stylesheet" href="css/tafei-ui.css">
 </head>
-<body>
+<body class="page-home">
 <canvas id="stars"></canvas>
 <header><div class="wrap nav">
 <a class="brand" href="#home">TAFEI<span>.</span></a>
@@ -471,7 +471,9 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 <p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
 </div></div></section>
 <section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">04 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
-<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！\n输入 help 查看可用命令。\n</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
+<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！
+输入 help 查看可用命令。
+</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
 
 <section id="studio" class="reveal">
  <div class="section-head"><div><div class="kicker">05 / CREATOR STUDIO</div><h2>我的项目管理台</h2></div><p>把完成的小作品添加到展厅，整理名称、介绍和访问地址。</p></div>
@@ -1925,5 +1927,6 @@ async function t12SaveProfile(userId, nickname, bio, button) {
 </script>
 
 <script src="announcement.js"></script>
+<script src="js/tafei-ui.js" defer></script>
 </body>
 </html>
