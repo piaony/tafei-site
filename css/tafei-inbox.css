@@ -163,7 +163,10 @@ body.light .tf3-code{background:rgba(232,240,255,.9);color:#0f2a48}
 }
 @media print{.tf3-bar,.tf3-readall,.tf3-newbtn,.tf3-composer,.tf3-back{display:none!important}}
 
-@media (max-width:520px){
+@media (max-width:560px){
+  .tf3-bar{flex-wrap:wrap;row-gap:8px}
+  .tf3-tabs{flex:1 0 100%;gap:4px}
+  .tf3-tab{flex:1 1 0;min-width:0;justify-content:center;padding:0 8px;font-size:13px;gap:5px}
+  .tf3-readall{order:2;margin-left:auto}
   .tf3-msgs{max-height:min(46vh,380px)}
-  .tf3-tab{padding:0 11px;font-size:13px}
 }
