@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>挞飞 · 服务预约后台</title>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<style>
+  :root{color-scheme:dark light}
+  body{margin:0;padding:22px 16px 70px;color:var(--tf-text,#eef4ff);
+    background:radial-gradient(1100px 520px at 12% -6%,rgba(70,120,255,.16),transparent 62%),radial-gradient(900px 480px at 92% 4%,rgba(132,107,255,.14),transparent 60%) fixed,var(--tf-bg,#0b1220);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  body.light{background:#eef4ff;color:#15213b}
+  main{max-width:820px;margin:0 auto}
+  .kicker{color:var(--tf-cyan,#64e8ff);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  h1{margin:8px 0 6px;font-size:26px;letter-spacing:-.01em}
+  .lead{color:var(--tf-muted,#9aaccb);font-size:13.5px;line-height:1.7;margin:0 0 18px}
+  .card{background:var(--tf-panel,rgba(16,25,48,.78));border:1px solid var(--tf-line,rgba(130,170,255,.18));
+    border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 12px 32px rgba(4,10,25,.28)}
+  body.light .card{background:#fff;border-color:#d7e3f7;box-shadow:0 10px 24px rgba(29,58,110,.08)}
+  h2{margin:0 0 12px;font-size:16px}
+  label{display:block;margin:10px 0 5px;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  input,select{width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;border-radius:12px;font:inherit;font-size:14px;
+    border:1px solid var(--tf-line,rgba(130,170,255,.18));background:var(--tf-panel2,#111d37);color:inherit;outline:none}
+  body.light input,body.light select{background:#f6f9ff;color:#15213b;border-color:#cfdff5}
+  input:focus,select:focus{border-color:var(--tf-cyan,#64e8ff);box-shadow:0 0 0 3px rgba(100,232,255,.22)}
+  button{min-height:44px;padding:0 18px;margin-top:12px;cursor:pointer;border:0;border-radius:12px;font:inherit;font-size:14px;
+    font-weight:600;color:#fff;background:linear-gradient(110deg,#3b8fff,#846bff)}
+  button.ghost{background:transparent;color:var(--tf-muted,#9aaccb);border:1px solid var(--tf-line,rgba(130,170,255,.18));font-weight:500}
+  body.light button.ghost{color:#5d729a;border-color:#cfdff5}
+  button:disabled{opacity:.5;cursor:default}
+  .msg{margin:10px 0 0;font-size:13px;color:var(--tf-muted,#9aaccb);min-height:18px}
+  .msg.err{color:#ff8f8f}
+  .msg.ok{color:#4ee6a1}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 4px}
+  .stat{background:var(--tf-panel,rgba(16,25,48,.78));border:1px solid var(--tf-line,rgba(130,170,255,.18));
+    border-radius:16px;padding:14px 16px}
+  body.light .stat{background:#fff;border-color:#d7e3f7}
+  .stat span{display:block;font-size:12px;color:var(--tf-muted,#9aaccb);margin-bottom:6px}
+  .stat b{font-size:24px;font-weight:650;letter-spacing:-.02em}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .toolbar input{flex:1 1 200px}
+  .toolbar select{flex:0 0 auto;width:auto;min-width:132px}
+  .toolbar button{margin:0;min-height:44px}
+  .req{border:1px solid var(--tf-line,rgba(130,170,255,.18));border-radius:16px;padding:14px 16px;margin:12px 0;
+    background:rgba(100,232,255,.03)}
+  body.light .req{background:#f8fbff;border-color:#dce9fa}
+  .req-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+  .req-title{font-size:15.5px;font-weight:650;letter-spacing:-.01em;line-height:1.4}
+  .req-sub{margin-top:3px;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  .pill{font-size:11.5px;padding:3px 9px;border-radius:999px;background:rgba(100,232,255,.14);color:var(--tf-cyan,#64e8ff);white-space:nowrap}
+  .pill.new{background:rgba(255,170,80,.16);color:#ffc07a}
+  .pill.contacted{background:rgba(100,232,255,.14);color:#64e8ff}
+  .pill.quoted{background:rgba(140,120,255,.18);color:#b0a4ff}
+  .pill.done{background:rgba(80,230,160,.16);color:#4ee6a1}
+  .pill.closed{background:rgba(150,160,180,.16);color:#98a6bd}
+  .meta{margin:9px 0 0;font-size:12.5px;color:var(--tf-muted,#9aaccb);display:flex;flex-wrap:wrap;gap:6px 14px}
+  .note{margin:9px 0 0;font-size:13.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+  .req-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .req-foot button{margin:0;min-height:34px;padding:0 12px;font-size:12.5px;font-weight:500}
+  .req-foot select{flex:0 0 auto;width:auto;min-width:120px;min-height:34px;padding:0 8px;font-size:12.5px;border-radius:10px}
+  .empty{text-align:center;padding:34px 10px;color:var(--tf-muted,#9aaccb);font-size:13.5px}
+  .hidden{display:none}
+  @media (max-width:560px){
+    .stats{grid-template-columns:1fr;gap:8px}
+    .stat{display:flex;align-items:baseline;justify-content:space-between;padding:12px 14px}
+    .stat span{margin:0}
+    .stat b{font-size:19px}
+    .toolbar select{flex:1 1 100%}
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">TAFEI ADMIN · SERVICE</div>
+  <h1>服务预约</h1>
+  <p class="lead">只有站长邮箱能读这张表。访客只能提交，看不到别人的联系方式。</p>
+
+  <section class="card" id="login">
+    <h2>站长登录</h2>
+    <label for="email">邮箱</label>
+    <input id="email" type="email" inputmode="email" placeholder="3659229103@qq.com" autocomplete="username">
+    <label for="password">密码</label>
+    <input id="password" type="password" placeholder="账号密码" autocomplete="current-password">
+    <button id="loginBtn">登录</button>
+    <p class="msg" id="loginMsg"></p>
+  </section>
+
+  <section class="hidden" id="dash">
+    <div class="stats">
+      <div class="stat"><span>待处理</span><b id="nNew">0</b></div>
+      <div class="stat"><span>今天新增</span><b id="nToday">0</b></div>
+      <div class="stat"><span>总计</span><b id="nAll">0</b></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <input id="q" placeholder="搜机型 / 联系方式 / 备注">
+        <select id="st">
+          <option value="all">全部状态</option>
+          <option value="new">新提交</option>
+          <option value="contacted">已联系</option>
+          <option value="quoted">已报价</option>
+          <option value="done">已完成</option>
+          <option value="closed">已关闭</option>
+        </select>
+        <button class="ghost" id="refreshBtn">刷新</button>
+        <button class="ghost" id="logoutBtn">退出</button>
+      </div>
+      <p class="msg" id="listMsg"></p>
+      <div id="list"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const BASE = 'https://kwkewmhmxyjmzdjyutwa.supabase.co';
+const KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
+const ADMIN_EMAIL = '3659229103@qq.com';
+const TABLE = BASE + '/rest/v1/tafei_service_requests';
+const TOKEN_KEY = 'tafei-svc-admin-token';
+
+const STATUS = { new: '新提交', contacted: '已联系', quoted: '已报价', done: '已完成', closed: '已关闭' };
+
+let token = sessionStorage.getItem(TOKEN_KEY) || '';
+let rows = [];
+let keyword = '';
+let statusFilter = 'all';
+
+const $ = (id) => document.getElementById(id);
+
+function say(id, text, kind) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function emailOf(jwt) {
+  try {
+    const part = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(atob(part).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    return JSON.parse(json).email || '';
+  } catch (e) { return ''; }
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function api(path, options) {
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      apikey: KEY,
+      Authorization: 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      ...(options && options.headers ? options.headers : {})
+    }
+  });
+  if (!res.ok) {
+    let body = null;
+    try { body = await res.json(); } catch (e) { body = null; }
+    const err = new Error((body && (body.message || body.hint)) || ('请求失败 ' + res.status));
+    err.status = res.status;
+    throw err;
+  }
+  if (res.status === 204) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function login() {
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if (!email || !password) { say('loginMsg', '请填写邮箱和密码。'); return; }
+  $('loginBtn').disabled = true;
+  say('loginMsg', '正在验证……');
+  try {
+    const res = await fetch(BASE + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || data.error_description || data.message || '登录失败');
+    if (data.user && data.user.email !== ADMIN_EMAIL) {
+      throw new Error('这个账号不是站长邮箱，读不了预约表。');
+    }
+    token = data.access_token;
+    sessionStorage.setItem(TOKEN_KEY, token);
+    await boot();
+  } catch (e) {
+    token = '';
+    sessionStorage.removeItem(TOKEN_KEY);
+    $('dash').classList.add('hidden');
+    $('login').classList.remove('hidden');
+    say('loginMsg', '登录失败：' + e.message, 'err');
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+}
+
+async function boot() {
+  $('login').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  const who = emailOf(token);
+  if (who && who !== ADMIN_EMAIL) {
+    logout();
+    say('loginMsg', '这个账号不是站长邮箱，读不了预约表。', 'err');
+    return;
+  }
+  await load();
+}
+
+async function load() {
+  say('listMsg', '正在读取……');
+  try {
+    rows = await api(TABLE + '?select=*&order=created_at.desc&limit=300') || [];
+    say('listMsg', '');
+    render();
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501|permission/i.test(e.message)) {
+      token = '';
+      sessionStorage.removeItem(TOKEN_KEY);
+      $('dash').classList.add('hidden');
+      $('login').classList.remove('hidden');
+      say('loginMsg', '登录状态失效或没有读取权限，请重新用站长邮箱登录。', 'err');
+      return;
+    }
+    if (/does not exist|Could not find the table|relation/i.test(e.message)) {
+      say('listMsg', '表还没建：先到 Supabase SQL Editor 跑一次 supabase/service_requests.sql。', 'err');
+      return;
+    }
+    say('listMsg', '读取失败：' + e.message, 'err');
+  }
+}
+
+function matches(row) {
+  if (statusFilter !== 'all' && (row.status || 'new') !== statusFilter) return false;
+  if (!keyword) return true;
+  const hay = [row.device, row.os_version, row.service, row.contact, row.note, row.contact_type].join(' ').toLowerCase();
+  return hay.includes(keyword);
+}
+
+function render() {
+  const today = new Date();
+  const sameDay = (iso) => {
+    const d = new Date(iso);
+    return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+  };
+
+  $('nAll').textContent = rows.length;
+  $('nNew').textContent = rows.filter((r) => (r.status || 'new') === 'new').length;
+  $('nToday').textContent = rows.filter((r) => sameDay(r.created_at)).length;
+
+  const shown = rows.filter(matches);
+  if (!shown.length) {
+    $('list').innerHTML = '<p class="empty">' + (rows.length ? '当前筛选下没有记录。' : '还没有人提交预约。') + '</p>';
+    return;
+  }
+
+  $('list').innerHTML = shown.map((row) => {
+    const st = row.status || 'new';
+    const contact = `${row.contact_type || 'QQ'} ${row.contact || ''}`;
+    return `<article class="req" data-id="${row.id}">
+      <div class="req-top">
+        <div>
+          <div class="req-title">${esc(row.device)}</div>
+          <div class="req-sub">${esc(row.service)}</div>
+        </div>
+        <span class="pill ${esc(st)}">${esc(STATUS[st] || st)}</span>
+      </div>
+      <div class="meta">
+        <span>${esc(fmtTime(row.created_at))}</span>
+        <span>${esc(contact)}</span>
+        ${row.os_version ? `<span>系统 ${esc(row.os_version)}</span>` : ''}
+        ${row.source === 'service-page' ? '<span>来自服务页</span>' : ''}
+      </div>
+      ${row.note ? `<p class="note">${esc(row.note)}</p>` : ''}
+      <div class="req-foot">
+        <button class="ghost" type="button" data-copy="${esc(contact)}">复制联系方式</button>
+        <button class="ghost" type="button" data-copy-all="${row.id}">复制整条</button>
+        <select data-status="${row.id}" aria-label="改状态">
+          ${Object.keys(STATUS).map((k) => `<option value="${k}"${k === st ? ' selected' : ''}>${STATUS[k]}</option>`).join('')}
+        </select>
+      </div>
+    </article>`;
+  }).join('');
+
+  bind();
+}
+
+function bind() {
+  $('list').querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const val = btn.dataset.copy;
+      try {
+        await navigator.clipboard.writeText(val);
+        btn.textContent = '已复制';
+        setTimeout(() => { btn.textContent = '复制联系方式'; }, 1600);
+      } catch (e) {
+        window.prompt('手动复制', val);
+      }
+    });
+  });
+
+  $('list').querySelectorAll('[data-copy-all]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const row = rows.find((r) => String(r.id) === btn.dataset.copyAll);
+      if (!row) return;
+      const text = `【挞飞预约 #${row.id}】\n机型：${row.device}\n系统：${row.os_version || '未填'}\n服务：${row.service}\n联系：${row.contact_type || 'QQ'} ${row.contact}\n说明：${row.note || '无'}\n时间：${fmtTime(row.created_at)}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '已复制';
+        setTimeout(() => { btn.textContent = '复制整条'; }, 1600);
+      } catch (e) {
+        window.prompt('手动复制', text);
+      }
+    });
+  });
+
+  $('list').querySelectorAll('[data-status]').forEach((sel) => {
+    sel.addEventListener('change', async () => {
+      const id = sel.dataset.status;
+      const next = sel.value;
+      sel.disabled = true;
+      try {
+        await api(TABLE + '?id=eq.' + encodeURIComponent(id), {
+          method: 'PATCH',
+          headers: { Prefer: 'return=minimal' },
+          body: JSON.stringify({ status: next })
+        });
+        const row = rows.find((r) => String(r.id) === String(id));
+        if (row) row.status = next;
+        render();
+      } catch (e) {
+        say('listMsg', '改状态失败：' + e.message, 'err');
+        sel.disabled = false;
+      }
+    });
+  });
+}
+
+function logout() {
+  token = '';
+  sessionStorage.removeItem(TOKEN_KEY);
+  rows = [];
+  $('dash').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('password').value = '';
+  say('loginMsg', '已退出。');
+}
+
+$('loginBtn').addEventListener('click', login);
+$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+$('refreshBtn').addEventListener('click', load);
+$('logoutBtn').addEventListener('click', logout);
+$('q').addEventListener('input', (e) => { keyword = e.target.value.trim().toLowerCase(); render(); });
+$('st').addEventListener('change', (e) => { statusFilter = e.target.value; render(); });
+
+if (token) boot();
+
+// 本地预览：不联网也能检查排版
+window.__svcAdminPreview = (demo) => {
+  $('login').classList.add('hidden');
+  $('dash').classList.remove('hidden');
+  rows = demo;
+  render();
+};
+</script>
+</body>
+</html>
