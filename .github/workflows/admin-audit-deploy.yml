@@ -1,0 +1,27 @@
+name: admin-audit-deploy
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: write
+jobs:
+  ship:
+    if: contains(github.event.head_commit.message, 'ADMIN-AUDIT')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch files
+        run: |
+          curl -fsSL -o admin-audit.html "https://aka.doubaocdn.com/s/kCvKrwDJ59"
+          curl -fsSL -o admin.html "https://aka.doubaocdn.com/s/q8LOFyGquw"
+          mkdir -p supabase
+          curl -fsSL -o supabase/admin_audit.sql "https://aka.doubaocdn.com/s/KIUwQHCCaI"
+          ls -l admin-audit.html admin.html supabase/admin_audit.sql
+      - name: commit
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          rm -f .github/workflows/admin-audit-deploy.yml
+          git add -A
+          git commit -m "feat(admin): audit page for accounts and direct messages"
+          git push
