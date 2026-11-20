@@ -71,6 +71,23 @@
     if (extra) { for (var k in extra) h[k] = extra[k]; }
     return h;
   }
+  async function rpc(name, body) {
+    var res = await fetch(API + '/rpc/' + name, {
+      method: 'POST',
+      headers: headers({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(body || {})
+    });
+    var text = await res.text();
+    if (!res.ok) {
+      var msg = '请求失败 ' + res.status;
+      try { msg = JSON.parse(text).message || msg; } catch (e) {}
+      var err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+    return text ? JSON.parse(text) : null;
+  }
+
   async function api(path, options) {
     var opts = options || {};
     var res = await fetch(API + path, {
@@ -443,18 +460,15 @@
   }
 
   function composeView() {
-    var profiles = (state.profiles || []).filter(function (p) { return p.id !== meId(); });
     var head = '<div class="tf3-threadhead"><button type="button" class="tf3-back" data-role="back-list">← 会话列表</button>'
       + '<strong>新私信</strong></div>';
-    if (!profiles.length) {
-      return head + '<div class="tf3-empty">还没有可发信的对象。<br>等更多成员注册后就能互发私信了。</div>';
-    }
-    var opts = profiles.map(function (p) {
-      return '<option value="' + esc(p.id) + '">' + esc(p.nickname || p.id.slice(0, 6)) + '</option>';
-    }).join('');
     return head + '<div class="tf3-form">'
-      + '<label class="tf3-label" for="tf3Peer">发给谁</label>'
-      + '<select class="tf3-select" id="tf3Peer">' + opts + '</select>'
+      + '<label class="tf3-label" for="tf3PeerEmail">收件人注册邮箱（必须完整填写）</label>'
+      + '<div class="tf3-searchrow">'
+      + '<input class="tf3-input" id="tf3PeerEmail" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="例如 name@qq.com">'
+      + '<button type="button" class="tf3-lookup" data-role="lookup-peer">查找</button>'
+      + '</div>'
+      + '<div class="tf3-status" id="tf3PeerInfo">只能凭对方注册邮箱发起私信，不提供成员列表。</div>'
       + '<label class="tf3-label" for="tf3Input">内容（1000 字以内）</label>'
       + '<textarea class="tf3-input" id="tf3Input" rows="3" maxlength="1000" placeholder="想说的话…"></textarea>'
       + '<button type="button" class="tf3-send" data-role="send-new" style="align-self:flex-start">发送</button>'
@@ -494,14 +508,54 @@
     var back = $('[data-role="back-list"]', root);
     if (back) back.addEventListener('click', function () {
       state.dmView = 'list';
+      state.peer = null;
       renderDm();
+      loadThreads();
     });
     var sendBtn = $('[data-role="send-new"]', root);
     var input = $('#tf3Input', root);
-    var peerSel = $('#tf3Peer', root);
+    var emailInput = $('#tf3PeerEmail', root);
+    var lookupBtn = $('[data-role="lookup-peer"]', root);
+
+    function peerInfo(msg, isErr) {
+      var el = $('#tf3PeerInfo', root);
+      if (!el) return;
+      el.textContent = msg || '';
+      el.style.color = isErr ? '#ff9d9d' : '';
+    }
+
+    async function lookup() {
+      var val = (emailInput && emailInput.value || '').trim();
+      state.peer = null;
+      if (!meId()) { peerInfo('请先登录后再发起私信。', true); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { peerInfo('请填写完整的邮箱地址，例如 name@qq.com。', true); return; }
+      peerInfo('正在查找…');
+      if (lookupBtn) lookupBtn.disabled = true;
+      try {
+        var rows = await rpc('tafei_lookup_peer', { p_email: val });
+        if (!rows || !rows.length) { peerInfo('没有找到这个邮箱的注册成员，请确认是否为对方的注册邮箱。', true); return; }
+        if (rows[0].uid === meId()) { peerInfo('不能给自己发私信。', true); return; }
+        state.peer = rows[0].uid;
+        peerInfo('已找到：' + (rows[0].nickname || val) + '，现在可以发送了。');
+      } catch (e) {
+        peerInfo('查找失败：' + (e.message || '未知错误'), true);
+      } finally {
+        if (lookupBtn) lookupBtn.disabled = false;
+      }
+    }
+
+    if (lookupBtn) lookupBtn.addEventListener('click', lookup);
+    if (emailInput) {
+      emailInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); lookup(); }
+      });
+      emailInput.addEventListener('input', function () {
+        state.peer = null;
+        peerInfo('修改了邮箱，请重新点「查找」。');
+      });
+    }
     if (sendBtn) sendBtn.addEventListener('click', function () {
-      if (!peerSel) return;
-      state.peer = peerSel.value;
+      if (!state.peer) { status('请先查找并确认收件人邮箱。'); return; }
       sendMessage(input && input.value, state.peer, sendBtn, input);
     });
   }
@@ -514,7 +568,7 @@
   async function sendMessage(text, peer, btn, input) {
     var body = norm(text);
     if (!body) { status('内容不能为空。'); return; }
-    if (!peer) { status('请选择收件人。'); return; }
+    if (!peer) { status('请先查找并确认收件人邮箱。'); return; }
     if (state.busy) return;
     state.busy = true;
     if (btn) { btn.disabled = true; btn.textContent = '发送中…'; }
