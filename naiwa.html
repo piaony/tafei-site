@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#080d1b">
+<meta name="description" content="奶娃小游戏合集：奶蛙系列 27 个网页小游戏，浏览器打开就能玩，不用下载。">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/naiwa.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="奶娃 · 小游戏合集">
+<meta property="og:description" content="27 个奶蛙系列网页小游戏，浏览器打开就能玩。">
+<meta property="og:url" content="https://piaony.github.io/tafei-site/naiwa.html">
+<title>奶娃 · 小游戏合集 · 挞飞 TAFEI</title>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/pages.css?v=1">
+<style>
+  .nw-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .nw-tools input{flex:1 1 220px;min-height:48px;padding:0 16px;border-radius:14px;font:inherit;font-size:15px;
+    border:1px solid var(--tf-line,rgba(130,170,255,.22));background:var(--tf-panel2,#111d37);color:var(--tf-text,#eef4ff);outline:none}
+  body.light .nw-tools input{background:#fff;color:#15213b;border-color:#cfdff5}
+  .nw-tools input:focus{border-color:var(--tf-cyan,#64e8ff);box-shadow:0 0 0 3px rgba(100,232,255,.22)}
+  .nw-count{font-size:13px;color:var(--tf-muted,#9aaccb);white-space:nowrap}
+  .nw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  .nw-card{position:relative;display:grid;gap:6px;padding:16px 16px 14px;border-radius:16px;text-decoration:none;color:inherit;
+    border:1px solid var(--tf-line,rgba(130,170,255,.18));background:rgba(100,232,255,.03);transition:transform .2s,border-color .2s,background .2s}
+  .nw-card:hover{transform:translateY(-2px);border-color:rgba(100,232,255,.45);background:rgba(100,232,255,.07)}
+  body.light .nw-card{background:#f8fbff;border-color:#dce9fa}
+  body.light .nw-card:hover{background:#eef7ff;border-color:#8fc4ff}
+  .nw-no{position:absolute;top:12px;right:14px;font-size:11.5px;color:var(--tf-muted,#9aaccb);font-variant-numeric:tabular-nums}
+  .nw-name{font-size:15.5px;font-weight:650;letter-spacing:-.01em;padding-right:26px}
+  .nw-host{font-size:12px;color:var(--tf-muted,#9aaccb)}
+  .nw-go{font-size:12.5px;color:var(--tf-cyan,#64e8ff);margin-top:2px}
+  body.light .nw-go{color:#1b74d8}
+  .nw-more{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px;padding:18px 20px;border-radius:18px;
+    text-decoration:none;color:inherit;border:1px solid rgba(100,232,255,.35);background:linear-gradient(120deg,rgba(59,143,255,.14),rgba(132,107,255,.14))}
+  .nw-more strong{font-size:16px}
+  .nw-more span{font-size:13px;color:var(--tf-muted,#9aaccb)}
+  .nw-note{margin:14px 0 0;font-size:12.5px;line-height:1.7;color:var(--tf-muted,#9aaccb)}
+  .nw-empty{padding:26px 0;color:var(--tf-muted,#9aaccb);font-size:13.5px}
+  @media (max-width:820px){.nw-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:460px){.nw-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="page-inner">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#articles">文章</a>
+    <a href="device.html">机型库</a>
+    <a href="service.html">技术服务</a>
+    <a href="search.html">搜索</a>
+    <a href="naiwa.html" aria-current="page">奶娃</a>
+    <a href="shop.html">商城</a>
+  </nav>
+</div></header>
+
+<main class="pw">
+  <section class="pg-hero">
+    <p class="pg-eyebrow">NAIWA ARCADE</p>
+    <h1 class="pg-title">奶娃<br><em>点什么玩什么</em></h1>
+    <p class="pg-lead">奶蛙系列的网页小游戏，全部在浏览器里跑，不用下载、不用装模拟器。点开就玩，玩完关掉也不占内存。</p>
+    <div class="nw-tools">
+      <input id="q" type="search" placeholder="搜游戏名，例如「2048」「羽毛球」" aria-label="搜索游戏">
+      <span class="nw-count" id="count">共 27 个</span>
+    </div>
+    <p class="nw-note">下面这些链接会跳到 <b>milkyfrog.com</b>（外部站点），不在挞飞站内。外站页面自己带广告或分享按钮，注意别乱填账号密码。</p>
+  </section>
+
+  <section class="pg-sec" style="padding-top:8px">
+    <div class="nw-grid" id="grid" aria-live="polite"></div>
+    <a class="nw-more" id="more" href="https://milkyfrog.com/games" target="_blank" rel="noopener noreferrer">
+      <div><strong>更多奶蛙游戏</strong><br><span>官方合集页，新出的基本都在这里</span></div>
+      <span style="color:var(--tf-cyan,#64e8ff)">打开 ↗</span>
+    </a>
+  </section>
+</main>
+
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · 奶娃小游戏 · <a href="index.html">返回首页</a> · <a href="service.html">技术服务</a></div></footer>
+
+<script>
+(() => {
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const grid = document.getElementById('grid');
+  const count = document.getElementById('count');
+  const qEl = document.getElementById('q');
+  let games = [];
+
+  function host(url) {
+    try { return new URL(url).host; } catch (e) { return 'milkyfrog.com'; }
+  }
+
+  function render(q) {
+    const key = (q || '').trim().toLowerCase();
+    const list = key ? games.filter((g) => g.name.toLowerCase().includes(key)) : games;
+    count.textContent = key ? `筛出 ${list.length} 个` : `共 ${games.length} 个`;
+    if (!list.length) {
+      grid.innerHTML = '<p class="nw-empty">没有这个游戏。去下面的官方合集页找找。</p>';
+      return;
+    }
+    grid.innerHTML = list.map((g) => `<a class="nw-card" href="${esc(g.url)}" target="_blank" rel="noopener noreferrer">
+      <span class="nw-no">${String(g.id).padStart(2, '0')}</span>
+      <span class="nw-name">${esc(g.name)}</span>
+      <span class="nw-host">${esc(host(g.url))}</span>
+      <span class="nw-go">开始玩 ↗</span>
+    </a>`).join('');
+  }
+
+  async function init() {
+    try {
+      const res = await fetch('data/naiwa.json', { cache: 'no-store' });
+      const json = await res.json();
+      games = json.games || [];
+      if (json.more) {
+        document.getElementById('more').href = json.more.url;
+        document.querySelector('#more strong').textContent = json.more.name;
+      }
+      render('');
+    } catch (e) {
+      grid.innerHTML = '<p class="nw-empty">游戏清单加载失败，刷新试试；也可以直接去 <a href="https://milkyfrog.com/games" target="_blank" rel="noopener noreferrer" style="color:var(--tf-cyan,#64e8ff)">官方合集页</a>。</p>';
+    }
+  }
+
+  qEl.addEventListener('input', () => {
+    clearTimeout(qEl._t);
+    qEl._t = setTimeout(() => render(qEl.value), 200);
+  });
+
+  init();
+})();
+</script>
+<script src="js/tafei-ui.js" defer></script>
+</body>
+</html>

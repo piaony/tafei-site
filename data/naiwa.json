@@ -1,0 +1,146 @@
+{
+  "title": "奶娃 · 小游戏合集",
+  "note": "奶蛙系列网页小游戏，点开就在浏览器里玩，不用下载。",
+  "source": "https://milkyfrog.com/",
+  "games": [
+    {
+      "id": 1,
+      "name": "奶蛙狂笑",
+      "url": "https://milkyfrog.com/"
+    },
+    {
+      "id": 2,
+      "name": "合成大奶蛙",
+      "url": "https://milkyfrog.com/hecheng"
+    },
+    {
+      "id": 3,
+      "name": "奶蛙神跑",
+      "url": "https://milkyfrog.com/shenpao"
+    },
+    {
+      "id": 4,
+      "name": "奶蛙羽毛球",
+      "url": "https://milkyfrog.com/yumaoqiu"
+    },
+    {
+      "id": 5,
+      "name": "奶蛙jump",
+      "url": "https://milkyfrog.com/jump"
+    },
+    {
+      "id": 6,
+      "name": "奶蛙的小窝",
+      "url": "https://milkyfrog.com/xiaowo"
+    },
+    {
+      "id": 7,
+      "name": "召唤神龙",
+      "url": "https://milkyfrog.com/shenlong"
+    },
+    {
+      "id": 8,
+      "name": "奶蛙放屁",
+      "url": "https://milkyfrog.com/fangpi"
+    },
+    {
+      "id": 9,
+      "name": "奶蛙贪吃蛙",
+      "url": "https://milkyfrog.com/tanchiwa"
+    },
+    {
+      "id": 10,
+      "name": "奶蛙跳一跳",
+      "url": "https://milkyfrog.com/tiaoyitiao"
+    },
+    {
+      "id": 11,
+      "name": "奶蛙奶茶铺",
+      "url": "https://milkyfrog.com/naicha"
+    },
+    {
+      "id": 12,
+      "name": "奶蛙挠痒",
+      "url": "https://milkyfrog.com/naoyang"
+    },
+    {
+      "id": 13,
+      "name": "奶蛙2048",
+      "url": "https://milkyfrog.com/nai2048"
+    },
+    {
+      "id": 14,
+      "name": "合成小奶蛙",
+      "url": "https://milkyfrog.com/xiaonaiwa"
+    },
+    {
+      "id": 15,
+      "name": "奶蛙爱洗澡",
+      "url": "https://milkyfrog.com/xizao"
+    },
+    {
+      "id": 16,
+      "name": "奶蛙2048超级版",
+      "url": "https://milkyfrog.com/2048"
+    },
+    {
+      "id": 17,
+      "name": "奶蛙五子棋",
+      "url": "https://milkyfrog.com/wuziqi"
+    },
+    {
+      "id": 18,
+      "name": "奶了个蛙",
+      "url": "https://milkyfrog.com/nailegewa"
+    },
+    {
+      "id": 19,
+      "name": "奶蛙一跳",
+      "url": "https://milkyfrog.com/tiao"
+    },
+    {
+      "id": 20,
+      "name": "奶斗罗",
+      "url": "https://milkyfrog.com/douluo"
+    },
+    {
+      "id": 21,
+      "name": "奶蛙颜色大挑战",
+      "url": "https://milkyfrog.com/yanse"
+    },
+    {
+      "id": 22,
+      "name": "旅行奶蛙",
+      "url": "https://milkyfrog.com/lvxing"
+    },
+    {
+      "id": 23,
+      "name": "奶蛙快跑",
+      "url": "https://milkyfrog.com/kuaipao"
+    },
+    {
+      "id": 24,
+      "name": "奶蛙工厂",
+      "url": "https://milkyfrog.com/gongchang"
+    },
+    {
+      "id": 25,
+      "name": "奶蛙街舞",
+      "url": "https://milkyfrog.com/jiewu"
+    },
+    {
+      "id": 26,
+      "name": "奶蛙鼓鼓碰",
+      "url": "https://milkyfrog.com/gugupeng"
+    },
+    {
+      "id": 27,
+      "name": "奶蛙消消乐",
+      "url": "https://milkyfrog.com/xiaoxiaole"
+    }
+  ],
+  "more": {
+    "name": "更多奶蛙游戏",
+    "url": "https://milkyfrog.com/games"
+  }
+}
