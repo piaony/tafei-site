@@ -20,7 +20,7 @@
     { type: 'page', href: 'index.html', title: '首页 · 让互联网温暖每一个人', body: 'home 首页 挞飞 社区 工具 作品 实验室 留言 个人中心' },
     { type: 'page', href: 'about.html', title: '关于 · 我是飘飘', body: 'about 关于 故事 梦想 高中生 初心' },
     { type: 'page', href: 'shop.html', title: '挞飞商城', body: 'shop 商城 商品 购物车 联系卖家' },
-    { type: 'page', href: 'admin.html', title: '管理后台', body: 'admin 管理 后台 登录 公告 商品' }
+    { type: 'page', href: 'admin-center.html', title: '站长后台', body: 'admin 管理 后台 登录 预约 账号 私信 公告 商品 举报' }
   ];
 
   /* ---------------- 工具 ---------------- */
