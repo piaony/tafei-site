@@ -1,0 +1,49 @@
+name: deploy-service-admin
+run-name: deploy-service-admin-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-service-admin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-service-admin]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download from CDN
+        run: |
+          set -e
+          curl -fsSL --retry 3 --retry-delay 2 -o service-admin.html "https://aka.doubaocdn.com/s/3aKRODQ4QV"
+          curl -fsSL --retry 3 --retry-delay 2 -o service.html "https://aka.doubaocdn.com/s/VVmUcoVtta"
+          curl -fsSL --retry 3 --retry-delay 2 -o admin-audit.html "https://aka.doubaocdn.com/s/u6Kkk20fga"
+          ls -l service-admin.html service.html admin-audit.html
+
+      - name: Verify bytes
+        run: |
+          set -e
+          cat > /tmp/SHA256SUMS <<'EOF'
+          efed11e17454d6e4e05742df7b373581f57c77326189bb7fd934c3a9b91e8a10  service-admin.html
+          63928cfc82a7e92534c2a2bff7f04af0bd1d6fa62f2365ba74ceea4596728d8d  service.html
+          0a08b63e00b8215ebbf66c00b904ead872f111c1d40afaad6a1225285208ef70  admin-audit.html
+          EOF
+          sha256sum -c /tmp/SHA256SUMS
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "tafei-bot"
+          git config user.email "3659229103@qq.com"
+          git rm -q .github/workflows/deploy-service-admin.yml
+          git add service-admin.html service.html admin-audit.html
+          git commit -m "feat(admin): service booking console [deploy-service-admin]"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
