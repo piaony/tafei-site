@@ -212,7 +212,7 @@ function resize(){
       if(st.y > canvas.height){ st.y = 0; st.x = Math.random() * canvas.width; }
       ctx.beginPath();
       ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(150,200,255,' + st.a + ')' + ';
+      ctx.fillStyle = 'rgba(150,200,255,' + st.a + ')';
       ctx.fill();
     });
     requestAnimationFrame(draw);
@@ -222,7 +222,6 @@ function resize(){
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
     requestAnimationFrame(draw);
   }
-}
 </script>
 
 <script src="js/tafei-ui.js" defer></script>
