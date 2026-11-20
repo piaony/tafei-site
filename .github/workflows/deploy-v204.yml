@@ -1,0 +1,57 @@
+name: deploy-v204
+run-name: deploy-v204-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-v204.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-v204]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download from CDN
+        run: |
+          set -e
+          curl -fsSL --retry 3 --retry-delay 2 -o index.html "https://aka.doubaocdn.com/s/sxTIGwEh6z"
+          curl -fsSL --retry 3 --retry-delay 2 -o search.html "https://aka.doubaocdn.com/s/lutxOLukCq"
+          curl -fsSL --retry 3 --retry-delay 2 -o device.html "https://aka.doubaocdn.com/s/e4QBq3h8f3"
+          curl -fsSL --retry 3 --retry-delay 2 -o js/articles.js "https://aka.doubaocdn.com/s/DZ192seVPS"
+          curl -fsSL --retry 3 --retry-delay 2 -o css/articles.css "https://aka.doubaocdn.com/s/Har07mktud"
+          curl -fsSL --retry 3 --retry-delay 2 -o data/devices.json "https://aka.doubaocdn.com/s/WutXyBstTG"
+          curl -fsSL --retry 3 --retry-delay 2 -o robots.txt "https://aka.doubaocdn.com/s/Lz21ZdQbWZ"
+          ls -l index.html search.html device.html js/articles.js css/articles.css data/devices.json robots.txt
+
+      - name: Verify bytes
+        run: |
+          set -e
+          cat > /tmp/SHA256SUMS <<'EOF'
+          ef28d0e213f3cf990429455b6dfa55ee70355cccf2f9668395504bb03d6a7330  index.html
+          aa718835d4dc3683ba4087fd775bfa98823723d5ec9f72f6d027fdd74794807d  search.html
+          e794a6b7abb98fabb0aea32115ff4da5b15590368768ec7373eeb15ed76e3378  device.html
+          1bfc2ec11e67ce3d5fbe64fb530ed4a037d53dcc7db650bfab0ad74902c4c4d6  js/articles.js
+          3b76b518050dba407a9a27ac85f05ab2dd7006b88c0be2c97ff9081a3c4d5964  css/articles.css
+          a3da7dfea39bd57c41efbfcf4286fb41ec8a10610d2118618970885434847eb8  data/devices.json
+          8f59987cbb64091e58a76ddef493c56f9fe709954e79be6ae7ba4da5786f7ab9  robots.txt
+          EOF
+          sha256sum -c /tmp/SHA256SUMS
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "tafei-bot"
+          git config user.email "3659229103@qq.com"
+          git rm -q .github/workflows/deploy-v204.yml
+          git add index.html search.html device.html js/articles.js css/articles.css data/devices.json robots.txt
+          git commit -m "feat: site search + device-community linking (v20.4) [deploy-v204]"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
