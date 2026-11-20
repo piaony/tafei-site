@@ -1,0 +1,36 @@
+name: tafei-version-sync
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: write
+jobs:
+  sync:
+    if: contains(github.event.head_commit.message, 'SYNC-VERSION-20')
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: patch index
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          p = pathlib.Path("index.html")
+          s = p.read_text(encoding="utf-8")
+          s = s.replace("PUBLIC COMMUNITY \u00b7 7.0", "PUBLIC COMMUNITY \u00b7 20.0")
+          if 'name="color-scheme"' not in s:
+              vp = '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+              if vp in s:
+                  s = s.replace(vp, vp + '<meta name="color-scheme" content="dark light">', 1)
+          p.write_text(s, encoding="utf-8")
+          PY
+      - name: commit and clean
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "TAFEI 20.0: bump version badge, add color-scheme"
+          rm -f .github/workflows/tafei-version-sync.yml
+          git add -A
+          git commit -m "chore: remove version sync workflow" || true
+          git push
