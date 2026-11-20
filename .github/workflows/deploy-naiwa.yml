@@ -1,0 +1,53 @@
+name: deploy-naiwa
+run-name: deploy-naiwa-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-naiwa.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-naiwa]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download from CDN
+        run: |
+          set -e
+          curl -fsSL --retry 3 --retry-delay 2 -o naiwa.html "https://aka.doubaocdn.com/s/uH8onjAbqV"
+          curl -fsSL --retry 3 --retry-delay 2 -o data/naiwa.json "https://aka.doubaocdn.com/s/RL2QLffWs8"
+          curl -fsSL --retry 3 --retry-delay 2 -o index.html "https://aka.doubaocdn.com/s/Zxee2dEZBs"
+          curl -fsSL --retry 3 --retry-delay 2 -o js/home-views.js "https://aka.doubaocdn.com/s/AwUM9m2hV9"
+          curl -fsSL --retry 3 --retry-delay 2 -o sitemap.xml "https://aka.doubaocdn.com/s/SzscTdDeqZ"
+          ls -l naiwa.html data/naiwa.json index.html js/home-views.js sitemap.xml
+
+      - name: Verify bytes
+        run: |
+          set -e
+          cat > /tmp/SHA256SUMS <<'EOF'
+          07d75f3d58a0714c0622e4e267a1b9d2dd80a24fe717d92ce0795513a2dffef3  naiwa.html
+          8ecd152bac35030feb5f02bbdb30df1a99153395f641c636dde275bc0a3248de  data/naiwa.json
+          d8ff19b76ceeb3d734160e97cd2bca5909c7b0a63d5cc35cd247a3d610d4339a  index.html
+          fde405323b6c146c3ea55fa00bd7c6590483c0fe1de77891c7969d25812b7fc4  js/home-views.js
+          451406a6f17a5640b350cac49ad710e725d59dcc8c0763569d38fa1105a42e68  sitemap.xml
+          EOF
+          sha256sum -c /tmp/SHA256SUMS
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "tafei-bot"
+          git config user.email "3659229103@qq.com"
+          git rm -q .github/workflows/deploy-naiwa.yml
+          git add naiwa.html data/naiwa.json index.html js/home-views.js sitemap.xml
+          git commit -m "feat(naiwa): 27 mini games page (v20.5) [deploy-naiwa]"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
