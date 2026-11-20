@@ -492,6 +492,12 @@ $id('tafeiGuestForm').addEventListener('submit', async event => {
     return;
   }
 
+  const consent = $id('tafeiSignupConsent');
+  if (!consent || !consent.checked) {
+    authMessage('请先勾选同意《社区规范与信息中心使用公告》。');
+    return;
+  }
+
   const button = event.submitter;
   if (button) button.disabled = true;
   authMessage('正在创建挞飞账户……');
@@ -500,7 +506,7 @@ $id('tafeiGuestForm').addEventListener('submit', async event => {
     const result = await authRequest('/signup', {
       email,
       password,
-      data: { username, nickname }
+      data: { username, nickname, agreed_at: new Date().toISOString() }
     });
 
     if (result.access_token && result.user) {

@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#080d1b">
 <meta name="description" content="挞飞，一个免费、友善、开放的互联网社区。分享知识、交流经验、互相帮助，让互联网温暖每一个人。">
 <title>挞飞 · 个人数字空间</title>
-<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/home.css?v=2">
 <link rel="stylesheet" href="css/tafei-ui.css">
 <link rel="stylesheet" href="css/tafei-features.css">
 <link rel="stylesheet" href="css/tafei-inbox.css?v=3">
@@ -342,6 +342,11 @@
      placeholder="再次输入登录密码">
    </label>
 
+   <label class="article-field consent">
+    <input type="checkbox" id="tafeiSignupConsent">
+    <span>我已阅读并同意<a href="#info" data-view="info">《社区规范与信息中心使用公告》</a>，承诺遵守站内规则。</span>
+   </label>
+
    <button class="btn primary" type="submit">注册挞飞账户 ↗</button>
   </form>
 
@@ -413,7 +418,7 @@
 </main>
 <footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界</footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
-<script src="js/home-core.js"></script>
+<script src="js/home-core.js?v=2"></script>
 
 <nav class="mobile-bottom-nav" aria-label="手机底部导航">
  <a href="#home" data-view="home" class="active"><span>⌂</span><span>首页</span></a>

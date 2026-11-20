@@ -65,6 +65,11 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  border-color:var(--cyan);
 }
 .article-field textarea{min-height:145px;resize:vertical}
+.article-field.consent{display:flex;gap:10px;align-items:flex-start;margin:14px 0}
+.article-field.consent input{width:auto;margin-top:3px;flex:0 0 auto}
+.article-field.consent span{margin-bottom:0;line-height:1.7}
+.article-field.consent a{color:var(--cyan);text-decoration:none}
+.article-field.consent a:hover{text-decoration:underline}
 .article-submit{width:100%;margin-top:8px}
 .article-status{min-height:24px;color:var(--muted);font-size:13px}
 .article-list{display:grid;gap:12px}
