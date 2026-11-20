@@ -1,5 +1,5 @@
 name: deploy-service-pages
-run-name: "[auto-deploy v20.1] service + device pages"
+run-name: "[auto-deploy v20.1b] service + device pages"
 on:
   push:
     branches: [main]
