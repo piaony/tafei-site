@@ -104,6 +104,9 @@
 
   /* ---------- 4. 主题：未手动选择时跟随系统 ---------- */
   function initAutoTheme() {
+    // 只有带主题切换按钮的页面才跟随系统，避免独立页面出现半浅色状态
+    if (!document.getElementById("themeBtn")) return;
+
     var mq = window.matchMedia("(prefers-color-scheme: light)");
 
     function apply() {
