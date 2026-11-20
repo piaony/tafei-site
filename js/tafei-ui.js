@@ -7,6 +7,7 @@
   "use strict";
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var THEME_KEY = "tafei-theme";
 
   /* ---------- 1. 顶部滚动进度条 ---------- */
   function initProgress() {
@@ -72,7 +73,7 @@
     btn.className = "tf-backtop";
     btn.type = "button";
     btn.setAttribute("aria-label", "回到顶部");
-    btn.innerHTML = "\u2191";
+    btn.innerHTML = "&#8593;";
     document.body.appendChild(btn);
 
     var raf = null;
@@ -101,7 +102,46 @@
     render();
   }
 
-  /* ---------- 4. 主题切换时同步浏览器地址栏颜色 ---------- */
+  /* ---------- 4. 主题：未手动选择时跟随系统 ---------- */
+  function initAutoTheme() {
+    var mq = window.matchMedia("(prefers-color-scheme: light)");
+
+    function apply() {
+      if (localStorage.getItem(THEME_KEY)) return;
+      document.body.classList.toggle("light", mq.matches);
+    }
+
+    apply();
+
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", apply);
+    } else if (typeof mq.addListener === "function") {
+      mq.addListener(apply);
+    }
+  }
+
+  /* ---------- 5. 主题图标语义同步 ---------- */
+  function initThemeIcon() {
+    var btn = document.getElementById("themeBtn");
+    if (!btn) return;
+
+    function sync() {
+      var isLight = document.body.classList.contains("light");
+      btn.textContent = isLight ? "\u263E" : "\u2600";
+      btn.setAttribute("aria-label", isLight ? "切换到深色主题" : "切换到浅色主题");
+      btn.setAttribute("aria-pressed", isLight ? "true" : "false");
+      btn.setAttribute("title", isLight ? "当前浅色 · 点击切换深色" : "当前深色 · 点击切换浅色");
+    }
+
+    sync();
+
+    new MutationObserver(sync).observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+  }
+
+  /* ---------- 6. 浏览器地址栏颜色同步 ---------- */
   function initThemeColorSync() {
     var meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;
@@ -119,7 +159,7 @@
     });
   }
 
-  /* ---------- 5. 点击锚点后关闭移动端菜单 ---------- */
+  /* ---------- 7. 点击锚点后关闭移动端菜单 ---------- */
   function initMenuAutoClose() {
     var nav = document.querySelector(".navlinks");
     if (!nav) return;
@@ -136,6 +176,8 @@
     initProgress();
     initRevealStagger();
     initBackTop();
+    initAutoTheme();
+    initThemeIcon();
     initThemeColorSync();
     initMenuAutoClose();
   }
