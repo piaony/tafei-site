@@ -262,6 +262,10 @@
         body: JSON.stringify({ post_id: Number(postId), user_id: s.user.id, content })
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
+      const target = posts.find((post) => String(post.id) === String(postId));
+      if (target && String(target.user_id) !== String(s.user.id)) {
+        window.TAFEI_TASKS?.event('comment', 'help-comment-' + postId);
+      }
       await load();
       openAnswers.add(String(postId));
       render();
@@ -310,6 +314,7 @@
 
       form.reset();
       say('已发布，有回答后会在列表里显示。', 'ok');
+      window.TAFEI_TASKS?.event('post', 'help-post-' + Date.now());
       document.dispatchEvent(new CustomEvent('tafei:help-posted'));
       await load();
     } catch (e) {

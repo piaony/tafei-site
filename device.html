@@ -74,6 +74,7 @@
 
 <footer class="pg-foot"><div class="pw">挞飞 TAFEI · 机型库 · <a href="index.html">返回首页</a><div class="pg-risk">官方服务只由站长本人对接。请勿私下转账或把设备交给站外认识的人；站外交易产生的纠纷与损失，本站不承担责任。</div></div></footer>
 
+<script src="js/task-center.js?v=1"></script>
 <script>
 (() => {
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -90,7 +91,7 @@
   const cmpBar = document.getElementById('cmpBar');
   const cmpInfo = document.getElementById('cmpInfo');
 
-  const state = { devices: [], selected: [], q: '', filter: 'all' };
+  const state = { devices: [], selected: [], q: '', filter: 'all', currentId: '' };
 
   const ROWS = [
     ['screen', '屏幕'], ['soc', '芯片'], ['battery', '电池'], ['charge', '充电'],
@@ -205,6 +206,7 @@
     if (listFoot) listFoot.hidden = false;
     detail.hidden = true;
     compare.hidden = true;
+    state.currentId = '';
     document.title = '机型库 · 挞飞 TAFEI';
   }
 
@@ -303,6 +305,7 @@
     listView.hidden = true;
     if (listFoot) listFoot.hidden = true;
     detail.hidden = false;
+    state.currentId = dev.id;
 
     const others = all.filter((d) => d.id !== dev.id && !d.catalog).slice(0, 3);
     const othersHtml = others.length
@@ -351,6 +354,11 @@
     detail.querySelectorAll('[data-cmp]').forEach((btn) => {
       btn.addEventListener('click', (e) => { e.preventDefault(); toggleCompare(btn.dataset.cmp); });
     });
+    setTimeout(() => {
+      if (String(state.currentId || '') === String(dev.id)) {
+        window.TAFEI_TASKS?.event('device_view', 'device-' + dev.id);
+      }
+    }, 3000);
     loadDeviceHelp(dev);
   }
 

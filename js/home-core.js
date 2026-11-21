@@ -1567,6 +1567,10 @@ async function t12AddComment(postId, content, button) {
         content: cleanContent
       })
     });
+    const targetPost = t12Posts.find((post) => String(post.id) === String(postId));
+    if (targetPost && String(targetPost.user_id) !== String(userId)) {
+      window.TAFEI_TASKS?.event('comment', 'feed-comment-' + postId);
+    }
     await t12LoadData();
   } catch (error) {
     console.error(error);

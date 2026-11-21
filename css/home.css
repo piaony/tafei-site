@@ -395,3 +395,75 @@ body.light .sv-risk{color:#8a5a12}
 
 /* 商城视图里隐藏全局搜索浮钮，避免遮挡商品卡 */
 .shop-view-open .tf2-fab{display:none}
+
+/* TAFEI 21.7：签到与每日任务 */
+.community-me-actions{flex:0 0 auto;display:flex;align-items:center;gap:8px;margin-left:auto}
+.community-task-btn{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:1px solid rgba(255,205,100,.3);border-radius:12px;background:rgba(255,205,100,.07);color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+.community-task-btn .tf-ico{width:19px;height:19px}
+.community-task-btn:hover{background:rgba(255,205,100,.14)}
+.community-task-btn[aria-expanded="true"]{background:rgba(255,205,100,.16);border-color:rgba(255,205,100,.5)}
+.task-badge{position:absolute;top:-6px;right:-5px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#ff9a5c;color:#28120a;font-size:10px;font-weight:800;line-height:17px}
+.task-badge[hidden]{display:none}
+.task-center{margin:14px 0 0;scroll-margin-top:86px;padding:18px;border:1px solid rgba(255,205,100,.26);border-radius:20px;background:linear-gradient(135deg,rgba(255,190,80,.08),rgba(100,232,255,.05) 55%,rgba(132,107,255,.08));box-shadow:0 16px 44px rgba(0,0,0,.18)}
+.task-center[hidden]{display:none}
+.task-center-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.task-kicker{font-size:11px;letter-spacing:.16em;color:#ffcf7a;margin:0 0 3px}
+.task-center-head h3{margin:0;font-size:21px;line-height:1.25}
+.task-center-head p:not(.task-kicker){margin:6px 0 0;color:var(--muted);font-size:12.8px;line-height:1.7;max-width:620px}
+.task-center-close{flex:0 0 auto;min-height:32px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+.task-checkin{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:14px;padding:16px;border:1px solid rgba(255,205,100,.26);border-radius:16px;background:linear-gradient(120deg,rgba(255,190,80,.11),rgba(59,143,255,.08))}
+.task-checkin-copy{min-width:0}
+.task-checkin-copy > span{font-size:12px;color:var(--muted);letter-spacing:.06em}
+.task-streak{display:flex;align-items:baseline;gap:5px;margin:2px 0 2px}
+.task-streak b{font-size:32px;line-height:1.05;color:#ffcf7a;letter-spacing:-.02em}
+.task-streak i{font-style:normal;font-size:13px;color:var(--muted)}
+.task-checkin-copy p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6}
+.task-checkin-side{display:flex;flex-direction:column;gap:6px;min-width:132px}
+.task-checkin-side .btn{margin:0;justify-content:center}
+.task-checkin-side .btn[hidden]{display:none}
+.task-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:10px}
+.task-day{display:grid;gap:2px;justify-items:center;padding:8px 4px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.025);font-size:10.5px;color:var(--muted)}
+.task-day b{font-size:12px;color:var(--text);font-weight:600}
+.task-day.on{border-color:rgba(255,205,100,.5);background:rgba(255,205,100,.13);color:#ffcf7a}
+.task-day.on b{color:#ffcf7a}
+.task-day.today{box-shadow:inset 0 0 0 1px rgba(100,232,255,.45)}
+.task-day.today span{color:var(--cyan)}
+.task-balance-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:9px 12px;border:1px dashed var(--line);border-radius:10px;font-size:12.5px;color:var(--muted)}
+.task-balance-line b{font-size:19px;color:var(--cyan)}
+.task-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.task-card{display:flex;flex-direction:column;gap:8px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025)}
+.task-card.ready{border-color:rgba(255,205,100,.36);background:rgba(255,205,100,.06)}
+.task-card.claimed{opacity:.72}
+.task-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.task-card-title{min-width:0}
+.task-card-title b{display:block;font-size:13.5px;line-height:1.35}
+.task-card-title p{margin:2px 0 0;color:var(--muted);font-size:11.5px;line-height:1.55}
+.task-reward{flex:0 0 auto;padding:3px 7px;border-radius:999px;background:rgba(255,205,100,.14);color:#ffcf7a;font-size:11px;font-weight:700}
+.task-progress{height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.task-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffb75d,#ffd998);transition:width .25s ease}
+.task-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
+.task-claim{min-height:30px;padding:0 10px;border:1px solid rgba(255,205,100,.42);border-radius:8px;background:rgba(255,205,100,.12);color:#ffdc9a;font:inherit;font-size:11.5px;cursor:pointer}
+.task-claim:disabled{border-color:var(--line);background:transparent;color:var(--muted);cursor:default}
+.task-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;box-sizing:border-box}
+.task-empty{grid-column:1/-1;margin:0;padding:22px 10px;text-align:center;color:var(--muted);font-size:13px}
+.task-msg{min-height:1.2em;margin:8px 0 0;font-size:12.5px;color:var(--cyan)}
+.task-msg.err{color:#ff9d9d}
+.task-msg.ok{color:#4ee6a1}
+body.light .task-center{background:linear-gradient(135deg,#fff7e9,#f2fbff 55%,#f6f3ff);border-color:#f0d7a5;box-shadow:0 14px 34px rgba(82,93,120,.1)}
+body.light .task-checkin{background:linear-gradient(120deg,#fff8eb,#edf7ff);border-color:#f0d7a5}
+body.light .task-day,body.light .task-card{background:#fff}
+body.light .task-day.on{background:#fff4dd}
+@media (max-width:760px){
+ .community-me-actions{order:4;width:100%;margin-left:0;justify-content:flex-end}
+ .community-task-btn{min-height:36px;padding:0 10px}
+ .task-center{padding:15px}
+ .task-center-head h3{font-size:19px}
+ .task-checkin{padding:14px}
+ .task-streak b{font-size:29px}
+ .task-checkin-side{flex:1 1 100%;flex-direction:row}
+ .task-checkin-side .btn{flex:1}
+ .task-week{gap:4px}
+ .task-day{padding:7px 2px;font-size:10px}
+ .task-day b{font-size:11px}
+ .task-list{grid-template-columns:1fr}
+}

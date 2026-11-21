@@ -117,6 +117,11 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
 .admin-sec-head h2{margin:0}
 .admin-page .card:hover,.admin-page .req:hover{transform:none;border-color:var(--tf-line)}
 .admin-page .msg{min-height:16px}
+.tk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--tf-line);font-size:12.5px}
+.tk-row:last-child{border-bottom:0}
+.tk-row span{color:var(--tf-muted);min-width:70px}
+.tk-row b{font-size:13.5px}
+.tk-row i{font-style:normal;color:var(--tf-muted);text-align:right;margin-left:auto}
 @media (max-width:760px){
   body.admin-page{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
   .admin-main{padding-bottom:10px}
@@ -125,7 +130,7 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
   .admin-hero-badge{width:100%;display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px;text-align:left}
   .admin-hero-badge span{margin:0}
   .admin-hero-badge b{font-size:22px}
-  .admin-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;position:static;margin-top:2px;overflow:visible}
+  .admin-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;position:static;margin-top:2px;overflow:visible}
   .admin-tabs button{min-width:0;padding:0 4px;font-size:12px}
   .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .admin-stats .stat{display:block;padding:12px 13px}
@@ -165,7 +170,7 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
   </section>
 
   <section class="card admin-login" id="login">
-    <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.6</span></div>
+    <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.7</span></div>
     <p class="hint">已用站长账号登录站点的，打开本页会自动进入；没有站点登录态时，用站长邮箱登录一次即可。</p>
     <label for="email">邮箱</label>
     <input id="email" type="email" inputmode="email" placeholder="3659229103@qq.com" autocomplete="username">
@@ -183,6 +188,7 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
     <nav class="tabs admin-tabs" id="tabs" aria-label="后台模块">
       <button type="button" data-tab="overview" class="on">概览</button>
       <button type="button" data-tab="booking">预约<b class="tab-count" id="tabBooking"></b></button>
+      <button type="button" data-tab="tasks">任务<b class="tab-count" id="tabTasks"></b></button>
       <button type="button" data-tab="accounts">账号</button>
       <button type="button" data-tab="messages">私信<b class="tab-count" id="tabMessages"></b></button>
       <button type="button" data-tab="products">商城</button>
@@ -228,6 +234,28 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
         </div>
         <p class="msg" id="bkMsg"></p>
         <div id="bkList"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-tasks">
+      <div class="card">
+        <div class="admin-sec-head"><div><h2>签到与任务</h2><p class="hint" style="margin:4px 0 0">只看统计，不直接改用户额度；发放与领取都走站内函数。</p></div><button class="ghost mini" id="tkRefresh" type="button">刷新</button></div>
+        <div class="stats admin-stats">
+          <div class="stat"><span>今日签到</span><b id="tkCheckins">—</b></div>
+          <div class="stat"><span>近 7 日签到用户</span><b id="tkUsers">—</b></div>
+          <div class="stat"><span>今日领取任务</span><b id="tkClaims">—</b></div>
+          <div class="stat"><span>今日发放额度</span><b id="tkCredits">—</b></div>
+          <div class="stat"><span>当前额度总余额</span><b id="tkBalance">—</b></div>
+        </div>
+        <p class="msg" id="tkMsg"></p>
+      </div>
+      <div class="card">
+        <h2>最近 14 天</h2>
+        <div id="tkDays" class="empty">正在读取……</div>
+      </div>
+      <div class="card">
+        <h2>今日任务领取分布</h2>
+        <div id="tkTaskList" class="empty">正在读取……</div>
       </div>
     </div>
 
@@ -456,7 +484,7 @@ function boot() {
   if (who && who !== ADMIN_EMAIL) { authFail('这个账号不是站长邮箱，进不了后台。'); return; }
   $('adminWho').textContent = '已登录 · ' + (who || ADMIN_EMAIL);
   const initial = (location.hash || '').replace('#', '');
-  switchTab(['overview', 'booking', 'accounts', 'messages', 'products', 'notices', 'reports'].includes(initial) ? initial : 'overview');
+  switchTab(['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'notices', 'reports'].includes(initial) ? initial : 'overview');
 }
 
 function logout() {
@@ -877,9 +905,43 @@ async function handleReport(id) {
   } catch (e) { say('rMsg', '保存失败：' + e.message, 'err'); }
 }
 
+/* ---------- 签到与任务 ---------- */
+async function loadTaskStats(force) {
+  if (loaded.tasks && !force) return;
+  say('tkMsg', '正在读取……');
+  try {
+    const data = await rpc('tafei_admin_task_stats', { p_days: 14 });
+    loaded.tasks = true;
+    say('tkMsg', '统计截至 ' + when(new Date().toISOString()) + '。', 'ok');
+    $('tkCheckins').textContent = data.checkins_today ?? 0;
+    $('tkUsers').textContent = data.checkin_users_7d ?? 0;
+    $('tkClaims').textContent = data.claims_today ?? 0;
+    $('tkCredits').textContent = data.credits_today ?? 0;
+    $('tkBalance').textContent = data.total_balance ?? 0;
+    setTabCount('tabTasks', Number(data.claims_today || 0));
+    const days = Array.isArray(data.days) ? data.days : [];
+    $('tkDays').className = days.length ? '' : 'empty';
+    $('tkDays').innerHTML = days.length
+      ? days.map((row) => '<div class="tk-row"><span>' + esc(String(row.date || '').slice(5).replace('-', '/')) + '</span><b>签到 ' + Number(row.checkins || 0) + '</b><i>领取 ' + Number(row.claims || 0) + ' · 发放 ' + Number(row.credits || 0) + '</i></div>').join('')
+      : '还没有任务数据。';
+    const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+    $('tkTaskList').className = tasks.length ? '' : 'empty';
+    $('tkTaskList').innerHTML = tasks.length
+      ? tasks.map((row) => '<div class="tk-row"><span>' + esc(row.title || row.key || '') + '</span><b>' + Number(row.claims || 0) + ' 人领取</b><i>每人 +' + Number(row.reward || 0) + '</i></div>').join('')
+      : '任务配置为空。';
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501/.test(e.message)) { authFail('没有读取任务统计的权限。'); return; }
+    if (e.status === 404 || /PGRST202|Could not find|function/i.test(e.message)) {
+      say('tkMsg', '任务库还没启用。请先在 Supabase 执行 supabase/daily_tasks.sql。', 'err');
+    } else {
+      say('tkMsg', '读取失败：' + e.message, 'err');
+    }
+  }
+}
+
 /* ---------- tab 切换 ---------- */
 function switchTab(name) {
-  const tabs = ['overview', 'booking', 'accounts', 'messages', 'products', 'notices', 'reports'];
+  const tabs = ['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'notices', 'reports'];
   if (!tabs.includes(name)) name = 'overview';
   currentTab = name;
   $('tabs').querySelectorAll('[data-tab]').forEach((b) => {
@@ -896,6 +958,7 @@ function switchTab(name) {
   } catch (e) {}
   if (name === 'overview') loadOverview();
   if (name === 'booking') loadBookings();
+  if (name === 'tasks') loadTaskStats();
   if (name === 'accounts') loadAccounts();
   if (name === 'messages') loadMessages();
   if (name === 'products') loadProducts();
@@ -932,6 +995,7 @@ $('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(
 $('logoutBtn').addEventListener('click', logout);
 $('refreshOverview').addEventListener('click', loadOverview);
 $('refreshAll').addEventListener('click', refreshAll);
+$('tkRefresh').addEventListener('click', () => loadTaskStats(true));
 $('bkQ').addEventListener('input', renderBookings);
 $('bkSt').addEventListener('change', renderBookings);
 $('bkRefresh').addEventListener('click', () => loadBookings(true));
