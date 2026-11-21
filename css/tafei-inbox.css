@@ -159,6 +159,19 @@ body.light .tf3-code{background:rgba(232,240,255,.9);color:#0f2a48}
   color:inherit;font:inherit;font-size:11.5px}
 .tf3-copy:hover{background:rgba(255,255,255,.16)}
 
+/* ---------------- 官方会话与站内保障 ---------------- */
+.tf3-safety{display:flex;gap:8px;align-items:flex-start;margin:0 0 10px;padding:10px 12px;
+  border:1px solid rgba(100,232,255,.28);border-radius:12px;background:rgba(100,232,255,.05);
+  color:var(--tf-muted,#9aaccb);font-size:12px;line-height:1.7}
+.tf3-safety b{flex:0 0 auto;color:var(--tf-cyan,#64e8ff);font-weight:600}
+.tf3-thread.is-official{border-color:rgba(100,232,255,.34);background:rgba(100,232,255,.055)}
+.tf3-thread.is-official .tf3-avatar{background:linear-gradient(135deg,#3b8fff,#846bff);color:#fff}
+.tf3-official-tag{font-size:10px;font-weight:500;color:var(--tf-cyan,#64e8ff);
+  border:1px solid rgba(100,232,255,.35);border-radius:20px;padding:0 6px;line-height:1.6}
+.tf3-msg.tf3-official-msg{max-width:92%;align-self:flex-start;border-color:rgba(100,232,255,.34);
+  background:rgba(100,232,255,.07);color:var(--tf-text,#eef4ff)}
+.tf3-msg.tf3-official-msg time{color:var(--tf-cyan,#64e8ff);opacity:.85}
+
 /* ---------------- 导航未读红点 ---------------- */
 .tf3-navdot{display:inline-block;width:6px;height:6px;margin-left:4px;vertical-align:super;
   border-radius:50%;background:var(--tf-cyan,#64e8ff);box-shadow:0 0 8px rgba(100,232,255,.7)}

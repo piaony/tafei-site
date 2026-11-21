@@ -32,6 +32,15 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 
+  const privateContactKind = (text) => {
+    const raw = String(text || '');
+    const digits = raw.replace(/[^0-9]/g, '');
+    if (/1[3-9][0-9]{9}/.test(digits)) return '手机号';
+    if (/(qq|扣扣|微信|vx|v信|加我|私聊)\s*[：:号]?\s*[a-zA-Z0-9_-]{5,}/i.test(raw)) return 'QQ/微信';
+    if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(raw)) return '邮箱';
+    return '';
+  };
+
   const session = () => {
     try { return JSON.parse(localStorage.getItem('tafei-auth-session') || 'null'); }
     catch (e) { return null; }
@@ -239,6 +248,11 @@
     }
     const content = String(text || '').trim();
     if (!content) return;
+    const contactKind = privateContactKind(content);
+    if (contactKind) {
+      say('回答里不能留' + contactKind + '等站外联系方式。请留在站内沟通。', 'err');
+      return;
+    }
 
     button.disabled = true;
     try {
@@ -276,6 +290,12 @@
 
     const content = (os ? '系统版本：' + os + '\n' : '') +
       '问题：' + problem + (tried ? '\n已试：' + tried : '');
+
+    const contactKind = privateContactKind(content);
+    if (contactKind) {
+      say('求助内容里不能留' + contactKind + '等站外联系方式。有问题请直接在「信息 → 私信」找站长。', 'err');
+      return;
+    }
 
     els.submit.disabled = true;
     say('正在发布…');

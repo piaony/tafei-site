@@ -69,6 +69,14 @@ body.page-inner {
 .pg-sec-head p { color: var(--tf-muted); font-size: 14px; margin: 0; max-width: 460px; }
 .pg-kicker { font-size: 11px; letter-spacing: .18em; color: var(--tf-cyan); text-transform: uppercase; margin: 0 0 6px; }
 
+/* v21.1 官方保障与风险边界 */
+.pg-risk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pg-risk-grid article { padding: 16px 18px; border: 1px solid rgba(100,232,255,.24); border-radius: 14px; background: rgba(100,232,255,.04); }
+.pg-risk-grid h3 { margin: 0 0 7px; font-size: 15px; color: var(--tf-cyan); }
+.pg-risk-grid p { margin: 0; color: var(--tf-muted); font-size: 13px; line-height: 1.75; }
+.pg-risk { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--tf-line); font-size: 11.5px; line-height: 1.8; color: var(--tf-muted); max-width: 760px; }
+@media (max-width: 760px) { .pg-risk-grid { grid-template-columns: 1fr; } }
+
 /* 通用卡片 */
 .pg-card {
   background: var(--tf-panel-glass);

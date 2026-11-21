@@ -279,6 +279,12 @@ function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){
    return;
   }
 
+  const contactKind=privateContactKind(content);
+  if(contactKind){
+   status.textContent='正文里不能留'+contactKind+'等站外联系方式。有问题请在「信息 → 私信」找站长。';
+   return;
+  }
+
   button.disabled=true;
   button.textContent='正在发布……';
   status.textContent='正在提交文章……';
@@ -343,12 +349,87 @@ function showAuth(session) {
       upgradeForm.hidden = !!user.email;
     }
 
+    loadBalance(false);
+
     authMessage('登录成功！欢迎回到挞飞。');
   } else {
     authLoggedOut.hidden = false;
     authLoggedIn.hidden = true;
+    const valueNode = $id('tafeiBalanceValue');
+    if (valueNode) valueNode.textContent = '—';
     authMessage('未登录也可以浏览社区，登录后即可发布动态。');
   }
+}
+
+// TAFEI 21.1 BALANCE MODULE
+const BALANCE_API = API.replace('/tafei-cloud', '/tafei_balance');
+
+function balanceNode(id) {
+  return document.getElementById(id);
+}
+
+async function loadBalance(manual) {
+  const valueNode = balanceNode('tafeiBalanceValue');
+  const updatedNode = balanceNode('tafeiBalanceUpdated');
+  const statusNode = balanceNode('tafeiBalanceStatus');
+  const userId = authSession?.user?.id;
+  const token = authSession?.access_token;
+
+  if (!userId || !token) {
+    if (valueNode) valueNode.textContent = '—';
+    if (updatedNode) updatedNode.textContent = '未登录';
+    return;
+  }
+
+  if (statusNode && manual) statusNode.textContent = '正在刷新额度…';
+
+  try {
+    const response = await fetch(
+      BALANCE_API + '?select=current_amount,updated_at&user_id=eq.' + encodeURIComponent(userId),
+      {
+        headers: {
+          apikey: KEY,
+          Authorization: 'Bearer ' + token
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('额度读取失败（HTTP ' + response.status + '）');
+    }
+
+    const rows = await response.json();
+    const row = Array.isArray(rows) && rows.length ? rows[0] : null;
+    const amount = row && typeof row.current_amount === 'number' ? row.current_amount : null;
+
+    if (valueNode) valueNode.textContent = amount === null ? '—' : String(amount);
+    if (updatedNode) {
+      const date = row?.updated_at ? new Date(row.updated_at) : null;
+      updatedNode.textContent = date && !Number.isNaN(date.getTime())
+        ? '更新于 ' + date.toLocaleDateString('zh-CN')
+        : (row ? '已开通' : '未初始化');
+    }
+    if (statusNode) {
+      statusNode.textContent = row
+        ? (manual ? '额度已刷新。' : '')
+        : '额度账户尚未初始化，请联系站长处理。';
+    }
+  } catch (error) {
+    console.error(error);
+    if (statusNode) statusNode.textContent = '额度暂时读不到：' + (error.message || '网络异常');
+  }
+}
+
+const balanceRefreshBtn = balanceNode('tafeiBalanceRefresh');
+if (balanceRefreshBtn) {
+  balanceRefreshBtn.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = '刷新中…';
+    await loadBalance(true);
+    button.disabled = false;
+    button.textContent = '刷新额度';
+  });
 }
 
 async function authRequest(path, data, token, method = 'POST') {
@@ -1193,6 +1274,15 @@ async function t12ToggleLike(postId) {
   }
 }
 
+function privateContactKind(text) {
+  const raw = String(text || '');
+  const digits = raw.replace(/[^0-9]/g, '');
+  if (/1[3-9][0-9]{9}/.test(digits)) return '手机号';
+  if (/(qq|扣扣|微信|vx|v信|加我|私聊)\s*[：:号]?\s*[a-zA-Z0-9_-]{5,}/i.test(raw)) return 'QQ/微信';
+  if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(raw)) return '邮箱';
+  return '';
+}
+
 async function t12AddComment(postId, content, button) {
   const userId = authSession?.user?.id;
   const cleanContent = content.trim();
@@ -1203,6 +1293,12 @@ async function t12AddComment(postId, content, button) {
   }
   if (!cleanContent || cleanContent.length > 500) {
     alert('评论需要填写内容，且不能超过500字。');
+    return;
+  }
+
+  const contactKind = privateContactKind(cleanContent);
+  if (contactKind) {
+    alert('评论里不能留' + contactKind + '等站外联系方式。有问题请直接在「信息 → 私信」找站长，走站内官方通道。');
     return;
   }
 

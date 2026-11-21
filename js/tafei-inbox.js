@@ -19,7 +19,8 @@
   var state = {
     notices: [], announce: [], announceError: null,
     threads: [], profiles: [], profilesLoaded: false,
-    tableOk: null, dmLoading: false, msgs: [], peer: null, dmView: 'list', busy: false
+    tableOk: null, dmLoading: false, msgs: [], peer: null, dmView: 'list', busy: false,
+    ownerId: null, ownerLoading: false
   };
 
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
@@ -69,6 +70,40 @@
     return s && s.user && s.user.email ? String(s.user.email).toLowerCase() : '';
   }
   function isOwner() { return meEmail() === OWNER_EMAIL; }
+
+  var OWNER_WELCOME = '你好，我是挞飞站长。这里是官方直连会话：刷机、救砖、机型选购、资料和售后问题都可以直接在这里说。\n\n站内沟通、站内报价、站内交付都有记录；请不要把设备或钱交给站外认识的人，也不要私下转账。站外交易出了问题，我无法替你兜底。';
+
+  async function resolveOwner() {
+    if (state.ownerId || state.ownerLoading || isOwner()) return state.ownerId;
+    state.ownerLoading = true;
+    try {
+      var rows = await rpc('tafei_lookup_peer', { p_email: OWNER_EMAIL });
+      if (rows && rows.length && rows[0].uid && rows[0].uid !== meId()) {
+        state.ownerId = rows[0].uid;
+      }
+    } catch (e) {
+      state.ownerId = null;
+    } finally {
+      state.ownerLoading = false;
+    }
+    return state.ownerId;
+  }
+
+  function privateContactKind(text) {
+    var raw = String(text || '');
+    var digits = raw.replace(/[^0-9]/g, '');
+    if (/1[3-9][0-9]{9}/.test(digits)) return '手机号';
+    if (/(qq|扣扣|微信|vx|v信|加我|私聊)\s*[：:号]?\s*[a-zA-Z0-9_-]{5,}/i.test(raw)) return 'QQ/微信';
+    if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(raw)) return '邮箱';
+    return '';
+  }
+
+  function safetyCard() {
+    return '<div class="tf3-safety">'
+      + '<b>官方保障</b>'
+      + '<span>站内私信、站内报价、站长交付。不要私下转账，也不要把设备交给站外认识的人；站外交易产生的纠纷，本站不承担责任。</span>'
+      + '</div>';
+  }
 
   function headers(extra) {
     var h = { apikey: KEY };
@@ -450,6 +485,7 @@
   }
 
   function peerName(id) {
+    if (id && id === state.ownerId) return '挞飞站长';
     var p = (state.profiles || []).filter(function (x) { return x.id === id; })[0];
     if (p && p.nickname) return p.nickname;
     return '成员 ' + String(id || '').slice(0, 6);
@@ -460,6 +496,7 @@
     var threads = state.threads || [];
     var head = '<div class="tf3-dmhead"><h4>我的会话</h4>'
       + '<button type="button" class="tf3-newbtn" data-role="new-dm">写新私信</button></div>';
+    head += safetyCard();
     if (state.dmLoading) return head + '<div class="tf3-hint">正在读取私信…</div>';
     if (!threads.length) {
       return head + '<div class="tf3-empty">还没有私信。<br>点右上角「写新私信」给社区成员发第一条消息。</div>';
@@ -467,12 +504,14 @@
     var html = head;
     threads.forEach(function (t) {
       var name = peerName(t.peer);
-      html += '<button type="button" class="tf3-thread" data-role="open-thread" data-peer="' + esc(t.peer) + '">'
-        + '<span class="tf3-avatar">' + esc(initial(name)) + '</span>'
+      var official = t.official || t.peer === state.ownerId;
+      html += '<button type="button" class="tf3-thread' + (official ? ' is-official' : '') + '" data-role="open-thread" data-peer="' + esc(t.peer) + '">'
+        + '<span class="tf3-avatar">' + esc(official ? '站' : initial(name)) + '</span>'
         + '<span class="tf3-thread-main"><span class="tf3-thread-name">' + esc(name)
+        + (official ? ' <span class="tf3-official-tag">官方</span>' : '')
         + (t.unread ? ' <span class="tf3-unread">' + t.unread + '</span>' : '') + '</span>'
         + '<span class="tf3-thread-last">' + esc((t.mine ? '我：' : '') + norm(t.last.body).slice(0, 40)) + '</span></span>'
-        + '<span class="tf3-thread-side">' + esc(fmtTime(t.last.created_at)) + '</span>'
+        + '<span class="tf3-thread-side">' + esc(official && !t.last.created_at ? '默认' : fmtTime(t.last.created_at)) + '</span>'
         + '</button>';
     });
     return html;
@@ -480,13 +519,19 @@
 
   function threadView() {
     var name = peerName(state.peer);
+    var official = state.peer === state.ownerId;
     var html = '<div class="tf3-threadhead"><button type="button" class="tf3-back" data-role="back-list">← 会话列表</button>'
       + '<strong>' + esc(name) + '</strong></div>';
+    html += safetyCard();
     html += '<div class="tf3-msgs" id="tf3Msgs">';
+    if (official) {
+      html += '<div class="tf3-msg tf3-official-msg">' + esc(OWNER_WELCOME)
+        + '<time>官方会话 · 站长直连</time></div>';
+    }
     if (state.dmLoading) {
       html += '<div class="tf3-hint">正在读取消息…</div>';
     } else if (!state.msgs.length) {
-      html += '<div class="tf3-hint">还没有消息，说点什么吧。</div>';
+      html += '<div class="tf3-hint">' + (official ? '直接回复这条会话即可，站长会看到。' : '还没有消息，说点什么吧。') + '</div>';
     } else {
       state.msgs.forEach(function (m) {
         var mine = m.sender_id === meId();
@@ -505,7 +550,7 @@
   function composeView() {
     var head = '<div class="tf3-threadhead"><button type="button" class="tf3-back" data-role="back-list">← 会话列表</button>'
       + '<strong>新私信</strong></div>';
-    return head + '<div class="tf3-form">'
+    return head + safetyCard() + '<div class="tf3-form">'
       + '<label class="tf3-label" for="tf3PeerEmail">收件人注册邮箱（必须完整填写）</label>'
       + '<div class="tf3-searchrow">'
       + '<input class="tf3-input" id="tf3PeerEmail" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="例如 name@qq.com">'
@@ -612,6 +657,11 @@
     var body = norm(text);
     if (!body) { status('内容不能为空。'); return; }
     if (!peer) { status('请先查找并确认收件人邮箱。'); return; }
+    var contactKind = privateContactKind(body);
+    if (contactKind) {
+      status('私信里不能留' + contactKind + '等站外联系方式。请留在站内沟通，有问题也可以直接找站长，走官方保障。');
+      return;
+    }
     if (state.busy) return;
     state.busy = true;
     if (btn) { btn.disabled = true; btn.textContent = '发送中…'; }
@@ -657,6 +707,28 @@
         + '&or=(sender_id.eq.' + me + ',recipient_id.eq.' + me + ')'
         + '&order=created_at.desc&limit=300');
       state.threads = groupThreads(rows || [], me);
+      await resolveOwner();
+      if (state.ownerId) {
+        var hasOwnerThread = state.threads.some(function (t) { return t.peer === state.ownerId; });
+        if (!hasOwnerThread) {
+          state.threads.unshift({
+            peer: state.ownerId,
+            official: true,
+            mine: false,
+            unread: 0,
+            last: { body: '官方直连已开启：有问题直接在这里找站长。', created_at: '' }
+          });
+        } else {
+          state.threads.forEach(function (t) {
+            if (t.peer === state.ownerId) t.official = true;
+          });
+        }
+        state.threads.sort(function (a, b) {
+          if (a.official && !b.official) return -1;
+          if (!a.official && b.official) return 1;
+          return new Date(b.last.created_at || 0) - new Date(a.last.created_at || 0);
+        });
+      }
       state.tableOk = true;
     } catch (e) {
       if (e.status === 404) state.tableOk = false;
