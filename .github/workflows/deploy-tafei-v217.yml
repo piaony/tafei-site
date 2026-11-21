@@ -1,0 +1,35 @@
+name: deploy-tafei-v217
+on:
+  push:
+    paths:
+      - '.deploy-v217'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download v21.7 package
+        run: curl -fL -o /tmp/site.zip 'https://aka.doubaocdn.com/s/zQURV9yAFj'
+      - name: Unpack package
+        run: unzip -o /tmp/site.zip -d /tmp/site
+      - name: Copy changed files
+        run: |
+          cp /tmp/site/index.html index.html
+          cp /tmp/site/admin-center.html admin-center.html
+          cp /tmp/site/device.html device.html
+          cp /tmp/site/css/home.css css/home.css
+          cp /tmp/site/js/home-core.js js/home-core.js
+          cp /tmp/site/js/community-help.js js/community-help.js
+          cp /tmp/site/js/task-center.js js/task-center.js
+          mkdir -p supabase
+          cp /tmp/site/supabase/daily_tasks.sql supabase/daily_tasks.sql
+      - name: Commit and push
+        run: |
+          git config user.name 'tafei-deploy-bot'
+          git config user.email 'actions@github.com'
+          git add index.html admin-center.html device.html css/home.css js/home-core.js js/community-help.js js/task-center.js supabase/daily_tasks.sql
+          if git diff --cached --quiet; then echo 'No changes to commit'; exit 0; fi
+          git commit -m 'v21.7 签到与每日任务'
+          git push
