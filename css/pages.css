@@ -172,6 +172,58 @@ body.page-inner {
   font-size: 13.5px; color: #ffd9a8;
 }
 
+/* 机型库工具条与对比 */
+.dev-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 0 0 16px; }
+.dev-search {
+  flex: 1 1 260px; min-height: 46px; padding: 0 15px;
+  border-radius: var(--tf-r-md); border: 1px solid var(--tf-line);
+  background: rgba(12, 20, 38, .86); color: var(--tf-text); font: inherit; font-size: 14.5px;
+}
+body.light .dev-search { background: #fff; color: #15213b; }
+.dev-search:focus { outline: none; border-color: rgba(100, 232, 255, .58); box-shadow: var(--tf-e-focus); }
+.dev-count { font-size: 13px; color: var(--tf-muted); white-space: nowrap; }
+
+.dev-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dev-card-link { display: grid; gap: 8px; }
+.dev-cmp-btn {
+  border: 1px solid var(--tf-line); background: rgba(17, 29, 55, .6); color: var(--tf-muted);
+  border-radius: var(--tf-r-pill); padding: 4px 11px; font: inherit; font-size: 11.5px; cursor: pointer;
+  transition: color var(--tf-dur-2) var(--tf-ease), border-color var(--tf-dur-2) var(--tf-ease), background-color var(--tf-dur-2) var(--tf-ease);
+}
+.dev-cmp-btn:hover { color: var(--tf-text); border-color: var(--tf-line-strong); }
+.dev-cmp-btn.on { color: #fff; background: var(--tf-grad-action); border-color: transparent; }
+body.light .dev-cmp-btn { background: #fff; }
+.dev-empty { grid-column: 1 / -1; text-align: center; color: var(--tf-muted); font-size: 14px; }
+
+.dev-cmp-bar {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+  width: min(880px, calc(100% - 28px)); z-index: 45;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 12px 16px; border-radius: var(--tf-r-md);
+  border: 1px solid rgba(100, 232, 255, .4);
+  background: rgba(9, 15, 30, .92); backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45); color: var(--tf-text);
+}
+body.light .dev-cmp-bar { background: rgba(255, 255, 255, .95); color: #15213b; border-color: #bcd8ff; }
+.dev-cmp-bar[hidden] { display: none; }
+body.has-cmp-bar { padding-bottom: 96px; }
+.dev-cmp-info { font-size: 13px; color: var(--tf-muted); flex: 1 1 220px; }
+.dev-cmp-acts { display: flex; gap: 8px; }
+
+.dev-cmp-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--tf-line); border-radius: var(--tf-r-md); background: rgba(17, 29, 55, .55); }
+body.light .dev-cmp-scroll { background: #fff; }
+.dev-cmp-table { border-collapse: collapse; min-width: 620px; width: 100%; font-size: 14px; }
+.dev-cmp-table th, .dev-cmp-table td { padding: 14px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--tf-line); }
+.dev-cmp-table thead th { background: rgba(100, 232, 255, .06); }
+.dev-cmp-table tbody th { color: var(--tf-muted); font-weight: 500; width: 96px; white-space: nowrap; }
+.dev-cmp-table tr:last-child th, .dev-cmp-table tr:last-child td { border-bottom: 0; }
+.dev-cmp-name { display: block; font-weight: 700; line-height: 1.5; margin-bottom: 4px; }
+.dev-cmp-soc { display: block; font-size: 12px; color: var(--tf-cyan); margin-bottom: 6px; }
+.dev-cmp-rm { border: 1px solid var(--tf-line); background: transparent; color: var(--tf-muted); border-radius: var(--tf-r-pill); font: inherit; font-size: 11.5px; padding: 3px 9px; cursor: pointer; }
+.dev-cmp-rm:hover { color: #ff8f8f; border-color: rgba(255, 143, 143, .45); }
+.dev-cmp-note { margin: 10px 0 0; font-size: 12.5px; color: var(--tf-muted); }
+.dev-cmp-hint { display: none; margin: 0 0 8px; font-size: 12.5px; color: var(--tf-cyan); }
+
 /* FAQ */
 .pg-faq { display: grid; gap: 10px; }
 .faq-item { border: 1px solid var(--tf-line); border-radius: var(--tf-r-md); background: rgba(17, 29, 55, .55); overflow: hidden; }
@@ -205,4 +257,15 @@ body.page-inner {
   .pg-card { padding: 18px; }
   .dev-kv { grid-template-columns: 1fr; gap: 4px; }
   .dev-kv dt { margin-top: 6px; }
+  .dev-cmp-table { min-width: 540px; }
+  .dev-cmp-table th, .dev-cmp-table td { padding: 10px 12px; font-size: 13px; }
+  .dev-cmp-table tbody th { width: 78px; }
+  .dev-cmp-table tbody th, .dev-cmp-table thead th:first-child {
+    position: sticky; left: 0; z-index: 2; background: #0f1a33;
+  }
+  body.light .dev-cmp-table tbody th, body.light .dev-cmp-table thead th:first-child { background: #f2f7ff; }
+  .dev-cmp-hint { display: block; }
+  .dev-cmp-bar { bottom: 12px; padding: 10px 12px; }
+  .dev-cmp-info { flex: 1 1 100%; }
+  .dev-cmp-acts { width: 100%; justify-content: flex-end; }
 }

@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#080d1b">
-<meta name="description" content="挞飞机型库：逐台整理解锁方式、Root 路线、模块建议、常见故障与实测记录，先按机型查，再决定要不要折腾。">
+<meta name="description" content="挞飞机型库：逐台整理解锁方式、Root 路线、模块建议、常见故障与实测记录，支持按机型搜索和多机对比，先按机型查，再决定要不要折腾。">
 <link rel="canonical" href="https://piaony.github.io/tafei-site/device.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="机型库 · 挞飞 TAFEI">
-<meta property="og:description" content="按机型查解锁、Root、模块与故障处置，一台机一页档案。">
+<meta property="og:description" content="按机型查解锁、Root、模块与故障处置，一台机一页档案，支持多机对比。">
 <meta property="og:url" content="https://piaony.github.io/tafei-site/device.html">
 <title>机型库 · 挞飞 TAFEI</title>
 <link rel="stylesheet" href="css/tafei-ui.css">
-<link rel="stylesheet" href="css/pages.css?v=2">
+<link rel="stylesheet" href="css/pages.css?v=3">
 </head>
 <body class="page-inner">
 <header class="pg-nav"><div class="pw pg-nav-in">
@@ -39,12 +39,16 @@
   <section class="pg-sec" id="listSection">
     <div class="pg-sec-head">
       <div><p class="pg-kicker">ALL DEVICES</p><h2>机型列表</h2></div>
-      <p>带“已验证”标记的，是站长在自己或客户机器上实测过的条目。</p>
+      <p>带“已验证”标记的，是站长在自己或客户机器上实测过的条目；其余为按官方规格整理的档案。</p>
+    </div>
+    <div class="dev-toolbar">
+      <input id="devSearch" class="dev-search" type="search" placeholder="搜机型或芯片，如 K40、骁龙 870" aria-label="搜索机型">
+      <span class="dev-count" id="devCount" role="status" aria-live="polite"></span>
     </div>
     <div class="dev-grid" id="deviceGrid" aria-live="polite"></div>
   </section>
 
-  <section class="pg-sec">
+  <section class="pg-sec" id="listFootSec">
     <div class="pg-card" style="display:grid;gap:10px">
       <h3 style="margin:0">没找到你的机型？</h3>
       <p>机型库还在补。把你的机型、系统版本和遇到的问题发过来，我可以为它单独建一页档案；紧急的变砖问题走技术服务更快。</p>
@@ -57,6 +61,15 @@
 </main>
 
 <main class="pw" id="detail" hidden></main>
+<main class="pw" id="compare" hidden></main>
+
+<div class="dev-cmp-bar" id="cmpBar" hidden>
+  <div class="dev-cmp-info" id="cmpInfo">已选 0 台</div>
+  <div class="dev-cmp-acts">
+    <button class="btn" type="button" id="cmpClear">清空</button>
+    <button class="btn primary" type="button" id="cmpStart">开始对比</button>
+  </div>
+</div>
 
 <footer class="pg-foot"><div class="pw">挞飞 TAFEI · 机型库 · <a href="index.html">返回首页</a></div></footer>
 
@@ -64,22 +77,164 @@
 (() => {
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const grid = document.getElementById('deviceGrid');
+  const searchInput = document.getElementById('devSearch');
+  const countEl = document.getElementById('devCount');
 
   const listView = document.getElementById('listSection');
   const listHero = document.getElementById('listHero');
+  const listFoot = document.getElementById('listFootSec');
   const detail = document.getElementById('detail');
+  const compare = document.getElementById('compare');
+  const cmpBar = document.getElementById('cmpBar');
+  const cmpInfo = document.getElementById('cmpInfo');
+
+  const state = { devices: [], selected: [], q: '' };
+
+  const ROWS = [
+    ['screen', '屏幕'], ['soc', '芯片'], ['battery', '电池'], ['charge', '充电'],
+    ['weight', '重量'], ['released', '上市'], ['system', '系统'], ['misc', '其它']
+  ];
+
+  function matchText(d) {
+    return [d.name, d.brand, d.soc, d.released, (d.aliases || []).join(' '), (d.specs || []).join(' ')]
+      .join(' ').toLowerCase();
+  }
+
+  function visibleDevices() {
+    const q = state.q.trim().toLowerCase();
+    return q ? state.devices.filter((d) => matchText(d).includes(q)) : state.devices;
+  }
 
   function card(dev) {
-    const state = dev.verified
+    const inCmp = state.selected.includes(dev.id);
+    const devState = dev.verified
       ? '<span class="dev-state verified">已验证</span>'
-      : '<span class="dev-state">模板样例</span>';
-    return `<a class="pg-card dev-card" href="device.html?m=${encodeURIComponent(dev.id)}">
-      ${state}
-      <h3>${esc(dev.name)}</h3>
-      <span class="dev-soc">${esc(dev.brand)} · ${esc(dev.soc)} · ${esc(dev.released)}</span>
-      <p>${esc(dev.summary)}</p>
-      <span class="dev-specs">${(dev.specs || []).map(esc).join(' · ')}</span>
-    </a>`;
+      : '<span class="dev-state">整理档案</span>';
+    return `<div class="pg-card dev-card" data-id="${esc(dev.id)}">
+      <div class="dev-card-top">
+        ${devState}
+        <button class="dev-cmp-btn${inCmp ? ' on' : ''}" type="button" data-cmp="${esc(dev.id)}" aria-pressed="${inCmp}">${inCmp ? '✓ 已加入' : '＋ 对比'}</button>
+      </div>
+      <a class="dev-card-link" href="device.html?m=${encodeURIComponent(dev.id)}">
+        <h3>${esc(dev.name)}</h3>
+        <span class="dev-soc">${esc(dev.brand)} · ${esc(dev.soc)} · ${esc(dev.released)}</span>
+        <p>${esc(dev.summary)}</p>
+        <span class="dev-specs">${(dev.specs || []).map(esc).join(' · ')}</span>
+      </a>
+    </div>`;
+  }
+
+  function renderGrid() {
+    const list = visibleDevices();
+    grid.innerHTML = list.map(card).join('')
+      || '<div class="pg-card dev-empty">没有匹配的机型。可以换个关键词，或者把机型发给我单独建档案。</div>';
+    if (countEl) countEl.textContent = `共 ${state.devices.length} 台 · 当前显示 ${list.length} 台 · 已选 ${state.selected.length}/3`;
+    grid.querySelectorAll('[data-cmp]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleCompare(btn.dataset.cmp);
+      });
+    });
+  }
+
+  function toggleCompare(id) {
+    const i = state.selected.indexOf(id);
+    if (i >= 0) {
+      state.selected.splice(i, 1);
+    } else {
+      if (state.selected.length >= 3) {
+        if (countEl) {
+          countEl.textContent = '最多同时对比 3 台，先移出一台再选';
+          setTimeout(renderGrid, 1800);
+        }
+        return;
+      }
+      state.selected.push(id);
+    }
+    renderGrid();
+    updateBar();
+  }
+
+  function updateBar() {
+    if (!cmpBar) return;
+    const inOverlay = !detail.hidden || !compare.hidden;
+    cmpBar.hidden = inOverlay || state.selected.length === 0;
+    document.body.classList.toggle('has-cmp-bar', !cmpBar.hidden);
+    if (cmpBar.hidden) return;
+    const names = state.selected.map((id) => {
+      const d = state.devices.find((x) => x.id === id);
+      return d ? d.name : id;
+    });
+    cmpInfo.textContent = `已选 ${names.length} 台：${names.join(' / ')}`;
+  }
+
+  function showList() {
+    listHero.hidden = false;
+    listView.hidden = false;
+    if (listFoot) listFoot.hidden = false;
+    detail.hidden = true;
+    compare.hidden = true;
+    document.title = '机型库 · 挞飞 TAFEI';
+  }
+
+  function renderCompare(list) {
+    listHero.hidden = true;
+    listView.hidden = true;
+    if (listFoot) listFoot.hidden = true;
+    detail.hidden = true;
+    compare.hidden = false;
+
+    const head = list.map((d) => `<th>
+      <a class="dev-cmp-name" href="device.html?m=${encodeURIComponent(d.id)}">${esc(d.name)}</a>
+      <span class="dev-cmp-soc">${esc(d.soc)}</span>
+      <button class="dev-cmp-rm" type="button" data-rm="${esc(d.id)}">移出对比</button>
+    </th>`).join('');
+
+    const body = ROWS.map(([key, label]) => `<tr>
+      <th scope="row">${esc(label)}</th>
+      ${list.map((d) => `<td>${esc((d.compare && d.compare[key]) || '—')}</td>`).join('')}
+    </tr>`).join('');
+
+    compare.innerHTML = `
+      <section class="pg-hero" style="padding-bottom:10px">
+        <p class="pg-eyebrow">COMPARE</p>
+        <h1 class="pg-title">机型对比</h1>
+        <p class="pg-lead">只对比能查到的官方规格，实际体验以你自己那台为准。点机型名可以进详细档案。</p>
+      </section>
+      <section class="pg-sec">
+        <p class="dev-cmp-hint">手机上可以左右滑动表格，查看全部机型 →</p>
+        <div class="dev-cmp-scroll">
+          <table class="dev-cmp-table">
+            <thead><tr><th scope="col">项目</th>${head}</tr></thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+        <p class="dev-cmp-note">对比最多 3 台。需要加机型或补实测数据，可以在技术服务里说明。</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn" type="button" id="cmpBack">← 返回机型列表</button>
+          <a class="btn primary" href="service.html#book">提交服务预约 ↗</a>
+        </div>
+      </section>`;
+
+    compare.querySelectorAll('[data-rm]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.selected = state.selected.filter((id) => id !== btn.dataset.rm);
+        const next = state.selected.map((id) => state.devices.find((d) => d.id === id)).filter(Boolean);
+        if (next.length < 2) {
+          location.href = 'device.html';
+          return;
+        }
+        history.replaceState(null, '', 'device.html?cmp=' + next.map((d) => d.id).join(','));
+        renderCompare(next);
+        updateBar();
+      });
+    });
+    const back = document.getElementById('cmpBack');
+    if (back) back.addEventListener('click', () => { location.href = 'device.html'; });
+    document.title = '机型对比 · 挞飞 TAFEI';
+    updateBar();
+    window.scrollTo(0, 0);
   }
 
   function renderBlock(block) {
@@ -98,8 +253,10 @@
   }
 
   function renderDetail(dev, all) {
+    showList();
     listHero.hidden = true;
     listView.hidden = true;
+    if (listFoot) listFoot.hidden = true;
     detail.hidden = false;
 
     const others = all.filter((d) => d.id !== dev.id).slice(0, 3);
@@ -116,7 +273,7 @@
             <h1>${esc(dev.name)}</h1>
             <div class="dev-spec-strip">${(dev.specs || []).map((s) => `<span>${esc(s)}</span>`).join('')}</div>
             <p class="pg-lead" style="margin-top:8px">${esc(dev.summary)}</p>
-            ${dev.verified ? '' : '<div class="dev-warn">本页为模板样例：结构已就绪，机型实测数据待站长补充后再标记为「已验证」。</div>'}
+            ${dev.verified ? '' : '<div class="dev-warn">本页按官方规格与公开资料整理，机型实测数据（系统版本、帧率、温度、续航）待站长补充后再标记为「已验证」。</div>'}
           </div>
         </div>
       </section>
@@ -143,6 +300,10 @@
       ${othersHtml}
     `;
     document.title = `${dev.name} · 机型档案 · 挞飞`;
+    updateBar();
+    detail.querySelectorAll('[data-cmp]').forEach((btn) => {
+      btn.addEventListener('click', (e) => { e.preventDefault(); toggleCompare(btn.dataset.cmp); });
+    });
     loadDeviceHelp(dev);
   }
 
@@ -173,7 +334,7 @@
         const raw = String(p.content || '');
         const lines = raw.split('\n').map((x) => x.trim()).filter(Boolean);
         let os = '';
-        let problem = [];
+        const problem = [];
         lines.forEach((t) => {
           if (t.startsWith('系统版本：')) os = t.slice(5).trim();
           else if (t.startsWith('问题：')) problem.push(t.slice(3).trim());
@@ -201,18 +362,52 @@
     try {
       const res = await fetch('data/devices.json', { cache: 'no-store' });
       const json = await res.json();
-      const devices = json.devices || [];
-      grid.innerHTML = devices.map(card).join('') || '<div class="pg-card">机型库整理中。</div>';
+      state.devices = json.devices || [];
+      renderGrid();
+      updateBar();
 
-      const id = new URLSearchParams(location.search).get('m');
-      if (id) {
-        const dev = devices.find((d) => d.id === id);
-        if (dev) renderDetail(dev, devices);
-        else grid.innerHTML = '<div class="pg-card">没有找到这台机型的档案。</div>';
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          state.q = searchInput.value || '';
+          renderGrid();
+        });
       }
+
+      const params = new URLSearchParams(location.search);
+      const id = params.get('m');
+      const cmp = params.get('cmp');
+      if (id) {
+        const dev = state.devices.find((d) => d.id === id);
+        if (dev) renderDetail(dev, state.devices);
+        else {
+          grid.innerHTML = '<div class="pg-card">没有找到这台机型的档案。</div>';
+        }
+      } else if (cmp) {
+        const list = cmp.split(',').map((x) => state.devices.find((d) => d.id === x)).filter(Boolean).slice(0, 3);
+        if (list.length >= 2) {
+          state.selected = list.map((d) => d.id);
+          updateBar();
+          renderCompare(list);
+        }      }
     } catch (e) {
       grid.innerHTML = '<div class="pg-card">机型数据加载失败，请稍后刷新。</div>';
     }
+
+    const clearBtn = document.getElementById('cmpClear');
+    if (clearBtn) clearBtn.addEventListener('click', () => {
+      state.selected = [];
+      renderGrid();
+      updateBar();
+    });
+    const startBtn = document.getElementById('cmpStart');
+    if (startBtn) startBtn.addEventListener('click', () => {
+      if (state.selected.length < 2) {
+        cmpInfo.textContent = '至少选 2 台才能对比';
+        setTimeout(updateBar, 1600);
+        return;
+      }
+      location.href = 'device.html?cmp=' + state.selected.join(',');
+    });
   }
 
   init();
