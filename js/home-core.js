@@ -515,7 +515,7 @@ async function saveAvatar(dataUrl) {
         apikey: KEY,
         Authorization: 'Bearer ' + token,
         'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
+        Prefer: 'return=representation'
       },
       body: JSON.stringify({ avatar_url: dataUrl })
     }
@@ -523,6 +523,40 @@ async function saveAvatar(dataUrl) {
 
   if (!response.ok) {
     throw new Error('云端头像保存失败（HTTP ' + response.status + '）');
+  }
+
+  let rows = await response.json().catch(() => []);
+  if (!Array.isArray(rows)) rows = [];
+
+  if (!rows.length) {
+    const created = await fetch(
+      AVATAR_API + '?on_conflict=id',
+      {
+        method: 'POST',
+        headers: {
+          apikey: KEY,
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          Prefer: 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify({
+          id: userId,
+          nickname: nicknameOf(authSession),
+          avatar_url: dataUrl
+        })
+      }
+    );
+    if (!created.ok) {
+      throw new Error('资料行不存在，自动创建失败（HTTP ' + created.status + '）');
+    }
+    rows = await created.json().catch(() => []);
+  }
+
+  if (!Array.isArray(rows) || !rows.length) {
+    throw new Error('资料行没有匹配到，头像未写入云端');
+  }
+  if (!rows[0] || !rows[0].avatar_url) {
+    throw new Error('云端没有返回 avatar_url');
   }
 
   writeAvatarCache(userId, dataUrl);
@@ -639,7 +673,7 @@ if (avatarFileInput) {
       const userId = authSession?.user?.id;
       if (userId) writeAvatarCache(userId, dataUrl);
       applyAvatar(dataUrl, nicknameOf(authSession));
-      if (status) status.textContent = '头像已在本设备生效；云端同步失败，可能还没开通 avatar_url 字段。';
+      if (status) status.textContent = '头像已在本设备生效；云端未写入：' + (error.message || '未知错误');
     } finally {
       input.value = '';
     }
