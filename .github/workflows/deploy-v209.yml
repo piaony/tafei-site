@@ -1,0 +1,86 @@
+name: deploy-v209
+run-name: deploy-v209-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - .github/workflows/deploy-v209.yml
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-v209]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Fetch files
+        run: |
+          set -e
+          python3 - <<'PY'
+          import hashlib, ssl, time, urllib.parse, urllib.request
+          FILES = {
+            'index.html': ('https://aka.doubaocdn.com/s/BhR7kkm9TT', '94d7b3815b26cbd76f97473ff613f180e46e75cc6b02458f0c9cd6ddc197447d'),
+            'js/home-core.js': ('https://aka.doubaocdn.com/s/doaB5FFzD1', '2d1063398a30989ecea43d7985c74adf59475fb3c10c2212138de104a942be45'),
+            'css/home.css': ('https://aka.doubaocdn.com/s/xGFJvUr09R', '372da6a0c931e305e2a62b0a1c0dd6224d55e37b70d53f84ee5a3c115959e040'),
+          }
+
+          def fetch(url, insecure=False, proxy=None, timeout=30):
+              target = 'https://api.allorigins.win/raw?url=' + urllib.parse.quote(url, safe='') if proxy else url
+              ctx = ssl.create_default_context()
+              if insecure:
+                  ctx.check_hostname = False
+                  ctx.verify_mode = ssl.CERT_NONE
+              req = urllib.request.Request(target, headers={'User-Agent': 'Mozilla/5.0'})
+              with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
+                  return r.read()
+
+          methods = [('direct', {}), ('insecure', {'insecure': True}), ('allorigins', {'proxy': True})]
+          diag = []
+          ok = True
+          for path, (url, sha) in FILES.items():
+              got = None
+              for attempt in range(3):
+                  for name, kw in methods:
+                      try:
+                          data = fetch(url, **kw)
+                          h = hashlib.sha256(data).hexdigest()
+                          diag.append('%s | %s | try%d | %d bytes | %s | %s' % (path, name, attempt + 1, len(data), h[:12], 'OK' if h == sha else 'HASH-MISMATCH'))
+                          if h == sha:
+                              got = data
+                              break
+                      except Exception as e:
+                          diag.append('%s | %s | try%d | ERR %s: %s' % (path, name, attempt + 1, type(e).__name__, str(e)[:160]))
+                  if got is not None:
+                      break
+                  time.sleep(4)
+              if got is None:
+                  ok = False
+                  continue
+              open(path, 'wb').write(got)
+
+          open('/tmp/diag.txt', 'w').write(chr(10).join(diag))
+          print(chr(10).join(diag))
+          if ok:
+              open('/tmp/site-ok', 'w').write('ok')
+          PY
+
+      - name: Deploy or report
+        run: |
+          set -e
+          git config user.name 'tafei-bot'
+          git config user.email '3659229103@qq.com'
+          if [ -f /tmp/site-ok ]; then
+            git add index.html js/home-core.js css/home.css
+            git commit -m 'feat(profile): 个人中心随时改昵称 (v20.9) [deploy-v209]'
+            git push origin HEAD:main
+          else
+            cp /tmp/diag.txt diag-v209.txt
+            git add diag-v209.txt
+            git commit -m 'diag: v20.9 fetch probe [deploy-v209]'
+            git push origin HEAD:main
+          fi
