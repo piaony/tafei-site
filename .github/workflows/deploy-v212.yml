@@ -1,6 +1,8 @@
 name: deploy-v212
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -8,6 +10,7 @@ permissions:
 
 jobs:
   deploy:
+    if: contains(github.event.head_commit.message, '[deploy-v212]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
