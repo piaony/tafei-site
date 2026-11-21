@@ -265,3 +265,9 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
 .service-strip p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
 .service-strip .ss-actions{display:flex;gap:10px;flex-wrap:wrap}
 @media(max-width:760px){.service-strip{padding:18px 18px}.service-strip .ss-actions{width:100%}.service-strip .ss-actions .btn{flex:1 1 auto;justify-content:center}}
+
+/* TAFEI 20.9 nickname editor */
+.nick-editor{margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+.nick-editor h4{margin:0 0 6px}
+.nick-editor p{color:var(--muted);font-size:14px;line-height:1.7;margin:0 0 6px}
+#tafeiNickStatus{color:var(--cyan);font-size:13px;min-height:1.2em;margin-top:6px}

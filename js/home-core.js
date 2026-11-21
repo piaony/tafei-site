@@ -335,6 +335,8 @@ function showAuth(session) {
     authLoggedOut.hidden = true;
     authLoggedIn.hidden = false;
     $id('tafeiCurrentNickname').textContent = nickname;
+    const nickInput = $id('tafeiNickInput');
+    if (nickInput) nickInput.value = nickname;
 
     const upgradeForm = $id('tafeiUpgradeForm');
     if (upgradeForm) {
@@ -389,6 +391,122 @@ function saveAuth(session) {
 
   authSession = session;
   showAuth(session);
+}
+
+async function updateAuthNickname(nickname) {
+  if (!authSession?.access_token) {
+    throw new Error('登录状态已失效，请重新登录。');
+  }
+
+  const metadata = {
+    ...(authSession.user?.user_metadata || {}),
+    nickname
+  };
+
+  const updated = await authRequest(
+    '/user',
+    { data: metadata },
+    authSession.access_token,
+    'PUT'
+  );
+
+  const user = {
+    ...(authSession.user || {}),
+    ...(updated || {}),
+    user_metadata: {
+      ...metadata,
+      ...((updated && updated.user_metadata) || {}),
+      nickname
+    }
+  };
+
+  authSession = { ...authSession, user };
+  try {
+    localStorage.setItem(AUTH_STORAGE, JSON.stringify(authSession));
+  } catch (error) {
+    throw new Error('无法保存登录状态，请检查手机存储权限。');
+  }
+
+  const nameNode = $id('tafeiCurrentNickname');
+  if (nameNode) nameNode.textContent = nickname;
+  const inputNode = $id('tafeiNickInput');
+  if (inputNode) inputNode.value = nickname;
+
+  return user;
+}
+
+async function updateProfileNickname(nickname) {
+  const userId = authSession?.user?.id;
+  if (!userId) throw new Error('登录状态已失效，请重新登录。');
+
+  await t12Request(
+    T12_PROFILE_API + '?id=eq.' + userId,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ nickname })
+    }
+  );
+
+  if (t12Profiles[userId]) {
+    t12Profiles[userId] = { ...t12Profiles[userId], nickname };
+  }
+  try { t12Render(); } catch (error) { /* 社区还没加载完时忽略 */ }
+}
+
+const nickForm = $id('tafeiNickForm');
+if (nickForm) {
+  nickForm.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const input = $id('tafeiNickInput');
+    const status = $id('tafeiNickStatus');
+    const button = event.submitter;
+    const nickname = input ? input.value.trim() : '';
+
+    if (!nickname || nickname.length > 30) {
+      if (status) status.textContent = '昵称不能为空，最多30个字。';
+      return;
+    }
+    if (!authSession?.access_token) {
+      if (status) status.textContent = '登录状态已失效，请重新登录。';
+      return;
+    }
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = '保存中…';
+    }
+    if (status) status.textContent = '正在保存昵称…';
+
+    try {
+      await updateProfileNickname(nickname);
+    } catch (error) {
+      console.error(error);
+      if (status) status.textContent = '保存失败：' + (error.message || '请稍后重试。');
+      if (button) {
+        button.disabled = false;
+        button.textContent = '保存昵称 ↗';
+      }
+      return;
+    }
+
+    try {
+      await updateAuthNickname(nickname);
+      if (status) status.textContent = '昵称已更新为「' + nickname + '」。';
+    } catch (error) {
+      console.error(error);
+      if (status) status.textContent = '社区昵称已更新，但账户资料同步失败：' + (error.message || '请重新登录后再试。');
+    }
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = '保存昵称 ↗';
+    }
+  });
 }
 
 // TAFEI 17.0 SECURE LOGOUT
@@ -1206,6 +1324,11 @@ async function t12SaveProfile(userId, nickname, bio, button) {
       nickname: cleanName,
       bio: cleanBio
     };
+
+    if (authSession?.user?.id === userId) {
+      try { await updateAuthNickname(cleanName); }
+      catch (error) { console.warn('同步账户昵称失败：', error); }
+    }
 
     t12Render();
     t12ShowProfile(userId);
