@@ -6,9 +6,6 @@ on:
     paths:
       - .github/workflows/deploy-v207.yml
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     if: contains(github.event.head_commit.message, '[deploy-v207]')
@@ -78,7 +75,6 @@ jobs:
         run: |
           set -e
           if [ -f /tmp/site-ok ]; then
-            git rm -q .github/workflows/deploy-v207.yml
             git add device.html index.html naiwa.html search.html service.html shop.html css/pages.css data/devices.json data/articles.json js/home-views.js 404.html
             git commit -m 'deploy: v20.7 机型库对比与404 [deploy-v207]'
             git push origin HEAD:main
