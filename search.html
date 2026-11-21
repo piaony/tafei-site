@@ -147,7 +147,7 @@
     if (!q) {
       stat.textContent = '输入关键词开始搜索；也可以直接去机型库或求助台。';
       results.innerHTML = `<div class="sr-group"><div class="sr-group-head"><h2>常用入口</h2></div>
-        <a class="sr-item" href="device.html"><span class="sr-kind device">机型</span><h3>机型库</h3><p>按机型查解锁、Root、模块与故障处置。</p></a>
+        <a class="sr-item" href="device.html"><span class="sr-kind device">机型</span><h3>机型库</h3><p>145 台官方规格与深度档案，支持品牌筛选和多机对比。</p></a>
         <a class="sr-item" href="index.html#community"><span class="sr-kind post">求助</span><h3>求助台</h3><p>写清机型、系统版本和问题，按机型归档。</p></a>
         <a class="sr-item" href="service.html"><span class="sr-kind">服务</span><h3>技术服务</h3><p>解 BL、Root、模块、救砖，先检测再报价。</p></a></div>`;
       return;
@@ -176,7 +176,7 @@
       if (hits.length) {
         out.push(`<div class="sr-group"><div class="sr-group-head"><h2>机型</h2><span>${hits.length} 台</span></div>
           ${hits.map((d) => `<a class="sr-item" href="device.html?m=${encodeURIComponent(d.id)}">
-            <span class="sr-kind device">${d.verified ? '已验证' : '档案'}</span>
+            <span class="sr-kind device">${d.verified ? '已验证' : d.catalog ? '规格' : '档案'}</span>
             <h3>${mark(d.name, q)}</h3>
             <p>${mark([d.brand, d.soc, d.released].filter(Boolean).join(' · '), q)}</p></a>`).join('')}
         </div>`);
@@ -222,7 +222,7 @@
       ]);
       state.columns = artRes.columns || [];
       state.articles = artRes.articles || [];
-      state.devices = devRes.devices || [];
+      state.devices = [...(devRes.devices || []), ...(devRes.catalog || [])];
       state.posts = Array.isArray(postRes) ? postRes : [];
     } catch (e) {
       stat.textContent = '数据加载失败，请稍后刷新。';

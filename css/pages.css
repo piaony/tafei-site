@@ -148,6 +148,17 @@ body.page-inner {
   border: 1px solid var(--tf-line); color: var(--tf-muted); justify-self: start;
 }
 .dev-card .dev-state.verified { color: var(--tf-green); border-color: rgba(78, 230, 161, .45); }
+.dev-card .dev-state.catalog { color: #ffd28a; border-color: rgba(255, 210, 138, .45); }
+
+.dev-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+.dev-filter {
+  border: 1px solid var(--tf-line); background: rgba(17, 29, 55, .55); color: var(--tf-muted);
+  border-radius: var(--tf-r-pill); padding: 6px 12px; font: inherit; font-size: 12.5px; cursor: pointer;
+}
+.dev-filter:hover { color: var(--tf-text); border-color: var(--tf-line-strong); }
+.dev-filter.on { color: #fff; background: var(--tf-grad-action); border-color: transparent; }
+body.light .dev-filter { background: #fff; }
+body.light .dev-filter.on { color: #fff; }
 
 .dev-page { display: grid; gap: 22px; max-width: 920px; }
 .dev-read { max-width: 880px; }

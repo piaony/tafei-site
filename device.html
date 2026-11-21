@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#080d1b">
-<meta name="description" content="挞飞机型库：逐台整理解锁方式、Root 路线、模块建议、常见故障与实测记录，支持按机型搜索和多机对比，先按机型查，再决定要不要折腾。">
+<meta name="description" content="挞飞机型库：4 台深度档案 + 141 台官方规格目录，覆盖小米、Redmi、POCO、OPPO、华为、荣耀、realme；支持按品牌筛选、关键词搜索和多机对比，参数均可回溯到厂商官网。">
 <link rel="canonical" href="https://piaony.github.io/tafei-site/device.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
@@ -13,7 +13,7 @@
 <meta property="og:url" content="https://piaony.github.io/tafei-site/device.html">
 <title>机型库 · 挞飞 TAFEI</title>
 <link rel="stylesheet" href="css/tafei-ui.css">
-<link rel="stylesheet" href="css/pages.css?v=3">
+<link rel="stylesheet" href="css/pages.css?v=4">
 </head>
 <body class="page-inner">
 <header class="pg-nav"><div class="pw pg-nav-in">
@@ -39,12 +39,13 @@
   <section class="pg-sec" id="listSection">
     <div class="pg-sec-head">
       <div><p class="pg-kicker">ALL DEVICES</p><h2>机型列表</h2></div>
-      <p>带“已验证”标记的，是站长在自己或客户机器上实测过的条目；其余为按官方规格整理的档案。</p>
+      <p>带「已验证」标记的是站长实测过的条目；「深度档案」含解锁、Root、模块与故障内容，「规格目录」只整理厂商官网参数、未实测。</p>
     </div>
     <div class="dev-toolbar">
       <input id="devSearch" class="dev-search" type="search" placeholder="搜机型或芯片，如 K40、骁龙 870" aria-label="搜索机型">
       <span class="dev-count" id="devCount" role="status" aria-live="polite"></span>
     </div>
+    <div class="dev-filters" id="devFilters" role="group" aria-label="按品牌筛选"></div>
     <div class="dev-grid" id="deviceGrid" aria-live="polite"></div>
   </section>
 
@@ -79,6 +80,7 @@
   const grid = document.getElementById('deviceGrid');
   const searchInput = document.getElementById('devSearch');
   const countEl = document.getElementById('devCount');
+  const filtersEl = document.getElementById('devFilters');
 
   const listView = document.getElementById('listSection');
   const listHero = document.getElementById('listHero');
@@ -88,7 +90,7 @@
   const cmpBar = document.getElementById('cmpBar');
   const cmpInfo = document.getElementById('cmpInfo');
 
-  const state = { devices: [], selected: [], q: '' };
+  const state = { devices: [], selected: [], q: '', filter: 'all' };
 
   const ROWS = [
     ['screen', '屏幕'], ['soc', '芯片'], ['battery', '电池'], ['charge', '充电'],
@@ -101,16 +103,41 @@
   }
 
   function visibleDevices() {
+    let list = state.devices;
+    if (state.filter === 'deep') list = list.filter((d) => !d.catalog);
+    else if (state.filter !== 'all') list = list.filter((d) => d.brand === state.filter);
     const q = state.q.trim().toLowerCase();
-    return q ? state.devices.filter((d) => matchText(d).includes(q)) : state.devices;
+    return q ? list.filter((d) => matchText(d).includes(q)) : list;
+  }
+
+  function renderFilters() {
+    if (!filtersEl) return;
+    const deepCount = state.devices.filter((d) => !d.catalog).length;
+    const brandOrder = ['小米', 'Redmi', 'POCO', 'OPPO', '华为', '荣耀', 'realme'];
+    const brands = brandOrder.filter((b) => state.devices.some((d) => d.brand === b));
+    const items = [
+      ['all', `全部 ${state.devices.length}`],
+      ['deep', `深度档案 ${deepCount}`],
+      ...brands.map((b) => [b, `${b} ${state.devices.filter((d) => d.brand === b).length}`])
+    ];
+    filtersEl.innerHTML = items.map(([value, label]) => `<button class="dev-filter${state.filter === value ? ' on' : ''}" type="button" data-filter="${esc(value)}" aria-pressed="${state.filter === value}">${esc(label)}</button>`).join('');
+    filtersEl.querySelectorAll('[data-filter]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.filter = btn.dataset.filter;
+        renderFilters();
+        renderGrid();
+      });
+    });
   }
 
   function card(dev) {
     const inCmp = state.selected.includes(dev.id);
     const devState = dev.verified
       ? '<span class="dev-state verified">已验证</span>'
-      : '<span class="dev-state">整理档案</span>';
-    return `<div class="pg-card dev-card" data-id="${esc(dev.id)}">
+      : dev.catalog
+        ? '<span class="dev-state catalog">规格目录</span>'
+        : '<span class="dev-state">整理档案</span>';
+    return `<div class="pg-card dev-card" data-id="${esc(dev.id)}" data-brand="${esc(dev.brand)}">
       <div class="dev-card-top">
         ${devState}
         <button class="dev-cmp-btn${inCmp ? ' on' : ''}" type="button" data-cmp="${esc(dev.id)}" aria-pressed="${inCmp}">${inCmp ? '✓ 已加入' : '＋ 对比'}</button>
@@ -118,7 +145,7 @@
       <a class="dev-card-link" href="device.html?m=${encodeURIComponent(dev.id)}">
         <h3>${esc(dev.name)}</h3>
         <span class="dev-soc">${esc(dev.brand)} · ${esc(dev.soc)} · ${esc(dev.released)}</span>
-        <p>${esc(dev.summary)}</p>
+        ${dev.catalog ? '' : `<p>${esc(dev.summary)}</p>`}
         <span class="dev-specs">${(dev.specs || []).map(esc).join(' · ')}</span>
       </a>
     </div>`;
@@ -128,7 +155,8 @@
     const list = visibleDevices();
     grid.innerHTML = list.map(card).join('')
       || '<div class="pg-card dev-empty">没有匹配的机型。可以换个关键词，或者把机型发给我单独建档案。</div>';
-    if (countEl) countEl.textContent = `共 ${state.devices.length} 台 · 当前显示 ${list.length} 台 · 已选 ${state.selected.length}/3`;
+    const deepCount = state.devices.filter((d) => !d.catalog).length;
+    if (countEl) countEl.textContent = `共 ${state.devices.length} 台 · 深度档案 ${deepCount} 台 · 当前显示 ${list.length} 台 · 已选 ${state.selected.length}/3`;
     grid.querySelectorAll('[data-cmp]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -191,7 +219,8 @@
       <button class="dev-cmp-rm" type="button" data-rm="${esc(d.id)}">移出对比</button>
     </th>`).join('');
 
-    const body = ROWS.map(([key, label]) => `<tr>
+    const rows = ROWS.filter(([key]) => list.some((d) => ((d.compare && d.compare[key]) || '—') !== '—'));
+    const body = rows.map(([key, label]) => `<tr>
       <th scope="row">${esc(label)}</th>
       ${list.map((d) => `<td>${esc((d.compare && d.compare[key]) || '—')}</td>`).join('')}
     </tr>`).join('');
@@ -210,7 +239,7 @@
             <tbody>${body}</tbody>
           </table>
         </div>
-        <p class="dev-cmp-note">对比最多 3 台。需要加机型或补实测数据，可以在技术服务里说明。</p>
+        <p class="dev-cmp-note">对比最多 3 台。「规格目录」条目的参数来自厂商官网，未实测；拿不准的字段建议点进详情核对原始参数页。</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
           <button class="btn" type="button" id="cmpBack">← 返回机型列表</button>
           <a class="btn primary" href="service.html#book">提交服务预约 ↗</a>
@@ -252,6 +281,20 @@
     return `<div class="dev-block"><h2>${esc(block.title)}</h2>${body()}</div>`;
   }
 
+  function catalogSpecBlock(dev) {
+    const c = dev.compare || {};
+    const rows = [
+      ['屏幕', c.screen], ['芯片', c.soc], ['电池', c.battery], ['充电', c.charge],
+      ['重量', c.weight], ['系统', c.system], ['其它', c.misc]
+    ].filter(([, v]) => v && v !== '—');
+    return `<div class="dev-block">
+      <h2>官方规格</h2>
+      <dl class="dev-kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      <div class="dev-note">这条是「官方规格目录」，参数来自厂商官网，未做实机测试；解锁、Root、模块与故障处置暂未整理。需要这台机的深度档案，可以在下面提交机型。</div>
+      ${dev.source ? `<div><a class="btn" href="${esc(dev.source)}" target="_blank" rel="noopener">查看${esc(dev.sourceName || '官方')}原始参数页 ↗</a></div>` : ''}
+    </div>`;
+  }
+
   function renderDetail(dev, all) {
     showList();
     listHero.hidden = true;
@@ -259,9 +302,9 @@
     if (listFoot) listFoot.hidden = true;
     detail.hidden = false;
 
-    const others = all.filter((d) => d.id !== dev.id).slice(0, 3);
+    const others = all.filter((d) => d.id !== dev.id && !d.catalog).slice(0, 3);
     const othersHtml = others.length
-      ? `<div class="pg-sec"><div class="pg-sec-head"><div><p class="pg-kicker">MORE</p><h2>其它机型</h2></div></div>
+      ? `<div class="pg-sec"><div class="pg-sec-head"><div><p class="pg-kicker">MORE</p><h2>深度档案</h2></div></div>
          <div class="dev-grid">${others.map(card).join('')}</div></div>`
       : '';
 
@@ -273,12 +316,14 @@
             <h1>${esc(dev.name)}</h1>
             <div class="dev-spec-strip">${(dev.specs || []).map((s) => `<span>${esc(s)}</span>`).join('')}</div>
             <p class="pg-lead" style="margin-top:8px">${esc(dev.summary)}</p>
-            ${dev.verified ? '' : '<div class="dev-warn">本页按官方规格与公开资料整理，机型实测数据（系统版本、帧率、温度、续航）待站长补充后再标记为「已验证」。</div>'}
+            ${dev.verified ? '' : dev.catalog
+              ? '<div class="dev-warn">本页是官方规格目录，未实测；没有解锁、Root、模块和故障处置内容。需要这些内容可以在下方提交机型。</div>'
+              : '<div class="dev-warn">本页按官方规格与公开资料整理，机型实测数据（系统版本、帧率、温度、续航）待站长补充后再标记为「已验证」。</div>'}
           </div>
         </div>
       </section>
       <section class="pg-sec dev-read" style="display:grid;gap:22px">
-        ${(dev.blocks || []).map(renderBlock).join('')}
+        ${dev.catalog ? catalogSpecBlock(dev) : (dev.blocks || []).map(renderBlock).join('')}
       </section>
       <section class="pg-sec" id="devHelpSec">
         <div class="pg-sec-head">
@@ -362,7 +407,8 @@
     try {
       const res = await fetch('data/devices.json', { cache: 'no-store' });
       const json = await res.json();
-      state.devices = json.devices || [];
+      state.devices = [...(json.devices || []), ...(json.catalog || [])];
+      renderFilters();
       renderGrid();
       updateBar();
 

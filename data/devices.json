@@ -310,5 +310,3799 @@
         "vivo X50"
       ]
     }
+  ],
+  "catalog": [
+    {
+      "id": "xm-xiaomi-17t-pro",
+      "name": "小米 17T Pro",
+      "brand": "小米",
+      "soc": "天玑 9500",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2772×1280 · 144Hz",
+        "7000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2772×1280 · 144Hz",
+        "soc": "天玑 9500",
+        "battery": "7000mAh",
+        "charge": "100W 有线",
+        "weight": "219g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-17t-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-17t",
+      "name": "小米 17T",
+      "brand": "小米",
+      "soc": "天玑 8500-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2756×1268 · 120Hz",
+        "6500mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2756×1268 · 120Hz",
+        "soc": "天玑 8500-Ultra",
+        "battery": "6500mAh",
+        "charge": "67W 有线",
+        "weight": "200g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-17t/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-leica-leitzphone-powered-by-xiaomi",
+      "name": "Leica Leitzphone powered by Xiaomi",
+      "brand": "小米",
+      "soc": "骁龙 8 Elite Gen 5",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2608×1200",
+        "6000mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2608×1200",
+        "soc": "骁龙 8 Elite Gen 5",
+        "battery": "6000mAh",
+        "charge": "90W 有线",
+        "weight": "223.4g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/leica-leitzphone-powered-by-xiaomi/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-17",
+      "name": "小米 17",
+      "brand": "小米",
+      "soc": "骁龙 8 Elite Gen 5",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.3 英寸 · 2656×1220",
+        "6330mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.3 英寸 · 2656×1220",
+        "soc": "骁龙 8 Elite Gen 5",
+        "battery": "6330mAh",
+        "charge": "100W 有线",
+        "weight": "191g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-17/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-17-ultra",
+      "name": "小米 17 Ultra",
+      "brand": "小米",
+      "soc": "骁龙 8 Elite Gen 5",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2608×1200",
+        "6000mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2608×1200",
+        "soc": "骁龙 8 Elite Gen 5",
+        "battery": "6000mAh",
+        "charge": "90W 有线",
+        "weight": "218.4g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-17-ultra/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-15t",
+      "name": "小米 15T",
+      "brand": "小米",
+      "soc": "天玑 8400-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2772×1280 · 120Hz",
+        "5500mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2772×1280 · 120Hz",
+        "soc": "天玑 8400-Ultra",
+        "battery": "5500mAh",
+        "charge": "67W 有线",
+        "weight": "194g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-15t/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-15t-pro",
+      "name": "小米 15T Pro",
+      "brand": "小米",
+      "soc": "天玑 9400+",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2772×1280 · 144Hz",
+        "5500mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2772×1280 · 144Hz",
+        "soc": "天玑 9400+",
+        "battery": "5500mAh",
+        "charge": "90W 有线",
+        "weight": "210g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-15t-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-15",
+      "name": "小米 15",
+      "brand": "小米",
+      "soc": "骁龙 8 Elite",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.36 英寸 · 7680×4320",
+        "5240mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.36 英寸 · 7680×4320",
+        "soc": "骁龙 8 Elite",
+        "battery": "5240mAh",
+        "charge": "90W 有线",
+        "weight": "191g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-15/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-15-ultra",
+      "name": "小米 15 Ultra",
+      "brand": "小米",
+      "soc": "骁龙 8 Elite",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.73 英寸 · 3200×1440",
+        "5410mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.73 英寸 · 3200×1440",
+        "soc": "骁龙 8 Elite",
+        "battery": "5410mAh",
+        "charge": "90W 有线",
+        "weight": "226g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-15-ultra/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-mix-flip",
+      "name": "小米 MIX Flip",
+      "brand": "小米",
+      "soc": "骁龙 8 Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.86 英寸 · 2912×1224",
+        "4780mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "6.86 英寸 · 2912×1224",
+        "soc": "骁龙 8 Gen 3",
+        "battery": "4780mAh",
+        "charge": "67W 有线",
+        "weight": "192g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-mix-flip/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-14t",
+      "name": "小米 14T",
+      "brand": "小米",
+      "soc": "天玑 8300-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "2712×1220 · 144Hz",
+        "5000mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "2712×1220 · 144Hz",
+        "soc": "天玑 8300-Ultra",
+        "battery": "5000mAh",
+        "charge": "67W 有线",
+        "weight": "195g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-14t/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-14t-pro",
+      "name": "小米 14T Pro",
+      "brand": "小米",
+      "soc": "天玑 9300+",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "2712×1220 · 144Hz",
+        "5000mAh",
+        "120W 有线"
+      ],
+      "compare": {
+        "screen": "2712×1220 · 144Hz",
+        "soc": "天玑 9300+",
+        "battery": "5000mAh",
+        "charge": "120W 有线",
+        "weight": "209g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-14t-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-14-ultra",
+      "name": "小米 14 Ultra",
+      "brand": "小米",
+      "soc": "骁龙 8 Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.73 英寸 · 3200×1440",
+        "5000mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.73 英寸 · 3200×1440",
+        "soc": "骁龙 8 Gen 3",
+        "battery": "5000mAh",
+        "charge": "90W 有线",
+        "weight": "219.8g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-14-ultra/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-14",
+      "name": "小米 14",
+      "brand": "小米",
+      "soc": "骁龙 8 Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.36 英寸 · 2670×1200",
+        "4610mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.36 英寸 · 2670×1200",
+        "soc": "骁龙 8 Gen 3",
+        "battery": "4610mAh",
+        "charge": "90W 有线",
+        "weight": "193g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-14/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-13-ultra",
+      "name": "小米 13 Ultra",
+      "brand": "小米",
+      "soc": "骁龙 8 Gen 2",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "3200×1440",
+        "5000mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "3200×1440",
+        "soc": "骁龙 8 Gen 2",
+        "battery": "5000mAh",
+        "charge": "90W 有线",
+        "weight": "227g",
+        "released": "—",
+        "system": "MIUI 14 based on Android 13",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-13-ultra/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-13-lite",
+      "name": "小米 13 Lite",
+      "brand": "小米",
+      "soc": "骁龙 7 Gen 1",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.55 英寸 · 3840×2160",
+        "4500mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "6.55 英寸 · 3840×2160",
+        "soc": "骁龙 7 Gen 1",
+        "battery": "4500mAh",
+        "charge": "67W 有线",
+        "weight": "171g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-13-lite/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-xiaomi-13",
+      "name": "小米 13",
+      "brand": "小米",
+      "soc": "骁龙 8 Gen 2",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.36 英寸 · 2400×1080",
+        "4500mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "6.36 英寸 · 2400×1080",
+        "soc": "骁龙 8 Gen 2",
+        "battery": "4500mAh",
+        "charge": "67W 有线",
+        "weight": "189g",
+        "released": "—",
+        "system": "MIUI 14, android 13",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/xiaomi-13/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-a7",
+      "name": "Redmi A7",
+      "brand": "Redmi",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.88 英寸 · 1640×720",
+        "5200mAh"
+      ],
+      "compare": {
+        "screen": "6.88 英寸 · 1640×720",
+        "soc": "—",
+        "battery": "5200mAh",
+        "charge": "—",
+        "weight": "193g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-a7/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-a7-pro",
+      "name": "Redmi A7 Pro",
+      "brand": "Redmi",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 1600×720",
+        "6000mAh"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 1600×720",
+        "soc": "—",
+        "battery": "6000mAh",
+        "charge": "—",
+        "weight": "208g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-a7-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-15",
+      "name": "Redmi Note 15",
+      "brand": "Redmi",
+      "soc": "Helio G100-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.77 英寸 · 2392×1080",
+        "6000mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.77 英寸 · 2392×1080",
+        "soc": "Helio G100-Ultra",
+        "battery": "6000mAh",
+        "charge": "33W 有线",
+        "weight": "183.7g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-15/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-15-5g",
+      "name": "Redmi Note 15 5G",
+      "brand": "Redmi",
+      "soc": "骁龙 6 Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2392×1080",
+        "5520mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2392×1080",
+        "soc": "骁龙 6 Gen 3",
+        "battery": "5520mAh",
+        "charge": "45W 有线",
+        "weight": "178g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-15-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-15-pro",
+      "name": "Redmi Note 15 Pro",
+      "brand": "Redmi",
+      "soc": "Helio G200-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.77 英寸 · 2392×1080",
+        "6500mAh"
+      ],
+      "compare": {
+        "screen": "6.77 英寸 · 2392×1080",
+        "soc": "Helio G200-Ultra",
+        "battery": "6500mAh",
+        "charge": "—",
+        "weight": "195g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-15-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-15-pro-5g",
+      "name": "Redmi Note 15 Pro 5G",
+      "brand": "Redmi",
+      "soc": "天玑 7400-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2772×1280",
+        "6580mAh"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2772×1280",
+        "soc": "天玑 7400-Ultra",
+        "battery": "6580mAh",
+        "charge": "—",
+        "weight": "210g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-15-pro-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-15-pro-plus-5g",
+      "name": "Redmi Note 15 Pro+ 5G",
+      "brand": "Redmi",
+      "soc": "骁龙 7s Gen 4",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2772×1280",
+        "6500mAh"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2772×1280",
+        "soc": "骁龙 7s Gen 4",
+        "battery": "6500mAh",
+        "charge": "—",
+        "weight": "207.1g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-15-pro-plus-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-15c-5g",
+      "name": "Redmi 15C 5G",
+      "brand": "Redmi",
+      "soc": "天玑 6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 1600×720",
+        "6000mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 1600×720",
+        "soc": "天玑 6300",
+        "battery": "6000mAh",
+        "charge": "33W 有线",
+        "weight": "211g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-15c-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-15",
+      "name": "Redmi 15",
+      "brand": "Redmi",
+      "soc": "骁龙 685",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2340×1080",
+        "7000mAh"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2340×1080",
+        "soc": "骁龙 685",
+        "battery": "7000mAh",
+        "charge": "—",
+        "weight": "214g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-15/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-15c",
+      "name": "Redmi 15C",
+      "brand": "Redmi",
+      "soc": "Helio G81-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 1600×720",
+        "6000mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 1600×720",
+        "soc": "Helio G81-Ultra",
+        "battery": "6000mAh",
+        "charge": "33W 有线",
+        "weight": "205g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-15c/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-15-5g",
+      "name": "Redmi 15 5G",
+      "brand": "Redmi",
+      "soc": "骁龙 6s Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2340×1080",
+        "7000mAh"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2340×1080",
+        "soc": "骁龙 6s Gen 3",
+        "battery": "7000mAh",
+        "charge": "—",
+        "weight": "217g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-15-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-13x",
+      "name": "Redmi 13x",
+      "brand": "Redmi",
+      "soc": "Helio G91-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.79 英寸 · 2460×1080",
+        "5030mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.79 英寸 · 2460×1080",
+        "soc": "Helio G91-Ultra",
+        "battery": "5030mAh",
+        "charge": "33W 有线",
+        "weight": "198g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-13x/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-a5",
+      "name": "Redmi A5",
+      "brand": "Redmi",
+      "soc": "紫光展锐 T7250",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.88 英寸 · 1640×720",
+        "5200mAh",
+        "15W 有线"
+      ],
+      "compare": {
+        "screen": "6.88 英寸 · 1640×720",
+        "soc": "紫光展锐 T7250",
+        "battery": "5200mAh",
+        "charge": "15W 有线",
+        "weight": "193g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-a5/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-14s",
+      "name": "Redmi Note 14S",
+      "brand": "Redmi",
+      "soc": "Helio G99-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2400×1080",
+        "5000mAh",
+        "67W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2400×1080",
+        "soc": "Helio G99-Ultra",
+        "battery": "5000mAh",
+        "charge": "67W 有线",
+        "weight": "179g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-14s/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-14",
+      "name": "Redmi Note 14",
+      "brand": "Redmi",
+      "soc": "Helio G99-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2400×1080",
+        "5500mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2400×1080",
+        "soc": "Helio G99-Ultra",
+        "battery": "5500mAh",
+        "charge": "33W 有线",
+        "weight": "196.5g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-14/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-14-5g",
+      "name": "Redmi Note 14 5G",
+      "brand": "Redmi",
+      "soc": "天玑 7025-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2400×1080",
+        "5110mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2400×1080",
+        "soc": "天玑 7025-Ultra",
+        "battery": "5110mAh",
+        "charge": "45W 有线",
+        "weight": "190g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-14-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-14-pro-5g",
+      "name": "Redmi Note 14 Pro 5G",
+      "brand": "Redmi",
+      "soc": "天玑 7300-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2712×1220",
+        "5110mAh"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2712×1220",
+        "soc": "天玑 7300-Ultra",
+        "battery": "5110mAh",
+        "charge": "—",
+        "weight": "190g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-14-pro-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-note-14-pro-plus-5g",
+      "name": "Redmi Note 14 Pro+ 5G",
+      "brand": "Redmi",
+      "soc": "骁龙 7s Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2712×1220",
+        "5110mAh"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2712×1220",
+        "soc": "骁龙 7s Gen 3",
+        "battery": "5110mAh",
+        "charge": "—",
+        "weight": "—",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-note-14-pro-plus-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-redmi-14-c",
+      "name": "Redmi 14C",
+      "brand": "Redmi",
+      "soc": "Helio G81-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.88 英寸 · 1640×720",
+        "5160mAh",
+        "18W 有线"
+      ],
+      "compare": {
+        "screen": "6.88 英寸 · 1640×720",
+        "soc": "Helio G81-Ultra",
+        "battery": "5160mAh",
+        "charge": "18W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/redmi-14-c/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-m8s-5g",
+      "name": "POCO M8s 5G",
+      "brand": "POCO",
+      "soc": "骁龙 6s Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2340×1080",
+        "7000mAh"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2340×1080",
+        "soc": "骁龙 6s Gen 3",
+        "battery": "7000mAh",
+        "charge": "—",
+        "weight": "217g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-m8s-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-c81-pro",
+      "name": "POCO C81 Pro",
+      "brand": "POCO",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 1600×720",
+        "6000mAh",
+        "15W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 1600×720",
+        "soc": "—",
+        "battery": "6000mAh",
+        "charge": "15W 有线",
+        "weight": "208g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-c81-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-x8-pro-max",
+      "name": "POCO X8 Pro Max",
+      "brand": "POCO",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 3840×2160 · 120Hz",
+        "8500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 3840×2160 · 120Hz",
+        "soc": "—",
+        "battery": "8500mAh",
+        "charge": "100W 有线",
+        "weight": "218g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-x8-pro-max/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-x8-pro",
+      "name": "POCO X8 Pro",
+      "brand": "POCO",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 3840×2160 · 120Hz",
+        "6500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 3840×2160 · 120Hz",
+        "soc": "—",
+        "battery": "6500mAh",
+        "charge": "100W 有线",
+        "weight": "201.47g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 3",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-x8-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-m8-pro-5g",
+      "name": "POCO M8 Pro 5G",
+      "brand": "POCO",
+      "soc": "骁龙 7s Gen 4",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2772×1280",
+        "6500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2772×1280",
+        "soc": "骁龙 7s Gen 4",
+        "battery": "6500mAh",
+        "charge": "100W 有线",
+        "weight": "205.9g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-m8-pro-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-m8-5g",
+      "name": "POCO M8 5G",
+      "brand": "POCO",
+      "soc": "骁龙 6 Gen 3",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.77 英寸 · 2392×1080",
+        "5520mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.77 英寸 · 2392×1080",
+        "soc": "骁龙 6 Gen 3",
+        "battery": "5520mAh",
+        "charge": "45W 有线",
+        "weight": "178g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-m8-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-c85",
+      "name": "POCO C85",
+      "brand": "POCO",
+      "soc": "Helio G81-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 1600×720",
+        "6000mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 1600×720",
+        "soc": "Helio G81-Ultra",
+        "battery": "6000mAh",
+        "charge": "33W 有线",
+        "weight": "205g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-c85/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-m7",
+      "name": "POCO M7",
+      "brand": "POCO",
+      "soc": "骁龙 685 4G",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2340×1080",
+        "7000mAh"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2340×1080",
+        "soc": "骁龙 685 4G",
+        "battery": "7000mAh",
+        "charge": "—",
+        "weight": "214g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-m7/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-c71",
+      "name": "POCO C71",
+      "brand": "POCO",
+      "soc": "紫光展锐 T7250",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.88 英寸 · 1640×720",
+        "5200mAh",
+        "15W 有线"
+      ],
+      "compare": {
+        "screen": "6.88 英寸 · 1640×720",
+        "soc": "紫光展锐 T7250",
+        "battery": "5200mAh",
+        "charge": "15W 有线",
+        "weight": "193g",
+        "released": "—",
+        "system": "Android 15 (Go Edition)",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-c71/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-m7-pro-5g",
+      "name": "POCO M7 Pro 5G",
+      "brand": "POCO",
+      "soc": "天玑 7025-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2400×1080",
+        "5110mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2400×1080",
+        "soc": "天玑 7025-Ultra",
+        "battery": "5110mAh",
+        "charge": "45W 有线",
+        "weight": "190g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-m7-pro-5g/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-f7-ultra",
+      "name": "POCO F7 Ultra",
+      "brand": "POCO",
+      "soc": "骁龙 8 Elite",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 7680×4320",
+        "5300mAh",
+        "120W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 7680×4320",
+        "soc": "骁龙 8 Elite",
+        "battery": "5300mAh",
+        "charge": "120W 有线",
+        "weight": "212g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-f7-ultra/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-x7-pro",
+      "name": "POCO X7 Pro",
+      "brand": "POCO",
+      "soc": "天玑 8400-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2712×1220",
+        "6000mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2712×1220",
+        "soc": "天玑 8400-Ultra",
+        "battery": "6000mAh",
+        "charge": "90W 有线",
+        "weight": "195g",
+        "released": "—",
+        "system": "Xiaomi HyperOS 2",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-x7-pro/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-x7",
+      "name": "POCO X7",
+      "brand": "POCO",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 2712×1220",
+        "5110mAh"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 2712×1220",
+        "soc": "—",
+        "battery": "5110mAh",
+        "charge": "—",
+        "weight": "185.5g",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-x7/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-c75",
+      "name": "POCO C75",
+      "brand": "POCO",
+      "soc": "Helio G81-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.88 英寸 · 1640×720",
+        "5160mAh",
+        "18W 有线"
+      ],
+      "compare": {
+        "screen": "6.88 英寸 · 1640×720",
+        "soc": "Helio G81-Ultra",
+        "battery": "5160mAh",
+        "charge": "18W 有线",
+        "weight": "204g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-c75/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-c61",
+      "name": "POCO C61",
+      "brand": "POCO",
+      "soc": "Helio G36",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.71 英寸 · 1650×720",
+        "5000mAh",
+        "10W 有线"
+      ],
+      "compare": {
+        "screen": "6.71 英寸 · 1650×720",
+        "soc": "Helio G36",
+        "battery": "5000mAh",
+        "charge": "10W 有线",
+        "weight": "199g",
+        "released": "—",
+        "system": "Android 14",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-c61/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "xm-poco-m6",
+      "name": "POCO M6",
+      "brand": "POCO",
+      "soc": "Helio G91-Ultra",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（小米官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.79 英寸 · 2460×1080",
+        "5030mAh",
+        "33W 有线"
+      ],
+      "compare": {
+        "screen": "6.79 英寸 · 2460×1080",
+        "soc": "Helio G91-Ultra",
+        "battery": "5030mAh",
+        "charge": "33W 有线",
+        "weight": "205g",
+        "released": "—",
+        "system": "Xiaomi HyperOS",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.mi.com/global/product/poco-m6/specs/",
+      "sourceName": "小米官网"
+    },
+    {
+      "id": "oppo-reno17",
+      "name": "Reno17",
+      "brand": "OPPO",
+      "soc": "高通第四代骁龙7移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.56 英寸 · 2624×1208 · 120Hz",
+        "8000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.56 英寸 · 2624×1208 · 120Hz",
+        "soc": "高通第四代骁龙7移动平台",
+        "battery": "8000mAh",
+        "charge": "80W 有线",
+        "weight": "206g",
+        "released": "—",
+        "system": "ColorOS 17.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno17/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x10-pro-max",
+      "name": "Find X10 Pro Max",
+      "brand": "OPPO",
+      "soc": "天玑 9600 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 120Hz",
+        "8000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 120Hz",
+        "soc": "天玑 9600 Pro",
+        "battery": "8000mAh",
+        "charge": "80W 有线",
+        "weight": "235g",
+        "released": "—",
+        "system": "ColorOS 17.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x10-pro-max/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-n6",
+      "name": "Find N6",
+      "brand": "OPPO",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "8.12 英寸 · 2480×2248 · 120Hz",
+        "6000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "8.12 英寸 · 2480×2248 · 120Hz",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "6000mAh",
+        "charge": "80W 有线",
+        "weight": "225g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "—"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-n/find-n6/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a7-pro-max",
+      "name": "A7 Pro Max",
+      "brand": "OPPO",
+      "soc": "高通第五代骁龙4移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 120Hz",
+        "10000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 120Hz",
+        "soc": "高通第五代骁龙4移动平台",
+        "battery": "10000mAh",
+        "charge": "80W 有线",
+        "weight": "226g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a7-pro-max/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x10",
+      "name": "Find X10",
+      "brand": "OPPO",
+      "soc": "天玑 9600M",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2768×1272 · 120Hz",
+        "8000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2768×1272 · 120Hz",
+        "soc": "天玑 9600M",
+        "battery": "8000mAh",
+        "charge": "80W 有线",
+        "weight": "216g",
+        "released": "—",
+        "system": "ColorOS 17.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x10/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x10-e",
+      "name": "Find X10 E",
+      "brand": "OPPO",
+      "soc": "天玑9500s",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2760×1256 · 120Hz",
+        "7025mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2760×1256 · 120Hz",
+        "soc": "天玑9500s",
+        "battery": "7025mAh",
+        "charge": "80W 有线",
+        "weight": "203g",
+        "released": "—",
+        "system": "ColorOS 17.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x10-e/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x9-ultra",
+      "name": "Find X9 Ultra",
+      "brand": "OPPO",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.82 英寸 · 3168×1440 · 144Hz",
+        "7050mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.82 英寸 · 3168×1440 · 144Hz",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "7050mAh",
+        "charge": "100W 有线",
+        "weight": "236g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x9-ultra/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x9s-pro",
+      "name": "Find X9s Pro",
+      "brand": "OPPO",
+      "soc": "天玑9500",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.32 英寸 · 2640×1216 · 144Hz",
+        "7025mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.32 英寸 · 2640×1216 · 144Hz",
+        "soc": "天玑9500",
+        "battery": "7025mAh",
+        "charge": "80W 有线",
+        "weight": "200g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x9s-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x9-pro-satellite",
+      "name": "Find X9 Pro 卫星通信版",
+      "brand": "OPPO",
+      "soc": "天玑9500",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 120Hz",
+        "7500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 120Hz",
+        "soc": "天玑9500",
+        "battery": "7500mAh",
+        "charge": "80W 有线",
+        "weight": "224g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x9-pro-satellite/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x9-pro",
+      "name": "Find X9 Pro",
+      "brand": "OPPO",
+      "soc": "天玑9500",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 120Hz",
+        "7500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 120Hz",
+        "soc": "天玑9500",
+        "battery": "7500mAh",
+        "charge": "80W 有线",
+        "weight": "224g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x9-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-find-x9",
+      "name": "Find X9",
+      "brand": "OPPO",
+      "soc": "天玑9500",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2760×1256 · 120Hz",
+        "7025mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2760×1256 · 120Hz",
+        "soc": "天玑9500",
+        "battery": "7025mAh",
+        "charge": "80W 有线",
+        "weight": "203g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-find-x/find-x9/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno17-pro",
+      "name": "Reno17 Pro",
+      "brand": "OPPO",
+      "soc": "天玑 8550 SUPER",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.32 英寸 · 2640×1216 · 120Hz",
+        "7250mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.32 英寸 · 2640×1216 · 120Hz",
+        "soc": "天玑 8550 SUPER",
+        "battery": "7250mAh",
+        "charge": "80W 有线",
+        "weight": "192g",
+        "released": "—",
+        "system": "ColorOS 17.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno17-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno16-pro",
+      "name": "Reno16 Pro",
+      "brand": "OPPO",
+      "soc": "天玑9500s",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 120Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 120Hz",
+        "soc": "天玑9500s",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "208g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno16-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno16",
+      "name": "Reno16",
+      "brand": "OPPO",
+      "soc": "天玑 8550 SUPER",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.32 英寸 · 2640×1216 · 120Hz",
+        "6700mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.32 英寸 · 2640×1216 · 120Hz",
+        "soc": "天玑 8550 SUPER",
+        "battery": "6700mAh",
+        "charge": "80W 有线",
+        "weight": "191g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno16/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno15-pro",
+      "name": "Reno15 Pro",
+      "brand": "OPPO",
+      "soc": "天玑8450",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 120Hz",
+        "6500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 120Hz",
+        "soc": "天玑8450",
+        "battery": "6500mAh",
+        "charge": "80W 有线",
+        "weight": "205g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno15-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno15",
+      "name": "Reno15",
+      "brand": "OPPO",
+      "soc": "天玑8450",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.32 英寸 · 2640×1216 · 120Hz",
+        "6200mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.32 英寸 · 2640×1216 · 120Hz",
+        "soc": "天玑8450",
+        "battery": "6200mAh",
+        "charge": "80W 有线",
+        "weight": "187g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno15/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno15c",
+      "name": "Reno15c",
+      "brand": "OPPO",
+      "soc": "高通第四代骁龙7移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2760×1256 · 120Hz",
+        "6500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2760×1256 · 120Hz",
+        "soc": "高通第四代骁龙7移动平台",
+        "battery": "6500mAh",
+        "charge": "80W 有线",
+        "weight": "197g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno15c/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno14-pro",
+      "name": "Reno14 Pro",
+      "brand": "OPPO",
+      "soc": "天玑8450",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2800×1272 · 120Hz",
+        "6200mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2800×1272 · 120Hz",
+        "soc": "天玑8450",
+        "battery": "6200mAh",
+        "charge": "80W 有线",
+        "weight": "201g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno14-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno14",
+      "name": "Reno14",
+      "brand": "OPPO",
+      "soc": "天玑8350",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2760×1256 · 120Hz",
+        "6000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2760×1256 · 120Hz",
+        "soc": "天玑8350",
+        "battery": "6000mAh",
+        "charge": "80W 有线",
+        "weight": "187g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno14/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno13-pro",
+      "name": "Reno13 Pro",
+      "brand": "OPPO",
+      "soc": "天玑8350",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.83 英寸 · 2800×1272 · 120Hz",
+        "5800mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.83 英寸 · 2800×1272 · 120Hz",
+        "soc": "天玑8350",
+        "battery": "5800mAh",
+        "charge": "80W 有线",
+        "weight": "197g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno13-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno13",
+      "name": "Reno13",
+      "brand": "OPPO",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2760×1256 · 120Hz",
+        "5450mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2760×1256 · 120Hz",
+        "soc": "—",
+        "battery": "5450mAh",
+        "charge": "80W 有线",
+        "weight": "181g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno13/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno12-pro",
+      "name": "Reno12 Pro",
+      "brand": "OPPO",
+      "soc": "天玑9200+ 星速版",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.70 英寸 · 2412×1080 · 120Hz",
+        "4880mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.70 英寸 · 2412×1080 · 120Hz",
+        "soc": "天玑9200+ 星速版",
+        "battery": "4880mAh",
+        "charge": "80W 有线",
+        "weight": "183g",
+        "released": "—",
+        "system": "ColorOS 14.1",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno12-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-reno12",
+      "name": "Reno12",
+      "brand": "OPPO",
+      "soc": "天玑8250 星速版",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.70 英寸 · 2412×1080 · 120Hz",
+        "4880mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.70 英寸 · 2412×1080 · 120Hz",
+        "soc": "天玑8250 星速版",
+        "battery": "4880mAh",
+        "charge": "80W 有线",
+        "weight": "179g",
+        "released": "—",
+        "system": "ColorOS 14.1",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-reno/reno12/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-k15-pro-plus",
+      "name": "K15 Pro+",
+      "brand": "OPPO",
+      "soc": "天玑 9500s",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.78 英寸 · 2772×1272 · 165Hz",
+        "8000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.78 英寸 · 2772×1272 · 165Hz",
+        "soc": "天玑 9500s",
+        "battery": "8000mAh",
+        "charge": "100W 有线",
+        "weight": "219g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-k/k15-pro-plus/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-k15-pro",
+      "name": "K15 Pro",
+      "brand": "OPPO",
+      "soc": "天玑 8500 SUPER",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.59 英寸 · 2760×1256 · 144Hz",
+        "7500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.59 英寸 · 2760×1256 · 144Hz",
+        "soc": "天玑 8500 SUPER",
+        "battery": "7500mAh",
+        "charge": "80W 有线",
+        "weight": "200g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-k/k15-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-k13-turbo-pro",
+      "name": "K13 Turbo Pro",
+      "brand": "OPPO",
+      "soc": "高通第四代骁龙8s 移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.80 英寸 · 2800×1280 · 120Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.80 英寸 · 2800×1280 · 120Hz",
+        "soc": "高通第四代骁龙8s 移动平台",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "208g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-k/k13-turbo-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-k13-turbo",
+      "name": "K13 Turbo",
+      "brand": "OPPO",
+      "soc": "天玑8450",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.80 英寸 · 2800×1280 · 120Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.80 英寸 · 2800×1280 · 120Hz",
+        "soc": "天玑8450",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "207g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-k/k13-turbo/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a7-pro",
+      "name": "A7 Pro",
+      "brand": "OPPO",
+      "soc": "天玑6360 MAX",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2372×1080 · 120Hz",
+        "8000mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2372×1080 · 120Hz",
+        "soc": "天玑6360 MAX",
+        "battery": "8000mAh",
+        "charge": "45W 有线",
+        "weight": "205g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a7-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6s-pro",
+      "name": "A6s Pro",
+      "brand": "OPPO",
+      "soc": "天玑6360 MAX",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2372×1080 · 120Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2372×1080 · 120Hz",
+        "soc": "天玑6360 MAX",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "194g",
+        "released": "—",
+        "system": "ColorOS 16.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6s-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6t-plus",
+      "name": "A6t+",
+      "brand": "OPPO",
+      "soc": "天玑6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 1570×720 · 120Hz",
+        "6500mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 1570×720 · 120Hz",
+        "soc": "天玑6300",
+        "battery": "6500mAh",
+        "charge": "45W 有线",
+        "weight": "212g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "—"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6t-plus/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6-pro",
+      "name": "A6 Pro",
+      "brand": "OPPO",
+      "soc": "天玑7300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2372×1080 · 120Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2372×1080 · 120Hz",
+        "soc": "天玑7300",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "190g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6-pro/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6k",
+      "name": "A6k",
+      "brand": "OPPO",
+      "soc": "天玑6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 1570×720 · 120Hz",
+        "7000mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 1570×720 · 120Hz",
+        "soc": "天玑6300",
+        "battery": "7000mAh",
+        "charge": "45W 有线",
+        "weight": "216g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "—"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6k/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6t",
+      "name": "A6t",
+      "brand": "OPPO",
+      "soc": "天玑6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 1570×720 · 120Hz",
+        "6500mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 1570×720 · 120Hz",
+        "soc": "天玑6300",
+        "battery": "6500mAh",
+        "charge": "45W 有线",
+        "weight": "212g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "—"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6t/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6m",
+      "name": "A6m",
+      "brand": "OPPO",
+      "soc": "天玑6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 1570×720 · 120Hz",
+        "6500mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 1570×720 · 120Hz",
+        "soc": "天玑6300",
+        "battery": "6500mAh",
+        "charge": "45W 有线",
+        "weight": "212g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "—"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6m/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6",
+      "name": "A6",
+      "brand": "OPPO",
+      "soc": "天玑6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2372×1080 · 120Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2372×1080 · 120Hz",
+        "soc": "天玑6300",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "185g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "oppo-a6x",
+      "name": "A6x",
+      "brand": "OPPO",
+      "soc": "天玑6300",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（OPPO 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 1570×720 · 120Hz",
+        "6500mAh",
+        "45W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 1570×720 · 120Hz",
+        "soc": "天玑6300",
+        "battery": "6500mAh",
+        "charge": "45W 有线",
+        "weight": "212g",
+        "released": "—",
+        "system": "ColorOS 15.0",
+        "misc": "—"
+      },
+      "source": "https://www.oppo.com/cn/smartphones/series-a/a6x/specs/",
+      "sourceName": "OPPO 官网"
+    },
+    {
+      "id": "hw-mate90-rs-ultimate-design",
+      "name": "华为 Mate 90 RS 非凡大师",
+      "brand": "华为",
+      "soc": "麒麟9050 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2848×1320 · 120Hz",
+        "6800mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2848×1320 · 120Hz",
+        "soc": "麒麟9050 Pro",
+        "battery": "6800mAh",
+        "charge": "100W 有线",
+        "weight": "248g",
+        "released": "—",
+        "system": "HarmonyOS 7.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate90-rs-ultimate-design/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate90-pro-max",
+      "name": "华为 Mate 90 Pro Max",
+      "brand": "华为",
+      "soc": "麒麟9050 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2848×1320 · 120Hz",
+        "6800mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2848×1320 · 120Hz",
+        "soc": "麒麟9050 Pro",
+        "battery": "6800mAh",
+        "charge": "100W 有线",
+        "weight": "234g",
+        "released": "—",
+        "system": "HarmonyOS 7.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate90-pro-max/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate90-pro",
+      "name": "华为 Mate 90 Pro",
+      "brand": "华为",
+      "soc": "麒麟9035",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 2832×1280 · 120Hz",
+        "6600mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 2832×1280 · 120Hz",
+        "soc": "麒麟9035",
+        "battery": "6600mAh",
+        "charge": "100W 有线",
+        "weight": "222g",
+        "released": "—",
+        "system": "HarmonyOS 7.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate90-pro/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate90",
+      "name": "华为 Mate 90",
+      "brand": "华为",
+      "soc": "麒麟9030",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 2832×1280 · 120Hz",
+        "6600mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 2832×1280 · 120Hz",
+        "soc": "麒麟9030",
+        "battery": "6600mAh",
+        "charge": "66W 有线",
+        "weight": "217g",
+        "released": "—",
+        "system": "HarmonyOS 7.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate90/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate-xt-2-ultimate-design",
+      "name": "华为 Mate XT 2 非凡大师",
+      "brand": "华为",
+      "soc": "麒麟9050 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "10.2 英寸",
+        "5600mAh",
+        "50W 有线"
+      ],
+      "compare": {
+        "screen": "10.2 英寸",
+        "soc": "麒麟9050 Pro",
+        "battery": "5600mAh",
+        "charge": "50W 有线",
+        "weight": "299g",
+        "released": "—",
+        "system": "HarmonyOS 7.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate-xt-2-ultimate-design/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate-x7",
+      "name": "华为 Mate X7",
+      "brand": "华为",
+      "soc": "麒麟9030 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "8 英寸 · 2416×2210 · 120Hz",
+        "5600mAh",
+        "50W 有线"
+      ],
+      "compare": {
+        "screen": "8 英寸 · 2416×2210 · 120Hz",
+        "soc": "麒麟9030 Pro",
+        "battery": "5600mAh",
+        "charge": "50W 有线",
+        "weight": "236g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate-x7/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate-xts-ultimate-design",
+      "name": "华为 Mate XTs 非凡大师",
+      "brand": "华为",
+      "soc": "麒麟 9020",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "10.2 英寸 · 3184×2232",
+        "5600mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "10.2 英寸 · 3184×2232",
+        "soc": "麒麟 9020",
+        "battery": "5600mAh",
+        "charge": "66W 有线",
+        "weight": "298g",
+        "released": "—",
+        "system": "HarmonyOS 5.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate-xts-ultimate-design/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate80-pro-max",
+      "name": "华为 Mate 80 Pro Max",
+      "brand": "华为",
+      "soc": "麒麟9030 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2848×1320 · 120Hz",
+        "6000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2848×1320 · 120Hz",
+        "soc": "麒麟9030 Pro",
+        "battery": "6000mAh",
+        "charge": "100W 有线",
+        "weight": "239g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate80-pro-max/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate80-pro",
+      "name": "华为 Mate 80 Pro",
+      "brand": "华为",
+      "soc": "麒麟9030 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 2832×1280 · 120Hz",
+        "5750mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 2832×1280 · 120Hz",
+        "soc": "麒麟9030 Pro",
+        "battery": "5750mAh",
+        "charge": "100W 有线",
+        "weight": "219g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate80-pro/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate80",
+      "name": "华为 Mate 80",
+      "brand": "华为",
+      "soc": "麒麟9020",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.75 英寸 · 2832×1280 · 120Hz",
+        "5750mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "6.75 英寸 · 2832×1280 · 120Hz",
+        "soc": "麒麟9020",
+        "battery": "5750mAh",
+        "charge": "66W 有线",
+        "weight": "217g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate80/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-mate80-rs-ultimate-design",
+      "name": "华为 Mate 80 RS 非凡大师",
+      "brand": "华为",
+      "soc": "麒麟9030 Pro",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2848×1320 · 120Hz",
+        "6000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2848×1320 · 120Hz",
+        "soc": "麒麟9030 Pro",
+        "battery": "6000mAh",
+        "charge": "100W 有线",
+        "weight": "249g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/mate80-rs-ultimate-design/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura90-pro-max",
+      "name": "华为 Pura 90 Pro Max",
+      "brand": "华为",
+      "soc": "麒麟9030S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.9 英寸 · 2880×1308 · 120Hz",
+        "6000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.9 英寸 · 2880×1308 · 120Hz",
+        "soc": "麒麟9030S",
+        "battery": "6000mAh",
+        "charge": "100W 有线",
+        "weight": "230.5g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura90-pro-max/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura90-plus",
+      "name": "华为 Pura 90 Plus",
+      "brand": "华为",
+      "soc": "麒麟9025",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.8 英寸 · 2848×1276 · 120Hz",
+        "5700mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.8 英寸 · 2848×1276 · 120Hz",
+        "soc": "麒麟9025",
+        "battery": "5700mAh",
+        "charge": "100W 有线",
+        "weight": "220g",
+        "released": "—",
+        "system": "HarmonyOS 7.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura90-plus/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura90-pro",
+      "name": "华为 Pura 90 Pro",
+      "brand": "华为",
+      "soc": "麒麟9030S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.6 英寸 · 2760×1256 · 120Hz",
+        "6000mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "6.6 英寸 · 2760×1256 · 120Hz",
+        "soc": "麒麟9030S",
+        "battery": "6000mAh",
+        "charge": "66W 有线",
+        "weight": "213.5g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura90-pro/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura90",
+      "name": "华为 Pura 90",
+      "brand": "华为",
+      "soc": "麒麟9010S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.84 英寸 · 2856×1320 · 120Hz",
+        "6500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.84 英寸 · 2856×1320 · 120Hz",
+        "soc": "麒麟9010S",
+        "battery": "6500mAh",
+        "charge": "100W 有线",
+        "weight": "210g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura90/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura80-ultra",
+      "name": "华为 Pura 80 Ultra",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.8 英寸 · 2848×1276 · 120Hz",
+        "5700mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.8 英寸 · 2848×1276 · 120Hz",
+        "soc": "—",
+        "battery": "5700mAh",
+        "charge": "100W 有线",
+        "weight": "233.5g",
+        "released": "—",
+        "system": "HarmonyOS 5.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura80-ultra/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura80-pro-plus",
+      "name": "华为 Pura 80 Pro+",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.8 英寸 · 2848×1276 · 120Hz",
+        "5700mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.8 英寸 · 2848×1276 · 120Hz",
+        "soc": "—",
+        "battery": "5700mAh",
+        "charge": "100W 有线",
+        "weight": "219g",
+        "released": "—",
+        "system": "HarmonyOS 5.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura80-pro-plus/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura80-pro",
+      "name": "华为 Pura 80 Pro",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.8 英寸 · 2848×1276 · 120Hz",
+        "5700mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.8 英寸 · 2848×1276 · 120Hz",
+        "soc": "—",
+        "battery": "5700mAh",
+        "charge": "100W 有线",
+        "weight": "219g",
+        "released": "—",
+        "system": "HarmonyOS 5.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura80-pro/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pura80",
+      "name": "华为 Pura 80",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.6 英寸 · 2760×1256 · 120Hz",
+        "5600mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "6.6 英寸 · 2760×1256 · 120Hz",
+        "soc": "—",
+        "battery": "5600mAh",
+        "charge": "66W 有线",
+        "weight": "211g",
+        "released": "—",
+        "system": "HarmonyOS 5.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pura80/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova16-ultra",
+      "name": "华为 nova 16 Ultra",
+      "brand": "华为",
+      "soc": "麒麟9010S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.84 英寸 · 2856×1320 · 120Hz",
+        "7000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.84 英寸 · 2856×1320 · 120Hz",
+        "soc": "麒麟9010S",
+        "battery": "7000mAh",
+        "charge": "100W 有线",
+        "weight": "220g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova16-ultra/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova16-pro",
+      "name": "华为 nova 16 Pro",
+      "brand": "华为",
+      "soc": "麒麟9010S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.84 英寸 · 2856×1320 · 120Hz",
+        "7000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.84 英寸 · 2856×1320 · 120Hz",
+        "soc": "麒麟9010S",
+        "battery": "7000mAh",
+        "charge": "100W 有线",
+        "weight": "218g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova16-pro/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova16",
+      "name": "华为 nova 16",
+      "brand": "华为",
+      "soc": "麒麟9010S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.68 英寸 · 2800×1280 · 120Hz",
+        "7000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.68 英寸 · 2800×1280 · 120Hz",
+        "soc": "麒麟9010S",
+        "battery": "7000mAh",
+        "charge": "100W 有线",
+        "weight": "199g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova16/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova16-se",
+      "name": "华为 nova 16 SE",
+      "brand": "华为",
+      "soc": "麒麟8020",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.84 英寸 · 2756×1272 · 120Hz",
+        "8500mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "6.84 英寸 · 2756×1272 · 120Hz",
+        "soc": "麒麟8020",
+        "battery": "8500mAh",
+        "charge": "66W 有线",
+        "weight": "229g",
+        "released": "—",
+        "system": "HarmonyOS 6.1",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova16-se/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova15-ultra",
+      "name": "华为 nova 15 Ultra",
+      "brand": "华为",
+      "soc": "麒麟9010S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.84 英寸 · 2856×1320 · 120Hz",
+        "6500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.84 英寸 · 2856×1320 · 120Hz",
+        "soc": "麒麟9010S",
+        "battery": "6500mAh",
+        "charge": "100W 有线",
+        "weight": "209g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova15-ultra/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova15-pro",
+      "name": "华为 nova 15 Pro",
+      "brand": "华为",
+      "soc": "麒麟9010S",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.84 英寸 · 2856×1320 · 120Hz",
+        "6500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.84 英寸 · 2856×1320 · 120Hz",
+        "soc": "麒麟9010S",
+        "battery": "6500mAh",
+        "charge": "100W 有线",
+        "weight": "202g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova15-pro/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova15",
+      "name": "华为 nova 15",
+      "brand": "华为",
+      "soc": "麒麟8020",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.7 英寸 · 2412×1084 · 120Hz",
+        "6000mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.7 英寸 · 2412×1084 · 120Hz",
+        "soc": "麒麟8020",
+        "battery": "6000mAh",
+        "charge": "100W 有线",
+        "weight": "196g",
+        "released": "—",
+        "system": "HarmonyOS 6.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova15/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova14-ultra",
+      "name": "华为 nova 14 Ultra",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.81 英寸 · 2860×1272 · 120Hz",
+        "5500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.81 英寸 · 2860×1272 · 120Hz",
+        "soc": "—",
+        "battery": "5500mAh",
+        "charge": "100W 有线",
+        "weight": "204g",
+        "released": "—",
+        "system": "HarmonyOS 5.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova14-ultra/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-nova14",
+      "name": "华为 nova 14",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.7 英寸 · 2412×1084 · 120Hz",
+        "5500mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.7 英寸 · 2412×1084 · 120Hz",
+        "soc": "—",
+        "battery": "5500mAh",
+        "charge": "100W 有线",
+        "weight": "192g",
+        "released": "—",
+        "system": "HarmonyOS 5.0",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/nova14/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "hw-pocket-2-youxiangban",
+      "name": "华为 Pocket 2 优享版",
+      "brand": "华为",
+      "soc": "—",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（华为官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.94 英寸 · 2690×1136 · 120Hz",
+        "4520mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "6.94 英寸 · 2690×1136 · 120Hz",
+        "soc": "—",
+        "battery": "4520mAh",
+        "charge": "66W 有线",
+        "weight": "199g",
+        "released": "—",
+        "system": "HarmonyOS 4.3",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://consumer.huawei.com/cn/phones/pocket-2-youxiangban/specs/",
+      "sourceName": "华为官网"
+    },
+    {
+      "id": "honor-honor-win2",
+      "name": "荣耀 WIN2",
+      "brand": "荣耀",
+      "soc": "第六代骁龙8超级至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.89 英寸 · 3104×1440",
+        "10100mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.89 英寸 · 3104×1440",
+        "soc": "第六代骁龙8超级至尊版移动平台",
+        "battery": "10100mAh",
+        "charge": "100W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 11（基于Android 17）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-win2/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-win-rt2",
+      "name": "荣耀 WIN RT2",
+      "brand": "荣耀",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.89 英寸 · 3104×1440",
+        "12070mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.89 英寸 · 3104×1440",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "12070mAh",
+        "charge": "90W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 11（基于Android 17）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-win-rt2/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-win-turbo2",
+      "name": "荣耀 WIN Turbo2",
+      "brand": "荣耀",
+      "soc": "第四代骁龙8s移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.89 英寸 · 3104×1440",
+        "12070mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.89 英寸 · 3104×1440",
+        "soc": "第四代骁龙8s移动平台",
+        "battery": "12070mAh",
+        "charge": "90W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 11（基于Android 17）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-win-turbo2/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic9-pro-max",
+      "name": "荣耀 Magic9 Pro Max",
+      "brand": "荣耀",
+      "soc": "第六代骁龙8超级至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.8 英寸 · 2868×1320",
+        "8800mAh",
+        "100W 有线"
+      ],
+      "compare": {
+        "screen": "6.8 英寸 · 2868×1320",
+        "soc": "第六代骁龙8超级至尊版移动平台",
+        "battery": "8800mAh",
+        "charge": "100W 有线",
+        "weight": "233g",
+        "released": "—",
+        "system": "MagicOS 11（基于Android 17）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic9-pro-max/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic9",
+      "name": "荣耀 Magic9",
+      "brand": "荣耀",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.37 英寸 · 2664×1236",
+        "8000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.37 英寸 · 2664×1236",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "8000mAh",
+        "charge": "80W 有线",
+        "weight": "209g",
+        "released": "—",
+        "system": "MagicOS 11（基于Android 17）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic9/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic-v6",
+      "name": "荣耀 Magic V6",
+      "brand": "荣耀",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "7.95 英寸 · 2352×2172",
+        "7150mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "7.95 英寸 · 2352×2172",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "7150mAh",
+        "charge": "80W 有线",
+        "weight": "219g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic-v6/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic8-pro-air",
+      "name": "荣耀 Magic8 Pro Air",
+      "brand": "荣耀",
+      "soc": "天玑 9500",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.31 英寸 · 2640×1216",
+        "5500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.31 英寸 · 2640×1216",
+        "soc": "天玑 9500",
+        "battery": "5500mAh",
+        "charge": "80W 有线",
+        "weight": "155g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic8-pro-air/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-600-pro",
+      "name": "荣耀600 Pro",
+      "brand": "荣耀",
+      "soc": "天玑8550 Elite",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2728×1264",
+        "8000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2728×1264",
+        "soc": "天玑8550 Elite",
+        "battery": "8000mAh",
+        "charge": "80W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-600-pro/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-600",
+      "name": "荣耀600 超级版",
+      "brand": "荣耀",
+      "soc": "第四代骁龙7移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2728×1264",
+        "8600mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2728×1264",
+        "soc": "第四代骁龙7移动平台",
+        "battery": "8600mAh",
+        "charge": "80W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-600/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-600-genki",
+      "name": "荣耀600 元气版",
+      "brand": "荣耀",
+      "soc": "第四代骁龙7移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.57 英寸 · 2728×1264",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.57 英寸 · 2728×1264",
+        "soc": "第四代骁龙7移动平台",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "190g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-600-genki/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-500-pro",
+      "name": "荣耀500 Pro",
+      "brand": "荣耀",
+      "soc": "骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.55 英寸 · 2736×1264",
+        "8000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.55 英寸 · 2736×1264",
+        "soc": "骁龙8至尊版移动平台",
+        "battery": "8000mAh",
+        "charge": "80W 有线",
+        "weight": "201g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-500-pro/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-win-turbo",
+      "name": "荣耀 WIN Turbo",
+      "brand": "荣耀",
+      "soc": "天玑8500 竞速版",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.79 英寸 · 2640×1200",
+        "10000mAh"
+      ],
+      "compare": {
+        "screen": "6.79 英寸 · 2640×1200",
+        "soc": "天玑8500 竞速版",
+        "battery": "10000mAh",
+        "charge": "—",
+        "weight": "216g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-win-turbo/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-power2",
+      "name": "荣耀 Power2",
+      "brand": "荣耀",
+      "soc": "天玑8500 Elite",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.79 英寸 · 2640×1200",
+        "10080mAh",
+        "27W 有线"
+      ],
+      "compare": {
+        "screen": "6.79 英寸 · 2640×1200",
+        "soc": "天玑8500 Elite",
+        "battery": "10080mAh",
+        "charge": "27W 有线",
+        "weight": "216g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-power2/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-x80-pro-max",
+      "name": "荣耀 X80 Pro Max",
+      "brand": "荣耀",
+      "soc": "第五代骁龙6移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.8 英寸 · 2788×1280",
+        "11000mAh",
+        "27W 有线"
+      ],
+      "compare": {
+        "screen": "6.8 英寸 · 2788×1280",
+        "soc": "第五代骁龙6移动平台",
+        "battery": "11000mAh",
+        "charge": "27W 有线",
+        "weight": "203g",
+        "released": "—",
+        "system": "MagicOS 10.0（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-x80-pro-max/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-x70-pro-max",
+      "name": "荣耀 X70 Pro Max",
+      "brand": "荣耀",
+      "soc": "第四代骁龙6移动平台增强版",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.79 英寸 · 2640×1200",
+        "8560mAh"
+      ],
+      "compare": {
+        "screen": "6.79 英寸 · 2640×1200",
+        "soc": "第四代骁龙6移动平台增强版",
+        "battery": "8560mAh",
+        "charge": "—",
+        "weight": "196g",
+        "released": "—",
+        "system": "MagicOS 10.0（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-x70-pro-max/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-x60-gt",
+      "name": "荣耀 X60 GT",
+      "brand": "荣耀",
+      "soc": "第一代骁龙8+移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.7 英寸 · 2664×1200",
+        "6300mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.7 英寸 · 2664×1200",
+        "soc": "第一代骁龙8+移动平台",
+        "battery": "6300mAh",
+        "charge": "80W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 9.0（基于Android 15）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-x60-gt/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-play11-plus",
+      "name": "荣耀 Play11 Plus",
+      "brand": "荣耀",
+      "soc": "天玑6500 Elite",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.6 英寸 · 2600×1200",
+        "7000mAh"
+      ],
+      "compare": {
+        "screen": "6.6 英寸 · 2600×1200",
+        "soc": "天玑6500 Elite",
+        "battery": "7000mAh",
+        "charge": "—",
+        "weight": "185g",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-play11-plus/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic8-pro",
+      "name": "荣耀 Magic8 Pro",
+      "brand": "荣耀",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.71 英寸 · 2808×1256",
+        "7200mAh",
+        "120W 有线"
+      ],
+      "compare": {
+        "screen": "6.71 英寸 · 2808×1256",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "7200mAh",
+        "charge": "120W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic8-pro/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic8",
+      "name": "荣耀 Magic8",
+      "brand": "荣耀",
+      "soc": "第五代骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.58 英寸 · 2760×1256",
+        "7000mAh",
+        "90W 有线"
+      ],
+      "compare": {
+        "screen": "6.58 英寸 · 2760×1256",
+        "soc": "第五代骁龙8至尊版移动平台",
+        "battery": "7000mAh",
+        "charge": "90W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "MagicOS 10（基于Android 16）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic8/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic-v5",
+      "name": "荣耀 Magic V5",
+      "brand": "荣耀",
+      "soc": "骁龙8至尊版移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "7.95 英寸 · 2352×2172",
+        "6100mAh",
+        "66W 有线"
+      ],
+      "compare": {
+        "screen": "7.95 英寸 · 2352×2172",
+        "soc": "骁龙8至尊版移动平台",
+        "battery": "6100mAh",
+        "charge": "66W 有线",
+        "weight": "217g",
+        "released": "—",
+        "system": "MagicOS 9.0.1 （基于Android 15）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic-v5/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "honor-honor-magic-v-flip2",
+      "name": "荣耀 Magic V Flip2",
+      "brand": "荣耀",
+      "soc": "第三代骁龙8移动平台",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（荣耀官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.82 英寸 · 2868×1232",
+        "5500mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.82 英寸 · 2868×1232",
+        "soc": "第三代骁龙8移动平台",
+        "battery": "5500mAh",
+        "charge": "80W 有线",
+        "weight": "204g",
+        "released": "—",
+        "system": "MagicOS 9.0.1（基于Android 15）",
+        "misc": "屏下指纹 · NFC"
+      },
+      "source": "https://www.honor.com/cn/phones/honor-magic-v-flip2/spec/",
+      "sourceName": "荣耀官网"
+    },
+    {
+      "id": "realme-realme-15",
+      "name": "真我15",
+      "brand": "realme",
+      "soc": "联发科天玑 7300+",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（realme 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.77 英寸 · 2392×1080 · 144Hz",
+        "7000mAh",
+        "80W 有线"
+      ],
+      "compare": {
+        "screen": "6.77 英寸 · 2392×1080 · 144Hz",
+        "soc": "联发科天玑 7300+",
+        "battery": "7000mAh",
+        "charge": "80W 有线",
+        "weight": "185g",
+        "released": "—",
+        "system": "—",
+        "misc": "NFC"
+      },
+      "source": "https://www.realme.com/cn/more-products/realme-15/specs",
+      "sourceName": "realme 官网"
+    },
+    {
+      "id": "realme-realme-v-70s",
+      "name": "真我 V70s",
+      "brand": "realme",
+      "soc": "天玑 6300 5G 芯片",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（realme 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 1604×720 · 120Hz",
+        "5000mAh",
+        "15W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 1604×720 · 120Hz",
+        "soc": "天玑 6300 5G 芯片",
+        "battery": "5000mAh",
+        "charge": "15W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.realme.com/cn/more-products/realme-v-70s/specs",
+      "sourceName": "realme 官网"
+    },
+    {
+      "id": "realme-realme-v-70",
+      "name": "真我 V70",
+      "brand": "realme",
+      "soc": "天玑 6300 5G 芯片",
+      "released": "—",
+      "verified": false,
+      "catalog": true,
+      "summary": "官方规格整理（realme 官网），未实测；用于选机对比与确认型号。",
+      "specs": [
+        "6.67 英寸 · 1604×720 · 120Hz",
+        "5000mAh",
+        "15W 有线"
+      ],
+      "compare": {
+        "screen": "6.67 英寸 · 1604×720 · 120Hz",
+        "soc": "天玑 6300 5G 芯片",
+        "battery": "5000mAh",
+        "charge": "15W 有线",
+        "weight": "—",
+        "released": "—",
+        "system": "—",
+        "misc": "屏下指纹"
+      },
+      "source": "https://www.realme.com/cn/more-products/realme-v-70/specs",
+      "sourceName": "realme 官网"
+    }
   ]
 }
