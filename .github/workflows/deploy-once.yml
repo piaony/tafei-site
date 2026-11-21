@@ -1,0 +1,26 @@
+name: deploy-once
+on:
+  push:
+    paths:
+      - '.deploy-trigger'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and replace site
+        env:
+          ZIP_URL: "https://aka.doubaocdn.com/s/ICMv2tKeVz"
+        run: |
+          curl -L "$ZIP_URL" -o /tmp/site.zip
+          unzip -o /tmp/site.zip -d /tmp/site
+          rsync -a --delete --exclude='.git' /tmp/site/ ./
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-deploy-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "deploy: v21.5 425 devices" || echo "no changes"
+          git push
