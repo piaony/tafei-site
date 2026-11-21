@@ -385,3 +385,6 @@ body.light .sv-cat{background:#fff}
 body.light .sv-risk{color:#8a5a12}
 @media(max-width:860px){.sv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sv-contact-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.sv-grid{grid-template-columns:1fr}.sv-head{display:block}.sv-head-actions{margin-top:16px}.sv-toolbar{padding:14px}.sv-contact{padding:18px}.sv-card:hover{transform:none}}
+
+/* 商城视图里隐藏全局搜索浮钮，避免遮挡商品卡 */
+.shop-view-open .tf2-fab{display:none}

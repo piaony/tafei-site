@@ -32,6 +32,7 @@
    else link.removeAttribute('aria-current');
   });
 
+  document.body.classList.toggle('shop-view-open', name === 'shop');
   window.scrollTo(0,0);
  }
 
