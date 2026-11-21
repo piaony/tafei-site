@@ -1,0 +1,62 @@
+name: deploy-v207
+run-name: deploy-v207-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-v207.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-v207]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download from CDN
+        run: |
+          set -e
+          curl -fsSL --retry 3 --retry-delay 2 -o device.html "https://aka.doubaocdn.com/s/fRk1CCUb5x"
+          curl -fsSL --retry 3 --retry-delay 2 -o index.html "https://aka.doubaocdn.com/s/vtnKm9NOrW"
+          curl -fsSL --retry 3 --retry-delay 2 -o naiwa.html "https://aka.doubaocdn.com/s/iPKbzGqTRC"
+          curl -fsSL --retry 3 --retry-delay 2 -o search.html "https://aka.doubaocdn.com/s/hmXKwO8n89"
+          curl -fsSL --retry 3 --retry-delay 2 -o service.html "https://aka.doubaocdn.com/s/Ry5YlvoQVy"
+          curl -fsSL --retry 3 --retry-delay 2 -o shop.html "https://aka.doubaocdn.com/s/5Tk85npNPn"
+          curl -fsSL --retry 3 --retry-delay 2 -o css/pages.css "https://aka.doubaocdn.com/s/aa2C9mTeIx"
+          curl -fsSL --retry 3 --retry-delay 2 -o data/devices.json "https://aka.doubaocdn.com/s/sGzCPs7SQP"
+          curl -fsSL --retry 3 --retry-delay 2 -o data/articles.json "https://aka.doubaocdn.com/s/agedI8Uz0q"
+          curl -fsSL --retry 3 --retry-delay 2 -o js/home-views.js "https://aka.doubaocdn.com/s/jgw3dV5ADP"
+          curl -fsSL --retry 3 --retry-delay 2 -o 404.html "https://aka.doubaocdn.com/s/kmUZ6gMDLd"
+
+      - name: Verify bytes
+        run: |
+          set -e
+          cat > /tmp/SHA256SUMS <<'EOF'
+          d64bdd6e09013722a783eae1b50682ecd1fd6169431f85f7f0cd5da67684a24d  device.html
+          519717fd218dc7399bafafbd656bdec95425245b8708686843b16838cedfe174  index.html
+          9fd6d4f8a4eb46816a9773aafd695b749b732bd31594e327865a6097f5939bba  naiwa.html
+          19de30ea50a229564ca893700907d603640f4e94eb8a04ca320b9c504d510679  search.html
+          d1e792286562cc5c58712091515d62527e672e62a8956aba1addaf766698dfb3  service.html
+          ca5cfd1fd9ca18d48f64d845f16123507a00a33d7b1aecc86487f9ed03891884  shop.html
+          61e2d9ed5176d17eafddcd11b7fcc393df63b6245e8e0ebaabfda2321732a738  css/pages.css
+          a18c09b122d38b4a9c6c24885967d9e64be459b180be14695198e343f93293d1  data/devices.json
+          7c7cc62878298b4beddcf1cebea06435ff0f81a769a7c65c13422e0218ff2acb  data/articles.json
+          2864c9acd6c2aafd6120257504c1fd034df199242f2692a6a2d4a60429ea0814  js/home-views.js
+          44cf188f5b0b6672db42b2ec7ce5999ab493ccca2ceb8db7ae12c70d6be9d78e  404.html
+          EOF
+          sha256sum -c /tmp/SHA256SUMS
+
+      - name: Commit and push
+        run: |
+          set -e
+          git config user.name "tafei-bot"
+          git config user.email "3659229103@qq.com"
+          git rm -q .github/workflows/deploy-v207.yml
+          git add device.html index.html naiwa.html search.html service.html shop.html css/pages.css data/devices.json data/articles.json js/home-views.js 404.html
+          git commit -m "deploy: v20.7 机型库对比与404 [deploy-v207]"
+          git push origin HEAD:main
