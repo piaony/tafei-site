@@ -426,6 +426,7 @@ function syncIdentity(session) {
   const balanceNode = document.getElementById('communityBalance');
   const user = session?.user || {};
   const nickname = session ? nicknameOf(session) : '未登录';
+  document.body.dataset.tafeiEmail = session ? (user.email || '').toLowerCase() : '';
 
   if (nameNode) nameNode.textContent = nickname;
   if (metaNode) {

@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>挞飞 · 站长后台</title>
 <link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/pages.css?v=6">
 <style>
   :root{color-scheme:dark light}
   body{margin:0;padding:20px 14px 70px;color:var(--tf-text,#eef4ff);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
@@ -81,16 +82,91 @@
     .toolbar select{flex:1 1 100%}
     .req-foot select{flex:1 1 100%}
   }
+
+/* TAFEI 21.6：站长后台与站点外壳融合 */
+body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at 12% -6%,rgba(58,100,200,.28),transparent 46%),radial-gradient(ellipse at 92% 4%,rgba(120,90,220,.18),transparent 42%),var(--tf-bg)}
+.admin-main{max-width:1040px;margin:0 auto;padding:0 0 28px}
+.admin-hero{padding-top:clamp(28px,5vw,48px);padding-bottom:8px}
+.admin-hero .pg-title em{font-style:normal;background:var(--tf-grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+.admin-hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.admin-hero-badge{box-sizing:border-box;flex:0 0 auto;min-width:126px;padding:12px 16px;border:1px solid rgba(100,232,255,.28);border-radius:16px;background:rgba(100,232,255,.07);text-align:center}
+.admin-hero-badge span{display:block;font-size:11px;letter-spacing:.08em;color:var(--tf-muted);margin-bottom:2px}
+.admin-hero-badge b{font-size:28px;line-height:1.1;color:var(--tf-cyan)}
+.admin-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.admin-chips span{padding:5px 10px;border:1px solid var(--tf-line);border-radius:999px;background:rgba(100,232,255,.05);font-size:11.5px;color:var(--tf-muted)}
+.admin-chips span:first-child{color:var(--tf-cyan);border-color:rgba(100,232,255,.32)}
+.admin-login{max-width:620px;margin:18px auto 0}
+.admin-login #loginBtn{width:100%;margin-top:18px}
+.admin-login-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-login-head h2{margin:0}
+.admin-version{font-size:11px;letter-spacing:.08em;color:var(--tf-muted);border:1px solid var(--tf-line);border-radius:999px;padding:3px 9px}
+.admin-console{margin-top:20px}
+.admin-console-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.admin-live{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tf-muted)}
+.admin-live .dot{width:7px;height:7px;border-radius:50%;background:var(--tf-green);display:inline-block}
+.admin-console-bar .ghost{min-height:34px;padding:0 12px;margin:0;font-size:12.5px}
+.admin-tabs{top:62px;background:color-mix(in srgb,var(--tf-bg) 88%,transparent);border-bottom:1px solid var(--tf-line);padding:9px 2px;margin:0 0 14px;backdrop-filter:blur(16px)}
+.admin-tabs button{position:relative}
+.tab-count{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;margin-left:5px;border-radius:999px;background:#ff8b64;color:#1a0d08;font-size:10px;font-weight:800;vertical-align:1px}
+.tab-count:empty{display:none}
+.admin-stats .stat{box-sizing:border-box;position:relative;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.admin-stats .stat:hover{transform:translateY(-2px);border-color:rgba(100,232,255,.48);background:rgba(100,232,255,.09)}
+.admin-stats .stat i{display:block;margin-top:5px;font-style:normal;font-size:11.5px;color:var(--tf-cyan)}
+.admin-stats .stat span{margin-bottom:5px}
+.admin-sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.admin-sec-head h2{margin:0}
+.admin-page .card:hover,.admin-page .req:hover{transform:none;border-color:var(--tf-line)}
+.admin-page .msg{min-height:16px}
+@media (max-width:760px){
+  body.admin-page{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  .admin-main{padding-bottom:10px}
+  .admin-hero{padding-top:26px}
+  .admin-hero-row{align-items:flex-start}
+  .admin-hero-badge{width:100%;display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px;text-align:left}
+  .admin-hero-badge span{margin:0}
+  .admin-hero-badge b{font-size:22px}
+  .admin-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;position:static;margin-top:2px;overflow:visible}
+  .admin-tabs button{min-width:0;padding:0 4px;font-size:12px}
+  .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .admin-stats .stat{display:block;padding:12px 13px}
+  .admin-stats .stat b{font-size:21px}
+  .admin-console-bar .ghost{flex:1 1 auto}
+  .admin-chips{margin-top:14px}
+  .admin-login{margin-top:14px}
+}
 </style>
 </head>
-<body>
-<main>
-  <div class="kicker">TAFEI ADMIN · CONSOLE</div>
-  <h1>站长后台</h1>
-  <p class="lead">预约、账号、私信、商城、公告、举报都在这一页。只有站长邮箱能读。</p>
+<body class="page-inner admin-page">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#community">社区</a>
+    <a href="device.html">机型库</a>
+    <a href="service.html">技术服务</a>
+    <a href="index.html#shop">商城</a>
+    <a href="admin-center.html" aria-current="page">站长后台</a>
+  </nav>
+</div></header>
 
-  <section class="card" id="login">
-    <h2>站长登录</h2>
+<main class="pw admin-main">
+  <section class="pg-hero admin-hero">
+    <p class="pg-eyebrow">ADMIN CONSOLE · 站长专属</p>
+    <div class="admin-hero-row">
+      <div>
+        <h1 class="pg-title">站长<em>工作台</em></h1>
+        <p class="pg-lead">预约、账号、私信、商品、公告、举报集中处理。后台沿用站点登录状态与手机底部导航，不用再单独记一套入口。</p>
+      </div>
+      <div class="admin-hero-badge"><span>今日待办</span><b id="heroTodo">—</b></div>
+    </div>
+    <div class="admin-chips" aria-label="后台特性">
+      <span>站长邮箱专属</span><span>共用站点登录</span><span>操作即时写库</span>
+    </div>
+  </section>
+
+  <section class="card admin-login" id="login">
+    <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.6</span></div>
+    <p class="hint">已用站长账号登录站点的，打开本页会自动进入；没有站点登录态时，用站长邮箱登录一次即可。</p>
     <label for="email">邮箱</label>
     <input id="email" type="email" inputmode="email" placeholder="3659229103@qq.com" autocomplete="username">
     <label for="password">密码</label>
@@ -99,34 +175,38 @@
     <p class="msg" id="loginMsg"></p>
   </section>
 
-  <section class="hidden" id="console">
-    <nav class="tabs" id="tabs">
+  <section class="hidden admin-console" id="console">
+    <div class="admin-console-bar">
+      <div class="admin-live"><i class="dot"></i><span id="adminWho">站长后台</span></div>
+      <button class="ghost" type="button" id="refreshAll">刷新全部</button>
+    </div>
+    <nav class="tabs admin-tabs" id="tabs" aria-label="后台模块">
       <button type="button" data-tab="overview" class="on">概览</button>
-      <button type="button" data-tab="booking">预约</button>
+      <button type="button" data-tab="booking">预约<b class="tab-count" id="tabBooking"></b></button>
       <button type="button" data-tab="accounts">账号</button>
-      <button type="button" data-tab="messages">私信</button>
+      <button type="button" data-tab="messages">私信<b class="tab-count" id="tabMessages"></b></button>
       <button type="button" data-tab="products">商城</button>
       <button type="button" data-tab="notices">公告</button>
-      <button type="button" data-tab="reports">举报</button>
+      <button type="button" data-tab="reports">举报<b class="tab-count" id="tabReports"></b></button>
       <button type="button" id="logoutBtn" style="margin-left:auto">退出</button>
     </nav>
 
     <div class="pane on" id="pane-overview">
       <div class="card">
-        <div class="stats">
-          <div class="stat"><span>待处理预约</span><b id="oNew">—</b></div>
-          <div class="stat"><span>今日预约</span><b id="oToday">—</b></div>
-          <div class="stat"><span>注册账号</span><b id="oAcc">—</b></div>
-          <div class="stat"><span>在售商品</span><b id="oProd">—</b></div>
-          <div class="stat"><span>待处理举报</span><b id="oRep">—</b></div>
-          <div class="stat"><span>最近私信</span><b id="oDm">—</b></div>
+        <div class="stats admin-stats">
+          <button class="stat" type="button" data-jump="booking" data-status="new"><span>待处理预约</span><b id="oNew">—</b><i>去处理 →</i></button>
+          <button class="stat" type="button" data-jump="booking"><span>今日预约</span><b id="oToday">—</b><i>看今天 →</i></button>
+          <button class="stat" type="button" data-jump="accounts"><span>注册账号</span><b id="oAcc">—</b><i>账号管理 →</i></button>
+          <button class="stat" type="button" data-jump="products"><span>在售商品</span><b id="oProd">—</b><i>商品维护 →</i></button>
+          <button class="stat" type="button" data-jump="reports"><span>待处理举报</span><b id="oRep">—</b><i>举报处理 →</i></button>
+          <button class="stat" type="button" data-jump="messages"><span>最近私信</span><b id="oDm">—</b><i>私信审查 →</i></button>
         </div>
         <p class="hint">数字在打开页面时拉取一次，点各标签会重新读取对应模块。</p>
         <button class="ghost" id="refreshOverview">刷新概览</button>
         <p class="msg" id="overviewMsg"></p>
       </div>
       <div class="card">
-        <h2>最近 5 条预约</h2>
+        <div class="admin-sec-head"><h2>最近 5 条预约</h2><button class="ghost mini" type="button" data-jump="booking">全部预约 →</button></div>
         <div id="overviewBookings" class="empty">正在读取……</div>
       </div>
     </div>
@@ -238,12 +318,14 @@
     </div>
   </section>
 </main>
-
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · 站长后台 · <a href="index.html">返回站点</a><div class="pg-risk">后台只处理站内数据；封禁、删除私信、下架商品等操作会立即生效。离开设备前请点“退出”。</div></div></footer>
+<script src="js/mobile-nav.js"></script>
 <script>
 const URL = 'https://kwkewmhmxyjmzdjyutwa.supabase.co';
 const KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
 const ADMIN_EMAIL = '3659229103@qq.com';
 const TOKEN_KEY = 'tafei-console-token';
+const SITE_AUTH_KEY = 'tafei-auth-session';
 const BOOKINGS = URL + '/rest/v1/tafei_service_requests';
 const PRODUCTS = URL + '/rest/v1/tafei_products';
 const REPORTS = URL + '/rest/v1/tafei_reports';
@@ -252,6 +334,7 @@ const NOTICES = URL + '/rest/v1/tafei_announcements';
 const ST = { new: '新提交', contacted: '已联系', quoted: '已报价', done: '已完成', closed: '已关闭' };
 
 let token = sessionStorage.getItem(TOKEN_KEY) || '';
+let siteSession = readSiteSession();
 let bookingRows = [];
 let accounts = [];
 let editingProduct = null;
@@ -308,9 +391,29 @@ function emailOf(jwt) {
   } catch (e) { return ''; }
 }
 
+function readSiteSession() {
+  try {
+    const data = JSON.parse(localStorage.getItem(SITE_AUTH_KEY) || 'null');
+    return data && data.access_token ? data : null;
+  } catch (e) { return null; }
+}
+
+function isAdminSession(data) {
+  const email = ((data && data.user && data.user.email) || '').toLowerCase();
+  const notExpired = !data.expires_at || data.expires_at * 1000 > Date.now() + 30000;
+  return email === ADMIN_EMAIL && !!data.access_token && notExpired;
+}
+
+function syncSiteSession(data) {
+  if (!isAdminSession(data)) return;
+  localStorage.setItem(SITE_AUTH_KEY, JSON.stringify(data));
+}
+
 function authFail(message) {
   token = '';
   sessionStorage.removeItem(TOKEN_KEY);
+  if (siteSession && isAdminSession(siteSession)) localStorage.removeItem(SITE_AUTH_KEY);
+  siteSession = null;
   $('console').classList.add('hidden');
   $('login').classList.remove('hidden');
   say('loginMsg', message || '登录已失效，请重新用站长邮箱登录。', 'err');
@@ -333,6 +436,7 @@ async function login() {
     if (data.user && data.user.email !== ADMIN_EMAIL) throw new Error('这个账号不是站长邮箱，进不了后台。');
     token = data.access_token;
     sessionStorage.setItem(TOKEN_KEY, token);
+    if (data.user && data.user.email === ADMIN_EMAIL) syncSiteSession(data);
     boot();
   } catch (e) {
     token = '';
@@ -350,16 +454,26 @@ function boot() {
   $('console').classList.remove('hidden');
   const who = emailOf(token);
   if (who && who !== ADMIN_EMAIL) { authFail('这个账号不是站长邮箱，进不了后台。'); return; }
-  loadOverview();
+  $('adminWho').textContent = '已登录 · ' + (who || ADMIN_EMAIL);
+  const initial = (location.hash || '').replace('#', '');
+  switchTab(['overview', 'booking', 'accounts', 'messages', 'products', 'notices', 'reports'].includes(initial) ? initial : 'overview');
 }
 
 function logout() {
   token = '';
   sessionStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SITE_AUTH_KEY);
+  siteSession = null;
   $('console').classList.add('hidden');
   $('login').classList.remove('hidden');
   $('password').value = '';
-  say('loginMsg', '已退出。');
+  say('loginMsg', '已退出后台，同时清除了本站的站长登录状态。');
+}
+
+async function refreshAll() {
+  Object.keys(loaded).forEach((k) => { delete loaded[k]; });
+  await loadOverview();
+  if (currentTab !== 'overview') switchTab(currentTab);
 }
 
 /* ---------- 概览 ---------- */
@@ -384,18 +498,30 @@ async function loadOverview() {
       const x = new Date(iso);
       return x.getFullYear() === today.getFullYear() && x.getMonth() === today.getMonth() && x.getDate() === today.getDate();
     };
-    $('oNew').textContent = bookings.filter((x) => (x.status || 'new') === 'new').length;
+    const pendingBookings = bookings.filter((x) => (x.status || 'new') === 'new').length;
+    const pendingReports = (Array.isArray(r) ? r.filter((x) => x.status !== 'handled').length : 0);
+    const unreadMessages = (Array.isArray(d) ? d.filter((x) => !x.read_at).length : 0);
+    $('oNew').textContent = pendingBookings;
     $('oToday').textContent = bookings.filter((x) => isToday(x.created_at)).length;
     $('oAcc').textContent = (Array.isArray(a) ? a.length : 0);
     $('oProd').textContent = (Array.isArray(p) ? p.filter((x) => x.is_active).length : 0);
-    $('oRep').textContent = (Array.isArray(r) ? r.filter((x) => x.status !== 'handled').length : 0);
+    $('oRep').textContent = pendingReports;
     $('oDm').textContent = (Array.isArray(d) ? d.length : 0);
-    say('overviewMsg', Array.isArray(n) ? ('公告共 ' + n.length + ' 条。') : '', '');
+    $('heroTodo').textContent = pendingBookings + pendingReports;
+    setTabCount('tabBooking', pendingBookings);
+    setTabCount('tabReports', pendingReports);
+    setTabCount('tabMessages', unreadMessages);
+    say('overviewMsg', (Array.isArray(n) ? ('公告共 ' + n.length + ' 条。') : '') + ' 上次读取：' + when(new Date().toISOString()), '');
     renderOverviewBookings(bookings.slice(0, 5));
   } catch (e) {
     if (e.status === 401 || e.status === 403) { authFail(); return; }
     say('overviewMsg', '读取失败：' + e.message, 'err');
   }
+}
+
+function setTabCount(id, count) {
+  const el = $(id);
+  if (el) el.textContent = count > 0 ? String(count) : '';
 }
 
 function renderOverviewBookings(rows) {
@@ -419,6 +545,7 @@ async function loadBookings(force) {
     bookingRows = await req(BOOKINGS + '?select=*&order=created_at.desc&limit=300') || [];
     loaded.booking = true;
     say('bkMsg', '');
+    setTabCount('tabBooking', bookingRows.filter((x) => (x.status || 'new') === 'new').length);
     renderBookings();
   } catch (e) {
     if (e.status === 401 || e.status === 403 || /42501/.test(e.message)) { authFail('没有读取预约的权限。'); return; }
@@ -752,11 +879,21 @@ async function handleReport(id) {
 
 /* ---------- tab 切换 ---------- */
 function switchTab(name) {
+  const tabs = ['overview', 'booking', 'accounts', 'messages', 'products', 'notices', 'reports'];
+  if (!tabs.includes(name)) name = 'overview';
   currentTab = name;
-  $('tabs').querySelectorAll('[data-tab]').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
-  ['overview', 'booking', 'accounts', 'messages', 'products', 'notices', 'reports'].forEach((k) => {
+  $('tabs').querySelectorAll('[data-tab]').forEach((b) => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  tabs.forEach((k) => {
     $('pane-' + k).classList.toggle('on', k === name);
   });
+  try {
+    const next = location.pathname + location.search + (name === 'overview' ? '' : '#' + name);
+    history.replaceState(null, '', next);
+  } catch (e) {}
   if (name === 'overview') loadOverview();
   if (name === 'booking') loadBookings();
   if (name === 'accounts') loadAccounts();
@@ -770,6 +907,14 @@ function switchTab(name) {
 document.addEventListener('click', (e) => {
   const tab = e.target.closest('[data-tab]');
   if (tab) { switchTab(tab.dataset.tab); return; }
+  const jump = e.target.closest('[data-jump]');
+  if (jump) {
+    if ($('bkSt')) $('bkSt').value = jump.dataset.status || 'all';
+    switchTab(jump.dataset.jump || 'overview');
+    const target = $('console');
+    if (target) window.scrollTo({ top: Math.max(0, target.offsetTop - 10), behavior: 'smooth' });
+    return;
+  }
   const ban = e.target.closest('[data-ban]');
   if (ban) { banUser(ban.dataset.ban); return; }
   const unb = e.target.closest('[data-unban]');
@@ -786,6 +931,7 @@ $('loginBtn').addEventListener('click', login);
 $('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
 $('logoutBtn').addEventListener('click', logout);
 $('refreshOverview').addEventListener('click', loadOverview);
+$('refreshAll').addEventListener('click', refreshAll);
 $('bkQ').addEventListener('input', renderBookings);
 $('bkSt').addEventListener('change', renderBookings);
 $('bkRefresh').addEventListener('click', () => loadBookings(true));
@@ -811,7 +957,18 @@ document.addEventListener('click', async (e) => {
   } catch (err) { say('pMsg', '读取商品失败：' + err.message, 'err'); }
 });
 
-if (token) boot();
+if (!token && siteSession && isAdminSession(siteSession)) {
+  token = siteSession.access_token;
+  sessionStorage.setItem(TOKEN_KEY, token);
+}
+if (token) {
+  boot();
+} else {
+  $('login').classList.remove('hidden');
+  if (siteSession && siteSession.user && siteSession.user.email) {
+    say('loginMsg', '当前站点登录的是 ' + siteSession.user.email + '，不是站长邮箱。', 'err');
+  }
+}
 </script>
 </body>
 </html>

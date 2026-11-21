@@ -1,10 +1,10 @@
-/* TAFEI 21.4：内页共用手机底部导航 */
+/* TAFEI 21.4–21.6：内页共用手机底部导航（后台页不高亮首页） */
 (function () {
   'use strict';
   if (document.querySelector('.mobile-bottom-nav')) return;
 
   const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  const active = file === 'service.html' ? 'service' : file === 'device.html' ? 'device' : file === 'shop.html' ? 'shop' : '';
+  const active = file === 'service.html' ? 'service' : file === 'device.html' ? 'device' : file === 'shop.html' ? 'shop' : file === 'admin-center.html' ? 'admin' : '';
 
   const sprite = `
 <svg class="tf-mobile-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">

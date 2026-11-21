@@ -10,6 +10,16 @@
   var profileClose = document.getElementById('communityProfileClose');
   var avatarBtn = document.getElementById('communityAvatarBtn');
   var avatarInput = document.getElementById('tafeiAvatarInput');
+  var adminEntry = document.getElementById('adminEntry');
+
+  function syncAdminEntry() {
+    if (!adminEntry) return;
+    var email = (document.body.getAttribute('data-tafei-email') || '').toLowerCase();
+    adminEntry.hidden = email !== '3659229103@qq.com';
+  }
+
+  syncAdminEntry();
+  new MutationObserver(syncAdminEntry).observe(document.body, { attributes: true, attributeFilter: ['data-tafei-email'] });
 
   function showCommunity() {
     if (window.TAFEIViews) {
