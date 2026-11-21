@@ -13,6 +13,7 @@
     home: ['home', 'home-tools', 'service-entry', 'shop-entry', 'device-entry', 'articles', 'changelog', 'projects', 'about', 'lab', 'studio', 'contact'],
     info: ['community'],
     community: ['community', 'help'],
+    shop: ['shop'],
     guestbook: ['guestbook'],
     profile: ['community']
   };

@@ -342,3 +342,46 @@ footer{padding:28px 0 42px;color:var(--muted);font-size:12px;border-top:1px soli
  .mobile-bottom-nav .tf-ico{width:22px;height:22px}
  .mobile-bottom-nav a span:first-child{font-size:inherit}
 }
+
+/* TAFEI 21.3：站内直通商城 */
+.shop-view{padding-top:10px}
+.sv-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.sv-head h2{font-size:clamp(30px,4.8vw,46px);line-height:1.1;margin:8px 0 10px}
+.sv-head p{margin:0;color:var(--muted);font-size:14.5px;max-width:620px}
+.sv-head-actions{display:flex;gap:10px;flex-wrap:wrap}
+.sv-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.sv-search{flex:1 1 260px;min-height:46px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel2);color:var(--text);font:inherit;outline:none}
+.sv-search:focus{border-color:rgba(100,232,255,.58);box-shadow:0 0 0 3px rgba(100,232,255,.1)}
+.sv-cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.sv-cats::-webkit-scrollbar{height:0}
+.sv-cat{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(17,29,55,.6);color:var(--muted);font-size:13px;white-space:nowrap;cursor:pointer;transition:.2s}
+body.light .sv-cat{background:#fff}
+.sv-cat.active,body.light .sv-cat.active{background:linear-gradient(110deg,#3b8fff,#846bff);border-color:transparent;color:#fff;box-shadow:0 8px 24px rgba(75,121,255,.24)}
+.sv-count{color:var(--muted);font-size:13px;margin:14px 0 10px}
+.sv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.sv-card{display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:var(--shadow);transition:.25s}
+.sv-card:hover{transform:translateY(-4px);border-color:rgba(100,232,255,.48)}
+.sv-vis{height:138px;display:grid;place-items:center;font-size:38px;background:linear-gradient(150deg,rgba(58,110,220,.32),rgba(120,90,220,.18));border-bottom:1px solid var(--line);overflow:hidden}
+.sv-vis img{width:100%;height:100%;object-fit:cover}
+.sv-body{display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px;flex:1}
+.sv-cat-label{font-size:11.5px;letter-spacing:.06em;color:var(--cyan)}
+.sv-body h3{margin:0;font-size:17px;line-height:1.4;overflow-wrap:anywhere}
+.sv-body p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sv-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:8px}
+.sv-price{color:var(--cyan);font-size:19px;font-weight:700}
+.sv-price small{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px}
+.sv-empty{grid-column:1/-1;padding:22px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:13.5px;text-align:center}
+.sv-empty .btn{margin-left:10px}
+.sv-contact{margin-top:22px;padding:24px;display:grid;gap:14px}
+.sv-contact-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sv-contact-head h3{margin:4px 0 0;font-size:clamp(20px,3vw,26px)}
+.sv-contact-head p{margin:0;color:var(--muted);font-size:13.5px}
+.sv-contact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sv-contact-grid div{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.sv-contact-grid b{display:block;font-size:12px;color:var(--cyan);margin-bottom:3px}
+.sv-contact-grid span{font-size:13.5px;overflow-wrap:anywhere}
+.sv-contact-actions{display:flex;gap:10px;flex-wrap:wrap}
+.sv-risk{padding:12px 14px;border:1px solid rgba(255,176,92,.3);border-radius:12px;background:rgba(255,176,92,.08);color:#d9b27d;font-size:12.5px;line-height:1.7}
+body.light .sv-risk{color:#8a5a12}
+@media(max-width:860px){.sv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sv-contact-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.sv-grid{grid-template-columns:1fr}.sv-head{display:block}.sv-head-actions{margin-top:16px}.sv-toolbar{padding:14px}.sv-contact{padding:18px}.sv-card:hover{transform:none}}

@@ -5,6 +5,7 @@
   articles:['articles'],
   info:['community'],
   community:['community'],
+  shop:['shop'],
   guestbook:['guestbook'],
   profile:['community']
  };

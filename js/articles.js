@@ -90,7 +90,7 @@
 
     root.innerHTML = `<div class="af-list-wrap">
       <div class="section-head"><div><div class="kicker">CONTENT</div>
-      <h2>最近更新</h2></div><p>手机折腾为主线，高中资料为副线；游客可读全文，注册用于评论与私信。</p></div>
+      <h2>最近更新</h2></div><p>手机权限为主线，高中资料为副线；游客可读全文，注册用于评论与私信。</p></div>
       ${groups || '<div class="empty-state">内容准备中，稍后更新。</div>'}
     </div>`;
 
