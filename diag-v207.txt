@@ -1,0 +1,13 @@
+device.html | direct | ERR URLError: <urlopen error _ssl.c:1063: The handshake operation timed out>
+device.html | insecure | ERR URLError: <urlopen error _ssl.c:1063: The handshake operation timed out>
+device.html | allorigins | ERR HTTPError: HTTP Error 502: Bad Gateway
+index.html | direct | 23948 bytes | 519717fd218d | OK
+naiwa.html | direct | 7433 bytes | 9fd6d4f8a4eb | OK
+search.html | direct | 13004 bytes | 19de30ea50a2 | OK
+service.html | direct | 16143 bytes | d1e792286562 | OK
+shop.html | direct | 10959 bytes | ca5cfd1fd9ca | OK
+css/pages.css | direct | 14645 bytes | 61e2d9ed5176 | OK
+data/devices.json | direct | 13420 bytes | a18c09b122d3 | OK
+data/articles.json | direct | 18944 bytes | 7c7cc6287829 | OK
+js/home-views.js | direct | 1382 bytes | 2864c9acd6c2 | OK
+404.html | direct | 4352 bytes | 44cf188f5b0b | OK
