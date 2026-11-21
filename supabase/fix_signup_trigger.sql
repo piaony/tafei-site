@@ -1,42 +1,9 @@
 -- 修复注册报错：Database error saving new user
+-- 诊断结果：auth.users 上有 on_tafei_user_created → public.tafei_create_profile() 的 INSERT 触发器
+-- 本脚本只替换这个函数的实现，不删除任何触发器，保留 on_tafei_username_updated。
 -- 用法：Supabase 控制台 → SQL Editor → 整段粘贴 → Run（一次即可）
---
--- 原因：auth.users 上的自定义触发器（通常是 handle_new_user）在写 public.tafei_profiles
--- 时出错（插入旧字段/表结构变化/RLS 权限），GoTrue 就会统一返回 500 这个错误。
--- 本脚本会删掉 public schema 里挂在 auth.users 上的自定义触发器，再建一个安全版本：
--- 写 id/nickname/bio/created_at，security definer 绕过 RLS，昵称重复也不会挡注册。
 
--- 1) 先看一眼现在有哪些自定义触发器（执行后会显示在结果区）
-select t.tgname as trigger_name,
-       p.proname as function_name,
-       pg_get_triggerdef(t.oid) as definition
-from pg_trigger t
-join pg_proc p on p.oid = t.tgfoid
-join pg_namespace n on n.oid = p.pronamespace
-where t.tgrelid = 'auth.users'::regclass
-  and not t.tgisinternal
-  and n.nspname = 'public';
-
--- 2) 移除会挡注册的旧触发器（只动 public schema，不碰 auth 内部触发器）
-do $$
-declare
-  r record;
-begin
-  for r in
-    select t.tgname
-    from pg_trigger t
-    join pg_proc p on p.oid = t.tgfoid
-    join pg_namespace n on n.oid = p.pronamespace
-    where t.tgrelid = 'auth.users'::regclass
-      and not t.tgisinternal
-      and n.nspname = 'public'
-  loop
-    execute format('drop trigger if exists %I on auth.users', r.tgname);
-  end loop;
-end $$;
-
--- 3) 重建一个只负责写档案的触发器函数
-create or replace function public.tafei_handle_new_user()
+create or replace function public.tafei_create_profile()
 returns trigger
 language plpgsql
 security definer
@@ -58,12 +25,16 @@ begin
   on conflict (id) do nothing;
 
   return new;
+exception
+  when others then
+    -- 档案写入失败也不阻止注册，错误会留在 Postgres 日志里
+    raise warning 'tafei_create_profile failed: %', sqlerrm;
+    return new;
 end;
 $$;
 
-create trigger tafei_on_auth_user_created
-after insert on auth.users
-for each row execute function public.tafei_handle_new_user();
+-- 让 GoTrue 的 auth 角色有权限执行这个触发器函数
+grant execute on function public.tafei_create_profile() to supabase_auth_admin;
 
--- 4) 验证：注册一个新账号，或在 SQL Editor 里查最新档案
+-- 验证：注册一个新账号后执行
 -- select id, nickname, created_at from public.tafei_profiles order by created_at desc limit 5;
