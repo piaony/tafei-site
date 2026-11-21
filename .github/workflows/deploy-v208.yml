@@ -1,0 +1,85 @@
+name: deploy-v208
+run-name: deploy-v208-${{ github.run_id }}
+
+on:
+  push:
+    paths:
+      - .github/workflows/deploy-v208.yml
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-v208]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Fetch files
+        run: |
+          set -e
+          python3 - <<'PY'
+          import hashlib, ssl, time, urllib.parse, urllib.request
+          FILES = {
+            'index.html': ('https://aka.doubaocdn.com/s/7qBh2B5coW', 'fd1e56d02da3a84b0102a5dde77ef47da4c5d6c03d2789dc3e61430ce075f539'),
+            'js/tafei-inbox.js': ('https://aka.doubaocdn.com/s/IeHUxftbEY', 'b4c1a5c904ab5bae53adfe23bccee7b6f3e8f403b06b5c7b9c4fc7a0e0b22d2e'),
+          }
+
+          def fetch(url, insecure=False, proxy=None, timeout=30):
+              target = 'https://api.allorigins.win/raw?url=' + urllib.parse.quote(url, safe='') if proxy else url
+              ctx = ssl.create_default_context()
+              if insecure:
+                  ctx.check_hostname = False
+                  ctx.verify_mode = ssl.CERT_NONE
+              req = urllib.request.Request(target, headers={'User-Agent': 'Mozilla/5.0'})
+              with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
+                  return r.read()
+
+          methods = [('direct', {}), ('insecure', {'insecure': True}), ('allorigins', {'proxy': True})]
+          diag = []
+          ok = True
+          for path, (url, sha) in FILES.items():
+              got = None
+              for attempt in range(3):
+                  for name, kw in methods:
+                      try:
+                          data = fetch(url, **kw)
+                          h = hashlib.sha256(data).hexdigest()
+                          diag.append('%s | %s | try%d | %d bytes | %s | %s' % (path, name, attempt + 1, len(data), h[:12], 'OK' if h == sha else 'HASH-MISMATCH'))
+                          if h == sha:
+                              got = data
+                              break
+                      except Exception as e:
+                          diag.append('%s | %s | try%d | ERR %s: %s' % (path, name, attempt + 1, type(e).__name__, str(e)[:160]))
+                  if got is not None:
+                      break
+                  time.sleep(4)
+              if got is None:
+                  ok = False
+                  continue
+              open(path, 'wb').write(got)
+
+          open('/tmp/diag.txt', 'w').write(chr(10).join(diag))
+          print(chr(10).join(diag))
+          if ok:
+              open('/tmp/site-ok', 'w').write('ok')
+          PY
+
+      - name: Deploy or report
+        run: |
+          set -e
+          git config user.name 'tafei-bot'
+          git config user.email '3659229103@qq.com'
+          if [ -f /tmp/site-ok ]; then
+            git add index.html js/tafei-inbox.js
+            git commit -m 'fix(inbox): 建表提示仅站长可见 (v20.8) [deploy-v208]'
+            git push origin HEAD:main
+          else
+            cp /tmp/diag.txt diag-v208.txt
+            git add diag-v208.txt
+            git commit -m 'diag: v20.8 fetch probe [deploy-v208]'
+            git push origin HEAD:main
+          fi
