@@ -12,14 +12,30 @@
 <meta name="og:url" content="https://piaony.github.io/tafei-site/">
 <link rel="canonical" href="https://piaony.github.io/tafei-site/">
 <title>挞飞 TAFEI · 手机折腾与高中资料</title>
-<link rel="stylesheet" href="css/home.css?v=5">
+<link rel="stylesheet" href="css/home.css?v=7">
 <link rel="stylesheet" href="css/tafei-ui.css">
 <link rel="stylesheet" href="css/tafei-features.css">
 <link rel="stylesheet" href="css/tafei-inbox.css?v=4">
 <link rel="stylesheet" href="css/articles.css?v=2">
-<link rel="stylesheet" href="css/community.css?v=1">
+<link rel="stylesheet" href="css/community.css?v=3">
 </head>
 <body class="page-home">
+<svg class="tf-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+ <defs><linearGradient id="tfIcoGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#64e8ff"/><stop offset=".55" stop-color="#7297ff"/><stop offset="1" stop-color="#bd8cff"/></linearGradient></defs>
+ <symbol id="ico-home" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></symbol>
+ <symbol id="ico-community" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h5A2.5 2.5 0 0 1 14 6.5v3A2.5 2.5 0 0 1 11.5 12H9l-5 4v-4A2.5 2.5 0 0 1 4 9.5z"/><path d="M14 9.5h3.5A2.5 2.5 0 0 1 20 12v3.5A2.5 2.5 0 0 1 17.5 18H16v3l-3.5-3H15"/></symbol>
+ <symbol id="ico-shop" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l1 12H4.5z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/><path d="M9 12v1.5a3 3 0 0 0 6 0V12"/></symbol>
+ <symbol id="ico-service" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 5.3a4.2 4.2 0 0 0-5.4 5.4L4 16l4 4 5.3-5.3a4.2 4.2 0 0 0 5.4-5.4l-3 3-2.4-2.4z"/></symbol>
+ <symbol id="ico-device" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 18.5h4"/></symbol>
+ <symbol id="ico-search" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+ <symbol id="ico-system" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0v4l2 2v2H4v-2l2-2z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+ <symbol id="ico-notice" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4l3 1 10 4V5L7 9z"/><path d="M7 15v4"/><path d="M19 9v6"/></symbol>
+ <symbol id="ico-dm" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+ <symbol id="ico-user" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+ <symbol id="ico-plus" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+ <symbol id="ico-coin" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linejoin="round"><path d="m12 3 8 5-8 5-8-5z"/><path d="M4 13l8 5 8-5"/><path d="M4 17l8 5 8-5"/></symbol>
+</svg>
+
 <canvas id="stars"></canvas>
 <header><div class="wrap nav">
 <a class="brand" href="#home">TAFEI<span>.</span></a>
@@ -30,16 +46,14 @@
 <a href="naiwa.html">奶娃</a>
 <a href="device.html">机型库</a>
 <a href="service.html">技术服务</a>
-<a href="#info" data-view="info">信息</a>
 <a href="#community" data-view="community">社区</a>
 <a href="shop.html">商城</a>
-<a href="#profile" data-view="profile">个人中心</a>
 </nav>
 <div class="navright"><button class="iconbtn" id="themeBtn" aria-label="切换主题">☼</button><button class="menuBtn" id="menuBtn" aria-label="打开菜单">☰</button></div>
 </div></header>
 <main class="wrap">
 <section class="hero" id="home">
-<div><div class="status"><i class="dot"></i> CONTENT STATION · 21.1</div><div class="eyebrow" style="margin-top:22px">手机折腾 / 高中资料</div>
+<div><div class="status"><i class="dot"></i> CONTENT STATION · 21.2</div><div class="eyebrow" style="margin-top:22px">手机折腾 / 高中资料</div>
 <h1 style="font-size:clamp(36px,5.2vw,66px)">把折腾和学习，<br><span class="gradient">写成可分享的笔记。</span></h1>
 <p>挞飞是站长直营的手机服务站：机型库、刷机与性能优化资料免费看；遇到具体问题，直接在站内私信找站长。报价、交付和售后都由站长本人负责，站内流程有记录，出了问题能找到人。</p>
 <div class="actions">
@@ -61,6 +75,20 @@
   <div class="ss-actions">
    <a class="btn primary" href="service.html">技术服务 ↗</a>
    <a class="btn" href="device.html">查机型档案</a>
+  </div>
+ </div>
+</section>
+
+<section id="shop-entry" class="reveal">
+ <div class="panel service-strip shop-strip">
+  <div>
+   <div class="kicker">TAFEI SHOP / 独立模块</div>
+   <h3>商城独立入口：资料包、工具包与站长服务</h3>
+   <p>数码资源、学习资料、定制服务统一放在商城；额度兑换、站内交付、全程留痕。</p>
+  </div>
+  <div class="ss-actions">
+   <a class="btn primary" href="shop.html">进入商城 ↗</a>
+   <a class="btn" href="service.html">先看服务</a>
   </div>
  </div>
 </section>
@@ -98,6 +126,7 @@
 <section id="changelog" class="reveal">
  <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
  <div class="panel" style="padding:24px;display:grid;gap:18px">
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.2</span><span class="af-date">2026-11-21</span></div><p>社区升级为消息枢纽：进入社区先看到个人状态、系统通知、公告和私信，个人中心收进社区抽屉；发布求助收成右下角加号弹层；首页新增独立商城入口；导航图标换成统一线性渐变图标，并上线头像更换。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.1</span><span class="af-date">2026-11-21</span></div><p>从社区转向服务站：每位登录用户默认拥有与站长的官方直连会话；个人中心新增额度展示与充值说明；全站补上站内交易保障提示，并对私信、评论中的手机号、邮箱、微信/QQ 等站外联系方式做拦截，避免私下交易后无人兜底。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.0</span><span class="af-date">2026-11-21</span></div><p>机型库扩容到 145 台：保留 4 台深度档案，新增 141 台官方规格目录，覆盖小米、Redmi、POCO、OPPO、华为、荣耀、realme；支持按品牌筛选，规格目录与实测档案分开标记，详情页附厂商官网原始参数链接。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.9</span><span class="af-date">2026-11-21</span></div><p>个人中心新增“修改昵称”：登录后随时可改，保存后会同步到社区动态、评论和机型求助；社区里的个人资料面板改名也会同步账户昵称。</p></div>
@@ -124,119 +153,46 @@
 </section>
 
 <section id="community" class="reveal">
-<div class="section-head">
-<div><div class="kicker">01 / HELP DESK</div>
-<h2>手机出问题，先把机型说清楚。</h2></div>
-<p>按机型归档的求助台。写明机型和系统版本，能自己解决的给你步骤，需要远程处理的直接转服务预约。</p>
-</div>
-
-<div class="help-tools">
- <input id="helpSearch" type="search" placeholder="搜机型或关键词，如「掉帧」「卡 logo」" aria-label="搜索求助">
- <select id="helpSort" aria-label="排序方式">
-  <option value="newest">最新发布</option>
-  <option value="active">回答最多</option>
-  <option value="open">只看没解决的</option>
- </select>
-</div>
-
-<form class="panel help-form" id="helpForm" novalidate>
- <h3>发一条求助</h3>
- <div class="help-row">
-  <div class="field">
-   <label for="helpDevice">机型 <span class="req">*</span></label>
-   <input id="helpDevice" required maxlength="30" placeholder="例如 Redmi K40 / OPPO Reno11 Pro" list="helpDeviceList" autocomplete="off">
-   <datalist id="helpDeviceList"></datalist>
+ <div class="community-hub" id="communityHub">
+  <div class="community-me" id="communityMe">
+   <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
+    <span id="communityAvatarFallback">访</span>
+    <img id="communityAvatarImg" alt="" hidden>
+   </button>
+   <div class="community-me-main">
+    <h3 id="communityNickname">未登录</h3>
+    <p id="communityMeta">登录后可发帖、私信站长、查看额度</p>
+   </div>
+   <div class="community-credit">
+    <span>可用额度</span>
+    <strong id="communityBalance">—</strong>
+   </div>
+   <button class="community-profile-btn" id="communityProfileToggle" type="button" aria-expanded="false" aria-controls="communityProfileWrap">个人中心</button>
   </div>
-  <div class="field">
-   <label for="helpOs">系统版本</label>
-   <input id="helpOs" maxlength="40" placeholder="例如 HyperOS 2.0 / ColorOS 15" autocomplete="off">
-  </div>
- </div>
- <div class="field">
-  <label for="helpProblem">问题描述 <span class="req">*</span></label>
-  <textarea id="helpProblem" required maxlength="600" placeholder="什么现象、什么时候开始、系统有没有提示。越具体越好判断。"></textarea>
- </div>
- <div class="field">
-  <label for="helpTried">已经试过什么</label>
-  <input id="helpTried" maxlength="120" placeholder="例如：清过缓存、重启过、刷过一次模块" autocomplete="off">
- </div>
- <div class="help-actions">
-  <button class="btn primary" type="submit" id="helpSubmit">发布求助</button>
-  <span class="form-status" id="helpStatus" role="status" aria-live="polite">登录后可发布，访客也能看全部求助。</span>
- </div>
-</form>
 
-<div class="help-board" id="helpBoard" aria-live="polite">
- <div class="feed-empty">正在加载求助……</div>
-</div>
-</section>
-
-<section id="projects" class="reveal">
-<div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
-<div class="grid">
-<article class="panel project"><div class="symbol">✦</div><h3>挞飞个人网站</h3><p>从零开始制作并部署的个人网站，记录这段学习与创作过程。</p><div class="bottom"><span class="tag">HTML · CSS · JS</span><a class="textbtn" href="https://piaony.github.io/tafei-site/" target="_blank" rel="noopener">访问网站 ↗</a></div></article>
-<article class="panel project"><div class="symbol">⌘</div><h3>下一个作品</h3><p>这里预留给你的下一个网页、小工具或编程练习。完成后再替换这段文字。</p><div class="bottom"><span class="tag">待添加</span><button class="textbtn detailBtn" data-title="下一个作品" data-desc="把你真正完成的项目名称、用途和访问链接添加到这里。">编辑提示 ↗</button></div></article>
-<article class="panel project"><div class="symbol">◇</div><h3>实验与练习</h3><p>收集学习过程中做过的小实验，展示从尝试到掌握的过程。</p><div class="bottom"><span class="tag">持续更新</span><button class="textbtn detailBtn" data-title="实验与练习" data-desc="可以放置 JavaScript 小练习、网页交互实验或自己编写的演示程序。">查看说明 ↗</button></div></article>
-</div></section>
-<section id="about" class="reveal">
-<div class="section-head"><div><div class="kicker">03 / OUR MISSION</div><h2>挞飞的初心</h2></div><p>让每个人都能平等、自由、友善地享受互联网带来的便利。</p></div>
-<div class="about-grid">
-<div class="panel about-card">
-<h3>让互联网温暖每一个人。</h3>
-<p>挞飞是一个面向所有普通人的免费、友善、开放的互联网社区。</p>
-<p>我们希望每个人都能在这里分享知识、交流经验、寻找帮助，也能把自己的经验分享给别人。</p>
-<p>无论身处哪里，无论是否懂技术，每个人都值得平等地享受互联网带来的便利。</p>
-<span class="tag">FREE · FRIENDLY · OPEN</span>
-</div>
-<div class="panel about-card"><h3>学习路线</h3>
-<div class="skill"><div class="skill-top"><span>HTML · 网页结构</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:42%"></div></div></div>
-<div class="skill"><div class="skill-top"><span>CSS · 页面样式</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:32%"></div></div></div>
-<div class="skill"><div class="skill-top"><span>JavaScript · 交互逻辑</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:18%"></div></div></div>
-<p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
-</div></div></section>
-<section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">04 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
-<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！
-输入 help 查看可用命令。
-</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
-
-<section id="studio" class="reveal">
- <div class="section-head"><div><div class="kicker">05 / CREATOR STUDIO</div><h2>我的项目管理台</h2></div><p>把完成的小作品添加到展厅，整理名称、介绍和访问地址。</p></div>
- <div class="feature-grid">
-  <div class="panel form-panel">
-   <h3>添加一个作品</h3>
-   <input id="projectName" maxlength="40" placeholder="作品名称，例如：我的计算器">
-   <textarea id="projectDesc" maxlength="220" placeholder="简单介绍它能做什么"></textarea>
-   <input id="projectUrl" type="url" placeholder="作品网址（可选，需以 https:// 开头）">
-   <button class="action-btn primary" id="addProject">＋ 添加到我的展厅</button>
-   <p class="local-note">说明：目前作品数据保存在当前浏览器中。清除浏览器数据或换设备后不会自动同步。</p>
-  </div>
-  <div class="panel">
-   <h3>我的新增作品</h3>
-   <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
+  <div class="community-msg-rail" aria-label="消息入口">
+   <button type="button" class="community-msg-card" data-community-pane="system">
+    <span class="cm-ico"><svg class="tf-ico" aria-hidden="true"><use href="#ico-system"></use></svg></span>
+    <span class="cm-main"><b>系统通知</b><span>版本更新与账号提醒</span></span>
+    <span class="cm-badge" data-hub-badge="system" hidden>0</span>
+   </button>
+   <button type="button" class="community-msg-card" data-community-pane="notice">
+    <span class="cm-ico"><svg class="tf-ico" aria-hidden="true"><use href="#ico-notice"></use></svg></span>
+    <span class="cm-main"><b>站内公告</b><span>规则、活动与上线说明</span></span>
+    <span class="cm-badge" data-hub-badge="notice" hidden>0</span>
+   </button>
+   <button type="button" class="community-msg-card" data-community-pane="dm">
+    <span class="cm-ico"><svg class="tf-ico" aria-hidden="true"><use href="#ico-dm"></use></svg></span>
+    <span class="cm-main"><b>我的私信</b><span>站长官方会话默认置顶</span></span>
+    <span class="cm-badge" data-hub-badge="dm" hidden>0</span>
+   </button>
   </div>
  </div>
- <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>21.1</strong>当前网站版本</div></div>
-</section>
-<section id="guestbook" class="reveal">
- <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
- <div class="feature-grid">
-  <div class="panel form-panel">
-   <h3>写一条留言</h3>
-   <input id="messageName" maxlength="24" placeholder="怎么称呼你（可选）">
-   <textarea id="messageText" maxlength="240" placeholder="写下你的留言，最多 240 字"></textarea>
-   <button class="action-btn primary" id="sendMessage">发布留言</button>
-   <p class="local-note">留言保存在云端，所有访客都可以查看。</p>
-  </div>
-  <div class="panel"><h3>最近的留言</h3><div id="messages" class="messages"><div class="empty-state">还没有留言。欢迎写下第一条。</div></div></div>
- </div>
-</section>
 
-<section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
-
-<section id="info" class="reveal">
+ <section id="info" class="community-block">
  <div class="section-head">
-  <div><div class="kicker">TAFEI INFORMATION</div><h2>信息中心</h2></div>
-  <p>系统通知、站内公告和私信，都收在这里。</p>
+  <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
+  <p>系统通知、公告和私信都在这里；站长官方会话默认置顶。</p>
  </div>
 
  <div class="tf3" id="tf3Inbox">
@@ -276,9 +232,16 @@
 </section>
 
 
-<section id="profile" class="reveal">
+
+
+ <div class="community-profile-wrap" id="communityProfileWrap" hidden>
+  <div class="community-profile-top">
+   <span>账户与个人资料</span>
+   <button type="button" id="communityProfileClose">收起 ↑</button>
+  </div>
+  <section id="profile" class="community-block community-profile-panel">
  <div class="section-head">
-  <div><div class="kicker">TAFEI PERSONAL CENTER</div><h2>个人中心</h2></div>
+  <div><div class="kicker">TAFEI PERSONAL CENTER</div><h2>账户与个人资料</h2></div>
   <p>注册、登录并管理你的挞飞账户。</p>
  </div>
 <div class="panel article-form" id="tafeiAuthPanel">
@@ -351,8 +314,21 @@
  </div>
 
  <div id="tafeiAuthLoggedIn" hidden>
+  <div class="avatar-editor">
+   <button class="avatar-preview" id="tafeiAvatarBtn" type="button" aria-label="更换头像">
+    <span id="tafeiAvatarFallback">我</span>
+    <img id="tafeiAvatarImg" alt="" hidden>
+   </button>
+   <div class="avatar-copy">
+    <h4>我的头像</h4>
+    <p>点击头像选择图片，自动裁成 1:1 并压缩。支持 JPG / PNG，单张不超过 8MB。</p>
+    <p id="tafeiAvatarStatus" role="status"></p>
+   </div>
+   <input id="tafeiAvatarInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+  </div>
+
   <p>欢迎回来，<strong id="tafeiCurrentNickname"></strong>！</p>
-  <p>你已经登录挞飞。遇到问题可以直接在「信息 → 私信」里找站长，官方会话已经默认置顶。</p>
+  <p>你已经登录挞飞。遇到问题可以直接在「社区 → 消息中心 → 私信」里找站长，官方会话已经默认置顶。</p>
 
   <div class="balance-card" id="tafeiBalanceCard">
    <div class="balance-head">
@@ -429,27 +405,152 @@
 </div>
 </section>
 
+
+ </div>
+
+ <div class="section-head community-feed-head">
+  <div><div class="kicker">COMMUNITY / HELP</div><h2>遇到问题，发出来一起看。</h2></div>
+  <p>按机型归档的求助区。写明机型和系统版本；需要远程处理的，直接转站长服务。发布入口收进右下角的加号。</p>
+ </div>
+
+ <div class="help-tools">
+  <input id="helpSearch" type="search" placeholder="搜机型或关键词，如「掉帧」「卡 logo」" aria-label="搜索求助">
+  <select id="helpSort" aria-label="排序方式">
+   <option value="newest">最新发布</option>
+   <option value="active">回答最多</option>
+   <option value="open">只看没解决的</option>
+  </select>
+ </div>
+
+ <div class="help-board" id="helpBoard" aria-live="polite">
+  <div class="feed-empty">正在加载求助……</div>
+ </div>
+
+ <button class="help-fab" id="helpFab" type="button" aria-controls="helpCompose" aria-expanded="false" aria-label="发布求助">
+  <svg class="tf-ico" aria-hidden="true"><use href="#ico-plus"></use></svg>
+  <span>发布</span>
+ </button>
+
+ <div class="help-compose" id="helpCompose" hidden>
+  <div class="help-compose-mask" data-help-close></div>
+  <div class="help-compose-card" role="dialog" aria-modal="true" aria-labelledby="helpComposeTitle">
+   <div class="help-compose-head">
+    <h3 id="helpComposeTitle">发布求助</h3>
+    <button type="button" id="helpComposeClose" aria-label="关闭">✕</button>
+   </div>
+   <form class="help-form" id="helpForm" novalidate>
+ <div class="help-row">
+  <div class="field">
+   <label for="helpDevice">机型 <span class="req">*</span></label>
+   <input id="helpDevice" required maxlength="30" placeholder="例如 Redmi K40 / OPPO Reno11 Pro" list="helpDeviceList" autocomplete="off">
+   <datalist id="helpDeviceList"></datalist>
+  </div>
+  <div class="field">
+   <label for="helpOs">系统版本</label>
+   <input id="helpOs" maxlength="40" placeholder="例如 HyperOS 2.0 / ColorOS 15" autocomplete="off">
+  </div>
+ </div>
+ <div class="field">
+  <label for="helpProblem">问题描述 <span class="req">*</span></label>
+  <textarea id="helpProblem" required maxlength="600" placeholder="什么现象、什么时候开始、系统有没有提示。越具体越好判断。"></textarea>
+ </div>
+ <div class="field">
+  <label for="helpTried">已经试过什么</label>
+  <input id="helpTried" maxlength="120" placeholder="例如：清过缓存、重启过、刷过一次模块" autocomplete="off">
+ </div>
+ <div class="help-actions">
+  <button class="btn primary" type="submit" id="helpSubmit">发布求助</button>
+  <span class="form-status" id="helpStatus" role="status" aria-live="polite">登录后可发布，访客也能看全部求助。</span>
+ </div>
+</form>
+  </div>
+ </div>
+</section>
+
+<section id="projects" class="reveal">
+<div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
+<div class="grid">
+<article class="panel project"><div class="symbol">✦</div><h3>挞飞个人网站</h3><p>从零开始制作并部署的个人网站，记录这段学习与创作过程。</p><div class="bottom"><span class="tag">HTML · CSS · JS</span><a class="textbtn" href="https://piaony.github.io/tafei-site/" target="_blank" rel="noopener">访问网站 ↗</a></div></article>
+<article class="panel project"><div class="symbol">⌘</div><h3>下一个作品</h3><p>这里预留给你的下一个网页、小工具或编程练习。完成后再替换这段文字。</p><div class="bottom"><span class="tag">待添加</span><button class="textbtn detailBtn" data-title="下一个作品" data-desc="把你真正完成的项目名称、用途和访问链接添加到这里。">编辑提示 ↗</button></div></article>
+<article class="panel project"><div class="symbol">◇</div><h3>实验与练习</h3><p>收集学习过程中做过的小实验，展示从尝试到掌握的过程。</p><div class="bottom"><span class="tag">持续更新</span><button class="textbtn detailBtn" data-title="实验与练习" data-desc="可以放置 JavaScript 小练习、网页交互实验或自己编写的演示程序。">查看说明 ↗</button></div></article>
+</div></section>
+<section id="about" class="reveal">
+<div class="section-head"><div><div class="kicker">03 / OUR MISSION</div><h2>挞飞的初心</h2></div><p>让每个人都能平等、自由、友善地享受互联网带来的便利。</p></div>
+<div class="about-grid">
+<div class="panel about-card">
+<h3>让互联网温暖每一个人。</h3>
+<p>挞飞是一个面向所有普通人的免费、友善、开放的互联网社区。</p>
+<p>我们希望每个人都能在这里分享知识、交流经验、寻找帮助，也能把自己的经验分享给别人。</p>
+<p>无论身处哪里，无论是否懂技术，每个人都值得平等地享受互联网带来的便利。</p>
+<span class="tag">FREE · FRIENDLY · OPEN</span>
+</div>
+<div class="panel about-card"><h3>学习路线</h3>
+<div class="skill"><div class="skill-top"><span>HTML · 网页结构</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:42%"></div></div></div>
+<div class="skill"><div class="skill-top"><span>CSS · 页面样式</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:32%"></div></div></div>
+<div class="skill"><div class="skill-top"><span>JavaScript · 交互逻辑</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:18%"></div></div></div>
+<p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
+</div></div></section>
+<section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">04 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
+<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！
+输入 help 查看可用命令。
+</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
+
+<section id="studio" class="reveal">
+ <div class="section-head"><div><div class="kicker">05 / CREATOR STUDIO</div><h2>我的项目管理台</h2></div><p>把完成的小作品添加到展厅，整理名称、介绍和访问地址。</p></div>
+ <div class="feature-grid">
+  <div class="panel form-panel">
+   <h3>添加一个作品</h3>
+   <input id="projectName" maxlength="40" placeholder="作品名称，例如：我的计算器">
+   <textarea id="projectDesc" maxlength="220" placeholder="简单介绍它能做什么"></textarea>
+   <input id="projectUrl" type="url" placeholder="作品网址（可选，需以 https:// 开头）">
+   <button class="action-btn primary" id="addProject">＋ 添加到我的展厅</button>
+   <p class="local-note">说明：目前作品数据保存在当前浏览器中。清除浏览器数据或换设备后不会自动同步。</p>
+  </div>
+  <div class="panel">
+   <h3>我的新增作品</h3>
+   <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
+  </div>
+ </div>
+ <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>21.2</strong>当前网站版本</div></div>
+</section>
+<section id="guestbook" class="reveal">
+ <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
+ <div class="feature-grid">
+  <div class="panel form-panel">
+   <h3>写一条留言</h3>
+   <input id="messageName" maxlength="24" placeholder="怎么称呼你（可选）">
+   <textarea id="messageText" maxlength="240" placeholder="写下你的留言，最多 240 字"></textarea>
+   <button class="action-btn primary" id="sendMessage">发布留言</button>
+   <p class="local-note">留言保存在云端，所有访客都可以查看。</p>
+  </div>
+  <div class="panel"><h3>最近的留言</h3><div id="messages" class="messages"><div class="empty-state">还没有留言。欢迎写下第一条。</div></div></div>
+ </div>
+</section>
+
+<section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
+
 </main>
 <footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界<div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
-<script src="js/home-core.js?v=4"></script>
+<script src="js/home-core.js?v=6"></script>
 
 <nav class="mobile-bottom-nav" aria-label="手机底部导航">
- <a href="#home" data-view="home" class="active"><span>⌂</span><span>首页</span></a>
- <a href="#info" data-view="info"><span>✉</span><span>信息</span></a>
- <a href="#community" data-view="community"><span>♧</span><span>社区</span></a>
- <a href="service.html"><span>🛠</span><span>服务</span></a>
- <a href="#profile" data-view="profile"><span>♙</span><span>个人中心</span></a>
+ <a href="#home" data-view="home" class="active"><svg class="tf-ico" aria-hidden="true"><use href="#ico-home"></use></svg><span>首页</span></a>
+ <a href="#community" data-view="community"><svg class="tf-ico" aria-hidden="true"><use href="#ico-community"></use></svg><span>社区</span></a>
+ <a href="shop.html"><svg class="tf-ico" aria-hidden="true"><use href="#ico-shop"></use></svg><span>商城</span></a>
+ <a href="service.html"><svg class="tf-ico" aria-hidden="true"><use href="#ico-service"></use></svg><span>服务</span></a>
+ <a href="device.html"><svg class="tf-ico" aria-hidden="true"><use href="#ico-device"></use></svg><span>机型</span></a>
 </nav>
 
 
-<script src="js/home-views.js?v=2"></script>
+<script src="js/home-views.js?v=4"></script>
+<script src="js/community-hub.js?v=2"></script>
 <script src="js/articles.js?v=2"></script>
-<script src="js/community-help.js?v=2"></script>
+<script src="js/community-help.js?v=4"></script>
 
 <script src="announcement.js"></script>
 <script src="js/tafei-ui.js" defer></script>
-<script src="js/tafei-features.js" defer></script>
-<script src="js/tafei-inbox.js?v=5" defer></script>
+<script src="js/tafei-features.js?v=3" defer></script>
+<script src="js/tafei-inbox.js?v=7" defer></script>
 </body>
 </html>

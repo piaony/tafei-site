@@ -10,11 +10,11 @@
   var body = doc.body;
   var isHome = body.classList.contains('page-home');
   var VIEWS = {
-    home: ['home', 'home-tools', 'projects', 'about', 'lab', 'studio', 'contact'],
-    info: ['info'],
+    home: ['home', 'home-tools', 'service-entry', 'shop-entry', 'device-entry', 'articles', 'changelog', 'projects', 'about', 'lab', 'studio', 'contact'],
+    info: ['community'],
     community: ['community', 'help'],
     guestbook: ['guestbook'],
-    profile: ['profile']
+    profile: ['community']
   };
   var SITE_PAGES = [
     { type: 'page', href: 'index.html', title: '首页 · 让互联网温暖每一个人', body: 'home 首页 挞飞 社区 工具 作品 实验室 留言 个人中心' },

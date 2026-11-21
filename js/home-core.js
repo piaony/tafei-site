@@ -349,6 +349,8 @@ function showAuth(session) {
       upgradeForm.hidden = !!user.email;
     }
 
+    syncIdentity(session);
+    loadAvatar();
     loadBalance(false);
 
     authMessage('登录成功！欢迎回到挞飞。');
@@ -357,12 +359,174 @@ function showAuth(session) {
     authLoggedIn.hidden = true;
     const valueNode = $id('tafeiBalanceValue');
     if (valueNode) valueNode.textContent = '—';
+    syncIdentity(null);
     authMessage('未登录也可以浏览社区，登录后即可发布动态。');
   }
 }
 
 // TAFEI 21.1 BALANCE MODULE
 const BALANCE_API = API.replace('/tafei-cloud', '/tafei_balance');
+const AVATAR_API = API.replace('/tafei-cloud', '/tafei_profiles');
+const AVATAR_CACHE = 'tafei-avatar-cache';
+
+function nicknameOf(session) {
+  const user = session?.user || {};
+  return user.user_metadata?.nickname || (user.email || '').split('@')[0] || '挞飞用户';
+}
+
+function initialOf(name) {
+  return String(name || '?').trim().slice(0, 1).toUpperCase() || '?';
+}
+
+function readAvatarCache(uid) {
+  if (!uid) return '';
+  try {
+    const cache = JSON.parse(localStorage.getItem(AVATAR_CACHE) || '{}');
+    return cache[uid] || '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function writeAvatarCache(uid, url) {
+  if (!uid) return;
+  try {
+    const cache = JSON.parse(localStorage.getItem(AVATAR_CACHE) || '{}');
+    if (url) cache[uid] = url;
+    else delete cache[uid];
+    localStorage.setItem(AVATAR_CACHE, JSON.stringify(cache));
+  } catch (error) { /* 本地缓存失败不影响云端 */ }
+}
+
+function applyAvatar(url, name) {
+  const pairs = [
+    ['communityAvatarImg', 'communityAvatarFallback'],
+    ['tafeiAvatarImg', 'tafeiAvatarFallback']
+  ];
+  pairs.forEach(([imgId, fallbackId]) => {
+    const img = document.getElementById(imgId);
+    const fallback = document.getElementById(fallbackId);
+    if (!img || !fallback) return;
+    if (url) {
+      img.src = url;
+      img.hidden = false;
+      fallback.hidden = true;
+    } else {
+      img.removeAttribute('src');
+      img.hidden = true;
+      fallback.hidden = false;
+      fallback.textContent = initialOf(name);
+    }
+  });
+}
+
+function syncIdentity(session) {
+  const nameNode = document.getElementById('communityNickname');
+  const metaNode = document.getElementById('communityMeta');
+  const balanceNode = document.getElementById('communityBalance');
+  const user = session?.user || {};
+  const nickname = session ? nicknameOf(session) : '未登录';
+
+  if (nameNode) nameNode.textContent = nickname;
+  if (metaNode) {
+    metaNode.textContent = session
+      ? (user.email || '已登录') + ' · 可发帖、私信站长、查看额度'
+      : '登录后可发帖、私信站长、查看额度';
+  }
+  if (balanceNode && !session) balanceNode.textContent = '—';
+  applyAvatar(session ? readAvatarCache(user.id) : '', session ? nickname : '访客');
+}
+
+async function loadAvatar() {
+  const userId = authSession?.user?.id;
+  const token = authSession?.access_token;
+  const nickname = nicknameOf(authSession);
+  if (!userId || !token) return;
+
+  const cached = readAvatarCache(userId);
+  if (cached) applyAvatar(cached, nickname);
+
+  try {
+    const response = await fetch(
+      AVATAR_API + '?select=avatar_url&id=eq.' + encodeURIComponent(userId),
+      { headers: { apikey: KEY, Authorization: 'Bearer ' + token } }
+    );
+    if (!response.ok) return;
+    const rows = await response.json();
+    const url = Array.isArray(rows) && rows.length ? rows[0].avatar_url : '';
+    if (url) {
+      writeAvatarCache(userId, url);
+      applyAvatar(url, nickname);
+    }
+  } catch (error) {
+    console.warn('头像读取失败：', error);
+  }
+}
+
+function resizeAvatar(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+      reject(new Error('请选择 JPG、PNG 或 WebP 图片。'));
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      reject(new Error('图片不能超过 8MB。'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('图片读取失败。'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('图片解码失败，请换一张。'));
+      img.onload = () => {
+        try {
+          const size = Math.min(img.width, img.height);
+          const sx = (img.width - size) / 2;
+          const sy = (img.height - size) / 2;
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#0b1224';
+          ctx.fillRect(0, 0, 256, 256);
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        } catch (error) {
+          reject(new Error('头像裁剪失败。'));
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveAvatar(dataUrl) {
+  const userId = authSession?.user?.id;
+  const token = authSession?.access_token;
+  if (!userId || !token) throw new Error('请先登录后再更换头像。');
+
+  const response = await fetch(
+    AVATAR_API + '?id=eq.' + encodeURIComponent(userId),
+    {
+      method: 'PATCH',
+      headers: {
+        apikey: KEY,
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ avatar_url: dataUrl })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('云端头像保存失败（HTTP ' + response.status + '）');
+  }
+
+  writeAvatarCache(userId, dataUrl);
+}
 
 function balanceNode(id) {
   return document.getElementById(id);
@@ -403,6 +567,8 @@ async function loadBalance(manual) {
     const amount = row && typeof row.current_amount === 'number' ? row.current_amount : null;
 
     if (valueNode) valueNode.textContent = amount === null ? '—' : String(amount);
+    const compactValue = balanceNode('communityBalance');
+    if (compactValue) compactValue.textContent = amount === null ? '—' : String(amount);
     if (updatedNode) {
       const date = row?.updated_at ? new Date(row.updated_at) : null;
       updatedNode.textContent = date && !Number.isNaN(date.getTime())
@@ -429,6 +595,54 @@ if (balanceRefreshBtn) {
     await loadBalance(true);
     button.disabled = false;
     button.textContent = '刷新额度';
+  });
+}
+
+const avatarFileInput = document.getElementById('tafeiAvatarInput');
+const avatarEditBtn = document.getElementById('tafeiAvatarBtn');
+
+if (avatarEditBtn && avatarFileInput) {
+  avatarEditBtn.addEventListener('click', () => {
+    if (!authSession?.access_token) {
+      const status = document.getElementById('tafeiAvatarStatus');
+      if (status) status.textContent = '请先登录后再更换头像。';
+      return;
+    }
+    avatarFileInput.click();
+  });
+}
+
+if (avatarFileInput) {
+  avatarFileInput.addEventListener('change', async event => {
+    const input = event.currentTarget;
+    const file = input.files && input.files[0];
+    const status = document.getElementById('tafeiAvatarStatus');
+    if (!file) return;
+
+    if (status) status.textContent = '正在处理头像…';
+
+    let dataUrl = '';
+    try {
+      dataUrl = await resizeAvatar(file);
+    } catch (error) {
+      if (status) status.textContent = error.message || '头像处理失败。';
+      input.value = '';
+      return;
+    }
+
+    try {
+      await saveAvatar(dataUrl);
+      applyAvatar(dataUrl, nicknameOf(authSession));
+      if (status) status.textContent = '头像已更新，云端已保存。';
+    } catch (error) {
+      console.warn(error);
+      const userId = authSession?.user?.id;
+      if (userId) writeAvatarCache(userId, dataUrl);
+      applyAvatar(dataUrl, nicknameOf(authSession));
+      if (status) status.textContent = '头像已在本设备生效；云端同步失败，可能还没开通 avatar_url 字段。';
+    } finally {
+      input.value = '';
+    }
   });
 }
 
@@ -510,6 +724,8 @@ async function updateAuthNickname(nickname) {
 
   const nameNode = $id('tafeiCurrentNickname');
   if (nameNode) nameNode.textContent = nickname;
+  const communityName = $id('communityNickname');
+  if (communityName) communityName.textContent = nickname;
   const inputNode = $id('tafeiNickInput');
   if (inputNode) inputNode.value = nickname;
 

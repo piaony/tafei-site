@@ -213,6 +213,10 @@
       if (!el) return;
       el.textContent = counts[k] > 99 ? '99+' : String(counts[k]);
       el.hidden = counts[k] === 0;
+      $$('[data-hub-badge="' + k + '"]').forEach(function (hub) {
+        hub.textContent = counts[k] > 99 ? '99+' : String(counts[k]);
+        hub.hidden = counts[k] === 0;
+      });
     });
     var total = counts.system + counts.notice + counts.dm;
     $$('[data-view="info"]').forEach(function (link) {
@@ -389,8 +393,8 @@
         + '<br><button type="button" class="tf3-cta" data-role="go-login">去登录 / 注册</button></div>';
       var btn = $('[data-role="go-login"]', box);
       if (btn) btn.addEventListener('click', function () {
-        var link = document.querySelector('[data-view="profile"]');
-        if (link) link.click();
+        var toggle = document.getElementById('communityProfileToggle');
+        if (toggle) toggle.click();
       });
       return;
     }
@@ -831,5 +835,13 @@
   });
 
   window.TAFEI = window.TAFEI || {};
-  window.TAFEI.inbox = { reload: function () { loadSystem(); loadNotice(); dmLoaded = false; loadDm(); } };
+  window.TAFEI.inbox = {
+    reload: function () { loadSystem(); loadNotice(); dmLoaded = false; loadDm(); },
+    openPane: function (name) {
+      if (!panes[name]) name = 'system';
+      switchPane(name);
+      var info = document.getElementById('info');
+      if (info) info.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 })();

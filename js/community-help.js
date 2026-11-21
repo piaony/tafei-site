@@ -310,6 +310,7 @@
 
       form.reset();
       say('已发布，有回答后会在列表里显示。', 'ok');
+      document.dispatchEvent(new CustomEvent('tafei:help-posted'));
       await load();
     } catch (e) {
       console.error(e);

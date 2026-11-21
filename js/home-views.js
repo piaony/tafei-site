@@ -1,12 +1,12 @@
 /* TAFEI 18.0：社区整合界面 */
 (()=>{
  const pages={
-  home:['home','home-tools','service-entry','device-entry','naiwa-entry','articles','changelog','projects','about','lab','studio','contact'],
+  home:['home','home-tools','service-entry','shop-entry','device-entry','naiwa-entry','articles','changelog','projects','about','lab','studio','contact'],
   articles:['articles'],
-  info:['info'],
+  info:['community'],
   community:['community'],
   guestbook:['guestbook'],
-  profile:['profile']
+  profile:['community']
  };
 
  const sections=[...document.querySelectorAll('main > section')];
@@ -47,5 +47,6 @@
   });
  });
 
+ window.TAFEIViews = { showPage: showPage };
  showPage('home');
 })();
