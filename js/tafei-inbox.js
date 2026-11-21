@@ -11,6 +11,7 @@
   var AUTH_STORAGE = 'tafei-auth-session';
   var READ_KEY = 'tafei-inbox-read';
   var DM_TABLE = 'tafei_messages';
+  var OWNER_EMAIL = '3659229103@qq.com';
 
   var root = document.getElementById('tf3Inbox');
   if (!root) return;
@@ -63,6 +64,11 @@
     var meta = s.user.user_metadata || {};
     return meta.nickname || meta.username || (s.user.email || '').split('@')[0] || '我';
   }
+  function meEmail() {
+    var s = session();
+    return s && s.user && s.user.email ? String(s.user.email).toLowerCase() : '';
+  }
+  function isOwner() { return meEmail() === OWNER_EMAIL; }
 
   function headers(extra) {
     var h = { apikey: KEY };
@@ -343,11 +349,6 @@
     var box = dmBox();
     if (!box) return;
 
-    if (state.tableOk !== true) {
-      box.innerHTML = setupCard();
-      wireSetup();
-      return;
-    }
     if (!token()) {
       box.innerHTML = '<div class="tf3-empty">登录后才能收发私信。<br>未登录也可以正常浏览其他内容。'
         + '<br><button type="button" class="tf3-cta" data-role="go-login">去登录 / 注册</button></div>';
@@ -356,6 +357,16 @@
         var link = document.querySelector('[data-view="profile"]');
         if (link) link.click();
       });
+      return;
+    }
+    if (state.tableOk !== true) {
+      if (isOwner()) {
+        box.innerHTML = setupCard();
+        wireSetup();
+      } else {
+        box.innerHTML = pendingCard();
+        wirePending();
+      }
       return;
     }
     if (state.dmView === 'thread') { box.innerHTML = threadView(); wireThread(); return; }
@@ -375,13 +386,43 @@
       + '<div class="tf3-sqlbar"><span>建表 SQL</span><button type="button" class="tf3-copy" data-role="copy-sql">复制</button></div>'
       + '<div class="tf3-code">' + esc(DM_SQL) + '</div>'
       + '<p style="margin-top:10px">这段 SQL 只做四件事：建表、打开行级安全、让“发件人只能以自己的身份发”、让“只有双方能看到这条消息”。</p>'
+      + '<button type="button" class="tf3-cta" data-role="setup-refresh">我已建好，刷新检查</button>'
       + '</div>';
+  }
+
+  function pendingCard() {
+    return '<div class="tf3-empty tf3-pending">'
+      + '<h4>私信正在开通中</h4>'
+      + '<p>前端已经就绪，还差站长完成最后一步配置。<br>私信开放前，你仍可以查看系统通知、站内公告和社区内容。</p>'
+      + '<button type="button" class="tf3-cta" data-role="dm-refresh">刷新试试</button>'
+      + '</div>';
+  }
+
+  async function recheckTable(btn) {
+    if (!btn || btn.disabled) return;
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '检查中…';
+    await probeTable();
+    btn.disabled = false;
+    btn.textContent = label;
+    if (state.tableOk === true) {
+      await loadProfiles();
+      await loadThreads();
+    } else {
+      renderDm();
+    }
+    paintBadges();
+  }
+
+  function wirePending() {
+    var btn = $('[data-role="dm-refresh"]', dmBox());
+    if (btn) btn.addEventListener('click', function () { recheckTable(btn); });
   }
 
   function wireSetup() {
     var btn = $('[data-role="copy-sql"]', dmBox());
-    if (!btn) return;
-    btn.addEventListener('click', function () {
+    if (btn) btn.addEventListener('click', function () {
       var text = DM_SQL;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(function () {
@@ -392,6 +433,8 @@
         legacyCopy(text, btn);
       }
     });
+    var re = $('[data-role="setup-refresh"]', dmBox());
+    if (re) re.addEventListener('click', function () { recheckTable(re); });
   }
 
   function legacyCopy(text, btn) {
