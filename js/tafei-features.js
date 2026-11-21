@@ -376,7 +376,7 @@
 
   /* ---------------- 视图记忆（仅首页） ---------------- */
   function restoreView() {
-    if (!isHome) return;
+    if (!isHome || location.hash) return;
     var saved = null;
     try { saved = localStorage.getItem('tafei-view'); } catch (e) { saved = null; }
     if (!saved || saved === 'home' || !VIEWS[saved]) return;

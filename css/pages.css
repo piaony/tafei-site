@@ -288,3 +288,30 @@ body.light .dev-cmp-scroll { background: #fff; }
   .dev-cmp-info { flex: 1 1 100%; }
   .dev-cmp-acts { width: 100%; justify-content: flex-end; }
 }
+
+/* TAFEI 21.4：内页保留手机底部导航 */
+.mobile-bottom-nav{display:none}
+@media (max-width: 760px){
+  body.page-inner{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+  .mobile-bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:9999;
+    display:grid;grid-template-columns:repeat(5,1fr);
+    padding:9px 4px calc(9px + env(safe-area-inset-bottom));
+    background:rgba(15,24,43,.96);
+    border-top:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(16px);
+    box-shadow:0 -8px 28px rgba(4,10,25,.45);
+  }
+  .mobile-bottom-nav a{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;min-height:44px;color:#aabbd1;text-decoration:none;
+    font-size:11px;line-height:1.5;border-radius:10px;
+  }
+  .mobile-bottom-nav a.active{color:#70d9ff;font-weight:700;background:rgba(100,232,255,.1)}
+  .mobile-bottom-nav a:active{transform:scale(.94)}
+  .mobile-bottom-nav .tf-ico{width:22px;height:22px}
+  .dev-cmp-bar{bottom:calc(78px + env(safe-area-inset-bottom))!important}
+}
+body.light.page-inner .mobile-bottom-nav{background:rgba(255,255,255,.94);border-top:1px solid rgba(55,91,160,.18);box-shadow:0 -8px 28px rgba(48,74,130,.14)}
+body.light.page-inner .mobile-bottom-nav a{color:var(--tf-muted)}
+body.light.page-inner .mobile-bottom-nav a.active{color:var(--tf-cyan);background:rgba(15,158,196,.1)}

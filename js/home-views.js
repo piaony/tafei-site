@@ -50,5 +50,14 @@
  });
 
  window.TAFEIViews = { showPage: showPage };
- showPage('home');
+
+ function pageFromHash(){
+  const key=(location.hash||'').replace('#','');
+  if(!key) return 'home';
+  if(key==='info') return 'community';
+  return pages[key] ? key : 'home';
+ }
+
+ window.addEventListener('hashchange',()=>showPage(pageFromHash()));
+ showPage(pageFromHash());
 })();
