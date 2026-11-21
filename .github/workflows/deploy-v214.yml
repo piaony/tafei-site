@@ -1,0 +1,34 @@
+name: deploy-v214
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, '[deploy-v214]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download package
+        run: curl -L --fail -o /tmp/v214.zip "https://aka.doubaocdn.com/s/jrn1dXdZnp"
+      - name: Unpack and verify
+        run: |
+          unzip -o /tmp/v214.zip -d .
+          grep -q 'CONTENT STATION · 21.4' index.html
+          grep -q 'js/mobile-nav.js' service.html
+          grep -q 'mobile-bottom-nav' css/pages.css
+          test -f js/mobile-nav.js
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          git add index.html css/pages.css js/home-views.js js/tafei-features.js js/mobile-nav.js service.html device.html shop.html 404.html search.html naiwa.html
+          git commit -m "v21.4: 内页保留手机底部导航"
+          git push origin HEAD:main
