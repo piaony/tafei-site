@@ -4,7 +4,7 @@
 -- 原因：auth.users 上的自定义触发器（通常是 handle_new_user）在写 public.tafei_profiles
 -- 时出错（插入旧字段/表结构变化/RLS 权限），GoTrue 就会统一返回 500 这个错误。
 -- 本脚本会删掉 public schema 里挂在 auth.users 上的自定义触发器，再建一个安全版本：
--- 只写 id + nickname，security definer 绕过 RLS，昵称重复也不会挡注册。
+-- 写 id/nickname/bio/created_at，security definer 绕过 RLS，昵称重复也不会挡注册。
 
 -- 1) 先看一眼现在有哪些自定义触发器（执行后会显示在结果区）
 select t.tgname as trigger_name,
@@ -53,8 +53,8 @@ begin
   );
   nick := left(nick, 30);
 
-  insert into public.tafei_profiles (id, nickname)
-  values (new.id, nick)
+  insert into public.tafei_profiles (id, nickname, bio, created_at)
+  values (new.id, nick, '', now())
   on conflict (id) do nothing;
 
   return new;
