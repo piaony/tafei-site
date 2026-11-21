@@ -23,7 +23,7 @@ jobs:
         run: |
           git config user.name "tafei-bot"
           git config user.email "tafei-bot@users.noreply.github.com"
-          git add -A
+          git add data/devices.json device.html index.html search.html
           git commit -m "v21.5: 机型库扩容到 425 台，覆盖 24 个品牌" || echo "no changes"
           set +e
           git push origin HEAD:main > /tmp/push.log 2>&1
