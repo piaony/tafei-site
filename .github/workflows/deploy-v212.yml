@@ -1,0 +1,29 @@
+name: deploy-v212
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download package
+        run: curl -L --fail -o /tmp/v212.zip "https://aka.doubaocdn.com/s/25mFjOwVke"
+      - name: Unpack and verify
+        run: |
+          unzip -o /tmp/v212.zip -d .
+          grep -q "21.2" index.html
+          test -f js/community-hub.js
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          git add index.html css/home.css css/community.css js/community-hub.js js/home-core.js js/tafei-inbox.js js/home-views.js js/tafei-features.js js/community-help.js supabase/avatar.sql
+          git commit -m "v21.2: 社区枢纽、独立商城与头像体系"
+          git push origin HEAD:main
