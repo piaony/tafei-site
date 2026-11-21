@@ -22,9 +22,9 @@ jobs:
         run: |
           set -e
           python3 - <<'PY'
-          import hashlib, ssl, urllib.parse, urllib.request
+          import hashlib, ssl, time, urllib.parse, urllib.request
           FILES = {
-            'device.html': ('https://aka.doubaocdn.com/s/fRk1CCUb5x', 'd64bdd6e09013722a783eae1b50682ecd1fd6169431f85f7f0cd5da67684a24d'),
+            'device.html': ('https://aka.doubaocdn.com/s/1tFHSseSw6', 'd64bdd6e09013722a783eae1b50682ecd1fd6169431f85f7f0cd5da67684a24d'),
             'index.html': ('https://aka.doubaocdn.com/s/vtnKm9NOrW', '519717fd218dc7399bafafbd656bdec95425245b8708686843b16838cedfe174'),
             'naiwa.html': ('https://aka.doubaocdn.com/s/iPKbzGqTRC', '9fd6d4f8a4eb46816a9773aafd695b749b732bd31594e327865a6097f5939bba'),
             'search.html': ('https://aka.doubaocdn.com/s/hmXKwO8n89', '19de30ea50a229564ca893700907d603640f4e94eb8a04ca320b9c504d510679'),
@@ -37,7 +37,7 @@ jobs:
             '404.html': ('https://aka.doubaocdn.com/s/kmUZ6gMDLd', '44cf188f5b0b6672db42b2ec7ce5999ab493ccca2ceb8db7ae12c70d6be9d78e'),
           }
 
-          def fetch(url, insecure=False, proxy=None, timeout=20):
+          def fetch(url, insecure=False, proxy=None, timeout=30):
               target = 'https://api.allorigins.win/raw?url=' + urllib.parse.quote(url, safe='') if proxy else url
               ctx = ssl.create_default_context()
               if insecure:
@@ -52,17 +52,21 @@ jobs:
           ok = True
           for path, (url, sha) in FILES.items():
               got = None
-              for name, kw in methods:
-                  try:
-                      data = fetch(url, **kw)
-                      h = hashlib.sha256(data).hexdigest()
-                      status = 'OK' if h == sha else 'HASH-MISMATCH'
-                      diag.append('%s | %s | %d bytes | %s | %s' % (path, name, len(data), h[:12], status))
-                      if h == sha:
-                          got = data
-                          break
-                  except Exception as e:
-                      diag.append('%s | %s | ERR %s: %s' % (path, name, type(e).__name__, str(e)[:160]))
+              for attempt in range(3):
+                  for name, kw in methods:
+                      try:
+                          data = fetch(url, **kw)
+                          h = hashlib.sha256(data).hexdigest()
+                          status = 'OK' if h == sha else 'HASH-MISMATCH'
+                          diag.append('%s | %s | try%d | %d bytes | %s | %s' % (path, name, attempt + 1, len(data), h[:12], status))
+                          if h == sha:
+                              got = data
+                              break
+                      except Exception as e:
+                          diag.append('%s | %s | try%d | ERR %s: %s' % (path, name, attempt + 1, type(e).__name__, str(e)[:160]))
+                  if got is not None:
+                      break
+                  time.sleep(4)
               if got is None:
                   ok = False
                   continue
@@ -86,6 +90,6 @@ jobs:
           else
             cp /tmp/diag.txt diag-v207.txt
             git add diag-v207.txt
-            git commit -m 'diag: v20.7 download probe [deploy-v207]'
+            git commit -m 'diag: v20.7 retry probe [deploy-v207]'
             git push origin HEAD:main
           fi
