@@ -22,6 +22,7 @@
     <a href="index.html">首页</a>
     <a href="index.html#articles">文章</a>
     <a href="device.html">机型库</a>
+    <a href="fix.html">急救室</a>
     <a href="service.html" aria-current="page">技术服务</a>
     <a href="search.html">搜索</a>
     <a href="naiwa.html">奶娃</a>
@@ -39,6 +40,17 @@
       <div><b>全程录屏</b><span>每一步操作可回看，交付附操作记录。</span></div>
       <div><b>7 天售后</b><span>同一问题免费返工，责任边界提前写清。</span></div>
     </div>
+  </section>
+
+  <section class="pg-sec" id="care" style="padding-top:0">
+    <a class="pg-card" href="fix.html" style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;border-color:rgba(100,232,255,.32);background:linear-gradient(120deg,rgba(59,143,255,.13),rgba(132,107,255,.1))">
+      <div style="min-width:240px;flex:1">
+        <p class="pg-kicker" style="margin:0">TAFEI CARE · 新功能</p>
+        <h3 style="margin:6px 0 6px">还不知道是软件还是硬件？先做 5 步自检</h3>
+        <p style="margin:0;color:var(--muted);font-size:14px;line-height:1.7">按设备、现象、系统状态、最近操作和目标生成初步判断，给出先做 / 别做 / 可能原因 / 参考区间，可直接把摘要带进预约。</p>
+      </div>
+      <span class="btn primary" style="white-space:nowrap">进入手机急救室 →</span>
+    </a>
   </section>
 
   <section class="pg-sec" id="services">
@@ -246,9 +258,14 @@
   const params = new URLSearchParams(location.search);
   const preDevice = params.get('device');
   const preIssue = params.get('issue');
+  const preService = params.get('service');
   if (preDevice) document.getElementById('f-device').value = preDevice;
-  if (preIssue) document.getElementById('f-note').value = '来自求助台：' + preIssue;
-  if (params.get('device')) {
+  if (preIssue) document.getElementById('f-note').value = '来自急救室：' + preIssue;
+  if (preService) {
+    const sel = document.getElementById('f-service');
+    if (sel && Array.from(sel.options).some((o) => o.value === preService || o.textContent === preService)) sel.value = preService;
+  }
+  if (params.get('device') && !preService) {
     const sel = document.getElementById('f-service');
     if (sel) sel.value = '还不确定，先咨询';
   }
@@ -318,6 +335,6 @@
 })();
 </script>
 <script src="js/mobile-nav.js?v=1" defer></script>
-<script src="js/tafei-ui.js" defer></script>
+<script src="js/tafei-ui.js?v=3" defer></script>
 </body>
 </html>

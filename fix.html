@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#070b16">
+<title>手机急救室 · 挞飞 TAFEI</title>
+<meta name="description" content="挞飞手机急救室：5 个问题快速判断手机开不了机、卡顿发热、耗电、刷机失败、屏幕电池等问题。给出先做什么、别做什么、参考价格和下一步建议，不收集设备数据。">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/fix.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="手机急救室 · 挞飞 TAFEI">
+<meta property="og:description" content="先判断，再动手：5 个问题缩小手机故障范围，给出安全步骤、风险动作和参考区间。">
+<meta property="og:url" content="https://piaony.github.io/tafei-site/fix.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b16'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+ --bg:#070b16;--bg2:#0b1220;--panel:rgba(14,23,40,.82);--panel2:rgba(16,28,48,.72);
+ --line:rgba(122,170,255,.17);--line2:rgba(122,170,255,.28);--txt:#eef5ff;--muted:#9babc6;
+ --cyan:#63e6ff;--blue:#6e8cff;--violet:#c69cff;--gold:#ffd36e;--green:#62e0ad;--red:#ff7d8d;--orange:#ffb26b;
+ --shadow:0 24px 70px rgba(0,0,0,.38);--radius:22px;--max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+ radial-gradient(55% 40% at 12% 2%,rgba(56,127,255,.20),transparent 70%),
+ radial-gradient(45% 38% at 92% 8%,rgba(194,120,255,.14),transparent 70%),
+ radial-gradient(50% 40% at 60% 95%,rgba(40,220,210,.08),transparent 70%),
+ var(--bg);
+ color:var(--txt);font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+ -webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+::selection{background:rgba(99,230,255,.28)}
+.wrap{width:min(var(--max),calc(100% - 40px));margin:0 auto}
+.top{position:sticky;top:0;z-index:30;background:rgba(7,11,22,.82);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}
+.top-inner{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-weight:900;letter-spacing:.13em;font-size:18px}
+.brand span{color:var(--cyan)}
+.nav{display:flex;align-items:center;gap:6px;font-size:13px}
+.nav a{padding:8px 11px;border-radius:99px;color:var(--muted);transition:.2s}
+.nav a:hover{color:var(--txt);background:rgba(255,255,255,.06)}
+.nav a.strong{color:var(--txt);border:1px solid var(--line2);background:rgba(99,230,255,.08)}
+
+.hero{padding:62px 0 26px;display:grid;grid-template-columns:1.18fr .82fr;gap:44px;align-items:center}
+.kicker{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.18em;font-weight:800;color:var(--cyan)}
+.kicker i{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 5px rgba(99,230,255,.09),0 0 18px var(--cyan)}
+h1{margin:18px 0 18px;font-size:clamp(42px,6vw,74px);line-height:1.03;letter-spacing:-.055em;font-weight:860}
+h1 em{font-style:normal;background:linear-gradient(100deg,#fff 5%,#8cecff 40%,#a78cff 76%,#ffd36e 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{max-width:660px;color:var(--muted);font-size:16px;margin:0}
+.lede b{color:var(--txt)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:99px;padding:7px 11px;color:#c8d5ea;font-size:12px}
+.chip b{color:var(--cyan)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:14px;border:1px solid var(--line2);background:rgba(255,255,255,.04);font-weight:700;font-size:14px;transition:.2s}
+.btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.08)}
+.btn.primary{border-color:transparent;background:linear-gradient(100deg,#53ddff,#728cff 55%,#b28cff);color:#06101f;box-shadow:0 12px 30px rgba(88,150,255,.24)}
+.btn.gold{border-color:transparent;background:linear-gradient(100deg,#ffd36e,#ffb26b);color:#211305}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+.radar{border:1px solid var(--line);border-radius:28px;padding:24px;background:linear-gradient(160deg,rgba(14,26,48,.92),rgba(9,16,30,.74));box-shadow:var(--shadow);position:relative;overflow:hidden}
+.radar:before{content:"";position:absolute;inset:-40% -20% auto auto;width:300px;height:300px;background:radial-gradient(circle,rgba(99,230,255,.18),transparent 66%);pointer-events:none}
+.radar-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;letter-spacing:.16em;color:var(--muted);font-weight:800}
+.live{display:inline-flex;align-items:center;gap:6px;color:var(--green);letter-spacing:.08em}
+.live i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.8s infinite}
+.radar-stage{height:238px;position:relative;margin:10px 0 4px;display:grid;place-items:center}
+.ring{position:absolute;border:1px solid rgba(99,230,255,.16);border-radius:50%;width:210px;height:210px}
+.ring.r2{width:154px;height:154px;border-color:rgba(198,156,255,.18)}
+.ring.r3{width:96px;height:96px;border-color:rgba(255,211,110,.22)}
+.scan{position:absolute;width:210px;height:210px;border-radius:50%;background:conic-gradient(from 0deg,rgba(99,230,255,.24),transparent 28%);animation:spin 7s linear infinite;mask:radial-gradient(circle,transparent 52%,#000 54%)}
+.core{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(99,230,255,.18),rgba(110,140,255,.14));border:1px solid rgba(99,230,255,.34);box-shadow:0 0 38px rgba(99,230,255,.14)}
+.core svg{width:40px;height:40px;stroke:#9beeff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pulse-line{position:absolute;left:16px;right:16px;bottom:8px;height:30px;opacity:.68}
+.pulse-line svg{width:100%;height:100%;stroke:var(--cyan);fill:none;stroke-width:1.4;filter:drop-shadow(0 0 8px rgba(99,230,255,.5))}
+.radar-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.radar-stats div{border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.025)}
+.radar-stats b{display:block;font-size:15px;color:#dff8ff}
+.radar-stats span{font-size:10px;color:var(--muted);letter-spacing:.04em}
+
+.section{padding:34px 0}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}
+.section-head h2{margin:6px 0 0;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.035em;line-height:1.15}
+.section-head p{max-width:520px;margin:0;color:var(--muted);font-size:13px}
+
+.care{display:grid;grid-template-columns:1.35fr .65fr;gap:18px;align-items:start}
+.wizard{border:1px solid var(--line);border-radius:26px;background:linear-gradient(155deg,rgba(15,27,49,.92),rgba(9,16,30,.8));box-shadow:var(--shadow);overflow:hidden}
+.wizard-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wizard-title{display:flex;align-items:center;gap:11px}
+.wizard-title .num{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(99,230,255,.1);border:1px solid rgba(99,230,255,.25);color:var(--cyan);font-size:12px;font-weight:900}
+.wizard-title b{font-size:15px}
+.wizard-title span{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:1px}
+.step-count{font-size:11px;color:var(--muted);white-space:nowrap}
+.progress{height:4px;background:rgba(255,255,255,.05)}
+.progress i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--cyan),var(--violet));transition:width .35s ease}
+.wizard-body{padding:24px 22px 22px}
+.q-no{font-size:10px;letter-spacing:.16em;color:var(--cyan);font-weight:800}
+.q-title{margin:8px 0 18px;font-size:clamp(20px,2.4vw,27px);line-height:1.32;letter-spacing:-.02em}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt{min-height:72px;text-align:left;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.035);padding:12px 13px;color:var(--txt);transition:.18s;display:flex;align-items:center;gap:11px}
+.opt:hover{border-color:var(--line2);background:rgba(99,230,255,.06);transform:translateY(-1px)}
+.opt.sel{border-color:rgba(99,230,255,.52);background:rgba(99,230,255,.1);box-shadow:inset 0 0 0 1px rgba(99,230,255,.12)}
+.opt-ico{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.05);font-size:16px}
+.opt b{display:block;font-size:14px;line-height:1.35}
+.opt small{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.45}
+.wizard-foot{display:flex;justify-content:space-between;gap:10px;padding:0 22px 22px}
+.ghost{border:0;background:transparent;color:var(--muted);font-size:12px;padding:8px 2px}
+.ghost:hover{color:var(--txt)}
+.hint{color:var(--muted);font-size:11px;margin-top:12px}
+
+.aside{display:grid;gap:12px}
+.note-card{border:1px solid var(--line);border-radius:18px;padding:17px;background:rgba(255,255,255,.035)}
+.note-card b{font-size:13px}
+.note-card p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.65}
+.note-card .mini{font-size:10px;letter-spacing:.14em;color:var(--cyan);font-weight:800;margin-bottom:6px}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:10px;padding:4px 7px;border-radius:99px;border:1px solid var(--line);color:#b9cbe6;background:rgba(255,255,255,.03)}
+.emergency{border-color:rgba(255,125,141,.28);background:rgba(255,125,141,.055)}
+.emergency .mini{color:var(--red)}
+
+.result{border:1px solid rgba(99,230,255,.3);border-radius:26px;background:linear-gradient(155deg,rgba(16,30,53,.96),rgba(9,16,30,.84));box-shadow:var(--shadow);overflow:hidden;display:none}
+.result.show{display:block;animation:rise .35s ease both}
+.result-head{padding:22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.result-head h2{margin:4px 0 0;font-size:25px;letter-spacing:-.03em}
+.result-head p{margin:6px 0 0;color:var(--muted);font-size:12px}
+.sev{display:inline-flex;align-items:center;gap:7px;border-radius:99px;padding:7px 11px;font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.sev i{width:7px;height:7px;border-radius:50%}
+.sev.low{background:rgba(98,224,173,.1);border:1px solid rgba(98,224,173,.28);color:#8ff0c9}.sev.low i{background:var(--green)}
+.sev.mid{background:rgba(255,178,107,.1);border:1px solid rgba(255,178,107,.28);color:#ffc48d}.sev.mid i{background:var(--orange)}
+.sev.high{background:rgba(255,125,141,.1);border:1px solid rgba(255,125,141,.3);color:#ffa4af}.sev.high i{background:var(--red)}
+.result-body{padding:20px 22px 22px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rblock{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.025)}
+.rblock.wide{grid-column:1/-1}
+.rblock h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;color:#d6e5f8;display:flex;align-items:center;gap:7px}
+.rblock h3 span{font-size:15px}
+.rblock ul{margin:0;padding-left:17px;color:#b7c7de;font-size:12px;line-height:1.75}
+.rblock li::marker{color:var(--cyan)}
+.rblock.danger{border-color:rgba(255,125,141,.2);background:rgba(255,125,141,.035)}
+.rblock.danger h3{color:#ffabb5}.rblock.danger li::marker{color:var(--red)}
+.rblock.good{border-color:rgba(98,224,173,.2);background:rgba(98,224,173,.03)}
+.rblock.good h3{color:#a4f5d4}.rblock.good li::marker{color:var(--green)}
+.price{display:flex;align-items:baseline;gap:8px;margin:2px 0 4px}
+.price b{font-size:28px;letter-spacing:-.04em;color:#fff}
+.price span{font-size:11px;color:var(--muted)}
+.note{font-size:11px;color:var(--muted);line-height:1.65}
+.result-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:9px;padding-top:4px}
+.copy-status{font-size:11px;color:var(--green);align-self:center}
+
+.faq{border-top:1px solid var(--line);padding-top:26px}
+.faq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.faq-item{border:1px solid var(--line);border-radius:16px;padding:16px;background:rgba(255,255,255,.025)}
+.faq-item b{display:block;font-size:13px;margin-bottom:6px}
+.faq-item p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+
+.footer{padding:30px 0 44px;color:var(--muted);font-size:11px;line-height:1.8}
+.footer strong{color:var(--txt)}
+.footer a{color:#b9dcff}
+.footer .risk{border-top:1px solid var(--line);margin-top:14px;padding-top:14px;max-width:920px}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media(max-width:900px){
+ .hero{grid-template-columns:1fr;gap:22px;padding-top:40px}
+ h1{font-size:clamp(40px,10vw,62px)}
+ .radar{max-width:520px}
+ .care{grid-template-columns:1fr}
+ .aside{grid-template-columns:1fr 1fr;grid-row:auto}
+ .result-body{grid-template-columns:1fr}
+ .faq-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+ .wrap{width:calc(100% - 28px)}
+ .top-inner{min-height:58px}
+ .nav a:not(.strong){display:none}
+ .hero{padding-top:30px;gap:18px}
+ .lede{font-size:14px}
+ .radar{padding:16px;border-radius:22px}
+ .radar-stage{height:198px}
+ .ring{width:174px;height:174px}.ring.r2{width:128px;height:128px}.ring.r3{width:82px;height:82px}
+ .scan{width:174px;height:174px}
+ .options{grid-template-columns:1fr}
+ .opt{min-height:62px}
+ .wizard-head,.wizard-body,.wizard-foot{padding-left:16px;padding-right:16px}
+ .aside{grid-template-columns:1fr}
+ .result-head,.result-body{padding-left:16px;padding-right:16px}
+ .section-head{display:block}
+ .section-head p{margin-top:8px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="wrap top-inner">
+  <a class="brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="nav" aria-label="页面导航">
+   <a href="service.html">技术服务</a>
+   <a href="device.html">机型库</a>
+   <a href="index.html">回首页</a>
+   <a class="strong" href="service.html#book">直接报修 ↗</a>
+  </nav>
+ </div>
+</header>
+
+<main class="wrap">
+ <section class="hero">
+  <div>
+   <div class="kicker"><i></i> TAFEI CARE · 手机急救室</div>
+   <h1>先判断，<br><em>再动手。</em></h1>
+   <p class="lede">手机开不了机、卡顿发热、刷机失败？用 <b>5 个问题</b> 把故障范围缩小。告诉你哪些可以先做、哪些千万别碰，以及大概要花多少。<b>不收集设备数据，不诱导下单。</b></p>
+   <div class="chips">
+    <span class="chip"><b>2 分钟</b> 自助判断</span>
+    <span class="chip">不上传 IMEI / 账号</span>
+    <span class="chip">价格只给区间</span>
+    <span class="chip">站长本人接单</span>
+   </div>
+   <div class="hero-actions">
+    <a class="btn primary" href="#care">开始自检 →</a>
+    <a class="btn" href="service.html">看技术服务</a>
+    <a class="btn" href="device.html">查机型档案</a>
+   </div>
+  </div>
+  <aside class="radar" aria-label="诊断台示意">
+   <div class="radar-top"><span>DEVICE SCAN / 本地判断</span><span class="live"><i></i> ONLINE</span></div>
+   <div class="radar-stage">
+    <span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span><span class="scan"></span>
+    <div class="core">
+     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10 18.5h4"/><path d="M9.5 6.5h5"/></svg>
+    </div>
+    <div class="pulse-line">
+     <svg viewBox="0 0 280 30" aria-hidden="true"><path d="M0 18h42l8-12 12 24 14-18 8 6h36l7-9 12 18 11-10 9 4h121"/></svg>
+    </div>
+   </div>
+   <div class="radar-stats">
+    <div><b>5</b><span>步判断</span></div>
+    <div><b>0</b><span>数据上传</span></div>
+    <div><b>7 天</b><span>服务售后</span></div>
+   </div>
+  </aside>
+ </section>
+
+ <section class="section" id="care">
+  <div class="section-head">
+   <div><div class="kicker"><i></i> SELF CHECK</div><h2>先把问题说清楚。</h2></div>
+   <p>选择越接近真实情况，建议越准确。中途可以返回修改，结果只保存在当前页面。</p>
+  </div>
+  <div class="care">
+   <section class="wizard" id="wizard" aria-live="polite">
+    <div class="wizard-head">
+     <div class="wizard-title"><span class="num" id="stepNum">01</span><div><b id="wizardHeading">先选设备</b><span>DIAGNOSTIC / 故障自检</span></div></div>
+     <span class="step-count" id="stepCount">1 / 5</span>
+    </div>
+    <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+    <div class="wizard-body">
+     <div class="q-no" id="qNo">QUESTION 01</div>
+     <h3 class="q-title" id="qTitle">你手里是什么设备？</h3>
+     <div class="options" id="options"></div>
+     <p class="hint" id="qHint">只用于匹配常见故障，不会识别你的具体设备。</p>
+    </div>
+    <div class="wizard-foot">
+     <button class="ghost" id="backBtn" type="button" disabled>← 上一步</button>
+     <button class="btn primary" id="nextBtn" type="button" disabled>继续 →</button>
+    </div>
+   </section>
+
+   <aside class="aside">
+    <div class="note-card">
+     <div class="mini">先记住</div>
+     <b>能备份，就先备份。</b>
+     <p>只要还能进入系统，优先把照片、聊天记录和账号迁移出来。不要一边发热一边反复重启。</p>
+     <div class="tag-row"><span class="tag">照片</span><span class="tag">聊天记录</span><span class="tag">账号</span><span class="tag">验证码</span></div>
+    </div>
+    <div class="note-card emergency">
+     <div class="mini">高风险</div>
+     <b>进水、摔伤、鼓包，不要充电。</b>
+     <p>进水后继续通电可能扩大腐蚀；电池鼓包有安全风险。先断电，找靠谱的店做检测。</p>
+    </div>
+    <div class="note-card">
+     <div class="mini">关于报价</div>
+     <b>这里只给参考区间。</b>
+     <p>同型号、成色、故障深度不同，价格会变。最终以检测结果和站长确认的报价为准。</p>
+    </div>
+   </aside>
+  </div>
+
+  <section class="result" id="result" aria-live="polite">
+   <div class="result-head">
+    <div><div class="kicker"><i></i> DIAGNOSTIC RESULT</div><h2 id="resultTitle">你的初步判断</h2><p id="resultSub">根据你选择的 5 项信息生成。</p></div>
+    <span class="sev mid" id="sevBadge"><i></i><span id="sevText">需要进一步判断</span></span>
+   </div>
+   <div class="result-body">
+    <div class="rblock good">
+     <h3><span>✓</span> 可以先做</h3>
+     <ul id="safeList"></ul>
+    </div>
+    <div class="rblock danger">
+     <h3><span>!</span> 先别做</h3>
+     <ul id="avoidList"></ul>
+    </div>
+    <div class="rblock">
+     <h3><span>◎</span> 可能原因</h3>
+     <ul id="causeList"></ul>
+    </div>
+    <div class="rblock">
+     <h3><span>¥</span> 参考区间</h3>
+     <div class="price"><b id="priceText">检测后报价</b><span id="priceUnit"></span></div>
+     <p class="note" id="priceNote">不含配件与主板级维修，最终以检测为准。</p>
+    </div>
+    <div class="rblock wide">
+     <h3><span>→</span> 下一步建议</h3>
+     <p class="note" id="nextText"></p>
+    </div>
+    <div class="result-actions">
+     <a class="btn primary" id="bookBtn" href="service.html#book">带着结果去报修 ↗</a>
+     <button class="btn" id="copyBtn" type="button">复制诊断摘要</button>
+     <button class="btn" id="restartBtn" type="button">重新判断</button>
+     <span class="copy-status" id="copyStatus" role="status"></span>
+    </div>
+   </div>
+  </section>
+ </section>
+
+ <section class="faq">
+  <div class="section-head">
+   <div><div class="kicker"><i></i> BEFORE YOU REPAIR</div><h2>修之前，先弄明白。</h2></div>
+   <p>急救室只做初步分流，不替代拆机检测。涉及主板、进水、电池鼓包时，优先线下检测。</p>
+  </div>
+  <div class="faq-grid">
+   <div class="faq-item"><b>手机开不了机，先按什么？</b><p>先确认是没电、充电器故障还是系统卡死：换一套充电器和线，充 30 分钟，再尝试强制重启。仍无反应就不要反复短接或乱刷。</p></div>
+   <div class="faq-item"><b>刷机失败还能自己救吗？</b><p>能进 Fastboot / Recovery 才有较大机会。先停止重复刷入，记下机型、系统版本和报错。没有备份时，优先保数据而不是追求一次刷好。</p></div>
+   <div class="faq-item"><b>远程服务安全吗？</b><p>只通过站内预约和站长本人对接，全程录屏，不要求提供锁屏密码、支付密码或 Apple ID。任何要求私下转账、远程控制你电脑的，都不要答应。</p></div>
+  </div>
+ </section>
+</main>
+
+<footer class="footer wrap">
+ <strong>挞飞 TAFEI · 手机急救室</strong> · 先判断，再动手。<br>
+ <a href="index.html">回首页</a> · <a href="service.html">技术服务</a> · <a href="device.html">机型库</a> · <a href="jingling.html">精灵小屋</a>
+ <div class="risk">说明：本页为自助排查工具，不构成维修承诺或最终报价。拆机、进水、电池鼓包等高风险情况请优先线下检测。站内服务由站长本人提供，请通过站内预约或公开联系方式对接，不要私下转账。</div>
+</footer>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"手机开不了机，先按什么？","acceptedAnswer":{"@type":"Answer","text":"先确认是没电、充电器故障还是系统卡死：换一套充电器和线，充 30 分钟，再尝试强制重启。仍无反应就不要反复短接或乱刷。"}},
+{"@type":"Question","name":"刷机失败还能自己救吗？","acceptedAnswer":{"@type":"Answer","text":"能进 Fastboot 或 Recovery 才有较大机会。先停止重复刷入，记下机型、系统版本和报错。没有备份时，优先保数据而不是追求一次刷好。"}},
+{"@type":"Question","name":"远程服务安全吗？","acceptedAnswer":{"@type":"Answer","text":"只通过站内预约和站长本人对接，全程录屏，不要求提供锁屏密码、支付密码或 Apple ID。任何要求私下转账、远程控制你电脑的，都不要答应。"}}
+]}
+</script>
+<script>
+(function(){
+ 'use strict';
+ var steps=[
+  {key:'device',no:'01',title:'你手里是什么设备？',hint:'只用于匹配常见故障，不会识别你的具体设备。',opts:[
+   {v:'iphone',ico:'◧',t:'iPhone',s:'iOS / iPadOS 设备'},
+   {v:'android',ico:'▤',t:'安卓手机',s:'小米、OPPO、vivo、荣耀等'},
+   {v:'tablet',ico:'▭',t:'平板 / 其他',s:'平板、备用机、老人机'},
+   {v:'unsure',ico:'?',t:'说不准',s:'先按通用步骤判断'}
+  ]},
+  {key:'symptom',no:'02',title:'现在最明显的问题是什么？',hint:'选最影响使用的那一个，其他问题可以在备注里补充。',opts:[
+   {v:'boot',ico:'⚡',t:'开不了机 / 黑屏',s:'按电源键没反应、卡 Logo'},
+   {v:'slow',ico:'◌',t:'卡顿 / 发热',s:'掉帧、发热、应用闪退'},
+   {v:'battery',ico:'▣',t:'耗电 / 电池异常',s:'掉电快、充不进、鼓包'},
+   {v:'flash',ico:'⌁',t:'刷机 / 系统失败',s:'Root、模块、更新后异常'},
+   {v:'network',ico:'◈',t:'网络 / 信号异常',s:'无服务、Wi-Fi 连不上'},
+   {v:'screen',ico:'▤',t:'屏幕 / 触控异常',s:'花屏、断触、亮线'},
+   {v:'other',ico:'…',t:'其他问题',s:'先描述，再判断'}
+  ]},
+  {key:'state',no:'03',title:'它现在能进系统吗？',hint:'这一步决定是软件排查还是救援优先。',opts:[
+   {v:'normal',ico:'✓',t:'能正常进系统',s:'可以操作设置、备份'},
+   {v:'partial',ico:'△',t:'能进，但功能异常',s:'能开机，某个功能坏了'},
+   {v:'bootloop',ico:'↻',t:'反复重启 / 卡 Logo',s:'进不去桌面'},
+   {v:'dead',ico:'×',t:'完全黑屏 / 无反应',s:'充电也没反应'}
+  ]},
+  {key:'history',no:'04',title:'最近对它做过什么？',hint:'很多故障不是突然出现的，最后一次操作很关键。',opts:[
+   {v:'none',ico:'○',t:'没折腾过',s:'正常使用中出现'},
+   {v:'update',ico:'↑',t:'刚更新系统',s:'OTA、换区、降级'},
+   {v:'flash',ico:'⌘',t:'刷机 / Root / 模块',s:'解 BL、Magisk、Xposed'},
+   {v:'drop',ico:'!',t:'摔过 / 进水 / 鼓包',s:'外力或液体接触'},
+   {v:'unknown',ico:'?',t:'不确定',s:'记不清最近操作'}
+  ]},
+  {key:'priority',no:'05',title:'你现在最在意什么？',hint:'目标不同，建议的顺序也不同。',opts:[
+   {v:'data',ico:'▣',t:'先保住数据',s:'照片、聊天记录最重要'},
+   {v:'speed',ico:'⚡',t:'尽快恢复使用',s:'能开机、能上网就行'},
+   {v:'budget',ico:'¥',t:'尽量控制预算',s:'先做必要项目'},
+   {v:'safe',ico:'◎',t:'稳妥，不想冒险',s:'宁愿多检测一步'}
+  ]}
+ ];
+ var answers={};var idx=0;
+ var qNo=document.getElementById('qNo'),qTitle=document.getElementById('qTitle'),qHint=document.getElementById('qHint'),
+ options=document.getElementById('options'),stepNum=document.getElementById('stepNum'),stepCount=document.getElementById('stepCount'),
+ heading=document.getElementById('wizardHeading'),progress=document.getElementById('progressBar'),nextBtn=document.getElementById('nextBtn'),
+ backBtn=document.getElementById('backBtn'),wizard=document.getElementById('wizard'),result=document.getElementById('result');
+
+ function render(){
+  var st=steps[idx];
+  qNo.textContent='QUESTION '+st.no;
+  qTitle.textContent=st.title;
+  qHint.textContent=st.hint;
+  stepNum.textContent=st.no;
+  stepCount.textContent=(idx+1)+' / '+steps.length;
+  heading.textContent=idx===0?'先选设备':(idx===1?'描述现象':(idx===2?'判断状态':(idx===3?'回忆操作':'确认目标')));
+  progress.style.width=((idx+1)/steps.length*100)+'%';
+  options.innerHTML='';
+  st.opts.forEach(function(o){
+   var b=document.createElement('button');b.type='button';b.className='opt'+(answers[st.key]===o.v?' sel':'');
+   b.innerHTML='<span class="opt-ico">'+(o.ico||'')+'</span><span><b>'+o.t+'</b><small>'+o.s+'</small></span>';
+   b.addEventListener('click',function(){answers[st.key]=o.v;render();});
+   options.appendChild(b);
+  });
+  nextBtn.disabled=!answers[st.key];
+  nextBtn.textContent=idx===steps.length-1?'生成判断 →':'继续 →';
+  backBtn.disabled=idx===0;
+ }
+ function next(){
+  if(!answers[steps[idx].key])return;
+  if(idx<steps.length-1){idx++;render();return;}
+  showResult();
+ }
+ function showResult(){
+  var a=answers,sev='low',sevLabel='可以先观察',title='先按安全步骤排查',sub='这类问题通常可以先从软件和使用习惯入手。';
+  var safe=[],avoid=[],causes=[],price='检测后报价',unit='',note='不含配件与主板级维修，最终以检测为准。',next='';
+  if(a.state==='dead'||a.state==='bootloop'||a.history==='drop'||a.history==='flash'&&a.state!=='normal'){
+   sev='high';sevLabel='建议尽快检测';
+  } else if(a.symptom==='flash'||a.symptom==='battery'||a.symptom==='screen'||a.state==='partial'){
+   sev='mid';sevLabel='需要分型判断';
+  }
+  if(a.symptom==='boot'){
+   title='先排除供电与系统卡死';
+   sub='不要一上来就刷机；先确认电量、充电器和强制重启。';
+   safe=['换一套确认可用的充电器和线，充 30 分钟再试','长按电源键 10–15 秒做强制重启','记下机型、系统版本、卡在哪个画面'];
+   avoid=['不要反复短接、拆机或乱刷来路不明的固件','不要同时插充电器又反复拔插','进水或摔伤后不要继续充电'];
+   causes=['电量耗尽或充电器/线材故障','系统更新或模块导致卡 Logo','主板、屏幕排线或电池硬件故障'];
+   price='¥40 起';unit='救砖 / 系统救援';note='硬件检测与配件另计；保数据方案需先检测确认。';
+   next='先按安全步骤做一遍。仍然黑屏或反复重启，带着机型、系统版本和报错去预约，优先说明是否要保数据。';
+  } else if(a.symptom==='slow'){
+   title='先找发热源，再谈优化';
+   sub='卡顿和发热经常不是同一个原因，先看后台与存储。';
+   safe=['查看电池用量和后台活动，关掉异常耗电应用','留出至少 10% 存储空间，清理缓存而不是清数据','在安全模式下观察是否仍卡顿'];
+   avoid=['不要装来路不明的“性能优化”或“降温”应用','不要盲目超频、改调度或刷所谓省电内核','发热严重时不要边充边玩'];
+   causes=['后台应用或系统更新占用资源','存储接近写满，读写变慢','散热老化、电池健康度下降','模块/调度配置不兼容'];
+   price='¥30 起';unit='Root / 调度 / 兼容排查';note='清刷、降级或硬件检测另计。';
+   next='先记录“什么时候最卡、什么应用最热”。如果安全模式下正常，多半是第三方应用或模块；如果安全模式也卡，优先查系统和电池健康。';
+  } else if(a.symptom==='battery'){
+   title='电池问题先看安全，再谈续航';
+   sub='鼓包、充不进电和掉电快是三件不同的事。';
+   safe=['用原装或正规充电器，换线换插座交叉测试','查看电池健康 / 循环次数（支持时）','鼓包立即断电，放在远离易燃物的地方'];
+   avoid=['电池鼓包还继续充电或按压','用劣质快充头长时间充电','自行刺破或拆鼓包电池'];
+   causes=['电池老化或健康度下降','充电口氧化、线材或充电器故障','系统后台异常耗电','电池鼓包（安全风险）'];
+   price='检测后报价';unit='电池配件按机型';note='电池鼓包不建议继续使用，优先线下检测。';
+   next='先交叉测试充电器和线。若电池健康明显下降或鼓包，别继续折腾软件，直接做线下检测和更换评估。';
+  } else if(a.symptom==='flash'){
+   title='刷机失败，先停手保数据';
+   sub='能进 Fastboot / Recovery 才有较大救援空间。';
+   safe=['停止重复刷入，记下机型、版本和完整报错','确认电量充足，换原装线连接','如果还能进系统，先备份照片和聊天记录'];
+   avoid=['不要跨版本乱刷、不要混用不同机型的固件','不要在没有备份时直接清空数据','不要相信“远程一键救砖”的私下转账'];
+   causes=['固件与机型/区域不匹配','BL 锁、驱动或数据线导致传输中断','模块不兼容或系统分区损坏','操作中断电或强制重启'];
+   price='¥40 起';unit='救砖 / 系统救援';note='保数据与清数据方案价格不同，需检测后确认。';
+   next='先写清楚：机型、当前系统、刷了什么、报什么错、还能进哪个模式。信息越完整，远程判断越快。';
+  } else if(a.symptom==='network'){
+   title='先分清是信号、设置还是硬件';
+   sub='同一张卡换机测试，是最快的一步。';
+   safe=['开关飞行模式，重新搜索网络','把 SIM 卡换到另一台手机测试','检查 APN / 运营商设置，重置网络设置'];
+   avoid=['不要反复恢复出厂设置','不要刷来路不明的基带或“信号增强”模块','不要自行拆天线'];
+   causes=['运营商侧临时故障或套餐状态异常','APN / 网络设置错误','SIM 卡老化或卡槽接触不良','基带/天线硬件故障'];
+   price='¥30 起';unit='软件排查';note='硬件维修与配件另计。';
+   next='先做换机换卡交叉测试：卡在别的手机正常，问题多半在手机；别的手机也没信号，先联系运营商。';
+  } else if(a.symptom==='screen'){
+   title='屏幕问题先别急着换总成';
+   sub='花屏、断触、亮线可能来自排线、压伤或系统。';
+   safe=['重启一次，观察是否固定出现','录一段显示异常的视频，记录出现条件','贴膜和手机壳先取下，排除遮挡与压力'];
+   avoid=['不要用力按压屏幕或自行拆排线','不要用“修复液”或高温烘烤','进水后不要继续充电'];
+   causes=['屏幕排线松动或受压','内屏/外屏受损','系统显示驱动异常','主板显示相关电路故障'];
+   price='检测后报价';unit='屏幕总成按机型';note='原装、组装屏价格差异大，先确认方案再换。';
+   next='记录异常出现的固定位置和条件。若能外接显示或截图正常，更偏向屏幕/排线；否则需要拆机检测。';
+  } else {
+   title='信息还不够，先做基础排查';
+   sub='先记录现象，再决定是软件还是硬件。';
+   safe=['重启一次，记录故障出现的时间与条件','备份重要数据，保留充电器和购买凭证','把报错、异常画面截图保存'];
+   avoid=['不要同时改多个设置，避免无法定位原因','不要私下转账给陌生人','不要在不了解风险时刷机'];
+   causes=['软件设置、系统更新或第三方应用冲突','硬件老化、进水或摔伤','使用环境与配件问题'];
+   price='检测后报价';unit='';note='先检测再报价，避免不必要的更换。';
+   next='把你的机型、系统版本、故障现象和最近操作整理成三句话，再预约检测。';
+  }
+  if(a.priority==='data'){
+   safe.unshift('第一优先备份：能进系统就立刻迁移照片、聊天记录和账号');
+   next='你选择了“先保数据”：不要在未备份时清空或恢复出厂，预约时第一句就说明要保数据。';
+  } else if(a.priority==='budget'){
+   next='你选择了“控制预算”：先做检测和软件排查，确认是硬件问题再决定换件，不要为不确定的方案先付费。';
+  } else if(a.priority==='safe'){
+   next='你选择了“稳妥”：涉及进水、鼓包、摔伤或主板时，优先线下检测，不建议远程盲刷。';
+  }
+  if(a.state==='dead'){
+   safe=['确认充电器和插座正常，充 30 分钟','换线换头再试，观察是否有震动/声音/指示灯','仍然无反应就停止操作，记录机型与故障时间'];
+   avoid=['不要反复短接或尝试“盲刷”','进水/摔伤后不要充电','不要拆机触碰电池'];
+   causes=['电池完全耗尽或充电系统故障','系统/分区损坏','主板、屏幕或排线硬件故障'];
+   price='¥40 起';unit='检测 + 救援';note='完全黑屏必须先检测供电，不能直接承诺救砖成功。';
+   next='完全黑屏不建议远程盲操作。先做充电交叉测试，仍无反应就预约线下检测，优先说明是否进水/摔过。';
+  }
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('resultSub').textContent=sub;
+  var badge=document.getElementById('sevBadge');badge.className='sev '+sev;document.getElementById('sevText').textContent=sevLabel;
+  fill('safeList',safe);fill('avoidList',avoid);fill('causeList',causes);
+  document.getElementById('priceText').textContent=price;
+  document.getElementById('priceUnit').textContent=unit;
+  document.getElementById('priceNote').textContent=note;
+  document.getElementById('nextText').textContent=next;
+  document.getElementById('bookBtn').href='service.html#book';
+  var deviceLabel=a.device==='iphone'?'iPhone':(a.device==='android'?'安卓手机':(a.device==='tablet'?'平板/其他':'手机'));
+  var serviceMap={boot:'变砖救援',slow:'游戏稳帧专项',battery:'还不确定，先咨询',flash:'变砖救援',network:'还不确定，先咨询',screen:'还不确定，先咨询',other:'还不确定，先咨询'};
+  var qs=new URLSearchParams({device:deviceLabel,service:serviceMap[a.symptom]||'还不确定，先咨询',issue:'急救室结果：'+title+'。目标：'+({data:'先保数据',speed:'尽快恢复',budget:'控制预算',safe:'稳妥不冒险'}[a.priority]||'尽快恢复')});
+  document.getElementById('bookBtn').href='service.html?'+qs.toString()+'#book';
+  result.classList.add('show');
+  wizard.style.display='none';
+  result.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ function fill(id,arr){
+  var el=document.getElementById(id);el.innerHTML='';
+  (arr||[]).forEach(function(x){var li=document.createElement('li');li.textContent=x;el.appendChild(li);});
+ }
+ function summary(){
+  var map={device:{iphone:'iPhone',android:'安卓手机',tablet:'平板/其他',unsure:'设备不确定'},symptom:{boot:'开不了机/黑屏',slow:'卡顿/发热',battery:'耗电/电池异常',flash:'刷机/系统失败',network:'网络/信号异常',screen:'屏幕/触控异常',other:'其他问题'},state:{normal:'能正常进系统',partial:'能进但功能异常',bootloop:'反复重启/卡Logo',dead:'完全黑屏/无反应'},history:{none:'没折腾过',update:'刚更新系统',flash:'刷机/Root/模块',drop:'摔过/进水/鼓包',unknown:'不确定'},priority:{data:'先保数据',speed:'尽快恢复',budget:'控制预算',safe:'稳妥不冒险'}};
+  var lines=['挞飞手机急救室 · 初步判断'];
+  ['device','symptom','state','history','priority'].forEach(function(k){if(answers[k])lines.push('· '+steps.find(function(s){return s.key===k;}).title.replace('？','')+'：'+map[k][answers[k]]);});
+  lines.push('结果：'+document.getElementById('resultTitle').textContent);
+  lines.push('参考：'+document.getElementById('priceText').textContent+' '+document.getElementById('priceUnit').textContent);
+  lines.push('下一步：'+document.getElementById('nextText').textContent);
+  lines.push('说明：此为自助初判，不是最终报价。');
+  return lines.join('\n');
+ }
+ nextBtn.addEventListener('click',next);
+ backBtn.addEventListener('click',function(){if(idx>0){idx--;render();}});
+ document.getElementById('restartBtn').addEventListener('click',function(){answers={};idx=0;result.classList.remove('show');wizard.style.display='';render();document.getElementById('care').scrollIntoView({behavior:'smooth'});});
+ document.getElementById('copyBtn').addEventListener('click',function(){
+  var text=summary(),status=document.getElementById('copyStatus');
+  function done(){status.textContent='已复制，可直接粘贴给站长';setTimeout(function(){status.textContent='';},2400);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,fallback);}else{fallback();}
+  function fallback(){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){status.textContent='复制失败，请手动选择文字';}document.body.removeChild(ta);}
+ });
+ render();
+})();
+</script>
+</body>
+</html>
