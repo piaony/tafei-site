@@ -127,12 +127,16 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
 .spirit-config-row input[type=checkbox]{width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:#64e8ff;flex:0 0 auto}
 .spirit-config-row label{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin:0;font-size:11px;color:var(--tf-muted);white-space:nowrap}
 .spirit-config-row select{margin:0;min-height:38px;padding:0 5px;font-size:11px;border-radius:8px;background:rgba(8,16,30,.8);color:var(--tf-text);border:1px solid var(--tf-line)}
+.spirit-bond-row{display:grid;grid-template-columns:50px 92px minmax(120px,1fr) minmax(160px,1.5fr);gap:8px;align-items:center;padding:8px 9px;border:1px solid rgba(100,232,255,.08);border-radius:10px;background:rgba(100,232,255,.025)}
+.spirit-bond-row strong{font-size:12px;color:var(--tf-cyan);font-weight:600}
+.spirit-bond-row label{display:grid;gap:3px;margin:0;font-size:9.5px;color:var(--tf-muted)}
+.spirit-bond-row input{width:100%;min-height:36px;margin:0;padding:0 7px;font-size:11px;border-radius:7px;border:1px solid var(--tf-line);background:rgba(8,16,30,.8);color:var(--tf-text)}
 .spirit-grant-card{margin-top:12px}
 .spirit-grant-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .spirit-grant-grid label{display:grid;gap:5px;margin:0;font-size:11px;color:var(--tf-muted)}
 .spirit-grant-grid select{width:100%;margin:0;min-height:40px;padding:0 8px;border-radius:8px;border:1px solid var(--tf-line);background:rgba(8,16,30,.8);color:var(--tf-text)}
 .spirit-grant-card button{margin-top:10px}
-@media(max-width:620px){.spirit-config-row{grid-template-columns:1fr 92px 64px;gap:6px}.spirit-config-row.has-mode{grid-template-columns:1fr 76px 52px 54px;gap:5px}.spirit-config-row strong{font-size:12px}.spirit-grant-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.spirit-config-row{grid-template-columns:1fr 92px 64px;gap:6px}.spirit-config-row.has-mode{grid-template-columns:1fr 76px 52px 54px;gap:5px}.spirit-config-row strong{font-size:12px}.spirit-bond-row{grid-template-columns:1fr 1fr;gap:5px}.spirit-bond-row strong{grid-column:1/-1}.spirit-bond-row label:nth-of-type(3){grid-column:1/-1}.spirit-grant-grid{grid-template-columns:1fr}}
 .tk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--tf-line);font-size:12.5px}
 .tk-row:last-child{border-bottom:0}
 .tk-row span{color:var(--tf-muted);min-width:70px}
@@ -464,7 +468,19 @@ const SPIRIT_ADMIN = {
     moodHigh: 75,
     fightBondPenalty: 2,
     tickMinutes: 1
-  }
+  },
+  bondLevels: [
+    { level: 1, need: 0, title: '初见', reward: '伙伴档案已建立' },
+    { level: 2, need: 5, title: '眼熟', reward: '全站挂件等级铭牌' },
+    { level: 3, need: 12, title: '常来', reward: '专属头像光环' },
+    { level: 4, need: 22, title: '有默契', reward: '专属互动台词' },
+    { level: 5, need: 35, title: '老朋友', reward: '服务预约优先排期' },
+    { level: 6, need: 50, title: '重要的人', reward: '私信专属签名' },
+    { level: 7, need: 70, title: '形影不离', reward: '限定卡面边框' },
+    { level: 8, need: 95, title: '灵魂搭档', reward: '个人主页展示位' },
+    { level: 9, need: 125, title: '命定伙伴', reward: '专属称号' },
+    { level: 10, need: 160, title: '永远的伙伴', reward: '永久纪念卡' }
+  ]
 };
 
 function spiritDefaultCatalog() {
@@ -474,7 +490,7 @@ function spiritDefaultCatalog() {
   SPIRIT_ADMIN.spirits.forEach((x) => { spirits[x.id] = { price: x.price, enabled: true, mode: x.mode || (x.id === 'xiaota' ? 'free' : 'request') }; });
   SPIRIT_ADMIN.skins.forEach((x) => { skins[x.id] = { price: x.price, enabled: true, spirit: x.spirit }; });
   SPIRIT_ADMIN.items.forEach((x) => { items[x.id] = { price: x.price, enabled: true }; });
-  return { version: 1, spirits, skins, items, rules: SPIRIT_ADMIN.rules };
+  return { version: 1, spirits, skins, items, bondLevels: SPIRIT_ADMIN.bondLevels, rules: SPIRIT_ADMIN.rules };
 }
 
 
@@ -1074,13 +1090,28 @@ function spiritConfigGroup(label, list, kind) {
   return '<div class="spirit-config-group">' + esc(label) + '</div>' + rows;
 }
 
+function bondLevelConfigGroup() {
+  const levels = (spiritCatalog && Array.isArray(spiritCatalog.bondLevels) && spiritCatalog.bondLevels.length >= 2)
+    ? spiritCatalog.bondLevels
+    : SPIRIT_ADMIN.bondLevels;
+  return '<div class="spirit-config-group">亲密度等级与权益</div>'
+    + '<p class="hint" style="margin:0 0 8px">每一级需要达到的亲密度、称号和权益。Lv.1 固定从 0 开始；权益只做备注，实际由站长在预约中手动核销。</p>'
+    + levels.map((row, index) => '<div class="spirit-bond-row" data-bond-row>'
+      + '<strong>Lv.' + (index + 1) + '</strong>'
+      + '<label><span>亲密度门槛</span><input class="bond-need" type="number" min="0" step="1" value="' + Number(row.need || 0) + '"></label>'
+      + '<label><span>称号</span><input class="bond-title" type="text" maxlength="16" value="' + esc(row.title || '') + '"></label>'
+      + '<label><span>权益说明</span><input class="bond-reward" type="text" maxlength="60" value="' + esc(row.reward || '') + '"></label>'
+      + '</div>').join('');
+}
+
 function renderSpiritConfig() {
   const box = $('spiritConfigRows');
   if (!box) return;
   if (!spiritCatalog) spiritCatalog = spiritDefaultCatalog();
   box.innerHTML = spiritConfigGroup('角色价格', SPIRIT_ADMIN.spirits, 'spirit')
     + spiritConfigGroup('皮肤价格', SPIRIT_ADMIN.skins, 'skin')
-    + spiritConfigGroup('食物 / 玩具价格', SPIRIT_ADMIN.items, 'item');
+    + spiritConfigGroup('食物 / 玩具价格', SPIRIT_ADMIN.items, 'item')
+    + bondLevelConfigGroup();
 }
 
 function readSpiritConfigRows() {
@@ -1096,6 +1127,16 @@ function readSpiritConfigRows() {
     const modeEl = row.querySelector('.sp-mode');
     if (modeEl) next[kind + 's'][id].mode = ['free', 'purchase', 'request'].includes(modeEl.value) ? modeEl.value : 'request';
   });
+  const bondRows = Array.from(document.querySelectorAll('[data-bond-row]'));
+  if (bondRows.length >= 2) {
+    next.bondLevels = bondRows.map((row, index) => ({
+      level: index + 1,
+      need: Math.max(0, Number(row.querySelector('.bond-need')?.value) || 0),
+      title: String(row.querySelector('.bond-title')?.value || '').trim() || ('等级 ' + (index + 1)),
+      reward: String(row.querySelector('.bond-reward')?.value || '').trim() || '待配置权益'
+    }));
+    next.bondLevels[0].need = 0;
+  }
   return next;
 }
 

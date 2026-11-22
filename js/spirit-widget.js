@@ -5,11 +5,12 @@
   var core = window.TafeiSpirits;
   if (!core) return;
 
-  var CSS_HREF = 'css/spirit-widget.css';
+  var CSS_HREF = 'css/spirit-widget.css?v=3';
   var root = null;
   var body = null;
   var avatar = null;
   var nameNode = null;
+  var levelNode = null;
   var speech = null;
   var closeBtn = null;
   var drag = null;
@@ -37,7 +38,7 @@
     root.innerHTML = '<button type="button" class="sw-close" aria-label="收起精灵挂件">×</button>'
       + '<span class="sw-speech" id="swSpeech"></span>'
       + '<button type="button" class="sw-body" aria-label="和当前伙伴互动">'
-      + '<span class="sw-avatar"><img id="swAvatarImg" alt=""></span>'
+      + '<span class="sw-avatar"><img id="swAvatarImg" alt=""><span class="sw-level" id="swLevel">Lv.1</span></span>'
       + '<span class="sw-name" id="swName">小挞飞</span>'
       + '<span class="sw-status" aria-hidden="true"><i></i><i></i><i></i></span>'
       + '</button>'
@@ -46,6 +47,7 @@
     body = root.querySelector('.sw-body');
     avatar = root.querySelector('#swAvatarImg');
     nameNode = root.querySelector('#swName');
+    levelNode = root.querySelector('#swLevel');
     speech = root.querySelector('#swSpeech');
     closeBtn = root.querySelector('.sw-close');
     bind();
@@ -85,14 +87,18 @@
     if (!root) return;
     var spirit = core.current();
     if (!spirit) { say('还没有伙伴，先去精灵小屋领取一个。'); return; }
+    var beforeLevel = core.bondInfo(spirit.id).level;
     core.pet(spirit.id);
+    var afterInfo = core.bondInfo(spirit.id);
+    var leveled = afterInfo.level > beforeLevel;
     root.classList.remove('action');
     void root.offsetWidth;
     root.classList.add('action');
     clearTimeout(actionTimer);
     actionTimer = setTimeout(function () { root.classList.remove('action'); }, 500);
     var condition = core.condition();
-    if (condition === 'sleep') say('唔……再睡一小会儿。');
+    if (leveled) say('亲密度升到 Lv.' + afterInfo.level + '，' + afterInfo.title + '。');
+    else if (condition === 'sleep') say('唔……再睡一小会儿。');
     else if (condition === 'angry') say('哼，先让我冷静一下。');
     else if (condition === 'hungry') say('肚子有点饿了，想吃点东西。');
     else say('被你摸到了，亲密度 +1。');
@@ -112,6 +118,8 @@
     avatar.src = skin.img;
     avatar.alt = spirit.name + ' · ' + skin.name;
     nameNode.textContent = spirit.name;
+    var bond = core.bondInfo(spirit.id);
+    if (levelNode) levelNode.textContent = 'Lv.' + bond.level;
     root.classList.remove('mood-sleep', 'mood-angry', 'mood-hungry', 'mood-happy', 'mood-sad');
     root.classList.add('mood-' + condition);
     if (!state.widget.on) {

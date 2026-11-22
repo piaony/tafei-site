@@ -15,6 +15,35 @@
   var CHANGE_EVENT = 'tafei:spirit-change';
   var DEFAULT_DEMO_CREDITS = 120;
 
+  // 亲密度等级：数值只增不减；每级奖励由后台 catalog.bondLevels 覆盖
+  var BOND_LEVELS = [
+    { level: 1, need: 0, title: '初见', reward: '伙伴档案已建立' },
+    { level: 2, need: 5, title: '眼熟', reward: '全站挂件等级铭牌' },
+    { level: 3, need: 12, title: '常来', reward: '专属头像光环' },
+    { level: 4, need: 22, title: '有默契', reward: '专属互动台词' },
+    { level: 5, need: 35, title: '老朋友', reward: '服务预约优先排期' },
+    { level: 6, need: 50, title: '重要的人', reward: '私信专属签名' },
+    { level: 7, need: 70, title: '形影不离', reward: '限定卡面边框' },
+    { level: 8, need: 95, title: '灵魂搭档', reward: '个人主页展示位' },
+    { level: 9, need: 125, title: '命定伙伴', reward: '专属称号' },
+    { level: 10, need: 160, title: '永远的伙伴', reward: '永久纪念卡' }
+  ];
+
+  function normalizeBondLevels(list) {
+    if (!Array.isArray(list) || list.length < 2) return copy(BOND_LEVELS);
+    var out = list.map(function (row, index) {
+      var fallback = BOND_LEVELS[index] || BOND_LEVELS[BOND_LEVELS.length - 1];
+      return {
+        level: index + 1,
+        need: Math.max(0, Math.round(Number(row && row.need) || 0)),
+        title: String((row && row.title) || fallback.title).slice(0, 16),
+        reward: String((row && row.reward) || fallback.reward).slice(0, 60)
+      };
+    }).sort(function (a, b) { return a.need - b.need; });
+    out[0].need = 0;
+    return out;
+  }
+
   function clamp(value, min, max) {
     value = Number(value);
     if (!Number.isFinite(value)) value = min;
@@ -151,6 +180,7 @@
       spirits: {},
       skins: {},
       items: {},
+      bondLevels: copy(BOND_LEVELS),
       rules: {
         satietyDecayPerHour: 1.2,
         moodDecayPerHour: 0.8,
@@ -278,6 +308,9 @@
         }
       });
     });
+    if (Array.isArray(remote.bondLevels) && remote.bondLevels.length >= 2) {
+      next.bondLevels = normalizeBondLevels(remote.bondLevels);
+    }
     if (remote.rules && typeof remote.rules === 'object') {
       Object.keys(next.rules).forEach(function (key) {
         if (remote.rules[key] != null && Number.isFinite(Number(remote.rules[key]))) {
@@ -376,6 +409,34 @@
       sad: '有点低落',
       idle: '安静待着'
     }[condition] || '安静待着';
+  }
+
+  function bondInfoOf(spiritId) {
+    var bond = Math.max(0, Math.round(Number(state.bond[spiritId]) || 0));
+    var levels = normalizeBondLevels(config.bondLevels);
+    var current = levels[0];
+    var index = 0;
+    for (var i = 0; i < levels.length; i++) {
+      if (bond >= levels[i].need) {
+        current = levels[i];
+        index = i;
+      }
+    }
+    var nextLevel = levels[index + 1] || null;
+    var progress = nextLevel
+      ? Math.max(0, Math.min(100, ((bond - current.need) / Math.max(1, nextLevel.need - current.need)) * 100))
+      : 100;
+    return {
+      bond: bond,
+      level: current.level,
+      title: current.title,
+      need: current.need,
+      reward: current.reward,
+      next: nextLevel,
+      toNext: nextLevel ? Math.max(0, nextLevel.need - bond) : 0,
+      progress: progress,
+      levels: levels
+    };
   }
 
   function applyDecay() {
@@ -713,6 +774,7 @@
       cloudReady: cloudReady,
       current: currentSpirit(),
       skin: currentSkin(),
+      bondLevel: bondInfoOf(state.selected),
       condition: conditionOf(state.selected),
       conditionText: conditionText(conditionOf(state.selected))
     };
@@ -740,6 +802,7 @@
     SPIRITS: SPIRITS,
     SKINS: SKINS,
     ITEMS: ITEMS,
+    BOND_LEVELS: BOND_LEVELS,
     config: function () { return config; },
     state: function () { return state; },
     snapshot: snapshot,
@@ -750,6 +813,7 @@
     skinById: skinById,
     itemById: itemById,
     status: statusOf,
+    bondInfo: bondInfoOf,
     condition: conditionOf,
     conditionText: conditionText,
     priceOfSpirit: priceOfSpirit,

@@ -259,8 +259,12 @@
   const preDevice = params.get('device');
   const preIssue = params.get('issue');
   const preService = params.get('service');
+  const preFrom = params.get('from');
   if (preDevice) document.getElementById('f-device').value = preDevice;
-  if (preIssue) document.getElementById('f-note').value = '来自急救室：' + preIssue;
+  if (preIssue) {
+    const issuePrefix = preFrom === 'spirit' ? '来自精灵权益：' : preFrom === 'fix' ? '来自急救室：' : '来自自助排查：';
+    document.getElementById('f-note').value = issuePrefix + preIssue;
+  }
   if (preService) {
     const sel = document.getElementById('f-service');
     if (sel && Array.from(sel.options).some((o) => o.value === preService || o.textContent === preService)) sel.value = preService;

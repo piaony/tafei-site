@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="viewport-fit=cover,width=device-width,initial-scale=1">
 <title>精灵小屋 · 挞飞 Q 版伙伴</title>
-<meta name="description" content="挞飞精灵小屋：8 个热门游戏同人 Q 版伙伴，加上挞飞原创小挞飞。解锁、喂养、玩玩具，选择一位伙伴挂到全站角落。">
+<meta name="description" content="挞飞精灵小屋：9 个热门游戏同人 Q 版伙伴，加上挞飞原创小挞飞。亲密度升级、专属称号、全站挂件和成长权益，按款设置获取方式。">
 <meta name="robots" content="noindex,follow">
 <link rel="stylesheet" href="css/angela.css?v=4">
 <link rel="stylesheet" href="css/jingling.css?v=2">
-<link rel="stylesheet" href="css/spirit-house.css?v=2">
+<link rel="stylesheet" href="css/spirit-house.css?v=3">
 </head>
 <body class="jingling-page">
 
@@ -28,7 +28,7 @@
   <div class="spirit-hero-copy">
    <p class="ang-kicker">SPIRIT HOUSE · 同人Q版 + 原创伙伴</p>
    <h1>精灵小屋</h1>
-   <p class="spirit-lead">9 个伙伴住在小屋里：8 个来自热门游戏，1 个是挞飞原创的小挞飞。选一个当当前伙伴，她会跟着你去全站角落；获取方式可由站长逐款设置。</p>
+   <p class="spirit-lead">9 个伙伴住在小屋里：8 个来自热门游戏，1 个是挞飞原创的小挞飞。亲密度会升级，解锁挂件铭牌、头像光环、专属称号和预约优先标注；获取方式可由站长逐款设置。</p>
    <div class="ang-badges">
     <span class="ang-badge">原创 <b>1</b></span>
     <span class="ang-badge">同人 <b>8</b></span>
@@ -49,7 +49,7 @@
 
  <section class="partner-dock" aria-label="当前展示伙伴">
   <div class="partner-main">
-   <div class="partner-avatar">
+   <div class="partner-avatar" id="partnerAvatarBox">
     <img id="partnerDockImg" src="assets/spirits/xiaota.jpg" alt="当前伙伴">
     <span class="partner-tag" id="partnerDockTag">挞飞原创</span>
    </div>
@@ -59,6 +59,7 @@
     <p class="partner-line" id="partnerDockLine">挞壳是帽子，奶油是身体，围巾是青绿色的风。</p>
     <div class="partner-actions">
      <button type="button" id="widgetToggle">开启全站挂件</button>
+     <a href="#bondPanel">成长与权益</a>
      <a href="#spiritGrid">换一个伙伴</a>
      <a class="ghost" href="xiaota.html">去看看小挞飞</a>
      <span class="partner-wallet demo" id="partnerWallet">演示额度 120</span>
@@ -71,7 +72,27 @@
    <div class="sp-meter mood"><b>心情</b><i><span id="dockMoodBar"></span></i><em id="dockMoodVal">76</em></div>
    <div class="sp-meter anger"><b>怒气</b><i><span id="dockAngerBar"></span></i><em id="dockAngerVal">8</em></div>
    <div class="sp-meter sleep"><b>困意</b><i><span id="dockSleepBar"></span></i><em id="dockSleepVal">20</em></div>
-   <div class="partner-bond"><span>亲密度</span><b id="partnerBond">0</b></div>
+   <div class="partner-bond"><span>亲密度</span><b id="partnerBond">0</b><em id="partnerBondLevel">Lv.1 初见</em></div>
+  </div>
+  <div class="bond-overview" id="bondPanel" aria-labelledby="bondPanelTitle">
+   <div class="bond-top">
+    <div class="bond-heading">
+     <p class="sp-kicker">BOND LEVEL</p>
+     <h3 id="bondPanelTitle"><b id="bondLevelBadge">Lv.1</b><span id="bondLevelTitle">初见</span></h3>
+     <p id="bondNextText">再互动 5 点亲密度，升到 Lv.2</p>
+    </div>
+    <div class="bond-total"><b id="bondTotal">0</b><span>亲密度</span></div>
+   </div>
+   <div class="bond-track" aria-hidden="true"><i><span id="bondProgressBar"></span></i></div>
+   <div class="bond-unlocks">
+    <div><span>当前权益</span><b id="bondCurrentReward">伙伴档案已建立</b></div>
+    <div><span>下一级</span><b id="bondNextReward">全站挂件等级铭牌</b></div>
+   </div>
+   <div class="bond-levels" id="bondLevels" aria-label="亲密度等级与权益"></div>
+   <div class="bond-actions">
+    <a class="ang-btn primary" id="bondBooking" href="service.html">带着权益去预约</a>
+    <span>优先排期等权益在预约备注中标注，由站长手动核销。</span>
+   </div>
   </div>
  </section>
 
@@ -98,7 +119,7 @@
  <section class="spirit-cta">
   <div>
    <h2>想把谁请进小屋？</h2>
-   <p>当前是本地原型：动作、彩蛋和后台获取方式先跑通。正式云端发放前，需要先在 Supabase 跑一次精灵小屋 SQL。</p>
+   <p>当前是本地原型：亲密度等级与伙伴权益已启用，额度购买走站内额度，私人款由站长后台发放。角色图为同人重绘，不接账号交易。</p>
   </div>
   <div class="cta-actions">
    <a class="ang-btn" href="index.html#info">去聊天页</a>
@@ -144,8 +165,7 @@
 
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
-<script src="js/spirit-core.js?v=2"></script>
-<script src="js/jingling.js?v=4"></script>
-<script src="js/spirit-widget.js?v=2"></script>
+<script src="js/spirit-core.js?v=3"></script>
+<script src="js/jingling.js?v=5"></script>
 </body>
 </html>

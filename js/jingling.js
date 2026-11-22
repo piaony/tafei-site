@@ -95,6 +95,8 @@
       if (line) line.textContent = '先在下面的图鉴里免费领取小挞飞；其他款式按后台设置获取。';
       if (condition) condition.textContent = '还没有伙伴';
       if (bond) bond.textContent = '—';
+      var emptyBondLevel = $('partnerBondLevel');
+      if (emptyBondLevel) emptyBondLevel.textContent = '—';
       if (toggle) { toggle.hidden = true; toggle.disabled = true; }
       renderWallet();
       return;
@@ -111,11 +113,58 @@
     if (condition) condition.textContent = snap.conditionText;
     renderMeters('dock');
     if (bond) bond.textContent = String(num(core.state().bond[spirit.id]));
+    var bondInfo = snap.bondLevel || core.bondInfo(spirit.id);
+    var bondLevel = $('partnerBondLevel');
+    if (bondLevel) bondLevel.textContent = 'Lv.' + bondInfo.level + ' ' + bondInfo.title;
+    var avatarBox = $('partnerAvatarBox');
+    if (avatarBox) avatarBox.classList.toggle('has-bond-ring', bondInfo.level >= 3);
     if (toggle) {
       toggle.textContent = core.state().widget.on ? '关闭全站挂件' : '开启全站挂件';
       toggle.classList.toggle('on', !!core.state().widget.on);
     }
     renderWallet();
+  }
+
+  function renderBond() {
+    var panel = $('bondPanel');
+    var snap = core.snapshot();
+    if (!panel) return;
+    if (!snap.current) {
+      panel.hidden = true;
+      return;
+    }
+    panel.hidden = false;
+    var info = core.bondInfo(snap.current.id);
+    var badge = $('bondLevelBadge');
+    var title = $('bondLevelTitle');
+    var total = $('bondTotal');
+    var progress = $('bondProgressBar');
+    var nextText = $('bondNextText');
+    var currentReward = $('bondCurrentReward');
+    var nextReward = $('bondNextReward');
+    var levels = $('bondLevels');
+    if (badge) badge.textContent = 'Lv.' + info.level;
+    if (title) title.textContent = info.title;
+    if (total) total.textContent = String(info.bond);
+    if (progress) progress.style.width = info.progress + '%';
+    if (nextText) nextText.textContent = info.next
+      ? '再互动 ' + info.toNext + ' 点亲密度，升到 Lv.' + info.next.level + ' ' + info.next.title
+      : '已满级，所有等级权益已解锁';
+    if (currentReward) currentReward.textContent = info.reward;
+    if (nextReward) nextReward.textContent = info.next ? info.next.reward : '已满级';
+    if (levels) {
+      levels.innerHTML = info.levels.map(function (row) {
+        var stateClass = info.level === row.level ? ' current' : (info.level > row.level ? ' done' : '');
+        return '<div class="bond-chip' + stateClass + '"' + (info.level === row.level ? ' aria-current="true"' : '') + '>'
+          + '<b>Lv.' + row.level + '</b><span>' + esc(row.title) + '</span><em>' + esc(row.reward) + '</em></div>';
+      }).join('');
+    }
+    var booking = $('bondBooking');
+    if (booking) {
+      var issue = snap.current.name + ' Lv.' + info.level + ' · ' + info.title + ' · 精灵权益';
+      if (info.level >= 5) issue += '，申请优先排期';
+      booking.href = 'service.html?from=spirit&service=' + encodeURIComponent('还不确定，先咨询') + '&issue=' + encodeURIComponent(issue);
+    }
   }
 
   function cardButton(spirit, unlocked, selected) {
@@ -189,8 +238,11 @@
     $('spiritModalTag').textContent = spirit.tag;
     var line = skin.quote || spirit.quote;
     $('spiritModalLine').textContent = unlocked ? line : spirit.intro;
+    var modalInfo = core.bondInfo(spirit.id);
     $('spiritBond').textContent = String(num(core.state().bond[spirit.id]));
-    $('spiritBondHint').textContent = core.state().bond[spirit.id] >= 6 ? '把你当成老朋友了' : core.state().bond[spirit.id] >= 3 ? '再互动几次会更亲近' : '先摸摸她，认识一下';
+    $('spiritBondHint').textContent = modalInfo.next
+      ? 'Lv.' + modalInfo.level + ' ' + modalInfo.title + ' · 还差 ' + modalInfo.toNext + ' 点升 Lv.' + modalInfo.next.level
+      : 'Lv.' + modalInfo.level + ' ' + modalInfo.title + ' · 已满级';
     var note = $('spiritModalNote');
     if (note) note.textContent = core.modeOfSpirit(spirit.id) === 'request' ? '这款不开放额度购买；把账号和款式发给站长，由后台私下发放。' : '同人 Q 版展示，非官方原画；本地原型使用演示额度，云端表启用后自动切换为站内额度。';
     renderMeters('modal');
@@ -279,6 +331,7 @@
 
   function renderAll() {
     renderDock();
+    renderBond();
     renderGrid();
     renderShop();
     if (currentModal) renderModal();
@@ -342,8 +395,14 @@
     var item = core.itemById(id);
     if (!item) return;
     try {
+      var beforeLevel = core.bondInfo(core.state().selected).level;
       core.useItem(id, core.state().selected);
-      toast('用了「' + item.name + '」，' + (item.kind === 'food' ? '她吃得很认真。' : '她玩得很开心。'));
+      var afterInfo = core.bondInfo(core.state().selected);
+      if (afterInfo.level > beforeLevel) {
+        toast('亲密度升级！现在是 Lv.' + afterInfo.level + ' ' + afterInfo.title + '，' + afterInfo.reward + '。');
+      } else {
+        toast('用了「' + item.name + '」，' + (item.kind === 'food' ? '她吃得很认真。' : '她玩得很开心。'));
+      }
       if (currentModal) renderModal();
       renderAll();
     } catch (error) {
@@ -398,8 +457,12 @@
   $('spiritPet')?.addEventListener('click', function () {
     if (!currentModal || !core.isUnlocked(currentModal)) return;
     try {
+      var beforeLevel = core.bondInfo(currentModal).level;
       core.pet(currentModal);
-      toast('她轻轻蹭了蹭你的手，亲密度 +1。');
+      var afterInfo = core.bondInfo(currentModal);
+      toast(afterInfo.level > beforeLevel
+        ? '亲密度升级！现在是 Lv.' + afterInfo.level + ' ' + afterInfo.title + '，' + afterInfo.reward + '。'
+        : '她轻轻蹭了蹭你的手，亲密度 +1。');
       renderAll();
     } catch (error) { toast(error.message || '互动失败。', true); }
   });
