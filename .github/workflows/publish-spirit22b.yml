@@ -1,0 +1,27 @@
+name: publish spirit v22.2b
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-spirit22b.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch bundle
+        run: curl -L --fail --retry 3 'https://aka.doubaocdn.com/s/Sl9ufHUpk7' -o /tmp/tafei-index-v2.tgz
+      - name: Extract and commit
+        run: |
+          tar -xzf /tmp/tafei-index-v2.tgz
+          git config user.name 'piaony'
+          git config user.email '3659229103@qq.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'style: bump spirit profile CSS version'
+          git push
