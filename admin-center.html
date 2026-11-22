@@ -117,6 +117,22 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
 .admin-sec-head h2{margin:0}
 .admin-page .card:hover,.admin-page .req:hover{transform:none;border-color:var(--tf-line)}
 .admin-page .msg{min-height:16px}
+.spirit-config-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.spirit-config-group{margin-top:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tf-cyan)}
+.spirit-config-row{display:grid;grid-template-columns:minmax(120px,1fr) 120px 82px;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--tf-line);border-radius:11px;background:rgba(100,232,255,.035)}
+.spirit-config-row.has-mode{grid-template-columns:minmax(110px,1fr) 82px 66px 62px}
+.spirit-config-row strong{font-size:13px;font-weight:600}
+.spirit-config-row small{display:block;margin-top:2px;color:var(--tf-muted);font-size:10.5px}
+.spirit-config-row input[type=number]{margin:0;text-align:right}
+.spirit-config-row input[type=checkbox]{width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:#64e8ff;flex:0 0 auto}
+.spirit-config-row label{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin:0;font-size:11px;color:var(--tf-muted);white-space:nowrap}
+.spirit-config-row select{margin:0;min-height:38px;padding:0 5px;font-size:11px;border-radius:8px;background:rgba(8,16,30,.8);color:var(--tf-text);border:1px solid var(--tf-line)}
+.spirit-grant-card{margin-top:12px}
+.spirit-grant-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spirit-grant-grid label{display:grid;gap:5px;margin:0;font-size:11px;color:var(--tf-muted)}
+.spirit-grant-grid select{width:100%;margin:0;min-height:40px;padding:0 8px;border-radius:8px;border:1px solid var(--tf-line);background:rgba(8,16,30,.8);color:var(--tf-text)}
+.spirit-grant-card button{margin-top:10px}
+@media(max-width:620px){.spirit-config-row{grid-template-columns:1fr 92px 64px;gap:6px}.spirit-config-row.has-mode{grid-template-columns:1fr 76px 52px 54px;gap:5px}.spirit-config-row strong{font-size:12px}.spirit-grant-grid{grid-template-columns:1fr}}
 .tk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--tf-line);font-size:12.5px}
 .tk-row:last-child{border-bottom:0}
 .tk-row span{color:var(--tf-muted);min-width:70px}
@@ -170,7 +186,7 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
   </section>
 
   <section class="card admin-login" id="login">
-    <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.9</span></div>
+    <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.10</span></div>
     <p class="hint">已用站长账号登录站点的，打开本页会自动进入；没有站点登录态时，用站长邮箱登录一次即可。</p>
     <label for="email">邮箱</label>
     <input id="email" type="email" inputmode="email" placeholder="3659229103@qq.com" autocomplete="username">
@@ -192,6 +208,7 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
       <button type="button" data-tab="accounts">账号</button>
       <button type="button" data-tab="messages">私信<b class="tab-count" id="tabMessages"></b></button>
       <button type="button" data-tab="products">商城</button>
+      <button type="button" data-tab="spirits">精灵</button>
       <button type="button" data-tab="notices">公告</button>
       <button type="button" data-tab="reports">举报<b class="tab-count" id="tabReports"></b></button>
       <button type="button" id="logoutBtn" style="margin-left:auto">退出</button>
@@ -319,6 +336,31 @@ body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at
       </div>
     </div>
 
+
+    <div class="pane" id="pane-spirits">
+      <div class="card">
+        <div class="admin-sec-head"><div><h2>精灵获取设置</h2><p class="hint" style="margin:4px 0 0">逐款设置「免费领取 / 额度购买 / 后台发放」。后台发放款前台不显示购买按钮，只显示联系站长；价格只在额度购买时扣。</p></div><button class="ghost mini" id="spiritConfigReload" type="button">重读云端</button></div>
+        <div id="spiritConfigRows" class="spirit-config-list"><p class="hint">正在读取……</p></div>
+        <button id="spiritConfigSave" type="button">保存精灵配置</button>
+        <p class="msg" id="spiritConfigMsg"></p>
+      </div>
+      <div class="card spirit-grant-card">
+        <h2>手动发放精灵</h2>
+        <p class="hint">给指定账号私下上架，不扣额度，也不要求对方走购买流程。发放后对方刷新精灵小屋即可看到。</p>
+        <div class="spirit-grant-grid">
+          <label>发给账户<select id="spiritGrantAccount"></select></label>
+          <label>发哪一款<select id="spiritGrantSpirit"></select></label>
+        </div>
+        <button id="spiritGrantBtn" type="button">添加到这个账户</button>
+        <p class="msg" id="spiritGrantMsg"></p>
+      </div>
+      <div class="card">
+        <h2>规则提醒</h2>
+        <p class="hint">额度购买款走 <b>tafei_spirit_buy</b>，扣 <b>tafei_balance</b> 并写流水；后台发放款走 <b>tafei_admin_spirit_grant</b>，只加 <b>owned_spirits</b>，不扣额度。</p>
+        <p class="hint">聊天双人彩蛋只读取双方的伙伴、皮肤、状态和亲密度，不读取私信正文。</p>
+      </div>
+    </div>
+
     <div class="pane" id="pane-notices">
       <div class="card">
         <h2>发布公告</h2>
@@ -368,6 +410,73 @@ let accounts = [];
 let editingProduct = null;
 let currentTab = 'overview';
 const loaded = {};
+
+const SPIRIT_ADMIN = {
+  spirits: [
+    { id: 'xiaota', name: '小挞飞', note: '挞飞原创 · 建议 0', price: 0, mode: 'free' },
+    { id: 'xi-shi', name: '西施', note: '王者荣耀', price: 20, mode: 'request' },
+    { id: 'angela', name: '安琪拉', note: '王者荣耀', price: 24, mode: 'request' },
+    { id: 'yao', name: '瑶', note: '王者荣耀', price: 28, mode: 'request' },
+    { id: 'gardener', name: '园丁', note: '第五人格', price: 32, mode: 'request' },
+    { id: 'doctor', name: '医生', note: '第五人格', price: 36, mode: 'request' },
+    { id: 'mechanic', name: '机械师', note: '第五人格', price: 40, mode: 'request' },
+    { id: 'perfumer', name: '调香师', note: '第五人格', price: 44, mode: 'request' },
+    { id: 'tanluning', name: '昙露凝', note: '纸嫁衣9 · 资源重心', price: 52, mode: 'request' }
+  ],
+  skins: [
+    { id: 'xiaota-default', spirit: 'xiaota', name: '挞壳精灵', price: 0 },
+    { id: 'xi-shi-default', spirit: 'xi-shi', name: '幻纱之灵', price: 0 },
+    { id: 'angela-default', spirit: 'angela', name: '暗夜萝莉', price: 0 },
+    { id: 'yao-default', spirit: 'yao', name: '鹿灵守心', price: 0 },
+    { id: 'gardener-default', spirit: 'gardener', name: '园丁日常', price: 0 },
+    { id: 'doctor-default', spirit: 'doctor', name: '医生日常', price: 0 },
+    { id: 'mechanic-default', spirit: 'mechanic', name: '机械师日常', price: 0 },
+    { id: 'perfumer-default', spirit: 'perfumer', name: '调香师日常', price: 0 },
+    { id: 'tanluning-daily', spirit: 'tanluning', name: '日常绿开衫', price: 0 },
+    { id: 'tanluning-bridal', spirit: 'tanluning', name: '红嫁衣', price: 0 },
+    { id: 'tanluning-uniform', spirit: 'tanluning', name: '民国学生装', price: 18 }
+  ],
+  items: [
+    { id: 'sugar-cake', kind: 'food', name: '白糖糕', price: 2 },
+    { id: 'tea', kind: 'food', name: '清茶', price: 3 },
+    { id: 'osmanthus', kind: 'food', name: '桂花酥', price: 5 },
+    { id: 'sweet-soup', kind: 'food', name: '甜汤', price: 8 },
+    { id: 'tanhua-cake', kind: 'food', name: '昙花糕', price: 12 },
+    { id: 'anshen-soup', kind: 'food', name: '安神羹', price: 15 },
+    { id: 'kite', kind: 'toy', name: '纸鸢', price: 5 },
+    { id: 'rattle', kind: 'toy', name: '拨浪鼓', price: 8 },
+    { id: 'sandbag', kind: 'toy', name: '沙包', price: 10 },
+    { id: 'mirror', kind: 'toy', name: '琉璃手镜', price: 18 },
+    { id: 'lantern', kind: 'toy', name: '昙花灯', price: 20 },
+    { id: 'album', kind: 'toy', name: '旧相册', price: 25 }
+  ],
+  rules: {
+    satietyDecayPerHour: 1.2,
+    moodDecayPerHour: 0.8,
+    sleepinessGainPerHour: 1.5,
+    angerGainPerHour: 0.6,
+    sleepRecoverPerHour: 4,
+    idleSleepMinutes: 10,
+    autoSleepAt: 85,
+    idleSleepAt: 65,
+    angerHigh: 75,
+    hungerLow: 25,
+    moodHigh: 75,
+    fightBondPenalty: 2,
+    tickMinutes: 1
+  }
+};
+
+function spiritDefaultCatalog() {
+  const spirits = {};
+  const skins = {};
+  const items = {};
+  SPIRIT_ADMIN.spirits.forEach((x) => { spirits[x.id] = { price: x.price, enabled: true, mode: x.mode || (x.id === 'xiaota' ? 'free' : 'request') }; });
+  SPIRIT_ADMIN.skins.forEach((x) => { skins[x.id] = { price: x.price, enabled: true, spirit: x.spirit }; });
+  SPIRIT_ADMIN.items.forEach((x) => { items[x.id] = { price: x.price, enabled: true }; });
+  return { version: 1, spirits, skins, items, rules: SPIRIT_ADMIN.rules };
+}
+
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -484,7 +593,7 @@ function boot() {
   if (who && who !== ADMIN_EMAIL) { authFail('这个账号不是站长邮箱，进不了后台。'); return; }
   $('adminWho').textContent = '已登录 · ' + (who || ADMIN_EMAIL);
   const initial = (location.hash || '').replace('#', '');
-  switchTab(['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'notices', 'reports'].includes(initial) ? initial : 'overview');
+  switchTab(['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'spirits', 'notices', 'reports'].includes(initial) ? initial : 'overview');
 }
 
 function logout() {
@@ -663,6 +772,7 @@ async function loadAccounts(force) {
     loaded.accounts = true;
     say('accMsg', '共 ' + accounts.length + ' 个注册账号。');
     renderAccounts();
+    renderSpiritGrant();
   } catch (e) {
     if (e.status === 401 || e.status === 403 || /42501|只有站长/.test(e.message)) { authFail('这个账号不是站长，读不到账号数据。'); return; }
     say('accMsg', '读取失败：' + e.message + '（若接口没部署，先跑 supabase/admin_audit.sql）', 'err');
@@ -939,9 +1049,148 @@ async function loadTaskStats(force) {
   }
 }
 
+
+/* ---------- 精灵配置 ---------- */
+let spiritCatalog = null;
+
+function spiritConfigGroup(label, list, kind) {
+  const rows = list.map((x) => {
+    const entry = (spiritCatalog && spiritCatalog[kind + 's'] && spiritCatalog[kind + 's'][x.id]) || { price: x.price, enabled: true, mode: x.mode };
+    const mode = entry.mode || (x.id === 'xiaota' ? 'free' : 'request');
+    const modeSelect = kind === 'spirit'
+      ? '<select class="sp-mode" aria-label="' + esc(x.name) + '获取方式">'
+        + '<option value="free"' + (mode === 'free' ? ' selected' : '') + '>免费</option>'
+        + '<option value="purchase"' + (mode === 'purchase' ? ' selected' : '') + '>额度购买</option>'
+        + '<option value="request"' + (mode === 'request' ? ' selected' : '') + '>后台发放</option>'
+        + '</select>'
+      : '';
+    return '<div class="spirit-config-row' + (kind === 'spirit' ? ' has-mode' : '') + '" data-spirit-row data-kind="' + kind + '" data-id="' + esc(x.id) + '">'
+      + '<div><strong>' + esc(x.name) + '</strong><small>' + esc(x.id) + (x.note ? ' · ' + esc(x.note) : (x.spirit ? ' · ' + esc(x.spirit) : '')) + '</small></div>'
+      + modeSelect
+      + '<input class="sp-price" type="number" min="0" step="1" value="' + Number(entry.price || 0) + '" aria-label="' + esc(x.name) + '额度价格">'
+      + '<label><input class="sp-enabled" type="checkbox"' + (entry.enabled !== false ? ' checked' : '') + '> 上架</label>'
+      + '</div>';
+  }).join('');
+  return '<div class="spirit-config-group">' + esc(label) + '</div>' + rows;
+}
+
+function renderSpiritConfig() {
+  const box = $('spiritConfigRows');
+  if (!box) return;
+  if (!spiritCatalog) spiritCatalog = spiritDefaultCatalog();
+  box.innerHTML = spiritConfigGroup('角色价格', SPIRIT_ADMIN.spirits, 'spirit')
+    + spiritConfigGroup('皮肤价格', SPIRIT_ADMIN.skins, 'skin')
+    + spiritConfigGroup('食物 / 玩具价格', SPIRIT_ADMIN.items, 'item');
+}
+
+function readSpiritConfigRows() {
+  const next = spiritDefaultCatalog();
+  document.querySelectorAll('[data-spirit-row]').forEach((row) => {
+    const kind = row.dataset.kind;
+    const id = row.dataset.id;
+    const price = Number(row.querySelector('.sp-price').value) || 0;
+    const enabled = !!row.querySelector('.sp-enabled').checked;
+    if (!next[kind + 's'][id]) next[kind + 's'][id] = { price, enabled };
+    next[kind + 's'][id].price = Math.max(0, price);
+    next[kind + 's'][id].enabled = enabled;
+    const modeEl = row.querySelector('.sp-mode');
+    if (modeEl) next[kind + 's'][id].mode = ['free', 'purchase', 'request'].includes(modeEl.value) ? modeEl.value : 'request';
+  });
+  return next;
+}
+
+function renderSpiritGrant() {
+  const acc = $('spiritGrantAccount');
+  const spirit = $('spiritGrantSpirit');
+  if (acc) {
+    const old = acc.value;
+    acc.innerHTML = accounts.length
+      ? accounts.map((a) => '<option value="' + esc(a.uid) + '">' + esc(a.nickname || '未设置昵称') + ' · ' + esc(a.email || a.uid) + '</option>').join('')
+      : '<option value="">先读取账号…</option>';
+    if (old && Array.from(acc.options).some((o) => o.value === old)) acc.value = old;
+  }
+  if (spirit && !spirit.options.length) {
+    spirit.innerHTML = SPIRIT_ADMIN.spirits.map((x) => '<option value="' + esc(x.id) + '">' + esc(x.name) + '</option>').join('');
+  }
+}
+
+async function grantSpirit() {
+  const btn = $('spiritGrantBtn');
+  const acc = $('spiritGrantAccount');
+  const spirit = $('spiritGrantSpirit');
+  if (!acc || !acc.value) { say('spiritGrantMsg', '先读取账号列表，再选择要发放的账户。', 'err'); return; }
+  if (!spirit || !spirit.value) { say('spiritGrantMsg', '先选择要发放的精灵。', 'err'); return; }
+  const account = accounts.find((a) => a.uid === acc.value);
+  if (btn) btn.disabled = true;
+  say('spiritGrantMsg', '正在发放……');
+  try {
+    const result = await rpc('tafei_admin_spirit_grant', { p_uid: acc.value, p_spirit_id: spirit.value });
+    const name = SPIRIT_ADMIN.spirits.find((x) => x.id === spirit.value)?.name || spirit.value;
+    if (result && result.already) say('spiritGrantMsg', '这个账号已经拥有「' + name + '」，没有重复添加。', 'ok');
+    else say('spiritGrantMsg', '已给 ' + (account ? account.email : acc.value) + ' 发放「' + name + '」，未扣额度。', 'ok');
+  } catch (e) {
+    if (e.status === 404 || /PGRST202|Could not find|function/i.test(e.message)) {
+      say('spiritGrantMsg', '发放接口还没建。先在 Supabase 执行 supabase/spirit_house.sql。', 'err');
+    } else if (e.status === 401 || e.status === 403) {
+      say('spiritGrantMsg', '没有发放权限：请确认登录的是站长邮箱，并已执行 SQL。', 'err');
+    } else {
+      say('spiritGrantMsg', '发放失败：' + e.message, 'err');
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadSpiritConfig(force) {
+  if (loaded.spirits && !force) return;
+  loaded.spirits = true;
+  try {
+    const rows = await req(URL + '/rest/v1/tafei_spirit_config?select=key,value,updated_at&key=eq.catalog&limit=1');
+    spiritCatalog = rows && rows[0] && rows[0].value ? rows[0].value : spiritDefaultCatalog();
+    renderSpiritConfig();
+    say('spiritConfigMsg', rows && rows[0] ? '已读取云端配置。' : '云端还没有目录，先显示默认价；保存后写入。');
+  } catch (e) {
+    spiritCatalog = spiritDefaultCatalog();
+    renderSpiritConfig();
+    if (e.status === 404 || /PGRST205|Could not find|relation/i.test(e.message)) {
+      say('spiritConfigMsg', '精灵配置表还没建。先在 Supabase 执行 supabase/spirit_house.sql，再回来保存。', 'err');
+    } else {
+      say('spiritConfigMsg', '读取失败：' + e.message, 'err');
+    }
+  }
+  renderSpiritGrant();
+  if (!loaded.accounts) loadAccounts();
+}
+
+async function saveSpiritConfig() {
+  const btn = $('spiritConfigSave');
+  const value = readSpiritConfigRows();
+  if (btn) btn.disabled = true;
+  say('spiritConfigMsg', '正在保存……');
+  try {
+    await req(URL + '/rest/v1/tafei_spirit_config?on_conflict=key', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: [{ key: 'catalog', value, updated_at: new Date().toISOString() }]
+    });
+    spiritCatalog = value;
+    say('spiritConfigMsg', '已保存。前台刷新精灵小屋后生效。');
+  } catch (e) {
+    if (e.status === 404 || /PGRST205|Could not find|relation/i.test(e.message)) {
+      say('spiritConfigMsg', '保存失败：表还没建。先执行 supabase/spirit_house.sql。', 'err');
+    } else if (e.status === 401 || e.status === 403) {
+      say('spiritConfigMsg', '保存失败：当前登录不是站长账号，或写入权限未配置。', 'err');
+    } else {
+      say('spiritConfigMsg', '保存失败：' + e.message, 'err');
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 /* ---------- tab 切换 ---------- */
 function switchTab(name) {
-  const tabs = ['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'notices', 'reports'];
+  const tabs = ['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'spirits', 'notices', 'reports'];
   if (!tabs.includes(name)) name = 'overview';
   currentTab = name;
   $('tabs').querySelectorAll('[data-tab]').forEach((b) => {
@@ -962,6 +1211,7 @@ function switchTab(name) {
   if (name === 'accounts') loadAccounts();
   if (name === 'messages') loadMessages();
   if (name === 'products') loadProducts();
+  if (name === 'spirits') loadSpiritConfig();
   if (name === 'notices') loadNotices();
   if (name === 'reports') loadReports();
 }
@@ -1006,6 +1256,9 @@ $('dmLimit').addEventListener('change', () => loadMessages(true));
 $('pSave').addEventListener('click', saveProduct);
 $('pCancel').addEventListener('click', resetProductForm);
 $('pRefresh').addEventListener('click', () => loadProducts(true));
+$('spiritConfigSave').addEventListener('click', saveSpiritConfig);
+$('spiritGrantBtn')?.addEventListener('click', grantSpirit);
+$('spiritConfigReload').addEventListener('click', () => loadSpiritConfig(true));
 $('nPublish').addEventListener('click', publishNotice);
 $('nRefresh').addEventListener('click', () => loadNotices(true));
 $('rRefresh').addEventListener('click', () => loadReports(true));
