@@ -18,15 +18,16 @@ jobs:
 
       - name: Download release payload
         run: |
-          curl -fsSL "https://aka.doubaocdn.com/s/8H14st9Vw5" -o /tmp/tafei-v23-release.tar.gz
-          echo "057c81a9290830616807c909c66b9280088f20f22d52e93b8755b6542ab8e702  /tmp/tafei-v23-release.tar.gz" | sha256sum -c -
-          tar -xzf /tmp/tafei-v23-release.tar.gz -C .
+          curl -fsSL "https://aka.doubaocdn.com/s/fLK9ynvmQW" -o /tmp/tafei-v23-hotfix.tar.gz
+          echo "01d7388154d72bb74144a0c24ea9e0f2738fe43f5fa0625a80d6ee2fdfbb2f80  /tmp/tafei-v23-hotfix.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/tafei-v23-hotfix.tar.gz -C .
+          rm -f assets/spirits/xiaota-v23/memorial-blank.png
 
-      - name: Commit v23 release
+      - name: Commit v23 hotfix
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html jingling.html xiaota.html angela.html css js assets/spirits/xiaota-v23
+          git add jingling.html js/jingling.js assets/spirits/xiaota-v23
           if git diff --cached --quiet; then echo "No changes to commit"; exit 0; fi
-          git commit -m "feat: v23.0 官方小挞飞与自由切换魔法伙伴"
+          git commit -m "perf: compress v23 memorial background and bump cache"
           git push
