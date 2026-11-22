@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="viewport-fit=cover,width=device-width,initial-scale=1">
 <title>安琪拉小屋 · 挞飞魔法伙伴</title>
-<meta name="description" content="挞飞站内同人娱乐小工具：和原创魔法少女安琪拉互动、喂星糖、换装、玩星光小游戏。非官方内容，不提供付费或账号交易。">
+<meta name="description" content="挞飞站内同人娱乐小工具：和同人版安琪拉互动、喂星糖、换装、玩星光小游戏。非官方内容，不提供付费或账号交易。">
 <meta name="robots" content="noindex,follow">
-<link rel="stylesheet" href="css/angela.css?v=3">
+<link rel="stylesheet" href="css/angela.css?v=4">
 </head>
 <body>
 <div class="ang-starfield" id="angStarField" aria-hidden="true"></div>
@@ -44,7 +44,7 @@
   <div class="ang-stage" id="angStage">
    <span class="stage-glow" aria-hidden="true"></span>
    <div class="ang-pet" id="angPet" data-mood="happy" data-outfit="starlight" data-action="">
-    <svg class="ang-pet-svg" viewBox="0 0 360 470" role="img" aria-label="原创绘制的魔法少女安琪拉">
+    <svg class="ang-pet-svg" viewBox="0 0 360 470" role="img" aria-label="同人绘制的安琪拉：粉色长双马尾、圆眼镜、黑色蝙蝠发饰和魔法书">
      <defs>
       <linearGradient id="angBookGrad" x1="0" y1="0" x2="1" y2="1">
        <stop offset="0" stop-color="#fff9e8"/><stop offset="1" stop-color="#f3d9a4"/>
@@ -52,51 +52,83 @@
       <radialGradient id="angGlowGrad" cx="50%" cy="50%" r="50%">
        <stop offset="0" stop-color="#ffe28a" stop-opacity=".9"/><stop offset="1" stop-color="#ffe28a" stop-opacity="0"/>
       </radialGradient>
+      <radialGradient id="angFireGrad" cx="50%" cy="50%" r="50%">
+       <stop offset="0" stop-color="#fff1b8" stop-opacity=".95"/><stop offset=".55" stop-color="#ff9a4a" stop-opacity=".65"/><stop offset="1" stop-color="#ff5a3c" stop-opacity="0"/>
+      </radialGradient>
      </defs>
 
      <ellipse class="ang-shadow" cx="180" cy="438" rx="105" ry="17"/>
      <circle cx="180" cy="230" r="150" fill="url(#angGlowGrad)" opacity=".22"/>
 
      <g class="ang-cape" aria-hidden="true">
-      <path class="ang-cape-fill" d="M126 254 C100 300 82 362 72 414 C112 431 248 431 288 414 C278 362 260 300 234 254 Z" opacity=".92"/>
-      <path d="M126 254 C150 270 210 270 234 254 C230 320 218 370 180 392 C142 370 130 320 126 254 Z" fill="#ffffff" opacity=".08"/>
+      <path class="ang-cape-fill" d="M148 252 C120 276 104 316 100 360 C110 392 134 406 150 406 C142 372 144 328 158 292 Z" opacity=".92"/>
+      <path class="ang-cape-fill" d="M212 252 C240 276 256 316 260 360 C250 392 226 406 210 406 C218 372 216 328 202 292 Z" opacity=".92"/>
+      <path d="M132 340 C124 366 124 388 132 402 C142 382 142 360 140 344 Z" fill="#000" opacity=".18"/>
+      <path d="M228 340 C236 366 236 388 228 402 C218 382 218 360 220 344 Z" fill="#000" opacity=".18"/>
      </g>
 
      <g class="ang-hair-back" aria-hidden="true">
-      <ellipse class="ang-hair" cx="180" cy="174" rx="112" ry="101"/>
-      <ellipse class="ang-hair-2" cx="72" cy="262" rx="39" ry="84" transform="rotate(-11 72 262)"/>
-      <ellipse class="ang-hair-2" cx="288" cy="262" rx="39" ry="84" transform="rotate(11 288 262)"/>
-      <ellipse class="ang-hair" cx="61" cy="330" rx="27" ry="38" transform="rotate(-18 61 330)"/>
-      <ellipse class="ang-hair" cx="299" cy="330" rx="27" ry="38" transform="rotate(18 299 330)"/>
-      <path class="ang-hair-2" d="M70 200 C50 235 48 286 58 330 C78 304 86 262 82 218 Z" opacity=".55"/>
-      <path class="ang-hair-2" d="M290 200 C310 235 312 286 302 330 C282 304 274 262 278 218 Z" opacity=".55"/>
+      <ellipse class="ang-hair" cx="180" cy="176" rx="112" ry="100"/>
+      <path class="ang-hair" d="M120 130 C74 136 34 182 30 246 C26 312 42 388 68 428 C78 442 98 442 104 426 C84 396 76 350 86 300 C96 252 118 204 144 172 Z"/>
+      <path class="ang-hair-2" d="M30 318 C30 372 44 414 68 432 C72 420 62 394 58 362 C54 330 44 298 30 318 Z" opacity=".86"/>
+      <path class="ang-hair-hi" d="M52 238 C40 292 46 356 70 404" fill="none" stroke="#ffd0d7" stroke-width="5" opacity=".34"/>
+      <path class="ang-hair" d="M240 130 C286 136 326 182 330 246 C334 312 318 388 292 428 C282 442 262 442 256 426 C276 396 284 350 274 300 C264 252 242 204 216 172 Z"/>
+      <path class="ang-hair-2" d="M330 318 C330 372 316 414 292 432 C288 420 298 394 302 362 C306 330 316 298 330 318 Z" opacity=".86"/>
+      <path class="ang-hair-hi" d="M308 238 C320 292 314 356 290 404" fill="none" stroke="#ffd0d7" stroke-width="5" opacity=".34"/>
      </g>
 
      <g class="ang-body">
       <rect x="168" y="242" width="24" height="18" rx="9" class="ang-skin"/>
-      <path d="M145 256 L215 256 L226 318 L134 318 Z" class="ang-dress"/>
-      <path d="M134 312 L226 312 L258 405 L102 405 Z" class="ang-dress-2"/>
-      <path d="M158 314 L202 314 L212 397 L148 397 Z" fill="#f8f5ff" opacity=".9"/>
-      <path d="M154 314 L206 314 L199 328 L161 328 Z" fill="#ffd36e" opacity=".75"/>
-      <path d="M134 312 L226 312 L220 326 L140 326 Z" fill="#ffffff" opacity=".16"/>
-      <path d="M145 268 C125 286 112 306 104 330" stroke="#ffe5d3" stroke-width="18" stroke-linecap="round" fill="none"/>
-      <path d="M215 268 C235 286 248 306 256 330" stroke="#ffe5d3" stroke-width="18" stroke-linecap="round" fill="none"/>
-      <circle cx="103" cy="331" r="10" class="ang-skin"/>
-      <circle cx="257" cy="331" r="10" class="ang-skin"/>
-      <rect x="153" y="398" width="17" height="38" rx="8" class="ang-skin"/>
-      <rect x="190" y="398" width="17" height="38" rx="8" class="ang-skin"/>
-      <ellipse cx="158" cy="438" rx="22" ry="10" fill="#27365e"/>
-      <ellipse cx="202" cy="438" rx="22" ry="10" fill="#27365e"/>
-      <path d="M150 318 C160 338 200 338 210 318" stroke="#ffd36e" stroke-width="3" fill="none" opacity=".8"/>
-      <circle cx="180" cy="334" r="5" fill="#ffd36e"/>
+      <path d="M150 252 Q180 244 210 252 L220 316 L140 316 Z" class="ang-dress"/>
+      <path d="M160 260 Q180 254 200 260 L206 313 L154 313 Z" fill="#1b0a12" opacity=".92"/>
+      <path d="M166 272 L194 284 M194 272 L166 284 M164 292 L196 304 M196 292 L164 304" stroke="#ffd36e" stroke-width="1.6" opacity=".82"/>
+      <path d="M141 312 L219 312 L218 320 L142 320 Z" fill="#ffd36e" opacity=".9"/>
+      <circle cx="180" cy="316" r="7" fill="#ffd36e"/>
+      <circle cx="180" cy="316" r="3" fill="#c92c4b"/>
+      <path d="M140 312 L220 312 L254 402 Q180 420 106 402 Z" class="ang-dress-2"/>
+      <path d="M140 312 L220 312 L230 350 L130 350 Z" fill="#000" opacity=".24"/>
+      <path d="M106 402 Q180 420 254 402 L252 412 Q180 430 108 412 Z" fill="#d32b4b"/>
+      <path d="M112 400 Q180 416 248 400" stroke="#f7e8ea" stroke-width="4" opacity=".82" fill="none"/>
+      <path d="M154 248 Q166 264 180 258 Q194 264 206 248 L198 242 Q180 252 162 242 Z" fill="#fff5f2"/>
+      <path d="M156 260 C142 252 132 256 130 264 C134 274 150 274 180 266 C210 274 226 274 230 264 C228 256 218 252 204 260 C196 265 164 265 156 260 Z" fill="#d32b4b"/>
+      <circle cx="180" cy="266" r="4.5" fill="#ffd36e"/>
+      <circle cx="180" cy="266" r="1.8" fill="#7a1528"/>
+      <path d="M150 262 C132 276 118 292 110 308" stroke="#ffe5d3" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M210 262 C228 276 242 292 250 308" stroke="#ffe5d3" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M120 292 C110 306 104 318 102 330" stroke="#1f0b12" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M240 292 C250 306 256 318 258 330" stroke="#1f0b12" stroke-width="16" stroke-linecap="round" fill="none"/>
+      <path d="M124 297 C115 309 110 318 108 327" stroke="#5a1a28" stroke-width="7" stroke-linecap="round" fill="none" opacity=".7"/>
+      <path d="M236 297 C245 309 250 318 252 327" stroke="#5a1a28" stroke-width="7" stroke-linecap="round" fill="none" opacity=".7"/>
+      <circle cx="101" cy="332" r="10" class="ang-skin"/>
+      <circle cx="259" cy="332" r="10" class="ang-skin"/>
+      <path d="M96 327 L106 327 M254 327 L264 327" stroke="#ffd36e" stroke-width="2" opacity=".8"/>
+      <rect x="153" y="396" width="18" height="36" rx="8" fill="#1b0a12"/>
+      <rect x="190" y="396" width="18" height="36" rx="8" fill="#1b0a12"/>
+      <rect x="153" y="396" width="18" height="7" fill="#d32b4b"/>
+      <rect x="190" y="396" width="18" height="7" fill="#d32b4b"/>
+      <path d="M157 406 h11 M160 416 h7 M194 406 h11 M197 416 h7" stroke="#ff8aa0" stroke-width="1.4" opacity=".35"/>
+      <ellipse cx="158" cy="438" rx="22" ry="10" fill="#120b10"/>
+      <ellipse cx="202" cy="438" rx="22" ry="10" fill="#120b10"/>
+      <path d="M140 434 Q158 428 176 434 M184 434 Q202 428 220 434" stroke="#ffd36e" stroke-width="1.4" opacity=".5" fill="none"/>
+      <path d="M156 430 L160 434 L164 430 M200 430 L204 434 L208 430" stroke="#d32b4b" stroke-width="2" fill="none"/>
      </g>
 
      <g class="ang-head">
       <ellipse cx="180" cy="178" rx="92" ry="82" class="ang-skin"/>
-      <path class="ang-hair" d="M88 158 C90 86 128 62 180 62 C232 62 270 86 272 158 C252 124 232 110 211 112 C197 80 163 80 149 112 C128 110 108 124 88 158 Z"/>
-      <path class="ang-hair-2" d="M104 118 C128 88 154 78 180 78 C206 78 232 88 256 118 C236 100 210 94 180 94 C150 94 124 100 104 118 Z" opacity=".62"/>
-      <path d="M110 146 C120 130 134 122 148 124" stroke="#ffd0c3" stroke-width="2" fill="none" opacity=".65"/>
-      <path d="M250 146 C240 130 226 122 212 124" stroke="#ffd0c3" stroke-width="2" fill="none" opacity=".65"/>
+      <path class="ang-hair" d="M86 168 C82 94 124 58 180 58 C236 58 278 94 274 168 C258 128 238 110 214 116 C198 84 162 84 146 116 C122 110 102 128 86 168 Z"/>
+      <path class="ang-hair-2" d="M104 124 C128 92 154 82 180 82 C206 82 232 92 256 124 C236 104 210 98 180 98 C150 98 124 104 104 124 Z" opacity=".55"/>
+      <path class="ang-hair" d="M96 150 C88 190 92 220 108 240 C102 214 106 180 120 156 Z"/>
+      <path class="ang-hair" d="M264 150 C272 190 268 220 252 240 C258 214 254 180 240 156 Z"/>
+      <path d="M110 146 C120 130 134 122 148 124" stroke="#ffd0d7" stroke-width="2" fill="none" opacity=".65"/>
+      <path d="M250 146 C240 130 226 122 212 124" stroke="#ffd0d7" stroke-width="2" fill="none" opacity=".65"/>
+
+      <g class="ang-headband" aria-hidden="true">
+       <path d="M118 94 C100 72 82 60 64 62 C72 74 78 84 80 96 C66 92 54 96 46 106 C62 104 76 108 86 120 Z" fill="#1b0d16"/>
+       <path d="M242 94 C260 72 278 60 296 62 C288 74 282 84 280 96 C294 92 306 96 314 106 C298 104 284 108 274 120 Z" fill="#1b0d16"/>
+       <path d="M112 92 Q180 70 248 92 L244 104 Q180 84 116 104 Z" fill="#24121a"/>
+       <path d="M64 62 C78 64 90 74 98 88 C86 82 74 82 64 88 Z" fill="#3a1a28" opacity=".65"/>
+       <path d="M296 62 C282 64 270 74 262 88 C274 82 286 82 296 88 Z" fill="#3a1a28" opacity=".65"/>
+      </g>
 
       <g class="ang-eyes-open">
        <ellipse cx="143" cy="190" rx="19" ry="23" class="ang-eye-white"/>
@@ -117,47 +149,63 @@
        <path d="M201 190 Q217 202 233 190" stroke="#6b3a33" stroke-width="3" fill="none" stroke-linecap="round"/>
       </g>
 
+      <g class="ang-glasses" aria-hidden="true">
+       <circle cx="143" cy="190" r="27" fill="#ffb8cd" fill-opacity=".06" stroke="#5a1c27" stroke-width="4"/>
+       <circle cx="217" cy="190" r="27" fill="#ffb8cd" fill-opacity=".06" stroke="#5a1c27" stroke-width="4"/>
+       <path d="M170 187 Q180 181 190 187" stroke="#5a1c27" stroke-width="3.5" fill="none"/>
+       <path d="M116 185 L94 177 M244 185 L266 177" stroke="#5a1c27" stroke-width="3" fill="none"/>
+       <path d="M132 170 Q140 164 149 170 M206 170 Q214 164 223 170" stroke="#ffb3bc" stroke-width="1.8" fill="none" opacity=".55"/>
+      </g>
+
       <path d="M128 166 Q143 160 158 166" stroke="#a95645" stroke-width="2.3" fill="none" stroke-linecap="round" opacity=".7"/>
       <path d="M202 166 Q217 160 232 166" stroke="#a95645" stroke-width="2.3" fill="none" stroke-linecap="round" opacity=".7"/>
       <ellipse cx="126" cy="216" rx="15" ry="7" fill="#ff9aa4" opacity=".38"/>
       <ellipse cx="234" cy="216" rx="15" ry="7" fill="#ff9aa4" opacity=".38"/>
 
-      <g class="ang-mouth-happy"><path d="M169 219 Q180 228 191 219" class="ang-mouth-line"/></g>
+      <g class="ang-mouth-happy"><path d="M169 219 Q180 228 191 219" class="ang-mouth-line"/><path d="M176 220 L179 226 L182 220 Z" fill="#fff" opacity=".92"/></g>
       <g class="ang-mouth-hungry"><ellipse cx="180" cy="223" rx="9" ry="7" fill="#8d4b48"/><ellipse cx="180" cy="226" rx="4" ry="3" fill="#ff9aa4"/></g>
       <g class="ang-mouth-sleepy"><path d="M172 223 Q180 219 188 223" class="ang-mouth-line"/></g>
       <g class="ang-mouth-love"><path d="M165 216 Q180 235 195 216 Q180 228 165 216 Z" fill="#ff6e96"/></g>
 
-      <g class="ang-outfit-star">
-       <path d="M245 103 L250 114 L262 116 L253 124 L255 136 L245 130 L235 136 L237 124 L228 116 L240 114 Z" fill="#ffd36e"/>
-       <circle cx="245" cy="118" r="2.4" fill="#fff6d1"/>
-      </g>
       <path d="M226 254 Q240 266 246 284" stroke="#ffd36e" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
-      <circle cx="247" cy="286" r="5" class="ang-dress-2"/>
+      <circle cx="247" cy="286" r="5" fill="#ffd36e"/>
      </g>
 
-     <g class="ang-book" transform="translate(38 300) rotate(-9)">
-      <ellipse cx="53" cy="42" rx="52" ry="34" fill="#ffe28a" opacity=".16"/>
-      <path d="M0 18 Q28 2 54 18 L54 58 Q28 42 0 58 Z" fill="url(#angBookGrad)"/>
-      <path d="M54 18 Q80 2 108 18 L108 58 Q80 42 54 58 Z" fill="url(#angBookGrad)"/>
-      <path d="M0 18 Q28 2 54 18 L54 58 Q28 42 0 58 Z" fill="none" stroke="#b8864a" stroke-width="2"/>
-      <path d="M54 18 Q80 2 108 18 L108 58 Q80 42 54 58 Z" fill="none" stroke="#b8864a" stroke-width="2"/>
-      <path d="M54 18 L54 58" stroke="#b8864a" stroke-width="2"/>
-      <path d="M10 28 Q28 20 44 28 M10 37 Q28 29 44 37 M64 28 Q80 20 98 28 M64 37 Q80 29 98 37" class="ang-book-line"/>
-      <path d="M54 12 L57 20 L65 21 L59 27 L61 35 L54 31 L47 35 L49 27 L43 21 L51 20 Z" fill="#ffd36e" opacity=".9"/>
+     <g class="ang-book" transform="translate(18 300) rotate(-8)">
+      <ellipse cx="62" cy="38" rx="68" ry="42" fill="#ffb24c" opacity=".14"/>
+      <path d="M-8 10 Q30 -8 62 12 L62 68 Q30 48 -8 68 Z" fill="#2a0d16" stroke="#ffd36e" stroke-width="2.5"/>
+      <path d="M62 12 Q94 -8 132 10 L132 68 Q94 48 62 68 Z" fill="#2a0d16" stroke="#ffd36e" stroke-width="2.5"/>
+      <path d="M0 18 Q30 2 60 18 L60 60 Q30 44 0 60 Z" fill="url(#angBookGrad)"/>
+      <path d="M60 18 Q90 2 120 18 L120 60 Q90 44 60 60 Z" fill="url(#angBookGrad)"/>
+      <path d="M0 18 Q30 2 60 18 L60 60 Q30 44 0 60 Z" fill="none" stroke="#b8864a" stroke-width="2"/>
+      <path d="M60 18 Q90 2 120 18 L120 60 Q90 44 60 60 Z" fill="none" stroke="#b8864a" stroke-width="2"/>
+      <path d="M60 18 L60 60" stroke="#b8864a" stroke-width="2"/>
+      <path d="M9 28 Q29 20 49 28 M9 38 Q29 30 49 38 M70 28 Q90 20 110 28 M70 38 Q90 30 110 38" class="ang-book-line"/>
+      <path d="M60 7 L63 15 L71 16 L65 22 L67 30 L60 26 L53 30 L55 22 L49 16 L57 15 Z" fill="#d32b4b"/>
+      <path d="M60 60 L56 88 L62 84 L68 88 Z" fill="#d32b4b"/>
      </g>
 
-     <g class="ang-wand" transform="translate(248 286) rotate(16)">
-      <path d="M0 0 L20 38" stroke="#ffd36e" stroke-width="5" stroke-linecap="round"/>
-      <path d="M20 38 L27 54" stroke="#fff1b8" stroke-width="2" stroke-linecap="round"/>
-      <path d="M0 -4 L6 8 L19 10 L10 19 L12 32 L0 25 L-12 32 L-10 19 L-19 10 L-6 8 Z" fill="#ffd36e"/>
-      <circle cx="0" cy="12" r="3" fill="#fff6d1"/>
+     <g class="ang-wand" transform="translate(270 306)">
+      <circle cx="0" cy="0" r="26" fill="url(#angFireGrad)" opacity=".75"/>
+      <path d="M-2 -28 Q6 -48 14 -28 Q20 -18 10 -8 Q2 -2 -2 -28 Z" fill="#ff7a3c"/>
+      <circle cx="0" cy="0" r="15" fill="#ff9a4a"/>
+      <circle cx="0" cy="0" r="8" fill="#ffd36e"/>
+      <circle cx="0" cy="0" r="3" fill="#fff6d1"/>
+     </g>
+
+     <g class="ang-imp" transform="translate(288 426)" aria-hidden="true">
+      <path d="M-14 4 Q-18 -8 0 -10 Q18 -8 14 4 Q8 18 0 18 Q-8 18 -14 4 Z" fill="#b8243d"/>
+      <path d="M-12 -6 L-16 -18 L-6 -12 Z" fill="#ffd36e"/>
+      <path d="M12 -6 L16 -18 L6 -12 Z" fill="#ffd36e"/>
+      <ellipse cx="0" cy="4" rx="7" ry="5" fill="#ffd36e"/>
+      <ellipse cx="0" cy="4" rx="2" ry="4" fill="#3a1018"/>
      </g>
 
      <g class="ang-sparkles" opacity=".9">
-      <path d="M302 178 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#ffd36e"/>
-      <path d="M58 188 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5 Z" fill="#8ceaff"/>
-      <circle cx="310" cy="238" r="3.5" fill="#ff9fc2"/>
-      <circle cx="46" cy="270" r="3" fill="#cbb7ff"/>
+      <path d="M316 178 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#ffd36e"/>
+      <path d="M52 188 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5 Z" fill="#ff8a9e"/>
+      <circle cx="322" cy="238" r="3.5" fill="#ff9fc2"/>
+      <circle cx="40" cy="270" r="3" fill="#cbb7ff"/>
      </g>
     </svg>
    </div>
@@ -241,7 +289,7 @@
     <span class="ang-badge">亲密度 <b id="angBondSmall">0</b></span>
    </div>
    <div class="ang-wardrobe">
-    <button class="ang-outfit active" type="button" data-outfit="starlight" data-need="0" style="--sw1:#ff7a59;--sw2:#57c6da"><span class="swatch"></span><strong>星辉原色</strong><small>默认装扮</small></button>
+    <button class="ang-outfit active" type="button" data-outfit="starlight" data-need="0" style="--sw1:#ff6a86;--sw2:#2a0d16"><span class="swatch"></span><strong>暗夜原色</strong><small>默认装扮 · 原皮配色</small></button>
     <button class="ang-outfit locked" type="button" data-outfit="sakura" data-need="3" style="--sw1:#ff9ab5;--sw2:#ffd0df"><span class="swatch"></span><strong>樱花魔法</strong><small>亲密度 3 解锁</small><span class="lock">🔒</span></button>
     <button class="ang-outfit locked" type="button" data-outfit="moon" data-need="6" style="--sw1:#d8e4ff;--sw2:#8ce8ff"><span class="swatch"></span><strong>月光星轨</strong><small>亲密度 6 解锁</small><span class="lock">🔒</span></button>
    </div>
@@ -263,7 +311,7 @@
 
 <footer class="ang-footer">
  <strong>挞飞 · 魔法伙伴实验页</strong>
- <div>本页是挞飞站内同人娱乐小工具，角色形象为原创绘制的魔法少女，灵感来自魔法少女题材；非《王者荣耀》官方内容，与腾讯无关。页面不提供付费、充值、账号交易或站外引流。</div>
+ <div>本页是挞飞站内同人娱乐小工具，角色形象为同人绘制的安琪拉，参考公开造型特征（粉色长双马尾、圆眼镜、黑色蝙蝠发饰和魔法书）；不是官方原画，非《王者荣耀》官方内容，与腾讯无关。页面不提供付费、充值、账号交易或站外引流。</div>
  <div class="risk">版权提示：如果你希望把它用于商业投放或 1:1 复刻官方角色，请先自行取得授权；当前版本按“同人娱乐、独立下线”的方式控制风险。</div>
  <div style="margin-top:10px"><a href="index.html#community">回挞飞社区</a> · <a href="service.html">看看技术服务</a> · <a href="index.html">回首页</a></div>
 </footer>
@@ -271,6 +319,6 @@
 <div class="ang-toast" id="angToast" role="status"></div>
 <div id="angParticles" aria-hidden="true"></div>
 
-<script src="js/angela-pet.js?v=2"></script>
+<script src="js/angela-pet.js?v=3"></script>
 </body>
 </html>

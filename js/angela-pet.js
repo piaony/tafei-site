@@ -417,7 +417,7 @@
     forceMood('love', 2200);
     burst('✦', 8);
     playSound('dress');
-    speak(key === 'sakura' ? '樱花魔法，变身！' : key === 'moon' ? '月光星轨，启动。' : '回到最初的星辉配色。');
+    speak(key === 'sakura' ? '樱花魔法，变身！' : key === 'moon' ? '月光星轨，启动。' : '回到最初的暗夜配色。');
     saveState();
     render();
   }

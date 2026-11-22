@@ -10,11 +10,11 @@
   --ang-gold:#ffd36e;
   --ang-purple:#b58cff;
   --ang-green:#64f0b3;
-  --ang-hair:#ff7a59;
-  --ang-hair2:#ff4f7d;
-  --ang-dress:#264a79;
-  --ang-dress2:#57c6da;
-  --ang-cape:#765cff;
+  --ang-hair:#ff6a86;
+  --ang-hair2:#ff315f;
+  --ang-dress:#3a101c;
+  --ang-dress2:#1b0a12;
+  --ang-cape:#5b1222;
   --ang-shadow:0 24px 70px rgba(0,0,0,.34);
 }
 *{box-sizing:border-box}
@@ -108,8 +108,8 @@ button{font:inherit}
 .ang-pet[data-mood="sleepy"] .ang-mouth-sleepy{display:block}
 .ang-pet[data-mood="love"] .ang-mouth-love{display:block}
 @keyframes angBlink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
-.ang-pet[data-outfit="sakura"]{--ang-hair:#ff9ab5;--ang-hair2:#ff6a96;--ang-dress:#7b3f66;--ang-dress2:#ffd0df;--ang-cape:#ffb35c}
-.ang-pet[data-outfit="moon"]{--ang-hair:#d8e4ff;--ang-hair2:#9eb9ff;--ang-dress:#1c2d54;--ang-dress2:#8ce8ff;--ang-cape:#5ac8ff}
+.ang-pet[data-outfit="sakura"]{--ang-hair:#ff9ab5;--ang-hair2:#ff5f8f;--ang-dress:#4d1b31;--ang-dress2:#26101c;--ang-cape:#9a3557}
+.ang-pet[data-outfit="moon"]{--ang-hair:#d8e4ff;--ang-hair2:#9eb9ff;--ang-dress:#1c2d54;--ang-dress2:#0e1830;--ang-cape:#2d5f8a}
 .ang-pet[data-outfit="sakura"] .ang-outfit-star{fill:#ffd36e}
 .ang-pet[data-outfit="moon"] .ang-outfit-star{fill:#bff7ff}
 
