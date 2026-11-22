@@ -1,0 +1,28 @@
+name: publish spirit v22.2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-spirit22.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch bundle
+        run: curl -L --fail --retry 3 'https://aka.doubaocdn.com/s/hVC5Dxuzqf' -o /tmp/tafei-v22.2.tgz
+      - name: Extract bundle
+        run: tar -xzf /tmp/tafei-v22.2.tgz
+      - name: Commit bundle
+        run: |
+          git config user.name 'piaony'
+          git config user.email '3659229103@qq.com'
+          git add js css jingling.html index.html angela.html xiaota.html
+          git diff --cached --quiet || git commit -m 'feat: spirit v22.2 bond perks'
+          git push
