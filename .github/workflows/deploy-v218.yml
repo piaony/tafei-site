@@ -1,0 +1,34 @@
+name: Deploy v21.8
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-v218.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Fetch v21.8 package
+        run: |
+          curl -L --retry 3 --retry-delay 2 -o /tmp/tafei-v218.zip "https://aka.doubaocdn.com/s/S2Kmio7XDk"
+          unzip -o /tmp/tafei-v218.zip -d .
+          ls -lh index.html angela.html css/home.css js/pet-hub.js
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-deploy-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html admin-center.html angela.html css/home.css css/angela.css js/pet-hub.js js/angela-pet.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: deploy v21.8 magic companion"
+          git push origin HEAD:main
