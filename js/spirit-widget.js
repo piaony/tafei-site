@@ -5,7 +5,7 @@
   var core = window.TafeiSpirits;
   if (!core) return;
 
-  var CSS_HREF = 'css/spirit-widget.css?v=3';
+  var CSS_HREF = 'css/spirit-widget.css?v=4';
   var root = null;
   var body = null;
   var avatar = null;
@@ -120,6 +120,7 @@
     nameNode.textContent = spirit.name;
     var bond = core.bondInfo(spirit.id);
     if (levelNode) levelNode.textContent = 'Lv.' + bond.level;
+    root.classList.toggle('has-bond-frame', bond.level >= 7);
     root.classList.remove('mood-sleep', 'mood-angry', 'mood-hungry', 'mood-happy', 'mood-sad');
     root.classList.add('mood-' + condition);
     if (!state.widget.on) {

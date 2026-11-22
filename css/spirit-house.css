@@ -213,3 +213,34 @@
 }
 .spirit-price.request{color:#ffafd0}
 .spirit-open.is-contact{border-color:rgba(255,159,194,.4);background:rgba(255,159,194,.08);color:#ffb7d2}
+
+/* v22.2 十级权益落地：Lv.7 限定卡面边框 / Lv.6 私信签名 / Lv.10 永久纪念卡 */
+.partner-avatar.has-bond-frame{border-color:rgba(255,211,110,.92);box-shadow:0 0 0 4px rgba(255,211,110,.14),0 0 0 7px rgba(110,231,255,.08),0 0 30px rgba(255,193,92,.34),0 12px 32px rgba(0,0,0,.32)}
+.partner-avatar.has-bond-frame:before{content:"";position:absolute;inset:5px;border:1px solid rgba(255,236,185,.72);border-radius:14px;pointer-events:none;z-index:1}
+.spirit-card.is-bond-frame{border-color:rgba(255,211,110,.82);box-shadow:0 0 0 3px rgba(255,211,110,.1),0 22px 58px rgba(255,178,78,.2)}
+.spirit-card.is-bond-frame .spirit-cover:after{content:"";position:absolute;inset:7px;border:1px solid rgba(255,211,110,.5);border-radius:12px;pointer-events:none}
+.bond-signature{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid rgba(110,231,255,.22);border-radius:10px;background:rgba(110,231,255,.055)}
+.bond-signature[hidden]{display:none!important}
+.bond-signature>div{min-width:0}
+.bond-signature span{display:block;color:var(--ang-muted);font-size:10px;margin-bottom:3px}
+.bond-signature b{display:block;color:var(--ang-text);font-size:12px;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
+.bond-signature button{flex:0 0 auto;min-height:30px;padding:0 9px;border:1px solid rgba(110,231,255,.34);border-radius:8px;background:rgba(110,231,255,.08);color:var(--sp-cyan);font:inherit;font-size:11px;cursor:pointer}
+.bond-actions button{min-height:34px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,211,110,.3);background:rgba(255,211,110,.08);color:var(--sp-gold);cursor:pointer;font:inherit;font-size:12px}
+.bond-actions button[hidden]{display:none!important}
+
+.spirit-memorial{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:16px;background:rgba(2,6,17,.82);backdrop-filter:blur(10px)}
+.spirit-memorial[hidden]{display:none!important}
+body.spirit-memorial-open{overflow:hidden}
+.spirit-memorial-card{position:relative;width:min(560px,100%);max-height:94vh;overflow:auto;padding:16px 18px 20px;border:1px solid rgba(255,211,110,.38);border-radius:22px;background:linear-gradient(155deg,#101b36,#1c1832 58%,#241726);box-shadow:0 30px 90px rgba(0,0,0,.6)}
+.spirit-memorial-card h2{margin:2px 0 4px;font-size:24px}
+.spirit-memorial-card>p{margin:0 0 12px;color:var(--ang-muted);font-size:12px;line-height:1.6}
+.memorial-canvas-wrap{display:grid;place-items:center;padding:8px;border:1px solid rgba(255,211,110,.2);border-radius:16px;background:rgba(0,0,0,.18)}
+.memorial-canvas-wrap canvas{display:block;width:min(300px,100%);height:auto;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.36)}
+.memorial-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.memorial-actions .ang-btn{flex:1;justify-content:center;min-height:40px;font-size:13px}
+@media(max-width:620px){
+  .bond-signature{align-items:flex-start;flex-direction:column}
+  .bond-signature button{width:100%}
+  .spirit-memorial{padding:10px}
+  .spirit-memorial-card{padding:13px;border-radius:18px}
+}

@@ -45,3 +45,8 @@
   .spirit-widget .sw-level{font-size:8px;left:4px;top:4px}
   .spirit-widget .sw-speech{max-width:148px;font-size:9.5px;bottom:14px}
 }
+
+/* Lv.7 限定卡面边框延伸到全站挂件 */
+.spirit-widget.has-bond-frame{border-color:rgba(255,211,110,.85);box-shadow:0 0 0 3px rgba(255,211,110,.12),0 0 28px rgba(255,193,92,.3),0 14px 36px rgba(0,0,0,.38)}
+.spirit-widget.has-bond-frame .sw-avatar{border-color:rgba(255,211,110,.82);box-shadow:0 0 0 2px rgba(255,211,110,.12) inset,0 0 18px rgba(255,193,92,.18)}
+.spirit-widget.has-bond-frame .sw-level{color:#fff0c4;border-color:rgba(255,211,110,.7);background:rgba(44,31,10,.88)}

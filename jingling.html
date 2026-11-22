@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex,follow">
 <link rel="stylesheet" href="css/angela.css?v=4">
 <link rel="stylesheet" href="css/jingling.css?v=2">
-<link rel="stylesheet" href="css/spirit-house.css?v=3">
+<link rel="stylesheet" href="css/spirit-house.css?v=4">
 </head>
 <body class="jingling-page">
 
@@ -88,9 +88,14 @@
     <div><span>当前权益</span><b id="bondCurrentReward">伙伴档案已建立</b></div>
     <div><span>下一级</span><b id="bondNextReward">全站挂件等级铭牌</b></div>
    </div>
+   <div class="bond-signature" id="bondSignatureWrap" hidden>
+    <div><span>私信专属签名</span><b id="bondSignatureText"></b></div>
+    <button type="button" id="bondSignatureCopy">复制签名</button>
+   </div>
    <div class="bond-levels" id="bondLevels" aria-label="亲密度等级与权益"></div>
    <div class="bond-actions">
     <a class="ang-btn primary" id="bondBooking" href="service.html">带着权益去预约</a>
+    <button class="ang-btn" type="button" id="bondMemorialBtn" hidden>查看永久纪念卡</button>
     <span>优先排期等权益在预约备注中标注，由站长手动核销。</span>
    </div>
   </div>
@@ -163,9 +168,22 @@
  </div>
 </div>
 
+<div class="spirit-memorial" id="memorialModal" hidden>
+ <div class="spirit-memorial-card" role="dialog" aria-modal="true" aria-labelledby="memorialTitle">
+  <div class="spirit-modal-head"><span>PERMANENT MEMORY · Lv.10</span><button class="spirit-modal-close" id="memorialClose" type="button" aria-label="关闭">×</button></div>
+  <h2 id="memorialTitle">永远的伙伴</h2>
+  <p>把这张卡留作纪念。它只属于你和当前伙伴，也记录着你们一起走过的亲密度。</p>
+  <div class="memorial-canvas-wrap"><canvas id="memorialCanvas" width="720" height="1080" aria-label="精灵永久纪念卡"></canvas></div>
+  <div class="memorial-actions">
+   <a class="ang-btn primary" id="memorialDownload" download="tafei-spirit-memory.png" href="#">下载纪念卡 ↘</a>
+   <button class="ang-btn" type="button" id="memorialCloseBottom">收起来</button>
+  </div>
+ </div>
+</div>
+
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
-<script src="js/spirit-core.js?v=3"></script>
-<script src="js/jingling.js?v=5"></script>
+<script src="js/spirit-core.js?v=4"></script>
+<script src="js/jingling.js?v=6"></script>
 </body>
 </html>

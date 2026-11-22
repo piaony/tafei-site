@@ -29,6 +29,32 @@
     { level: 10, need: 160, title: '永远的伙伴', reward: '永久纪念卡' }
   ];
 
+  // Lv.4 起才会出现的专属互动台词；每个伙伴两句，按互动次数轮换
+  var BOND_LINES = {
+    xiaota: ['你摸头的次数，我都偷偷记在手账里。', '今天的糖霜有点甜，分你一半。'],
+    'xi-shi': ['水面的倒影里，现在多了一个你。', '莲花开的时候，我会等你来。'],
+    angela: ['这一页魔法，是专门写给你的。', '别乱翻书，最后一页藏着我的名字。'],
+    yao: ['小鹿说，它已经认得你的脚步声了。', '森林很大，但我会在你身边。'],
+    gardener: ['今天种下的花，等我们一起看它开。', '工具箱里有给你的小礼物，自己找找。'],
+    doctor: ['手伸出来，我看看你有没有好好照顾自己。', '别总说没事，我会担心的。'],
+    mechanic: ['这个齿轮是为你转的，听出来了吗？', '小玩偶学会走路了，第一个想见的是你。'],
+    perfumer: ['这一瓶香味叫「今天你来了」。', '记忆会淡，但这个味道不会。'],
+    tanluning: ['旧车站的灯还亮着，我一直在等。', '如果你记得我的名字，梦就不算醒。']
+  };
+
+  // Lv.9 专属称号：和等级称号分开，作为个人主页与私信里的身份标记
+  var HONOR_TITLES = {
+    xiaota: '糖霜收藏家',
+    'xi-shi': '莲池旧友',
+    angela: '禁书管理员',
+    yao: '林间引路人',
+    gardener: '花园守夜人',
+    doctor: '深夜值班员',
+    mechanic: '齿轮调音师',
+    perfumer: '气味记录官',
+    tanluning: '旧梦保管员'
+  };
+
   function normalizeBondLevels(list) {
     if (!Array.isArray(list) || list.length < 2) return copy(BOND_LEVELS);
     var out = list.map(function (row, index) {
@@ -411,6 +437,41 @@
     }[condition] || '安静待着';
   }
 
+  function bondLineFor(spiritId, bond, level) {
+    if (level < 4) return '';
+    var lines = BOND_LINES[spiritId] || [];
+    if (!lines.length) return '';
+    return lines[bond % lines.length];
+  }
+
+  function honorTitleFor(spiritId, level, fallback) {
+    if (level < 9) return '';
+    return HONOR_TITLES[spiritId] || fallback;
+  }
+
+  function signatureFor(spiritId, bond, level, title) {
+    if (level < 6) return '';
+    var spirit = spiritById(spiritId);
+    if (!spirit) return '';
+    var line = bondLineFor(spiritId, bond, level) || spirit.quote || spirit.line;
+    return spirit.name + ' · ' + title + ' · 「' + line + '」';
+  }
+
+  function bondLineOf(spiritId) {
+    var info = bondInfoOf(spiritId);
+    return bondLineFor(spiritId, info.bond, info.level);
+  }
+
+  function honorTitleOf(spiritId) {
+    var info = bondInfoOf(spiritId);
+    return honorTitleFor(spiritId, info.level, info.title);
+  }
+
+  function signatureOf(spiritId) {
+    var info = bondInfoOf(spiritId);
+    return signatureFor(spiritId, info.bond, info.level, info.title);
+  }
+
   function bondInfoOf(spiritId) {
     var bond = Math.max(0, Math.round(Number(state.bond[spiritId]) || 0));
     var levels = normalizeBondLevels(config.bondLevels);
@@ -435,7 +496,10 @@
       next: nextLevel,
       toNext: nextLevel ? Math.max(0, nextLevel.need - bond) : 0,
       progress: progress,
-      levels: levels
+      levels: levels,
+      line: bondLineFor(spiritId, bond, current.level),
+      honor: honorTitleFor(spiritId, current.level, current.title),
+      signature: signatureFor(spiritId, bond, current.level, current.title)
     };
   }
 
@@ -803,6 +867,8 @@
     SKINS: SKINS,
     ITEMS: ITEMS,
     BOND_LEVELS: BOND_LEVELS,
+    BOND_LINES: BOND_LINES,
+    HONOR_TITLES: HONOR_TITLES,
     config: function () { return config; },
     state: function () { return state; },
     snapshot: snapshot,
@@ -814,6 +880,9 @@
     itemById: itemById,
     status: statusOf,
     bondInfo: bondInfoOf,
+    bondLine: bondLineOf,
+    honorTitle: honorTitleOf,
+    signature: signatureOf,
     condition: conditionOf,
     conditionText: conditionText,
     priceOfSpirit: priceOfSpirit,

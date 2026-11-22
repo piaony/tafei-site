@@ -117,7 +117,10 @@
     var bondLevel = $('partnerBondLevel');
     if (bondLevel) bondLevel.textContent = 'Lv.' + bondInfo.level + ' ' + bondInfo.title;
     var avatarBox = $('partnerAvatarBox');
-    if (avatarBox) avatarBox.classList.toggle('has-bond-ring', bondInfo.level >= 3);
+    if (avatarBox) {
+      avatarBox.classList.toggle('has-bond-ring', bondInfo.level >= 3);
+      avatarBox.classList.toggle('has-bond-frame', bondInfo.level >= 7);
+    }
     if (toggle) {
       toggle.textContent = core.state().widget.on ? '关闭全站挂件' : '开启全站挂件';
       toggle.classList.toggle('on', !!core.state().widget.on);
@@ -152,6 +155,14 @@
       : '已满级，所有等级权益已解锁';
     if (currentReward) currentReward.textContent = info.reward;
     if (nextReward) nextReward.textContent = info.next ? info.next.reward : '已满级';
+    var sigWrap = $('bondSignatureWrap');
+    var sigText = $('bondSignatureText');
+    if (sigWrap && sigText) {
+      sigWrap.hidden = !info.signature;
+      sigText.textContent = info.signature || '';
+    }
+    var memorialBtn = $('bondMemorialBtn');
+    if (memorialBtn) memorialBtn.hidden = info.level < 10;
     if (levels) {
       levels.innerHTML = info.levels.map(function (row) {
         var stateClass = info.level === row.level ? ' current' : (info.level > row.level ? ' done' : '');
@@ -180,14 +191,16 @@
   function renderGrid() {
     if (!grid) return;
     var selected = core.state().selected;
+    var selectedLevel = selected ? core.bondInfo(selected).level : 0;
     grid.innerHTML = core.SPIRITS.map(function (spirit) {
       var unlocked = core.isUnlocked(spirit.id);
       var isSelected = selected === spirit.id;
+      var frame = isSelected && selectedLevel >= 7 ? ' is-bond-frame' : '';
       var price = core.priceOfSpirit(spirit.id);
       var mode = core.modeOfSpirit(spirit.id);
       var skin = core.skinsOf(spirit.id)[0];
       var priceLabel = unlocked ? '<span class="spirit-price free">已解锁</span>' : mode === 'request' ? '<span class="spirit-price request">私人上架</span>' : (mode === 'free' || price === 0 ? '<span class="spirit-price free">免费</span>' : '<span class="spirit-price">' + price + ' 额度</span>');
-      return '<article class="spirit-card' + (unlocked ? '' : ' is-locked') + (isSelected ? ' is-selected' : '') + '">'
+      return '<article class="spirit-card' + (unlocked ? '' : ' is-locked') + (isSelected ? ' is-selected' : '') + frame + '">'
         + '<div class="spirit-flag' + (spirit.original ? ' original' : '') + '">' + esc(spirit.tag) + '</div>'
         + '<button class="spirit-cover" type="button" data-card-action="open" data-id="' + esc(spirit.id) + '" aria-label="查看' + esc(spirit.name) + '">'
         + '<img src="' + esc(skin.img) + '" alt="' + esc(spirit.name) + ' Q 版角色卡" loading="lazy"></button>'
@@ -237,12 +250,19 @@
     $('spiritModalGame').textContent = spirit.game;
     $('spiritModalTag').textContent = spirit.tag;
     var line = skin.quote || spirit.quote;
+    if (unlocked && selected) {
+      var liveLine = core.bondLine(spirit.id);
+      if (liveLine) line = liveLine;
+    }
     $('spiritModalLine').textContent = unlocked ? line : spirit.intro;
     var modalInfo = core.bondInfo(spirit.id);
     $('spiritBond').textContent = String(num(core.state().bond[spirit.id]));
     $('spiritBondHint').textContent = modalInfo.next
       ? 'Lv.' + modalInfo.level + ' ' + modalInfo.title + ' · 还差 ' + modalInfo.toNext + ' 点升 Lv.' + modalInfo.next.level
       : 'Lv.' + modalInfo.level + ' ' + modalInfo.title + ' · 已满级';
+    if (modalInfo.honor && modalInfo.level >= 9) {
+      $('spiritBondHint').textContent += ' · 专属称号「' + modalInfo.honor + '」';
+    }
     var note = $('spiritModalNote');
     if (note) note.textContent = core.modeOfSpirit(spirit.id) === 'request' ? '这款不开放额度购买；把账号和款式发给站长，由后台私下发放。' : '同人 Q 版展示，非官方原画；本地原型使用演示额度，云端表启用后自动切换为站内额度。';
     renderMeters('modal');
@@ -298,6 +318,173 @@
     modal.hidden = true;
     document.body.classList.remove('spirit-modal-open');
     currentModal = null;
+  }
+
+  function roundRect(ctx, x, y, width, height, radius) {
+    var r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + width, y, x + width, y + height, r);
+    ctx.arcTo(x + width, y + height, x, y + height, r);
+    ctx.arcTo(x, y + height, x, y, r);
+    ctx.arcTo(x, y, x + width, y, r);
+    ctx.closePath();
+  }
+
+  function drawMemorial() {
+    var canvas = $('memorialCanvas');
+    if (!canvas || !canvas.getContext) return;
+    var spirit = core.current();
+    var skin = core.skin();
+    if (!spirit || !skin) return;
+    var info = core.bondInfo(spirit.id);
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width;
+    var h = canvas.height;
+    var gradient = ctx.createLinearGradient(0, 0, w, h);
+    gradient.addColorStop(0, '#081126');
+    gradient.addColorStop(0.48, '#152447');
+    gradient.addColorStop(1, '#3a2240');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, w, h);
+
+    var glow = ctx.createRadialGradient(w * 0.22, h * 0.12, 8, w * 0.22, h * 0.12, 320);
+    glow.addColorStop(0, 'rgba(255,211,110,.3)');
+    glow.addColorStop(1, 'rgba(255,211,110,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(255,211,110,.55)';
+    ctx.lineWidth = 2;
+    roundRect(ctx, 30, 30, w - 60, h - 60, 28);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(110,231,255,.22)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 42, 42, w - 84, h - 84, 22);
+    ctx.stroke();
+
+    // 星点
+    for (var i = 0; i < 42; i++) {
+      var x = (i * 97 + 31) % w;
+      var y = (i * 173 + 61) % h;
+      var size = i % 3 === 0 ? 2.2 : 1.1;
+      ctx.fillStyle = i % 4 === 0 ? 'rgba(255,211,110,.8)' : 'rgba(150,230,255,.55)';
+      ctx.fillRect(x, y, size, size);
+    }
+
+    ctx.fillStyle = '#ffd36e';
+    ctx.font = '600 24px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText('TAFEI · SPIRIT HOUSE', 62, 104);
+    ctx.fillStyle = 'rgba(255,255,255,.58)';
+    ctx.font = '400 16px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText('永久纪念卡 · PERMANENT MEMORY', 62, 134);
+
+    ctx.fillStyle = '#fff7e2';
+    ctx.font = '700 58px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText('永远的伙伴', 62, 206);
+
+    var img = new Image();
+    img.onload = function () {
+      ctx.save();
+      roundRect(ctx, 62, 250, w - 124, 450, 24);
+      ctx.clip();
+      ctx.drawImage(img, 60, 248, w - 120, 454);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(255,211,110,.7)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 62, 250, w - 124, 450, 24);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 44px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText(spirit.name, 62, 764);
+      ctx.fillStyle = '#ffd36e';
+      ctx.font = '500 22px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('Lv.' + info.level + ' · ' + info.title + ' · 亲密度 ' + info.bond, 62, 802);
+      if (info.honor) {
+        ctx.fillStyle = '#8ce8ff';
+        ctx.font = '500 20px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+        ctx.fillText('专属称号 · ' + info.honor, 62, 838);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.8)';
+      ctx.font = '400 22px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      wrapText(ctx, '「' + (info.line || spirit.quote || spirit.line) + '」', 62, 892, w - 124, 34);
+      ctx.fillStyle = 'rgba(255,255,255,.42)';
+      ctx.font = '400 16px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('记录于 ' + new Date().toLocaleDateString('zh-CN') + ' · 挞飞精灵小屋', 62, h - 78);
+      var link = $('memorialDownload');
+      if (link) {
+        try { link.href = canvas.toDataURL('image/png'); }
+        catch (error) { link.hidden = true; }
+      }
+    };
+    img.onerror = function () {
+      ctx.fillStyle = 'rgba(255,255,255,.3)';
+      ctx.font = '400 20px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('图片暂时没有加载出来，但这份记忆仍然有效。', 62, 500);
+    };
+    img.src = skin.img;
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var line = '';
+    for (var i = 0; i < text.length; i++) {
+      var test = line + text[i];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        ctx.fillText(line, x, y);
+        line = text[i];
+        y += lineHeight;
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, x, y);
+  }
+
+  function openMemorial() {
+    var snap = core.snapshot();
+    if (!snap.current) { toast('先领取一个伙伴。', true); return; }
+    var info = core.bondInfo(snap.current.id);
+    if (info.level < 10) {
+      toast('Lv.10「永远的伙伴」才会解锁永久纪念卡，现在是 Lv.' + info.level + '。', true);
+      return;
+    }
+    var node = $('memorialModal');
+    if (!node) return;
+    node.hidden = false;
+    document.body.classList.add('spirit-memorial-open');
+    drawMemorial();
+  }
+
+  function closeMemorial() {
+    var node = $('memorialModal');
+    if (node) node.hidden = true;
+    document.body.classList.remove('spirit-memorial-open');
+  }
+
+  function copySignature() {
+    var snap = core.snapshot();
+    if (!snap.current) return;
+    var text = core.signature(snap.current.id);
+    if (!text) { toast('Lv.6「重要的人」才会解锁私信签名。', true); return; }
+    var done = function () { toast('私信签名已复制。'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+
+  function fallbackCopy(text, done) {
+    var input = document.createElement('textarea');
+    input.value = text;
+    input.setAttribute('readonly', '');
+    input.style.position = 'fixed';
+    input.style.opacity = '0';
+    document.body.appendChild(input);
+    input.select();
+    try { document.execCommand('copy'); done(); } catch (error) { toast('复制失败，请手动选中签名。', true); }
+    document.body.removeChild(input);
   }
 
   function itemCard(item) {
@@ -452,7 +639,20 @@
 
   $('spiritModalClose')?.addEventListener('click', closeModal);
   modal?.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
-  document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !modal.hidden) closeModal(); });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      if (!$('memorialModal')?.hidden) closeMemorial();
+      else if (!$('spiritModal')?.hidden) closeModal();
+    }
+  });
+
+  $('bondMemorialBtn')?.addEventListener('click', openMemorial);
+  $('bondSignatureCopy')?.addEventListener('click', copySignature);
+  $('memorialClose')?.addEventListener('click', closeMemorial);
+  $('memorialCloseBottom')?.addEventListener('click', closeMemorial);
+  $('memorialModal')?.addEventListener('click', function (event) {
+    if (event.target === $('memorialModal')) closeMemorial();
+  });
 
   $('spiritPet')?.addEventListener('click', function () {
     if (!currentModal || !core.isUnlocked(currentModal)) return;
