@@ -174,6 +174,27 @@
     });
   }
 
+
+  /* ---------- 8. 全站精灵挂件启动 ---------- */
+  function loadSpiritWidget() {
+    if (document.querySelector('script[src*="spirit-widget"]')) return;
+    var script = document.createElement('script');
+    script.src = 'js/spirit-widget.js?v=5';
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
+  function initSpiritWidget() {
+    if (window.TafeiSpirits) {
+      loadSpiritWidget();
+      return;
+    }
+    var script = document.createElement('script');
+    script.src = 'js/spirit-core.js?v=5';
+    script.onload = loadSpiritWidget;
+    document.body.appendChild(script);
+  }
+
   /* ---------- 启动 ---------- */
   function boot() {
     initProgress();
@@ -183,6 +204,7 @@
     initThemeIcon();
     initThemeColorSync();
     initMenuAutoClose();
+    initSpiritWidget();
   }
 
   if (document.readyState === "loading") {

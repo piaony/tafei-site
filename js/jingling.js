@@ -1,3 +1,5 @@
+/* TAFEI SPIRIT HOUSE v23.0
+   精灵小屋：伙伴坞、十级成长、纪念卡（750×1000 空白底图 + 动态文字）。 */
 (function () {
   'use strict';
 
@@ -87,7 +89,7 @@
     if (!spirit || !skin) {
       if (dock) dock.classList.add('is-empty');
       if (img) {
-        img.src = 'assets/spirits/xiaota.jpg';
+        img.src = 'assets/spirits/xiaota-v23/avatar.png';
         img.alt = '还没有伙伴';
       }
       if (tag) tag.textContent = '待领取';
@@ -104,7 +106,7 @@
     if (dock) dock.classList.remove('is-empty');
     if (toggle) { toggle.hidden = false; toggle.disabled = false; }
     if (img) {
-      img.src = skin.img;
+      img.src = skin.avatar || skin.img;
       img.alt = spirit.name + ' · ' + skin.name;
     }
     if (tag) tag.textContent = spirit.tag;
@@ -179,8 +181,8 @@
   }
 
   function cardButton(spirit, unlocked, selected) {
-    if (selected) return '<button class="spirit-open is-current" type="button" disabled>当前伙伴</button>';
-    if (unlocked) return '<button class="spirit-open is-select" type="button" data-card-action="select" data-id="' + esc(spirit.id) + '">设为伙伴</button>';
+    if (selected) return '<button class="spirit-open is-current" type="button" disabled>当前全站伙伴</button>';
+    if (unlocked) return '<button class="spirit-open is-select" type="button" data-card-action="select" data-id="' + esc(spirit.id) + '">设为全站伙伴</button>';
     var mode = core.modeOfSpirit(spirit.id);
     var price = core.priceOfSpirit(spirit.id);
     if (mode === 'request') return '<button class="spirit-open is-contact" type="button" data-card-action="open" data-id="' + esc(spirit.id) + '">联系站长获取<span class="price-mini">私人上架</span></button>';
@@ -295,10 +297,10 @@
       set.classList.add('show');
       if (selected) {
         set.classList.add('current');
-        set.textContent = '当前伙伴';
+        set.textContent = '当前全站伙伴';
         set.disabled = true;
       } else {
-        set.textContent = '设为当前伙伴';
+        set.textContent = '设为全站伙伴';
         set.disabled = false;
       }
     }
@@ -341,89 +343,124 @@
     var ctx = canvas.getContext('2d');
     var w = canvas.width;
     var h = canvas.height;
-    var gradient = ctx.createLinearGradient(0, 0, w, h);
-    gradient.addColorStop(0, '#081126');
-    gradient.addColorStop(0.48, '#152447');
-    gradient.addColorStop(1, '#3a2240');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
+    var base = new Image();
+    var portrait = new Image();
+    var baseReady = false;
+    var portraitReady = false;
+    var loaded = 0;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
-    var glow = ctx.createRadialGradient(w * 0.22, h * 0.12, 8, w * 0.22, h * 0.12, 320);
-    glow.addColorStop(0, 'rgba(255,211,110,.3)');
-    glow.addColorStop(1, 'rgba(255,211,110,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = 'rgba(255,211,110,.55)';
-    ctx.lineWidth = 2;
-    roundRect(ctx, 30, 30, w - 60, h - 60, 28);
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(110,231,255,.22)';
-    ctx.lineWidth = 1;
-    roundRect(ctx, 42, 42, w - 84, h - 84, 22);
-    ctx.stroke();
-
-    // 星点
-    for (var i = 0; i < 42; i++) {
-      var x = (i * 97 + 31) % w;
-      var y = (i * 173 + 61) % h;
-      var size = i % 3 === 0 ? 2.2 : 1.1;
-      ctx.fillStyle = i % 4 === 0 ? 'rgba(255,211,110,.8)' : 'rgba(150,230,255,.55)';
-      ctx.fillRect(x, y, size, size);
+    function drawFallback() {
+      var gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, '#081126');
+      gradient.addColorStop(0.48, '#152447');
+      gradient.addColorStop(1, '#3a2240');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(255,211,110,.55)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 24, 24, w - 48, h - 48, 28);
+      ctx.stroke();
     }
 
-    ctx.fillStyle = '#ffd36e';
-    ctx.font = '600 24px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('TAFEI · SPIRIT HOUSE', 62, 104);
-    ctx.fillStyle = 'rgba(255,255,255,.58)';
-    ctx.font = '400 16px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('永久纪念卡 · PERMANENT MEMORY', 62, 134);
-
-    ctx.fillStyle = '#fff7e2';
-    ctx.font = '700 58px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    ctx.fillText('永远的伙伴', 62, 206);
-
-    var img = new Image();
-    img.onload = function () {
+    function drawPortrait() {
+      if (!portraitReady) return;
       ctx.save();
-      roundRect(ctx, 62, 250, w - 124, 450, 24);
-      ctx.clip();
-      ctx.drawImage(img, 60, 248, w - 120, 454);
+      ctx.shadowColor = 'rgba(255,196,92,.28)';
+      ctx.shadowBlur = 26;
+      drawImageContain(ctx, portrait, 54, 108, w - 108, 470);
       ctx.restore();
-      ctx.strokeStyle = 'rgba(255,211,110,.7)';
-      ctx.lineWidth = 2;
-      roundRect(ctx, 62, 250, w - 124, 450, 24);
-      ctx.stroke();
+    }
+
+    function paint() {
+      ctx.clearRect(0, 0, w, h);
+      if (baseReady) ctx.drawImage(base, 0, 0, w, h);
+      else drawFallback();
+
+      // 底部渐暗，保证动态文字在星云和浪纹上仍然可读
+      var fade = ctx.createLinearGradient(0, h * 0.52, 0, h * 0.97);
+      fade.addColorStop(0, 'rgba(5,10,24,0)');
+      fade.addColorStop(0.34, 'rgba(5,10,24,.58)');
+      fade.addColorStop(0.62, 'rgba(5,10,24,.88)');
+      fade.addColorStop(1, 'rgba(5,10,24,.92)');
+      ctx.fillStyle = fade;
+      ctx.fillRect(0, h * 0.5, w, h * 0.5);
+
+      drawPortrait();
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.55)';
+      ctx.shadowBlur = 8;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffd36e';
+      ctx.font = '600 22px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('TAFEI · SPIRIT HOUSE', 74, 72);
+      ctx.fillStyle = 'rgba(236,244,255,.64)';
+      ctx.font = '400 15px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('永久纪念卡 · PERMANENT MEMORY', 74, 96);
+
+      ctx.fillStyle = 'rgba(255,211,110,.92)';
+      ctx.font = '500 20px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('永远的伙伴', 72, 646);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = '700 44px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-      ctx.fillText(spirit.name, 62, 764);
+      ctx.fillText(spirit.name, 72, 696);
+
       ctx.fillStyle = '#ffd36e';
-      ctx.font = '500 22px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-      ctx.fillText('Lv.' + info.level + ' · ' + info.title + ' · 亲密度 ' + info.bond, 62, 802);
+      ctx.font = '500 18px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('Lv.' + info.level + ' · ' + info.title + ' · 亲密度 ' + info.bond, 72, 736);
+
       if (info.honor) {
         ctx.fillStyle = '#8ce8ff';
-        ctx.font = '500 20px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-        ctx.fillText('专属称号 · ' + info.honor, 62, 838);
+        ctx.font = '500 16px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+        ctx.fillText('专属称号 · ' + info.honor, 72, 768);
       }
-      ctx.fillStyle = 'rgba(255,255,255,.8)';
-      ctx.font = '400 22px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-      wrapText(ctx, '「' + (info.line || spirit.quote || spirit.line) + '」', 62, 892, w - 124, 34);
-      ctx.fillStyle = 'rgba(255,255,255,.42)';
-      ctx.font = '400 16px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-      ctx.fillText('记录于 ' + new Date().toLocaleDateString('zh-CN') + ' · 挞飞精灵小屋', 62, h - 78);
+
+      ctx.strokeStyle = 'rgba(255,211,110,.36)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(72, 790);
+      ctx.lineTo(w - 72, 790);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255,255,255,.92)';
+      ctx.font = '400 17px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      wrapText(ctx, '「' + (info.line || spirit.quote || spirit.line) + '」', 72, 824, w - 144, 28);
+
+      var now = new Date();
+      var date = now.getFullYear() + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + String(now.getDate()).padStart(2, '0');
+      ctx.fillStyle = 'rgba(236,244,255,.46)';
+      ctx.font = '400 13px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+      ctx.fillText('记录于 ' + date + ' · 挞飞精灵小屋', 72, h - 50);
+      ctx.restore();
+
       var link = $('memorialDownload');
       if (link) {
         try { link.href = canvas.toDataURL('image/png'); }
         catch (error) { link.hidden = true; }
       }
-    };
-    img.onerror = function () {
-      ctx.fillStyle = 'rgba(255,255,255,.3)';
-      ctx.font = '400 20px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-      ctx.fillText('图片暂时没有加载出来，但这份记忆仍然有效。', 62, 500);
-    };
-    img.src = skin.img;
+    }
+
+    function ready() {
+      loaded += 1;
+      if (loaded >= 2) paint();
+    }
+
+    base.onload = function () { baseReady = true; ready(); };
+    base.onerror = function () { baseReady = false; ready(); };
+    portrait.onload = function () { portraitReady = true; ready(); };
+    portrait.onerror = function () { portraitReady = false; ready(); };
+    base.src = 'assets/spirits/xiaota-v23/memorial-blank.png';
+    portrait.src = skin.img;
+  }
+
+  function drawImageContain(ctx, img, x, y, maxWidth, maxHeight) {
+    var ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+    var width = img.width * ratio;
+    var height = img.height * ratio;
+    ctx.drawImage(img, x + (maxWidth - width) / 2, y + (maxHeight - height) / 2, width, height);
   }
 
   function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -544,7 +581,7 @@
     busy = true;
     Promise.resolve(core.buySpirit(id)).then(function () {
       core.selectSpirit(id, core.spiritById(id).defaultSkin);
-      toast('已解锁 ' + spirit.name + '，并设成当前伙伴。');
+      toast('已解锁 ' + spirit.name + '，并设成全站伙伴。');
       if (currentModal === id) { currentModal = id; renderModal(); }
     }).catch(function (error) {
       toast(error.message || '解锁失败。', true);
@@ -688,7 +725,7 @@
     if (!currentModal) return;
     try {
       core.selectSpirit(currentModal, core.spiritById(currentModal).defaultSkin);
-      toast('已设成当前伙伴。');
+      toast('已设成全站伙伴，首页和全站挂件会同步更新。');
       renderAll();
     } catch (error) { toast(error.message || '切换失败。', true); }
   });

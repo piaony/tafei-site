@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex,follow">
 <link rel="stylesheet" href="css/angela.css?v=4">
 <link rel="stylesheet" href="css/jingling.css?v=2">
-<link rel="stylesheet" href="css/spirit-house.css?v=4">
+<link rel="stylesheet" href="css/spirit-house.css?v=5">
 </head>
 <body class="jingling-page">
 
@@ -50,7 +50,7 @@
  <section class="partner-dock" aria-label="当前展示伙伴">
   <div class="partner-main">
    <div class="partner-avatar" id="partnerAvatarBox">
-    <img id="partnerDockImg" src="assets/spirits/xiaota.jpg" alt="当前伙伴">
+    <img id="partnerDockImg" src="assets/spirits/xiaota-v23/avatar.png" alt="当前伙伴">
     <span class="partner-tag" id="partnerDockTag">挞飞原创</span>
    </div>
    <div class="partner-copy">
@@ -60,7 +60,7 @@
     <div class="partner-actions">
      <button type="button" id="widgetToggle">开启全站挂件</button>
      <a href="#bondPanel">成长与权益</a>
-     <a href="#spiritGrid">换一个伙伴</a>
+     <a href="#spiritGrid">更换全站伙伴</a>
      <a class="ghost" href="xiaota.html">去看看小挞飞</a>
      <span class="partner-wallet demo" id="partnerWallet">演示额度 120</span>
     </div>
@@ -103,7 +103,7 @@
 
  <section class="spirit-section" aria-labelledby="spiritGridTitle">
   <div class="section-heading">
-   <div><h2 id="spiritGridTitle">伙伴图鉴</h2><p>9 款伙伴都会展示；获取方式由站长后台按款设置，不再默认全部开放额度购买。</p></div>
+   <div><h2 id="spiritGridTitle">伙伴图鉴</h2><p>9 款伙伴都会展示；点「设为全站伙伴」后，首页魔法伙伴和全站挂件会同步切换。</p></div>
    <div class="heading-tools">
     <span class="wallet-pill demo" id="gridWallet">演示额度 120</span>
     <button type="button" class="mini-btn" id="demoTopup">补充测试额度 +100</button>
@@ -143,7 +143,7 @@
 <div class="spirit-modal" id="spiritModal" hidden>
  <div class="spirit-modal-card" role="dialog" aria-modal="true" aria-labelledby="spiritModalName">
   <div class="spirit-modal-head"><span>SPIRIT HOUSE</span><button class="spirit-modal-close" id="spiritModalClose" type="button" aria-label="关闭">×</button></div>
-  <img class="spirit-modal-img" id="spiritModalImg" src="assets/spirits/xiaota.jpg" alt="">
+  <img class="spirit-modal-img" id="spiritModalImg" src="assets/spirits/xiaota-v23/main.png" alt="">
   <div class="spirit-forms" id="spiritForms"></div>
   <div class="spirit-modal-body">
    <div class="spirit-modal-meta"><span class="game" id="spiritModalGame">挞飞原创 · 挞壳精灵</span><span class="spirit-modal-tag" id="spiritModalTag">挞飞原创</span></div>
@@ -162,7 +162,7 @@
     <button class="ang-btn" id="spiritPlay" type="button">玩玩具</button>
    </div>
    <button class="spirit-modal-unlock" id="spiritUnlock" type="button">联系站长获取</button>
-   <button class="spirit-modal-set" id="spiritSet" type="button">设为当前伙伴</button>
+   <button class="spirit-modal-set" id="spiritSet" type="button">设为全站伙伴</button>
    <p class="spirit-modal-note" id="spiritModalNote">同人 Q 版展示，非官方原画；本地原型使用演示额度，云端表启用后自动切换为站内额度。</p>
   </div>
  </div>
@@ -173,7 +173,7 @@
   <div class="spirit-modal-head"><span>PERMANENT MEMORY · Lv.10</span><button class="spirit-modal-close" id="memorialClose" type="button" aria-label="关闭">×</button></div>
   <h2 id="memorialTitle">永远的伙伴</h2>
   <p>把这张卡留作纪念。它只属于你和当前伙伴，也记录着你们一起走过的亲密度。</p>
-  <div class="memorial-canvas-wrap"><canvas id="memorialCanvas" width="720" height="1080" aria-label="精灵永久纪念卡"></canvas></div>
+  <div class="memorial-canvas-wrap"><canvas id="memorialCanvas" width="750" height="1000" aria-label="精灵永久纪念卡"></canvas></div>
   <div class="memorial-actions">
    <a class="ang-btn primary" id="memorialDownload" download="tafei-spirit-memory.png" href="#">下载纪念卡 ↘</a>
    <button class="ang-btn" type="button" id="memorialCloseBottom">收起来</button>
@@ -183,7 +183,7 @@
 
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
-<script src="js/spirit-core.js?v=4"></script>
-<script src="js/jingling.js?v=6"></script>
+<script src="js/spirit-core.js?v=5"></script>
+<script src="js/jingling.js?v=8"></script>
 </body>
 </html>

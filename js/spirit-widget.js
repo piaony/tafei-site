@@ -5,7 +5,7 @@
   var core = window.TafeiSpirits;
   if (!core) return;
 
-  var CSS_HREF = 'css/spirit-widget.css?v=4';
+  var CSS_HREF = 'css/spirit-widget.css?v=5';
   var root = null;
   var body = null;
   var avatar = null;
@@ -115,7 +115,7 @@
       return;
     }
     var condition = core.condition();
-    avatar.src = skin.img;
+    avatar.src = skin.widget || skin.avatar || skin.img;
     avatar.alt = spirit.name + ' · ' + skin.name;
     nameNode.textContent = spirit.name;
     var bond = core.bondInfo(spirit.id);

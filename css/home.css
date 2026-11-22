@@ -570,3 +570,32 @@ body.light .pet-link{background:#f2fbff;border-color:#bfeaf5}
 }
 
 body.pet-panel-open .tf2-fab,body.pet-panel-open .help-fab{visibility:hidden;opacity:0;pointer-events:none}
+
+
+/* TAFEI 21.8：原创挞壳精灵小挞 */
+.mini-pet{--xt-shell:#f2b24a;--xt-shell2:#d68a2e;--xt-custard:#fff3d6;--xt-custard2:#f6ddb0;--xt-scarf:#37d6e0;--xt-scarf2:#1a8f9e;--xt-caramel:#c97a2f;--xt-navy:#173047;--xt-shadow:rgba(0,0,0,.35);width:min(168px,62%)}
+.mini-pet[data-outfit="sakura"]{--xt-shell:#e9a05d;--xt-shell2:#b9692c;--xt-scarf:#ff9a7a;--xt-scarf2:#c94b38;--xt-caramel:#b9682b;--xt-custard:#fff7e7}
+.mini-pet[data-outfit="moon"]{--xt-shell:#ffe3a8;--xt-shell2:#c9a761;--xt-scarf:#8ce8ff;--xt-scarf2:#3aa6c9;--xt-caramel:#b98a5c;--xt-custard:#f7fbff}
+.xt-shell,.xt-shell-hat{fill:var(--xt-shell)}
+.xt-shell-2{fill:var(--xt-shell2)}
+.xt-custard{fill:var(--xt-custard)}
+.xt-custard-2{fill:var(--xt-custard2)}
+.xt-scarf{fill:var(--xt-scarf)}
+.xt-scarf-2{fill:var(--xt-scarf2)}
+.xt-caramel{fill:var(--xt-caramel)}
+.xt-navy{fill:var(--xt-navy)}
+.xt-shadow{fill:var(--xt-shadow)}
+.xt-head,.xt-body,.xt-wand{transform-box:fill-box;transform-origin:center}
+.xt-eyes-open{opacity:1;transform-box:fill-box;transform-origin:center;animation:petBlink 5.2s infinite}
+.xt-eyes-sleep{opacity:0}
+.xt-mouth-hungry,.xt-mouth-sleepy,.xt-mouth-love{display:none}
+.mini-pet[data-mood="sleepy"] .xt-eyes-open{opacity:0;animation:none}
+.mini-pet[data-mood="sleepy"] .xt-eyes-sleep{opacity:1}
+.mini-pet[data-mood="sleepy"] .xt-mouth-happy,.mini-pet[data-mood="hungry"] .xt-mouth-happy,.mini-pet[data-mood="love"] .xt-mouth-happy{display:none}
+.mini-pet[data-mood="hungry"] .xt-mouth-hungry{display:block}
+.mini-pet[data-mood="sleepy"] .xt-mouth-sleepy{display:block}
+.mini-pet[data-mood="love"] .xt-mouth-love{display:block}
+.mini-pet[data-action="pet"] .xt-head{animation:petPat .55s ease}
+.mini-pet[data-action="feed"] .xt-body{animation:petBounce .55s ease}
+.mini-pet[data-action="play"] .xt-wand{animation:petWand .65s ease}
+@media(max-width:620px){.mini-pet{width:150px}}

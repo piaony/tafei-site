@@ -1,4 +1,4 @@
-/* TAFEI SPIRIT HOUSE v2 */
+/* TAFEI SPIRIT HOUSE v5 · 对应站点 v23.0 */
 .jingling-page .ang-wrap{width:min(1220px,calc(100% - 32px))}
 .spirit-hero-copy{padding-top:6px}
 .spirit-hero-copy .spirit-lead{max-width:680px}
@@ -235,7 +235,7 @@ body.spirit-memorial-open{overflow:hidden}
 .spirit-memorial-card h2{margin:2px 0 4px;font-size:24px}
 .spirit-memorial-card>p{margin:0 0 12px;color:var(--ang-muted);font-size:12px;line-height:1.6}
 .memorial-canvas-wrap{display:grid;place-items:center;padding:8px;border:1px solid rgba(255,211,110,.2);border-radius:16px;background:rgba(0,0,0,.18)}
-.memorial-canvas-wrap canvas{display:block;width:min(300px,100%);height:auto;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.36)}
+.memorial-canvas-wrap canvas{display:block;width:min(320px,100%);height:auto;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.36)}
 .memorial-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .memorial-actions .ang-btn{flex:1;justify-content:center;min-height:40px;font-size:13px}
 @media(max-width:620px){

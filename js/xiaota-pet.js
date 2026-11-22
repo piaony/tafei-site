@@ -1,3 +1,5 @@
+/* TAFEI XIAOTA WORKSHOP v23.0
+   独立小挞工坊：新官方形象、表情/动作图切换、本地养成与糖霜小游戏。 */
 (function () {
   'use strict';
 
@@ -29,6 +31,25 @@
   var audioCtx = null;
 
   var pet = $('angPet');
+  var petImg = $('angPetImg');
+  var ASSET_BASE = 'assets/spirits/xiaota-v23/';
+  var PET_ART = {
+    default: 'main.png',
+    happy: 'main.png',
+    sleepy: 'emotion-sleepy.png',
+    hungry: 'emotion-sad.png',
+    love: 'emotion-shy.png',
+    angry: 'emotion-angry.png',
+    pet: 'action-pet.png',
+    feed: 'main.png',
+    play: 'action-upgrade.png',
+    sleep: 'emotion-sleepy.png',
+    dress: 'main.png'
+  };
+  ['main.png', 'emotion-sleepy.png', 'emotion-sad.png', 'emotion-shy.png', 'emotion-angry.png', 'action-pet.png', 'action-upgrade.png'].forEach(function (file) {
+    var preload = new Image();
+    preload.src = ASSET_BASE + file;
+  });
   var speech = $('angSpeech');
   var toastEl = $('angToast');
   var field = $('angGameField');
@@ -98,6 +119,15 @@
     return 'happy';
   }
 
+  function refreshPetArt() {
+    if (!pet || !petImg) return;
+    var action = pet.dataset.action;
+    var mood = pet.dataset.mood;
+    var file = PET_ART[action] || PET_ART[mood] || PET_ART.default;
+    var src = ASSET_BASE + file;
+    if (petImg.getAttribute('src') !== src) petImg.src = src;
+  }
+
   function idleLine() {
     if (state.care.energy < 22) return '有点困了，想睡一会儿…';
     if (state.care.hunger < 26) return '肚子咕咕叫，星糖在哪里？';
@@ -108,6 +138,7 @@
   function refreshMood() {
     if (!pet) return;
     pet.dataset.mood = forcedMood || autoMood();
+    refreshPetArt();
   }
 
   function forceMood(mood, hold) {
@@ -123,8 +154,12 @@
   function actionAnim(name) {
     if (!pet) return;
     pet.dataset.action = name;
+    refreshPetArt();
     clearTimeout(actionTimer);
-    actionTimer = setTimeout(function () { pet.dataset.action = ''; }, 720);
+    actionTimer = setTimeout(function () {
+      pet.dataset.action = '';
+      refreshPetArt();
+    }, 720);
   }
 
   function speak(text, hold) {

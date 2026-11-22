@@ -1,4 +1,4 @@
-/* TAFEI v22.2 个人主页伙伴展示位
+/* TAFEI v23.0 个人主页伙伴展示位
    Lv.8 解锁完整展示；Lv.6 私信签名、Lv.9 专属称号会在这里露出来。 */
 (function () {
   'use strict';
@@ -29,7 +29,7 @@
 
     if (info.level < 8) {
       body.innerHTML = '<div class="ps-locked">'
-        + '<div class="ps-lock-avatar"><img src="' + esc(skin.img) + '" alt="" loading="lazy"></div>'
+        + '<div class="ps-lock-avatar"><img src="' + esc(skin.avatar || skin.img) + '" alt="" loading="lazy"></div>'
         + '<div class="ps-lock-copy"><b>Lv.8 解锁个人主页展示位</b>'
         + '<span>现在 Lv.' + info.level + ' ' + esc(info.title) + '，再互动 ' + info.toNext + ' 点升到 Lv.' + (info.next ? info.next.level : 8) + '</span>'
         + '<i><em style="width:' + info.progress + '%"></em></i></div>'
@@ -40,7 +40,7 @@
     }
 
     body.innerHTML = '<div class="ps-main">'
-      + '<div class="ps-avatar' + (info.level >= 9 ? ' is-honored' : '') + '"><img src="' + esc(skin.img) + '" alt="' + esc(spirit.name) + '"></div>'
+      + '<div class="ps-avatar' + (info.level >= 9 ? ' is-honored' : '') + '"><img src="' + esc(skin.avatar || skin.img) + '" alt="' + esc(spirit.name) + '"></div>'
       + '<div class="ps-copy"><div class="ps-name"><h3>' + esc(spirit.name) + '</h3><span>Lv.' + info.level + ' ' + esc(info.title) + '</span></div>'
       + '<p>' + esc(spirit.quote || spirit.line) + '</p>'
       + '<div class="ps-tags"><span>亲密度 ' + info.bond + '</span><span>' + esc(info.reward) + '</span>' + honor + '</div></div>'

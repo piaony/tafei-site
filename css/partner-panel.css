@@ -1,6 +1,9 @@
-/* TAFEI CURRENT PARTNER PANEL BRIDGE */
+/* TAFEI CURRENT PARTNER PANEL BRIDGE · v23 */
 .mini-pet .pet-mini-photo{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:20px;border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 38px rgba(0,0,0,.34);background:#0b1224;transition:filter .25s ease}
+.mini-pet .pet-mini-photo[hidden]{display:none!important}
+.mini-pet .pet-mini-photo.is-alpha{aspect-ratio:auto;height:auto;max-height:270px;object-fit:contain;border:0;border-radius:0;background:transparent;box-shadow:none;filter:drop-shadow(0 18px 28px rgba(0,0,0,.28))}
 .mini-pet.is-photo{width:min(205px,82%)}
+.mini-pet.has-alpha{width:min(218px,78%)}
 .mini-pet.is-photo .ang-pet-svg{display:none}
 .mini-pet[data-action="pet"] .pet-mini-photo{animation:partnerPat .55s ease}
 .mini-pet[data-action="feed"] .pet-mini-photo{animation:partnerFeed .55s ease}
@@ -17,4 +20,7 @@
 .pet-mini-stage .pet-mini-photo + .pet-mini-speech{z-index:4}
 .pet-identity .pet-mini-label{letter-spacing:.14em}
 .pet-actions .pet-action span{font-size:14px}
-@media(max-width:620px){.mini-pet.is-photo{width:min(188px,78%)}}
+.pet-panel-nav{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.pet-switch{display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border:1px solid rgba(255,211,110,.36);border-radius:9px;color:var(--gold,#ffd36e);font-size:12px;text-decoration:none;white-space:nowrap}
+.pet-switch:hover{border-color:rgba(255,211,110,.72);background:rgba(255,211,110,.08)}
+@media(max-width:620px){.mini-pet.is-photo{width:min(188px,78%)}.mini-pet.has-alpha{width:min(190px,70%)}.pet-panel-nav{gap:6px}.pet-switch{display:none}}

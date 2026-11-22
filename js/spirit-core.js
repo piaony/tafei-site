@@ -1,4 +1,4 @@
-/* TAFEI SPIRIT CORE v1
+/* TAFEI SPIRIT CORE v23.0
    精灵小屋共享数据层：角色、皮肤、道具、状态、解锁、挂件位置、云端接口。
    本地原型使用演示额度；Supabase 表和函数就绪后自动切到真实额度。 */
 (function (window) {
@@ -99,11 +99,15 @@
   var SPIRITS = [
     {
       id: 'xiaota', name: '小挞飞', game: '挞飞原创 · 挞壳精灵', tag: '挞飞原创',
-      original: true, img: 'assets/spirits/xiaota.jpg', accent: '#ffd36e',
-      line: '挞壳是帽子，奶油是身体，围巾是青绿色的风。',
+      original: true,
+      img: 'assets/spirits/xiaota-v23/main.png',
+      avatar: 'assets/spirits/xiaota-v23/avatar.png',
+      widget: 'assets/spirits/xiaota-v23/widget-128.png',
+      accent: '#ffd36e',
+      line: '金色挞壳是帽子，奶油白是裙摆，青绿色的风是围巾。',
       quote: '你回来啦。今天也要一起收集糖霜吗？',
       defaultSkin: 'xiaota-default',
-      intro: '挞飞原创伙伴，0 额度领取，领取后才会住进小屋。'
+      intro: '挞飞官方原创伙伴，0 额度领取，领取后才会住进小屋。'
     },
     {
       id: 'xi-shi', name: '西施', game: '王者荣耀 · 幻纱之灵', tag: '王者荣耀',
@@ -172,7 +176,7 @@
   ];
 
   var SKINS = [
-    { id: 'xiaota-default', spirit: 'xiaota', name: '挞壳精灵', img: 'assets/spirits/xiaota.jpg', price: 0, default: true, quote: '挞壳是帽子，奶油是身体，围巾是青绿色的风。' },
+    { id: 'xiaota-default', spirit: 'xiaota', name: '奶油挞壳', img: 'assets/spirits/xiaota-v23/main.png', avatar: 'assets/spirits/xiaota-v23/avatar.png', widget: 'assets/spirits/xiaota-v23/widget-128.png', price: 0, default: true, quote: '挞壳是帽子，奶油是裙摆，围巾是青绿色的风。' },
     { id: 'xi-shi-default', spirit: 'xi-shi', name: '幻纱之灵', img: 'assets/spirits/xi-shi.jpg', price: 0, default: true },
     { id: 'angela-default', spirit: 'angela', name: '暗夜萝莉', img: 'assets/spirits/angela.jpg', price: 0, default: true },
     { id: 'yao-default', spirit: 'yao', name: '鹿灵守心', img: 'assets/spirits/yao.jpg', price: 0, default: true },

@@ -68,8 +68,9 @@ button{font:inherit}
 .ang-stage:before{content:"";position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,150,190,.17),rgba(110,231,255,.1) 38%,transparent 68%);filter:blur(7px)}
 .ang-stage:after{content:"";position:absolute;inset:18px;border:1px solid rgba(255,255,255,.09);border-radius:22px;pointer-events:none}
 .ang-stage .stage-glow{position:absolute;bottom:40px;width:330px;height:90px;border-radius:50%;background:radial-gradient(ellipse,rgba(110,231,255,.22),transparent 70%);filter:blur(12px)}
-.ang-pet{position:relative;z-index:2;width:min(370px,82%);transform-origin:center bottom;animation:angFloat 5.4s ease-in-out infinite;transition:filter .25s}
-.ang-pet-svg{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 30px 38px rgba(0,0,0,.38))}
+.ang-pet{position:relative;z-index:2;width:min(410px,88%);transform-origin:center bottom;animation:angFloat 5.4s ease-in-out infinite;transition:filter .25s}
+.ang-pet-img{width:100%;height:auto;display:block;object-fit:contain;filter:drop-shadow(0 30px 38px rgba(0,0,0,.38));transition:filter .25s,transform .25s}
+.ang-pet-svg{display:none!important}
 @keyframes angFloat{0%,100%{transform:translateY(0) rotate(-.4deg)}50%{transform:translateY(-11px) rotate(.5deg)}}
 .ang-head,.ang-body,.ang-wand,.ang-cape,.ang-book{transform-box:fill-box;transform-origin:center}
 .ang-pet[data-action="pet"] .ang-head{animation:angPat .55s ease}
@@ -268,3 +269,12 @@ button{font:inherit}
 .ang-pet[data-action="play"] .xt-wand{animation:angWand .65s ease}
 .ang-pet[data-action="sleep"] .xt-head{animation:angSleep .8s ease}
 .ang-pet[data-action="dress"] .xt-body{animation:angCape .75s ease}
+
+/* v23.0 官方形象：光栅角色图状态与动作 */
+.ang-pet[data-action="pet"] .ang-pet-img{animation:angPat .55s ease}
+.ang-pet[data-action="feed"] .ang-pet-img{animation:angFeed .55s ease}
+.ang-pet[data-action="play"] .ang-pet-img{animation:angWand .65s ease}
+.ang-pet[data-action="sleep"] .ang-pet-img{animation:angSleep .8s ease}
+.ang-pet[data-action="dress"] .ang-pet-img{animation:angCape .75s ease}
+.ang-pet[data-outfit="sakura"] .ang-pet-img{filter:drop-shadow(0 30px 38px rgba(0,0,0,.38)) hue-rotate(-18deg) saturate(1.08) brightness(1.02)}
+.ang-pet[data-outfit="moon"] .ang-pet-img{filter:drop-shadow(0 30px 38px rgba(0,0,0,.38)) hue-rotate(145deg) saturate(.82) brightness(1.04)}

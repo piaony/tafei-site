@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="viewport-fit=cover,width=device-width,initial-scale=1">
-<title>小挞工坊 · 挞飞原创伙伴</title>
-<meta name="description" content="挞飞原创伙伴小挞的独立互动页：摸摸挞壳精灵、喂星糖、换装、玩糖霜收集小游戏。原创角色，不接付费和账号交易。">
+<title>小挞工坊 · 挞飞官方原创伙伴</title>
+<meta name="description" content="挞飞官方原创伙伴小挞的独立互动页：摸摸挞壳精灵、喂星糖、换装、玩糖霜收集小游戏。原创角色，不接付费和账号交易。">
 <meta name="robots" content="noindex,follow">
-<link rel="stylesheet" href="css/xiaota.css?v=1">
+<link rel="preload" as="image" href="assets/spirits/xiaota-v23/main.png">
+<link rel="stylesheet" href="css/xiaota.css?v=2">
 </head>
 <body>
 <div class="ang-starfield" id="angStarField" aria-hidden="true"></div>
@@ -27,7 +28,7 @@
   <div class="ang-copy">
    <p class="ang-kicker">ORIGINAL PARTNER · 挞飞原创</p>
    <h1>小挞工坊</h1>
-   <p>一只在挞飞服务器里醒来的挞壳精灵。摸摸头、喂星糖、换装扮、接糖霜，所有进度只保存在你自己的浏览器里。</p>
+   <p>一位在挞飞服务器里醒来的挞壳精灵女孩。摸摸头、喂星糖、换装扮、接糖霜，所有进度只保存在你自己的浏览器里。</p>
    <div class="ang-badges">
     <span class="ang-badge">本地存档 · 不上传</span>
     <span class="ang-badge">不消耗额度</span>
@@ -44,7 +45,8 @@
   <div class="ang-stage" id="angStage">
    <span class="stage-glow" aria-hidden="true"></span>
    <div class="ang-pet" id="angPet" data-mood="happy" data-outfit="starlight" data-action="">
-<svg class="ang-pet-svg" viewBox="0 0 360 470" role="img" aria-label="挞飞原创挞壳精灵小挞：金色挞壳帽、奶油色身体和青绿色围巾">
+<img class="ang-pet-img" id="angPetImg" src="assets/spirits/xiaota-v23/main.png" alt="挞飞官方原创伙伴小挞飞：金色挞壳帽、奶油白裙和青绿色围巾">
+<svg class="ang-pet-svg" viewBox="0 0 360 470" aria-hidden="true" hidden>
  <defs>
   <radialGradient id="xtGlow" cx="50%" cy="50%" r="50%">
    <stop offset="0" stop-color="#ffd36e" stop-opacity=".55"/><stop offset="1" stop-color="#37d6e0" stop-opacity="0"/>
@@ -236,7 +238,7 @@
 
 <footer class="ang-footer">
  <strong>挞飞 · 小挞工坊</strong>
- <div>小挞是挞飞原创的挞壳精灵：金色挞壳帽、奶油色身体、青绿色围巾和一支星形小杖。没有使用任何现有游戏、动漫或第三方IP素材。页面不提供付费、充值、账号交易或站外引流。</div>
+ <div>小挞是挞飞官方原创的挞壳精灵：金色挞壳帽、奶油白裙、青绿色围巾和星星糖挎包。没有使用任何现有游戏、动漫或第三方IP素材。页面不提供付费、充值、账号交易或站外引流。</div>
  <div class="risk">原创说明：小挞的图形、名字和页面文案由挞飞自行设计；如需对外商用或注册商标，建议再做一次图形检索，确认没有近似冲突。</div>
  <div style="margin-top:10px"><a href="index.html#community">回挞飞社区</a> · <a href="service.html">看看技术服务</a> · <a href="index.html">回首页</a></div>
 </footer>
@@ -244,8 +246,8 @@
 <div class="ang-toast" id="angToast" role="status"></div>
 <div id="angParticles" aria-hidden="true"></div>
 
-<script src="js/xiaota-pet.js?v=1"></script>
-<script src="js/spirit-core.js?v=4"></script>
-<script src="js/spirit-widget.js?v=4"></script>
+<script src="js/xiaota-pet.js?v=2"></script>
+<script src="js/spirit-core.js?v=5"></script>
+<script src="js/spirit-widget.js?v=5"></script>
 </body>
 </html>
