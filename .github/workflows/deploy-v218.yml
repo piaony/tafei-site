@@ -18,9 +18,9 @@ jobs:
           fetch-depth: 0
       - name: Fetch v21.8 package
         run: |
-          curl -L --retry 3 --retry-delay 2 -o /tmp/tafei-v218.zip "https://aka.doubaocdn.com/s/S2Kmio7XDk"
+          curl -L --retry 3 --retry-delay 2 -o /tmp/tafei-v218.zip "https://aka.doubaocdn.com/s/rb6lMDSuO7"
           unzip -o /tmp/tafei-v218.zip -d .
-          ls -lh index.html angela.html css/home.css js/pet-hub.js
+          ls -lh angela.html css/angela.css
       - name: Commit and push
         run: |
           git config user.name "tafei-deploy-bot"
@@ -30,5 +30,5 @@ jobs:
             echo "No changes to commit"
             exit 0
           fi
-          git commit -m "chore: deploy v21.8 magic companion"
+          git commit -m "chore: refine v21.8 mobile tap hint"
           git push origin HEAD:main
