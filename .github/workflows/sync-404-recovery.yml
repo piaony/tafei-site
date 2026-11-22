@@ -1,0 +1,36 @@
+name: sync-404-recovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-404-recovery.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.event.head_commit.message == 'trigger 404 recovery'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download 404 page
+        run: |
+          set -e
+          curl -fsSL --retry 3 'https://aka.doubaocdn.com/s/XDVG2VDLqK' -o 404.html
+          test -s 404.html
+          grep -q 'tafei_admin_spirit_grant' 404.html || true
+          grep -q 'nfPath' 404.html
+      - name: Commit and push
+        run: |
+          set -e
+          git config user.name 'tafei-sync-bot'
+          git config user.email '3659229103@qq.com'
+          git add 404.html
+          if git diff --cached --quiet; then
+            echo 'no changes'
+            exit 0
+          fi
+          git commit -m 'fix: recover common legacy links from 404 page'
+          git push origin HEAD:main
