@@ -175,39 +175,27 @@
       closeModal();
     });
 
-    button.addEventListener('click', async () => {
-      button.disabled = true;
-      button.textContent = '正在提交…';
-      status.textContent = '';
-
+    button.addEventListener('click', () => {
+      // 本地先确认并关闭，保证公告永远不会卡住用户。
       try {
-        const response = await fetch(API + '/tafei_announcement_confirmations', {
-          method: 'POST',
-          headers: {
-            'apikey': KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            announcement_version: announcement.version,
-            visitor_id: getVisitorId(),
-            user_id: null
-          })
-        });
-
-        if (!response.ok) {
-          const detail = await response.text();
-          throw new Error('提交失败：' + response.status + ' ' + detail);
-        }
-
         localStorage.setItem(STORAGE_KEY, String(announcement.version));
-        closeModal();
-      } catch (error) {
-        console.error('公告确认失败：', error);
-        status.textContent = '确认暂时未成功，请检查网络后重试。';
-        button.disabled = false;
-        button.textContent = '重新提交确认';
-      }
+      } catch (e) {}
+      closeModal();
+
+      // 后台确认只是留痕，失败不影响用户继续使用。
+      fetch(API + '/tafei_announcement_confirmations', {
+        method: 'POST',
+        headers: {
+          'apikey': KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          announcement_version: announcement.version,
+          visitor_id: getVisitorId(),
+          user_id: null
+        })
+      }).catch(error => console.warn('公告确认留痕失败：', error));
     });
 
     box.append(title, content, snooze, button, status);
