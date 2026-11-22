@@ -1,0 +1,36 @@
+name: sync-spirit-sql-quote
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-spirit-sql-quote.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.event.head_commit.message == 'trigger sql quote v21.10'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download SQL
+        run: |
+          set -e
+          curl -fsSL --retry 3 'https://aka.doubaocdn.com/s/sZ2AHDouFg' -o supabase/spirit_house.sql
+          test -s supabase/spirit_house.sql
+          grep -q 'tafei_admin_spirit_grant' supabase/spirit_house.sql
+          ! grep -q '\$' supabase/spirit_house.sql
+      - name: Commit and push
+        run: |
+          set -e
+          git config user.name 'tafei-sync-bot'
+          git config user.email '3659229103@qq.com'
+          git add supabase/spirit_house.sql
+          if git diff --cached --quiet; then
+            echo 'no changes'
+            exit 0
+          fi
+          git commit -m 'fix: avoid dollar quote delimiter in spirit SQL'
+          git push origin HEAD:main
