@@ -452,7 +452,7 @@
     base.onerror = function () { baseReady = false; ready(); };
     portrait.onload = function () { portraitReady = true; ready(); };
     portrait.onerror = function () { portraitReady = false; ready(); };
-    base.src = 'assets/spirits/xiaota-v23/memorial-blank.png';
+    base.src = 'assets/spirits/xiaota-v23/memorial-blank.jpg';
     portrait.src = skin.img;
   }
 
