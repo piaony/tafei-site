@@ -98,7 +98,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $tafei$
 declare
   v_uid uuid := auth.uid();
 begin
@@ -127,7 +127,7 @@ begin
 
   return jsonb_build_object('ok', true);
 end;
-$$;
+$tafei$;
 
 -- 4) 花站内额度：解锁角色 / 买皮肤 / 买食物玩具
 create or replace function public.tafei_spirit_buy(p_kind text, p_id text)
@@ -135,7 +135,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $tafei$
 declare
   v_uid uuid := auth.uid();
   v_cfg jsonb;
@@ -255,7 +255,7 @@ begin
 
   return jsonb_build_object('ok', true, 'kind', p_kind, 'id', p_id, 'price', v_price);
 end;
-$$;
+$tafei$;
 
 -- 5) 站长手动发放精灵（不扣额度，直接写 owned_spirits）
 create or replace function public.tafei_admin_spirit_grant(p_uid uuid, p_spirit_id text)
@@ -263,7 +263,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = public, auth
-as $$
+as $tafei$
 declare
   v_cfg jsonb;
   v_owned text[] := '{}'::text[];
@@ -307,7 +307,7 @@ begin
 
   return jsonb_build_object('ok', true, 'already', v_already, 'spirit', p_spirit_id);
 end;
-$$;
+$tafei$;
 
 -- 6) 聊天页读取对方的公开伙伴信息（只暴露伙伴、皮肤、状态，不暴露私信/额度）
 create or replace view public.tafei_spirit_public as
