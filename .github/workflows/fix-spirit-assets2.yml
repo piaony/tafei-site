@@ -1,0 +1,39 @@
+name: fix-spirit-assets2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-spirit-assets2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch missing spirit assets
+        shell: bash
+        run: |
+          set -e
+          curl -kfsSL --connect-timeout 15 --max-time 180 --retry 2 'https://aka.doubaocdn.com/s/Z2tsU7jZrV' -o /tmp/spirit-assets.tgz
+          tar tzf /tmp/spirit-assets.tgz
+          tar xzf /tmp/spirit-assets.tgz -C .
+          test -s js/spirit-widget.js
+          test -s js/spirit-chat.js
+          test -s css/spirit-widget.css
+          test -s css/spirit-chat.css
+          test -s css/partner-panel.css
+          test -s assets/spirits/xiaota.jpg
+      - name: Commit and push
+        shell: bash
+        run: |
+          set -e
+          git config user.name 'tafei-sync-bot'
+          git config user.email '3659229103@qq.com'
+          git add js/spirit-widget.js js/spirit-chat.js js/xiaota-pet.js css/spirit-widget.css css/spirit-chat.css css/partner-panel.css css/xiaota.css assets/spirits/xiaota.jpg assets/spirits/tanluning-uniform.jpg
+          if git diff --cached --quiet; then echo 'no changes'; exit 0; fi
+          git commit -m 'fix: publish missing spirit assets'
+          git push origin HEAD:main
