@@ -1,0 +1,31 @@
+name: publish-bond-v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-bond.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download bond bundle
+        shell: bash
+        run: |
+          set -e
+          curl -k -L --retry 5 --retry-delay 3 'https://aka.doubaocdn.com/s/DCAjTLr1as' -o /tmp/tafei-bond.tgz
+          tar -xzf /tmp/tafei-bond.tgz -C .
+          grep -q 'BOND_LEVELS' js/spirit-core.js
+          grep -q 'renderBond' js/jingling.js
+          grep -q 'bondLevelConfigGroup' admin-center.html
+          git config user.name 'tafei-sync-bot'
+          git config user.email '3659229103@qq.com'
+          git add js/spirit-core.js js/jingling.js js/spirit-widget.js css/spirit-house.css css/spirit-widget.css jingling.html index.html angela.html xiaota.html admin-center.html service.html
+          if git diff --cached --quiet; then echo 'no changes'; exit 0; fi
+          git commit -m 'feat: spirit bond levels and perks'
+          git push origin HEAD:main
