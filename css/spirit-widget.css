@@ -1,0 +1,45 @@
+/* TAFEI SPIRIT WIDGET */
+.spirit-widget{
+  position:fixed;z-index:8800;width:94px;padding:8px 7px 9px;border-radius:17px;
+  border:1px solid rgba(255,211,110,.32);
+  background:radial-gradient(circle at 50% 0,rgba(255,211,110,.13),transparent 48%),rgba(9,15,30,.9);
+  box-shadow:0 14px 36px rgba(0,0,0,.38);backdrop-filter:blur(14px);
+  color:var(--ang-text,#f2f6ff);font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  touch-action:none;user-select:none;transition:left .2s ease,top .2s ease,opacity .18s ease,transform .18s ease;
+  opacity:0;pointer-events:none;transform:translateY(8px)
+}
+.spirit-widget[hidden]{display:none!important}
+.spirit-widget.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.spirit-widget.dragging{transition:none;cursor:grabbing;transform:scale(.96)}
+.spirit-widget .sw-body{display:block;width:100%;border:0;padding:0;background:transparent;cursor:grab}
+.spirit-widget .sw-avatar{position:relative;width:78px;height:78px;margin:1px auto 4px;border-radius:14px;overflow:hidden;background:#0b1224;border:1px solid rgba(255,255,255,.12)}
+.spirit-widget .sw-avatar img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.spirit-widget .sw-name{display:block;text-align:center;font-size:10.5px;line-height:1.2;color:#ffe6ad;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spirit-widget .sw-status{display:flex;justify-content:center;gap:3px;margin-top:4px}
+.spirit-widget .sw-status i{width:5px;height:5px;border-radius:50%;background:#6ee7ff;box-shadow:0 0 6px rgba(110,231,255,.6)}
+.spirit-widget .sw-status i:nth-child(2){background:#ffd36e;box-shadow:0 0 6px rgba(255,211,110,.5)}
+.spirit-widget .sw-status i:nth-child(3){background:#ff8aa6;box-shadow:0 0 6px rgba(255,138,166,.45)}
+.spirit-widget .sw-close{position:absolute;right:-7px;top:-7px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(9,15,30,.94);color:#cfe0ff;font-size:12px;line-height:18px;padding:0;cursor:pointer}
+.spirit-widget .sw-speech{position:absolute;right:calc(100% + 9px);bottom:18px;max-width:180px;padding:6px 8px;border:1px solid rgba(110,231,255,.24);border-radius:9px;background:rgba(9,15,30,.93);color:#e6f0ff;font-size:10.5px;line-height:1.45;white-space:nowrap;opacity:0;transform:translateX(5px);transition:.2s;pointer-events:none}
+.spirit-widget .sw-speech.show{opacity:1;transform:translateX(0)}
+.spirit-widget.flip .sw-speech{right:auto;left:calc(100% + 9px);transform:translateX(-5px)}
+.spirit-widget.flip .sw-speech.show{transform:translateX(0)}
+.spirit-widget.mood-sleep .sw-avatar img{filter:brightness(.8) saturate(.8);transform:translateY(4px)}
+.spirit-widget.mood-sleep .sw-avatar:after{content:"z z";position:absolute;right:7px;top:5px;color:#bdefff;font-size:14px;letter-spacing:2px;animation:swZ 2.4s ease-in-out infinite}
+.spirit-widget.mood-angry .sw-avatar img{animation:swAngry .32s ease-in-out infinite alternate}
+.spirit-widget.mood-hungry .sw-avatar img{animation:swHungry 1.8s ease-in-out infinite}
+.spirit-widget.mood-happy .sw-avatar img{animation:swHappy 2.2s ease-in-out infinite}
+.spirit-widget.mood-sad .sw-avatar img{filter:brightness(.86) saturate(.68)}
+.spirit-widget.action .sw-avatar img{animation:swBounce .44s ease}
+.spirit-widget .sw-drag-line{position:absolute;left:8px;bottom:-1px;width:78px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(110,231,255,.45),transparent);opacity:.35}
+@keyframes swZ{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-5px)}}
+@keyframes swAngry{0%{transform:translateX(-2px) rotate(-1deg)}100%{transform:translateX(2px) rotate(1deg)}}
+@keyframes swHungry{0%,100%{transform:translateY(0)}50%{transform:translateY(3px) scale(1.01)}}
+@keyframes swHappy{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(1.5deg)}}
+@keyframes swBounce{0%,100%{transform:translateY(0) scale(1)}38%{transform:translateY(-10px) scale(1.03)}68%{transform:translateY(2px) scale(.99)}}
+@media(max-width:620px){
+  .spirit-widget{width:78px;padding:6px 5px 7px;border-radius:14px}
+  .spirit-widget .sw-avatar{width:66px;height:66px;border-radius:12px}
+  .spirit-widget .sw-name{font-size:9px}
+  .spirit-widget .sw-speech{max-width:148px;font-size:9.5px;bottom:14px}
+}

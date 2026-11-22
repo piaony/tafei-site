@@ -1,0 +1,20 @@
+/* TAFEI CURRENT PARTNER PANEL BRIDGE */
+.mini-pet .pet-mini-photo{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:20px;border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 38px rgba(0,0,0,.34);background:#0b1224;transition:filter .25s ease}
+.mini-pet.is-photo{width:min(205px,82%)}
+.mini-pet.is-photo .ang-pet-svg{display:none}
+.mini-pet[data-action="pet"] .pet-mini-photo{animation:partnerPat .55s ease}
+.mini-pet[data-action="feed"] .pet-mini-photo{animation:partnerFeed .55s ease}
+.mini-pet[data-action="play"] .pet-mini-photo{animation:partnerPlay .62s ease}
+.mini-pet[data-mood="sleepy"] .pet-mini-photo{filter:brightness(.78) saturate(.78);transform:translateY(3px)}
+.mini-pet[data-mood="angry"] .pet-mini-photo{filter:saturate(1.15) contrast(1.04);animation:partnerAngry .26s ease-in-out infinite alternate}
+.mini-pet[data-mood="hungry"] .pet-mini-photo{animation:partnerHungry 1.8s ease-in-out infinite}
+.mini-pet[data-mood="sad"] .pet-mini-photo{filter:brightness(.86) saturate(.7)}
+@keyframes partnerPat{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-8px) scale(1.02)}}
+@keyframes partnerFeed{0%,100%{transform:translateY(0) rotate(0)}35%{transform:translateY(-4px) rotate(-1.5deg)}70%{transform:translateY(0) rotate(1.5deg)}}
+@keyframes partnerPlay{0%,100%{transform:translateY(0) rotate(0)}32%{transform:translateY(-12px) rotate(2deg)}64%{transform:translateY(1px) rotate(-1deg)}}
+@keyframes partnerAngry{0%{transform:translateX(-2px) rotate(-.5deg)}100%{transform:translateX(2px) rotate(.5deg)}}
+@keyframes partnerHungry{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.pet-mini-stage .pet-mini-photo + .pet-mini-speech{z-index:4}
+.pet-identity .pet-mini-label{letter-spacing:.14em}
+.pet-actions .pet-action span{font-size:14px}
+@media(max-width:620px){.mini-pet.is-photo{width:min(188px,78%)}}
