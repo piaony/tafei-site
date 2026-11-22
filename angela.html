@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="viewport-fit=cover,width=device-width,initial-scale=1">
+<title>安琪拉小屋 · 挞飞魔法伙伴</title>
+<meta name="description" content="挞飞站内同人娱乐小工具：和原创魔法少女安琪拉互动、喂星糖、换装、玩星光小游戏。非官方内容，不提供付费或账号交易。">
+<meta name="robots" content="noindex,follow">
+<link rel="stylesheet" href="css/angela.css?v=2">
+</head>
+<body>
+<div class="ang-starfield" id="angStarField" aria-hidden="true"></div>
+
+<header class="ang-top">
+ <div class="ang-top-inner">
+  <a class="ang-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav aria-label="页面导航">
+   <a href="index.html#community">社区</a>
+   <a href="service.html">技术服务</a>
+   <a class="ang-back" href="index.html">← 回挞飞</a>
+  </nav>
+ </div>
+</header>
+
+<main class="ang-wrap">
+ <section class="ang-hero">
+  <div class="ang-copy">
+   <p class="ang-kicker">MAGIC COMPANION · 同人娱乐</p>
+   <h1>安琪拉小屋</h1>
+   <p>一个放在挞飞旁边的魔法少女小房间。摸摸头、喂星糖、换装扮、接星光，所有进度只保存在你自己的浏览器里。</p>
+   <div class="ang-badges">
+    <span class="ang-badge">本地存档 · 不上传</span>
+    <span class="ang-badge">不消耗额度</span>
+    <span class="ang-badge"><b>非官方</b> 同人娱乐</span>
+    <span class="ang-badge" id="fromTafei" hidden>从挞飞跳转而来</span>
+   </div>
+   <div class="ang-copy-actions">
+    <button class="ang-btn primary" id="angMainPetBtn" type="button">摸摸她 +1 亲密度</button>
+    <button class="ang-btn" id="angSoundToggle" type="button" aria-pressed="true">音效：开</button>
+    <a class="ang-btn ang-mobile-hide" href="index.html#community">回挞飞社区 ↗</a>
+   </div>
+  </div>
+
+  <div class="ang-stage" id="angStage">
+   <span class="stage-glow" aria-hidden="true"></span>
+   <div class="ang-pet" id="angPet" data-mood="happy" data-outfit="starlight" data-action="">
+    <svg class="ang-pet-svg" viewBox="0 0 360 470" role="img" aria-label="原创绘制的魔法少女安琪拉">
+     <defs>
+      <linearGradient id="angBookGrad" x1="0" y1="0" x2="1" y2="1">
+       <stop offset="0" stop-color="#fff9e8"/><stop offset="1" stop-color="#f3d9a4"/>
+      </linearGradient>
+      <radialGradient id="angGlowGrad" cx="50%" cy="50%" r="50%">
+       <stop offset="0" stop-color="#ffe28a" stop-opacity=".9"/><stop offset="1" stop-color="#ffe28a" stop-opacity="0"/>
+      </radialGradient>
+     </defs>
+
+     <ellipse class="ang-shadow" cx="180" cy="438" rx="105" ry="17"/>
+     <circle cx="180" cy="230" r="150" fill="url(#angGlowGrad)" opacity=".22"/>
+
+     <g class="ang-cape" aria-hidden="true">
+      <path class="ang-cape-fill" d="M126 254 C100 300 82 362 72 414 C112 431 248 431 288 414 C278 362 260 300 234 254 Z" opacity=".92"/>
+      <path d="M126 254 C150 270 210 270 234 254 C230 320 218 370 180 392 C142 370 130 320 126 254 Z" fill="#ffffff" opacity=".08"/>
+     </g>
+
+     <g class="ang-hair-back" aria-hidden="true">
+      <ellipse class="ang-hair" cx="180" cy="174" rx="112" ry="101"/>
+      <ellipse class="ang-hair-2" cx="72" cy="262" rx="39" ry="84" transform="rotate(-11 72 262)"/>
+      <ellipse class="ang-hair-2" cx="288" cy="262" rx="39" ry="84" transform="rotate(11 288 262)"/>
+      <ellipse class="ang-hair" cx="61" cy="330" rx="27" ry="38" transform="rotate(-18 61 330)"/>
+      <ellipse class="ang-hair" cx="299" cy="330" rx="27" ry="38" transform="rotate(18 299 330)"/>
+      <path class="ang-hair-2" d="M70 200 C50 235 48 286 58 330 C78 304 86 262 82 218 Z" opacity=".55"/>
+      <path class="ang-hair-2" d="M290 200 C310 235 312 286 302 330 C282 304 274 262 278 218 Z" opacity=".55"/>
+     </g>
+
+     <g class="ang-body">
+      <rect x="168" y="242" width="24" height="18" rx="9" class="ang-skin"/>
+      <path d="M145 256 L215 256 L226 318 L134 318 Z" class="ang-dress"/>
+      <path d="M134 312 L226 312 L258 405 L102 405 Z" class="ang-dress-2"/>
+      <path d="M158 314 L202 314 L212 397 L148 397 Z" fill="#f8f5ff" opacity=".9"/>
+      <path d="M154 314 L206 314 L199 328 L161 328 Z" fill="#ffd36e" opacity=".75"/>
+      <path d="M134 312 L226 312 L220 326 L140 326 Z" fill="#ffffff" opacity=".16"/>
+      <path d="M145 268 C125 286 112 306 104 330" stroke="#ffe5d3" stroke-width="18" stroke-linecap="round" fill="none"/>
+      <path d="M215 268 C235 286 248 306 256 330" stroke="#ffe5d3" stroke-width="18" stroke-linecap="round" fill="none"/>
+      <circle cx="103" cy="331" r="10" class="ang-skin"/>
+      <circle cx="257" cy="331" r="10" class="ang-skin"/>
+      <rect x="153" y="398" width="17" height="38" rx="8" class="ang-skin"/>
+      <rect x="190" y="398" width="17" height="38" rx="8" class="ang-skin"/>
+      <ellipse cx="158" cy="438" rx="22" ry="10" fill="#27365e"/>
+      <ellipse cx="202" cy="438" rx="22" ry="10" fill="#27365e"/>
+      <path d="M150 318 C160 338 200 338 210 318" stroke="#ffd36e" stroke-width="3" fill="none" opacity=".8"/>
+      <circle cx="180" cy="334" r="5" fill="#ffd36e"/>
+     </g>
+
+     <g class="ang-head">
+      <ellipse cx="180" cy="178" rx="92" ry="82" class="ang-skin"/>
+      <path class="ang-hair" d="M88 158 C90 86 128 62 180 62 C232 62 270 86 272 158 C252 124 232 110 211 112 C197 80 163 80 149 112 C128 110 108 124 88 158 Z"/>
+      <path class="ang-hair-2" d="M104 118 C128 88 154 78 180 78 C206 78 232 88 256 118 C236 100 210 94 180 94 C150 94 124 100 104 118 Z" opacity=".62"/>
+      <path d="M110 146 C120 130 134 122 148 124" stroke="#ffd0c3" stroke-width="2" fill="none" opacity=".65"/>
+      <path d="M250 146 C240 130 226 122 212 124" stroke="#ffd0c3" stroke-width="2" fill="none" opacity=".65"/>
+
+      <g class="ang-eyes-open">
+       <ellipse cx="143" cy="190" rx="19" ry="23" class="ang-eye-white"/>
+       <ellipse cx="217" cy="190" rx="19" ry="23" class="ang-eye-white"/>
+       <circle cx="145" cy="192" r="12" class="ang-iris"/>
+       <circle cx="219" cy="192" r="12" class="ang-iris"/>
+       <circle cx="145" cy="192" r="7.5" class="ang-pupil"/>
+       <circle cx="219" cy="192" r="7.5" class="ang-pupil"/>
+       <circle cx="140" cy="186" r="4.1" fill="#fff"/>
+       <circle cx="214" cy="186" r="4.1" fill="#fff"/>
+       <circle cx="150" cy="198" r="2" fill="#ffd9a3"/>
+       <circle cx="224" cy="198" r="2" fill="#ffd9a3"/>
+       <ellipse cx="130" cy="176" rx="9" ry="5" fill="#fff" opacity=".2"/>
+       <ellipse cx="204" cy="176" rx="9" ry="5" fill="#fff" opacity=".2"/>
+      </g>
+      <g class="ang-eyes-sleep">
+       <path d="M127 190 Q143 202 159 190" stroke="#6b3a33" stroke-width="3" fill="none" stroke-linecap="round"/>
+       <path d="M201 190 Q217 202 233 190" stroke="#6b3a33" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </g>
+
+      <path d="M128 166 Q143 160 158 166" stroke="#a95645" stroke-width="2.3" fill="none" stroke-linecap="round" opacity=".7"/>
+      <path d="M202 166 Q217 160 232 166" stroke="#a95645" stroke-width="2.3" fill="none" stroke-linecap="round" opacity=".7"/>
+      <ellipse cx="126" cy="216" rx="15" ry="7" fill="#ff9aa4" opacity=".38"/>
+      <ellipse cx="234" cy="216" rx="15" ry="7" fill="#ff9aa4" opacity=".38"/>
+
+      <g class="ang-mouth-happy"><path d="M169 219 Q180 228 191 219" class="ang-mouth-line"/></g>
+      <g class="ang-mouth-hungry"><ellipse cx="180" cy="223" rx="9" ry="7" fill="#8d4b48"/><ellipse cx="180" cy="226" rx="4" ry="3" fill="#ff9aa4"/></g>
+      <g class="ang-mouth-sleepy"><path d="M172 223 Q180 219 188 223" class="ang-mouth-line"/></g>
+      <g class="ang-mouth-love"><path d="M165 216 Q180 235 195 216 Q180 228 165 216 Z" fill="#ff6e96"/></g>
+
+      <g class="ang-outfit-star">
+       <path d="M245 103 L250 114 L262 116 L253 124 L255 136 L245 130 L235 136 L237 124 L228 116 L240 114 Z" fill="#ffd36e"/>
+       <circle cx="245" cy="118" r="2.4" fill="#fff6d1"/>
+      </g>
+      <path d="M226 254 Q240 266 246 284" stroke="#ffd36e" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
+      <circle cx="247" cy="286" r="5" class="ang-dress-2"/>
+     </g>
+
+     <g class="ang-book" transform="translate(38 300) rotate(-9)">
+      <ellipse cx="53" cy="42" rx="52" ry="34" fill="#ffe28a" opacity=".16"/>
+      <path d="M0 18 Q28 2 54 18 L54 58 Q28 42 0 58 Z" fill="url(#angBookGrad)"/>
+      <path d="M54 18 Q80 2 108 18 L108 58 Q80 42 54 58 Z" fill="url(#angBookGrad)"/>
+      <path d="M0 18 Q28 2 54 18 L54 58 Q28 42 0 58 Z" fill="none" stroke="#b8864a" stroke-width="2"/>
+      <path d="M54 18 Q80 2 108 18 L108 58 Q80 42 54 58 Z" fill="none" stroke="#b8864a" stroke-width="2"/>
+      <path d="M54 18 L54 58" stroke="#b8864a" stroke-width="2"/>
+      <path d="M10 28 Q28 20 44 28 M10 37 Q28 29 44 37 M64 28 Q80 20 98 28 M64 37 Q80 29 98 37" class="ang-book-line"/>
+      <path d="M54 12 L57 20 L65 21 L59 27 L61 35 L54 31 L47 35 L49 27 L43 21 L51 20 Z" fill="#ffd36e" opacity=".9"/>
+     </g>
+
+     <g class="ang-wand" transform="translate(248 286) rotate(16)">
+      <path d="M0 0 L20 38" stroke="#ffd36e" stroke-width="5" stroke-linecap="round"/>
+      <path d="M20 38 L27 54" stroke="#fff1b8" stroke-width="2" stroke-linecap="round"/>
+      <path d="M0 -4 L6 8 L19 10 L10 19 L12 32 L0 25 L-12 32 L-10 19 L-19 10 L-6 8 Z" fill="#ffd36e"/>
+      <circle cx="0" cy="12" r="3" fill="#fff6d1"/>
+     </g>
+
+     <g class="ang-sparkles" opacity=".9">
+      <path d="M302 178 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#ffd36e"/>
+      <path d="M58 188 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5 Z" fill="#8ceaff"/>
+      <circle cx="310" cy="238" r="3.5" fill="#ff9fc2"/>
+      <circle cx="46" cy="270" r="3" fill="#cbb7ff"/>
+     </g>
+    </svg>
+   </div>
+   <div class="ang-speech" id="angSpeech" aria-live="polite">今天也要一起收集星光吗？</div>
+   <button class="ang-tap-hint" id="angTapHint" type="button">摸摸她</button>
+  </div>
+ </section>
+
+ <section class="ang-grid">
+  <aside class="ang-card ang-panel" aria-labelledby="angStatusTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">STATUS</p><h2 id="angStatusTitle">今天的状态</h2><p>互动会改变心情、饱食度和体力。</p></div>
+    <span class="ang-badge"><b id="angCoins">0</b> 星币</span>
+   </div>
+   <div class="ang-bond">
+    <div><b id="angBond">0</b><small>亲密度</small></div>
+    <div class="ang-bond-level">当前等级<strong id="angBondLevel">Lv.1</strong><span id="angBondNext">再互动 5 次升级</span></div>
+   </div>
+   <div class="ang-meters">
+    <div>
+     <div class="ang-meter-head"><span>心情</span><b id="angMoodVal">80</b></div>
+     <div class="ang-meter mood"><i id="angMoodBar"></i></div>
+    </div>
+    <div>
+     <div class="ang-meter-head"><span>饱食度</span><b id="angHungerVal">70</b></div>
+     <div class="ang-meter hunger"><i id="angHungerBar"></i></div>
+    </div>
+    <div>
+     <div class="ang-meter-head"><span>体力</span><b id="angEnergyVal">80</b></div>
+     <div class="ang-meter energy"><i id="angEnergyBar"></i></div>
+    </div>
+   </div>
+   <div class="ang-daily">
+    <div class="ang-daily-head"><b>今日互动</b><span><i id="angDailyDone">0</i>/3</span></div>
+    <div class="ang-daily-list">
+     <div class="ang-daily-item" data-daily="pet"><span class="tick">○</span><span>摸摸她一次</span></div>
+     <div class="ang-daily-item" data-daily="feed"><span class="tick">○</span><span>喂一颗星糖</span></div>
+     <div class="ang-daily-item" data-daily="play"><span class="tick">○</span><span>陪她玩一次</span></div>
+    </div>
+   </div>
+  </aside>
+
+  <section class="ang-card ang-panel" aria-labelledby="angActionTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">INTERACT</p><h2 id="angActionTitle">和她做点什么</h2><p>每次互动都会保存在本地；明天会自动刷新每日互动。</p></div>
+   </div>
+   <div class="ang-actions">
+    <button class="ang-action" type="button" data-act="pet"><span class="act-ico">✦</span><strong>摸摸头</strong><span>亲密度 +1，心情 +4</span></button>
+    <button class="ang-action" type="button" data-act="feed"><span class="act-ico">🍬</span><strong>喂星糖</strong><span>饱食度 +16，亲密度 +1</span></button>
+    <button class="ang-action" type="button" data-act="play"><span class="act-ico">★</span><strong>陪她玩</strong><span>心情 +8，体力 -8，亲密度 +2</span></button>
+    <button class="ang-action" type="button" data-act="sleep"><span class="act-ico">☾</span><strong>哄她睡</strong><span>体力 +28，心情 +4</span></button>
+    <button class="ang-action game" type="button" data-act="game"><span class="act-ico">✧</span><span class="act-copy"><strong>星光小游戏</strong><span>20 秒内点中星光，结算成星币</span></span></button>
+   </div>
+   <div class="ang-notes" style="margin-top:16px">
+    <div class="ang-note"><span class="note-ico">◈</span><span><b>所有数据只在本机。</b>换浏览器、清缓存会回到初始状态，不会影响挞飞账号和额度。</span></div>
+    <div class="ang-note"><span class="note-ico">◇</span><span><b>不接入付费。</b>这里没有充值、交易或账号买卖，纯粹是站内娱乐小工具。</span></div>
+   </div>
+  </section>
+ </section>
+
+ <section class="ang-card ang-panel" style="margin-top:20px" aria-labelledby="angGameTitle">
+  <div class="ang-panel-head">
+   <div><p class="ang-mini-label">MINI GAME</p><h2 id="angGameTitle">星光收集</h2><p>20 秒内点中飘动的星光，每颗 1 星币。星币只用于本页展示，不兑换额度。</p></div>
+   <span class="ang-badge"><b id="angGameScore">0</b> 分</span>
+  </div>
+  <div class="ang-game-box" id="angGameBox">
+   <div class="ang-game-field" id="angGameField"></div>
+   <div class="ang-game-hud"><span>得分 <b id="angGameScoreHud">0</b></span><span>剩余 <b id="angGameTime">20</b>s</span></div>
+   <div class="ang-game-start" id="angGameStart">
+    <strong>准备好了吗？</strong>
+    <p>星光会随机出现，点得越快分越高。结束后星币自动存入小屋。</p>
+    <button class="ang-btn gold" id="angGameStartBtn" type="button">开始收集</button>
+   </div>
+  </div>
+ </section>
+
+ <section class="ang-lower">
+  <section class="ang-card ang-panel" aria-labelledby="angWardrobeTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">WARDROBE</p><h2 id="angWardrobeTitle">换装间</h2><p>亲密度到 3 和 6 时自动解锁新配色。</p></div>
+    <span class="ang-badge">亲密度 <b id="angBondSmall">0</b></span>
+   </div>
+   <div class="ang-wardrobe">
+    <button class="ang-outfit active" type="button" data-outfit="starlight" data-need="0" style="--sw1:#ff7a59;--sw2:#57c6da"><span class="swatch"></span><strong>星辉原色</strong><small>默认装扮</small></button>
+    <button class="ang-outfit locked" type="button" data-outfit="sakura" data-need="3" style="--sw1:#ff9ab5;--sw2:#ffd0df"><span class="swatch"></span><strong>樱花魔法</strong><small>亲密度 3 解锁</small><span class="lock">🔒</span></button>
+    <button class="ang-outfit locked" type="button" data-outfit="moon" data-need="6" style="--sw1:#d8e4ff;--sw2:#8ce8ff"><span class="swatch"></span><strong>月光星轨</strong><small>亲密度 6 解锁</small><span class="lock">🔒</span></button>
+   </div>
+   <p class="ang-wardrobe-hint" id="angWardrobeHint">先摸摸她，把亲密度养到 3 就能换第一套。</p>
+  </section>
+
+  <section class="ang-card ang-panel" aria-labelledby="angAboutTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">ABOUT</p><h2 id="angAboutTitle">小屋说明</h2><p>为什么它放在挞飞旁边，而不是塞进主站首页。</p></div>
+   </div>
+   <div class="ang-notes">
+    <div class="ang-note"><span class="note-ico">01</span><span><b>独立页面，风险隔离。</b>这是同人娱乐页，不接入挞飞的付费服务、额度账户或站长后台。</span></div>
+    <div class="ang-note"><span class="note-ico">02</span><span><b>主站有原创伙伴。</b>主站社区里的「伙伴」是原创小挞，和这里是两个角色、两套存档。</span></div>
+    <div class="ang-note"><span class="note-ico">03</span><span><b>随时可以下线。</b>如果内容或版权有争议，只需移除本页入口，不影响机型库、商城、预约和后台。</span></div>
+   </div>
+  </section>
+ </section>
+</main>
+
+<footer class="ang-footer">
+ <strong>挞飞 · 魔法伙伴实验页</strong>
+ <div>本页是挞飞站内同人娱乐小工具，角色形象为原创绘制的魔法少女，灵感来自魔法少女题材；非《王者荣耀》官方内容，与腾讯无关。页面不提供付费、充值、账号交易或站外引流。</div>
+ <div class="risk">版权提示：如果你希望把它用于商业投放或 1:1 复刻官方角色，请先自行取得授权；当前版本按“同人娱乐、独立下线”的方式控制风险。</div>
+ <div style="margin-top:10px"><a href="index.html#community">回挞飞社区</a> · <a href="service.html">看看技术服务</a> · <a href="index.html">回首页</a></div>
+</footer>
+
+<div class="ang-toast" id="angToast" role="status"></div>
+<div id="angParticles" aria-hidden="true"></div>
+
+<script src="js/angela-pet.js?v=2"></script>
+</body>
+</html>

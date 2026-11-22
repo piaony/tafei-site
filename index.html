@@ -12,7 +12,7 @@
 <meta name="og:url" content="https://piaony.github.io/tafei-site/">
 <link rel="canonical" href="https://piaony.github.io/tafei-site/">
 <title>挞飞 TAFEI · 手机权限与高中资料</title>
-<link rel="stylesheet" href="css/home.css?v=10">
+<link rel="stylesheet" href="css/home.css?v=13">
 <link rel="stylesheet" href="css/tafei-ui.css">
 <link rel="stylesheet" href="css/tafei-features.css">
 <link rel="stylesheet" href="css/tafei-inbox.css?v=4">
@@ -34,6 +34,7 @@
  <symbol id="ico-user" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
  <symbol id="ico-plus" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
  <symbol id="ico-coin" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linejoin="round"><path d="m12 3 8 5-8 5-8-5z"/><path d="M4 13l8 5 8-5"/><path d="M4 17l8 5 8-5"/></symbol>
+ <symbol id="ico-wand" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 15 9"/><path d="m15 4 1.2 3.1L19 8.3l-2.8 1.2L15 12.5l-1.2-3L11 8.3l2.8-1.2z"/><path d="m19 14 .7 1.8L22 16.5l-2.3.7L19 19l-.7-1.8-2.3-.7 2.3-.7z"/></symbol>
 </svg>
 
 <canvas id="stars"></canvas>
@@ -53,7 +54,7 @@
 </div></header>
 <main class="wrap">
 <section class="hero" id="home">
-<div><div class="status"><i class="dot"></i> CONTENT STATION · 21.7</div><div class="eyebrow" style="margin-top:22px">手机权限 / 高中资料</div>
+<div><div class="status"><i class="dot"></i> CONTENT STATION · 21.8</div><div class="eyebrow" style="margin-top:22px">手机权限 / 高中资料</div>
 <h1 style="font-size:clamp(36px,5.2vw,66px)">把折腾和学习，<br><span class="gradient">写成可分享的笔记。</span></h1>
 <p>挞飞是站长直营的手机服务站：机型库、刷机与性能优化资料免费看；遇到具体问题，直接在站内私信找站长。报价、交付和售后都由站长本人负责，站内流程有记录，出了问题能找到人。</p>
 <div class="actions">
@@ -159,6 +160,7 @@
 <section id="changelog" class="reveal">
  <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
  <div class="panel" style="padding:24px;display:grid;gap:18px">
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.8</span><span class="af-date">2026-11-22</span></div><p>新增「魔法伙伴」：社区个人栏加入主站原创小挞，支持摸摸、喂星糖、陪玩和本地养成；同时上线独立同人娱乐页「安琪拉小屋」，可换装、玩星光小游戏，带完整版权与风险隔离说明。宠物数据只保存在浏览器，不消耗额度、不写后台。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.7</span><span class="af-date">2026-11-22</span></div><p>社区新增「签到与任务」：每日签到得 1 额度，连续 3 / 7 / 30 天额外奖励；逛 3 台机型、发布求助、回复他人求助、完善头像昵称都能领额度。所有奖励只进站内额度账户，支持额度流水，不能提现或转让。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.6</span><span class="af-date">2026-11-22</span></div><p>站长后台与站点彻底打通：后台改用站点顶栏和手机底部导航，共用站长账号登录态；概览数字可点击直达预约、账号、商品、举报和私信模块，待处理数量和未读私信直接标在标签上；个人中心新增站长专属后台入口，普通账号看不到。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.5</span><span class="af-date">2026-11-22</span></div><p>机型库从 145 台扩到 425 台：新增苹果、三星、vivo、iQOO、一加、摩托罗拉、中兴、努比亚、红魔、魅族、索尼、华硕、谷歌、Nothing、联想、Infinix、TECNO 等品牌，覆盖 24 个品牌 2024–2026 主流机型；规格目录统一标注公开规格库来源与“未实测”，品牌筛选随数据自动扩展。</p></div>
@@ -206,6 +208,9 @@
     <strong id="communityBalance">—</strong>
    </div>
    <div class="community-me-actions">
+    <button class="community-pet-btn" id="communityPetBtn" type="button" aria-expanded="false" aria-controls="petPanel">
+     <svg class="tf-ico" aria-hidden="true"><use href="#ico-wand"></use></svg><span>伙伴</span><b class="pet-badge" id="petBadge" hidden>1</b>
+    </button>
     <button class="community-task-btn" id="communityTaskBtn" type="button" aria-expanded="false" aria-controls="taskCenter">
      <svg class="tf-ico" aria-hidden="true"><use href="#ico-coin"></use></svg><span>任务</span><b class="task-badge" id="taskBadge" hidden>0</b>
     </button>
@@ -264,6 +269,112 @@
   <p class="task-msg" id="taskMsg" role="status"></p>
  </section>
 
+ <section class="pet-panel" id="petPanel" hidden aria-labelledby="petPanelTitle">
+  <div class="pet-panel-head">
+   <div>
+    <p class="pet-kicker">MAGIC COMPANION</p>
+    <h3 id="petPanelTitle">魔法伙伴 · 小挞</h3>
+    <p>主站的原创小魔女。摸摸她、喂星糖、陪她玩，进度只存在你的浏览器里；不会消耗额度，也不会写进账号数据。</p>
+   </div>
+   <button class="pet-panel-close" id="petPanelClose" type="button">收起 ↑</button>
+  </div>
+
+  <div class="pet-panel-body">
+   <div class="pet-mini-stage" id="petMiniStage">
+    <div class="mini-pet" id="miniPet" data-mood="happy" data-outfit="starlight" aria-label="原创魔法少女小挞">
+     <svg viewBox="0 0 220 240" role="img" aria-hidden="true">
+      <ellipse class="mini-shadow" cx="110" cy="226" rx="58" ry="9"/>
+      <g class="mini-hair-back">
+       <ellipse class="mini-hair" cx="110" cy="92" rx="61" ry="56"/>
+       <ellipse class="mini-hair2" cx="49" cy="136" rx="22" ry="43" transform="rotate(-10 49 136)"/>
+       <ellipse class="mini-hair2" cx="171" cy="136" rx="22" ry="43" transform="rotate(10 171 136)"/>
+      </g>
+      <g class="mini-body">
+       <path class="mini-cape" d="M78 145 C62 170 58 198 56 218 C88 228 132 228 164 218 C162 198 158 170 142 145 Z"/>
+       <path class="mini-dress" d="M84 145 L136 145 L145 186 L75 186 Z"/>
+       <path class="mini-dress2" d="M75 182 L145 182 L158 220 L62 220 Z"/>
+       <path d="M96 145 L124 145 L124 182 L96 182 Z" fill="#f7f2ff" opacity=".88"/>
+       <path d="M96 145 L108 145 L108 178 L96 178 Z" fill="#ffd36e" opacity=".45"/>
+       <path d="M86 150 C74 164 68 178 65 193" stroke="#ffe5d3" stroke-width="11" stroke-linecap="round" fill="none"/>
+       <path d="M134 150 C146 164 152 178 155 193" stroke="#ffe5d3" stroke-width="11" stroke-linecap="round" fill="none"/>
+       <circle cx="65" cy="194" r="6" class="mini-skin"/>
+       <circle cx="155" cy="194" r="6" class="mini-skin"/>
+       <rect x="95" y="218" width="10" height="18" rx="5" class="mini-skin"/>
+       <rect x="115" y="218" width="10" height="18" rx="5" class="mini-skin"/>
+      </g>
+      <g class="mini-head">
+       <ellipse class="mini-skin" cx="110" cy="100" rx="44" ry="40"/>
+       <path class="mini-hair" d="M67 92 C68 48 86 34 110 34 C134 34 152 48 153 92 C142 74 130 68 119 69 C112 53 100 53 92 69 C81 68 75 74 67 92 Z"/>
+       <path d="M83 84 C93 73 101 70 111 71" stroke="#ffd0c3" stroke-width="1.4" fill="none" opacity=".6"/>
+       <path d="M137 84 C127 73 119 70 109 71" stroke="#ffd0c3" stroke-width="1.4" fill="none" opacity=".6"/>
+       <g class="mini-eyes-open">
+        <ellipse cx="93" cy="105" rx="10" ry="13" fill="#fffdf8"/>
+        <ellipse cx="127" cy="105" rx="10" ry="13" fill="#fffdf8"/>
+        <circle cx="94" cy="106" r="6" fill="#c96c2d"/>
+        <circle cx="128" cy="106" r="6" fill="#c96c2d"/>
+        <circle cx="94" cy="106" r="3.8" fill="#3b1f1a"/>
+        <circle cx="128" cy="106" r="3.8" fill="#3b1f1a"/>
+        <circle cx="91.5" cy="102.5" r="2" fill="#fff"/>
+        <circle cx="125.5" cy="102.5" r="2" fill="#fff"/>
+        <ellipse cx="84" cy="113" rx="7" ry="3.5" fill="#ff9aa4" opacity=".36"/>
+        <ellipse cx="136" cy="113" rx="7" ry="3.5" fill="#ff9aa4" opacity=".36"/>
+       </g>
+       <g class="mini-eyes-sleep">
+        <path d="M84 105 Q93 112 102 105" stroke="#6b3a33" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M118 105 Q127 112 136 105" stroke="#6b3a33" stroke-width="2" fill="none" stroke-linecap="round"/>
+       </g>
+       <g class="mini-mouth-happy"><path d="M103 122 Q110 128 117 122" stroke="#8d4b48" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>
+       <g class="mini-mouth-hungry"><ellipse cx="110" cy="125" rx="5" ry="4" fill="#8d4b48"/></g>
+       <path d="M156 64 L159 71 L166 72 L160 77 L161 84 L156 80 L151 84 L152 77 L146 72 L153 71 Z" fill="#ffd36e"/>
+      </g>
+      <g class="mini-book" transform="translate(8 168) rotate(-8)">
+       <path d="M0 8 Q15 1 30 8 L30 34 Q15 27 0 34 Z" fill="#fff6dd"/>
+       <path d="M30 8 Q45 1 60 8 L60 34 Q45 27 30 34 Z" fill="#fff6dd"/>
+       <path d="M0 8 Q15 1 30 8 L30 34 Q15 27 0 34 Z M30 8 Q45 1 60 8 L60 34 Q45 27 30 34 Z" stroke="#b8864a" stroke-width="1.3" fill="none"/>
+       <path d="M30 8 L30 34" stroke="#b8864a" stroke-width="1.3"/>
+       <path d="M30 5 L32 10 L37 11 L33 15 L34 20 L30 18 L26 20 L27 15 L23 11 L28 10 Z" fill="#ffd36e"/>
+      </g>
+      <g class="mini-wand" transform="translate(164 172) rotate(18)">
+       <path d="M0 0 L12 24" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/>
+       <path d="M0 -3 L4 5 L12 6 L6 12 L7 20 L0 16 L-7 20 L-6 12 L-12 6 L-4 5 Z" fill="#ffd36e"/>
+      </g>
+     </svg>
+    </div>
+    <div class="pet-mini-speech" id="petMiniSpeech" aria-live="polite">今天也来看看小挞吗？</div>
+    <div class="pet-mini-sparkles" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>
+   </div>
+
+   <div class="pet-panel-side">
+    <div class="pet-identity">
+     <div>
+      <p class="pet-mini-label">ORIGINAL PARTNER</p>
+      <h4>小挞</h4>
+      <p>主站原创角色，和安琪拉小屋不是同一套形象。</p>
+     </div>
+     <span class="pet-level" id="petLevel">Lv.1</span>
+    </div>
+    <div class="pet-bond-card">
+     <div><b id="petBond">0</b><small>亲密度</small></div>
+     <p id="petBondHint">再互动 5 次升级</p>
+    </div>
+    <div class="pet-meters">
+     <div><span>心情 <b id="petMoodVal">80</b></span><i><em id="petMoodBar"></em></i></div>
+     <div><span>饱食 <b id="petHungerVal">70</b></span><i><em id="petHungerBar"></em></i></div>
+     <div><span>体力 <b id="petEnergyVal">80</b></span><i><em id="petEnergyBar"></em></i></div>
+    </div>
+    <div class="pet-actions">
+     <button class="pet-action" id="petPetBtn" type="button"><span>✦</span><b>摸摸</b></button>
+     <button class="pet-action" id="petFeedBtn" type="button"><span>🍬</span><b>喂星糖</b></button>
+     <button class="pet-action" id="petPlayBtn" type="button"><span>★</span><b>陪她玩</b></button>
+    </div>
+    <a class="pet-link" href="angela.html?from=tafei" target="_blank" rel="noopener">
+     <span><b>去安琪拉小屋 ↗</b><small>独立同人娱乐页 · 不接账号和额度</small></span><i>打开</i>
+    </a>
+    <p class="pet-status" id="petStatus" role="status"></p>
+   </div>
+  </div>
+ </section>
+
  <section id="info" class="community-block">
  <div class="section-head">
   <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
@@ -316,6 +427,9 @@
   </div>
   <a class="community-admin-entry" id="adminEntry" href="admin-center.html" rel="nofollow" hidden>
    <span><b>站长后台</b><small>预约、私信、商品、公告和举报集中处理</small></span><i>进入 ↗</i>
+  </a>
+  <a class="community-admin-entry pet-entry" href="angela.html?from=tafei" target="_blank" rel="noopener">
+   <span><b>魔法伙伴 · 安琪拉小屋</b><small>同人娱乐页，独立存档，不接账号和额度</small></span><i>打开 ↗</i>
   </a>
   <section id="profile" class="community-block community-profile-panel">
  <div class="section-head">
@@ -589,7 +703,7 @@
    <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
   </div>
  </div>
- <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>21.7</strong>当前网站版本</div></div>
+ <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>21.8</strong>当前网站版本</div></div>
 </section>
 <section id="guestbook" class="reveal">
  <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
@@ -608,10 +722,11 @@
 <section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
 
 </main>
-<footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界<div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
+<footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界 · <a href="angela.html?from=tafei" target="_blank" rel="noopener">魔法伙伴</a><div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
 <script src="js/home-core.js?v=7"></script>
 <script src="js/task-center.js?v=1"></script>
+<script src="js/pet-hub.js?v=3"></script>
 
 <nav class="mobile-bottom-nav" aria-label="手机底部导航">
  <a href="#home" data-view="home" class="active"><svg class="tf-ico" aria-hidden="true"><use href="#ico-home"></use></svg><span>首页</span></a>
