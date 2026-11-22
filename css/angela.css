@@ -215,7 +215,7 @@ button{font:inherit}
   .ang-stage{min-height:440px;border-radius:24px}
   .ang-pet{width:72%}
   .ang-speech{bottom:16px;font-size:12.5px}
-  .ang-tap-hint{right:12px;bottom:12px}
+  .ang-tap-hint{display:none}
   .ang-panel{padding:17px}
   .ang-actions{grid-template-columns:1fr}
   .ang-action.game{grid-column:auto}
