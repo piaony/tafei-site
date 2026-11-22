@@ -1,0 +1,34 @@
+name: Deploy Angela canon redesign
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-angela-canon.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Fetch redesign package
+        run: |
+          curl -L --retry 3 --retry-delay 2 -o /tmp/tafei-angela.zip "https://aka.doubaocdn.com/s/ZVRNV3j8VS"
+          unzip -o /tmp/tafei-angela.zip -d .
+          ls -lh angela.html css/angela.css js/angela-pet.js
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-deploy-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add angela.html css/angela.css js/angela-pet.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "feat: redraw Angela closer to canon look"
+          git push origin HEAD:main
