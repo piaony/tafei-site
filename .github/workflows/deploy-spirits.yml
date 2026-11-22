@@ -1,0 +1,23 @@
+name: Deploy spirit house
+on: push
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and unpack bundle
+        run: |
+          curl -L --fail --retry 3 --retry-delay 2 -o /tmp/tafei-spirits.zip "https://aka.doubaocdn.com/s/CrP4eJ6vCx"
+          rm -rf /tmp/tafei-spirits && mkdir -p /tmp/tafei-spirits
+          unzip -o /tmp/tafei-spirits.zip -d /tmp/tafei-spirits
+          find /tmp/tafei-spirits -maxdepth 3 -type f | sort
+      - name: Copy and commit
+        run: |
+          cp -r /tmp/tafei-spirits/* .
+          git config user.name "tafei-deploy"
+          git config user.email "tafei-deploy@users.noreply.github.com"
+          git add index.html angela.html admin-center.html jingling.html css/jingling.css js/jingling.js assets/spirits/angela.jpg assets/spirits/xi-shi.jpg assets/spirits/yao.jpg assets/spirits/gardener.jpg assets/spirits/doctor.jpg assets/spirits/mechanic.jpg assets/spirits/perfumer.jpg assets/spirits/tanluning-daily.jpg assets/spirits/tanluning.jpg
+          git commit -m "feat: add spirit house with 8 Q characters (v21.9)"
+          git push
