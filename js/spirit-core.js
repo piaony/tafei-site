@@ -103,6 +103,7 @@
       img: 'assets/spirits/xiaota-v23/main.png',
       avatar: 'assets/spirits/xiaota-v23/avatar.png',
       widget: 'assets/spirits/xiaota-v23/widget-128.png',
+      actionDir: 'assets/spirits/xiaota-v23/',
       accent: '#ffd36e',
       line: '金色挞壳是帽子，奶油白是裙摆，青绿色的风是围巾。',
       quote: '你回来啦。今天也要一起收集糖霜吗？',
@@ -119,7 +120,11 @@
     },
     {
       id: 'angela', name: '安琪拉', game: '王者荣耀 · 暗夜萝莉', tag: '王者荣耀',
-      img: 'assets/spirits/angela.jpg', accent: '#ff9fc2',
+      img: 'assets/spirits/angela-v23/main.png',
+      avatar: 'assets/spirits/angela-v23/avatar.png',
+      widget: 'assets/spirits/angela-v23/widget-128.png',
+      actionDir: 'assets/spirits/angela-v23/',
+      accent: '#ff9fc2',
       line: '知识，就是力量。',
       quote: '书页翻到哪一页，魔法就从哪一页开始。',
       defaultSkin: 'angela-default',
@@ -176,9 +181,9 @@
   ];
 
   var SKINS = [
-    { id: 'xiaota-default', spirit: 'xiaota', name: '奶油挞壳', img: 'assets/spirits/xiaota-v23/main.png', avatar: 'assets/spirits/xiaota-v23/avatar.png', widget: 'assets/spirits/xiaota-v23/widget-128.png', price: 0, default: true, quote: '挞壳是帽子，奶油是裙摆，围巾是青绿色的风。' },
+    { id: 'xiaota-default', spirit: 'xiaota', name: '奶油挞壳', img: 'assets/spirits/xiaota-v23/main.png', avatar: 'assets/spirits/xiaota-v23/avatar.png', widget: 'assets/spirits/xiaota-v23/widget-128.png', actionDir: 'assets/spirits/xiaota-v23/', price: 0, default: true, quote: '挞壳是帽子，奶油是裙摆，围巾是青绿色的风。' },
     { id: 'xi-shi-default', spirit: 'xi-shi', name: '幻纱之灵', img: 'assets/spirits/xi-shi.jpg', price: 0, default: true },
-    { id: 'angela-default', spirit: 'angela', name: '暗夜萝莉', img: 'assets/spirits/angela.jpg', price: 0, default: true },
+    { id: 'angela-default', spirit: 'angela', name: '暗夜萝莉', img: 'assets/spirits/angela-v23/main.png', avatar: 'assets/spirits/angela-v23/avatar.png', widget: 'assets/spirits/angela-v23/widget-128.png', actionDir: 'assets/spirits/angela-v23/', price: 0, default: true },
     { id: 'yao-default', spirit: 'yao', name: '鹿灵守心', img: 'assets/spirits/yao.jpg', price: 0, default: true },
     { id: 'gardener-default', spirit: 'gardener', name: '园丁日常', img: 'assets/spirits/gardener.jpg', price: 0, default: true },
     { id: 'doctor-default', spirit: 'doctor', name: '医生日常', img: 'assets/spirits/doctor.jpg', price: 0, default: true },

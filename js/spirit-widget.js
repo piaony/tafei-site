@@ -180,11 +180,11 @@
     if (nextBase) baseArt = nextBase;
     if (!baseArt) return;
     var spirit = core.current();
+    var skin = core.skin();
     var file = ART_FILES[action];
     var src = baseArt;
-    if (spirit && spirit.id === 'xiaota' && file) {
-      src = baseArt.replace(/[^/]+$/, file);
-    }
+    var actionDir = (skin && skin.actionDir) || (spirit && spirit.actionDir) || '';
+    if (actionDir && file) src = actionDir + file;
     if (art.getAttribute('src') !== src) {
       art.dataset.fallback = '0';
       art.src = src;
