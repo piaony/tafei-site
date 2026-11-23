@@ -6,12 +6,14 @@
   var core = window.TafeiSpirits;
   if (!core) return;
 
-  var CSS_HREF = 'css/spirit-widget.css?v=6';
+  var CSS_HREF = 'css/spirit-widget.css?v=7';
   var ART_FILES = {
     idle: 'action-idle.png',
     pet: 'action-pet.png',
     jump: 'action-upgrade.png',
     sit: 'action-sit.png',
+    hit: 'action-hit.png',
+    dizzy: 'action-dizzy.png',
     happy: 'emotion-happy.png',
     shy: 'emotion-shy.png',
     sad: 'emotion-sad.png',
@@ -25,17 +27,27 @@
   var art = null;
   var speech = null;
   var zzz = null;
+  var fx = null;
+  var aura = null;
   var drag = null;
   var moved = false;
   var pressTimer = 0;
+  var holdTimer = 0;
   var speechTimer = 0;
   var actionTimer = 0;
   var autoTimer = 0;
   var idleTimer = 0;
+  var sparkTimer = 0;
+  var alertTimer = 0;
   var started = false;
   var mode = 'auto';
   var currentAction = '';
   var baseArt = '';
+  var lastFxAction = '';
+  var lastSpark = 0;
+  var BUMP_LINES = ['好疼……撞到啦。', '呜，头有点晕。', '小心一点呀。', '角角撞疼了。'];
+  var DIZZY_LINES = ['慢一点……好晕呀。', '要转晕啦……', '飞太快了，星星都在转。', '等我缓一缓。'];
+  var DROP_LINES = ['这里不错，我记住啦。', '就放这里吧。', '呼……稳稳落地。'];
 
   function ensureCss() {
     if (!document.querySelector('link[data-spirit-widget]')) {
@@ -58,6 +70,8 @@
       art = root.querySelector('#swArtImg');
       speech = root.querySelector('#swSpeech');
       zzz = root.querySelector('.sw-zzz');
+      fx = root.querySelector('#swFx');
+      aura = root.querySelector('.sw-aura');
       if (!art) {
         root.remove();
         root = null;
@@ -75,16 +89,20 @@
     root.hidden = true;
     root.setAttribute('aria-live', 'polite');
     root.innerHTML = '<span class="sw-speech" id="swSpeech" aria-hidden="true"></span>'
+      + '<span class="sw-aura" aria-hidden="true"></span>'
       + '<button type="button" class="sw-body" aria-label="和当前伙伴互动">'
       + '<span class="sw-shadow" aria-hidden="true"></span>'
       + '<span class="sw-zzz" aria-hidden="true">z z</span>'
       + '<img class="sw-art" id="swArtImg" alt="">'
-      + '</button>';
+      + '</button>'
+      + '<span class="sw-fx" id="swFx" aria-hidden="true"></span>';
     document.body.appendChild(root);
     body = root.querySelector('.sw-body');
     art = root.querySelector('#swArtImg');
     speech = root.querySelector('#swSpeech');
     zzz = root.querySelector('.sw-zzz');
+    fx = root.querySelector('#swFx');
+    aura = root.querySelector('.sw-aura');
     root.dataset.bound = '1';
     bind();
   }
@@ -124,6 +142,13 @@
   function setPixel(left, top) {
     if (!root) return;
     var d = dims();
+    var rawLeft = left;
+    var rawTop = top;
+    var hitWall = left < 8 || left > d.maxLeft || top < d.minTop || top > d.maxTop;
+    if (drag && drag.active) {
+      if (rawTop <= d.minTop + 10) drag.topEdge = true;
+      if (hitWall && !drag.dizzy && (drag.speed || 0) > 0.4) bumpWall();
+    }
     left = Math.max(8, Math.min(d.maxLeft, left));
     top = Math.max(d.minTop, Math.min(d.maxTop, top));
     root.style.left = Math.round(left) + 'px';
@@ -168,6 +193,86 @@
     speechTimer = setTimeout(function () { speech.classList.remove('show'); }, hold || 2600);
   }
 
+  function pick(list) {
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  function burst(kind, count, origin) {
+    if (!root || !widgetOn()) return;
+    var box = root.getBoundingClientRect();
+    var x = origin && Number.isFinite(origin.x) ? origin.x : box.left + box.width / 2;
+    var y = origin && Number.isFinite(origin.y) ? origin.y : box.top + box.height * 0.42;
+    count = count || 4;
+    for (var i = 0; i < count; i++) {
+      var item = document.createElement('span');
+      item.className = 'sw-effect sw-fx-' + kind;
+      item.setAttribute('aria-hidden', 'true');
+      if (kind === 'bump' || kind === 'land') {
+        item.textContent = '';
+      } else {
+        item.textContent = kind === 'heart' ? '♥' : (kind === 'drop' ? '•' : (kind === 'cloud' ? '☁' : (kind === 'z' ? 'z' : (kind === 'step' ? '✧' : '✦'))));
+      }
+      item.style.left = Math.round(x + (kind === 'trail' ? (Math.random() * 18 - 9) : 0)) + 'px';
+      item.style.top = Math.round(y + (kind === 'trail' ? (Math.random() * 12 - 6) : 0)) + 'px';
+      item.style.setProperty('--dx', Math.round(Math.random() * 64 - 32) + 'px');
+      item.style.setProperty('--dy', Math.round(-18 - Math.random() * 42) + 'px');
+      item.style.setProperty('--rot', Math.round(Math.random() * 100 - 50) + 'deg');
+      item.style.animationDelay = Math.round(i * 35) + 'ms';
+      document.body.appendChild(item);
+      (function (node) {
+        setTimeout(function () { if (node.parentNode) node.remove(); }, 1050);
+      })(item);
+    }
+  }
+
+  function showAlert(text, hold) {
+    if (!root) return;
+    root.classList.add('sw-alert');
+    say(text, hold || 1600);
+    clearTimeout(alertTimer);
+    alertTimer = setTimeout(function () {
+      if (root) root.classList.remove('sw-alert');
+    }, (hold || 1600) + 180);
+  }
+
+  function bumpWall() {
+    if (!root || !drag) return;
+    var now = Date.now();
+    if (now - (drag.lastBump || 0) < 850) return;
+    drag.lastBump = now;
+    drag.bumped = true;
+    setAction('hit', 700);
+    showAlert(pick(BUMP_LINES), 1550);
+    root.classList.add('sw-bump');
+    burst('bump', 1);
+    setTimeout(function () { if (root) root.classList.remove('sw-bump'); }, 620);
+  }
+
+  function dizzyNow() {
+    if (!root || !drag || drag.dizzy) return;
+    drag.dizzy = true;
+    setAction('dizzy', 0);
+    showAlert(pick(DIZZY_LINES), 2200);
+    burst('dizzy', 6);
+  }
+
+  function footSpark() {
+    if (!root) return;
+    var box = root.getBoundingClientRect();
+    burst('step', 1, { x: box.left + box.width / 2, y: box.top + box.height - 8 });
+  }
+
+  function startSparkles() {
+    clearInterval(sparkTimer);
+    sparkTimer = setInterval(function () {
+      if (!root || !widgetOn() || drag || document.hidden) return;
+      if (Date.now() - lastSpark < 2200) return;
+      lastSpark = Date.now();
+      var box = root.getBoundingClientRect();
+      burst('idle', 2, { x: box.left + box.width * 0.5, y: box.top + box.height * 0.82 });
+    }, 2600);
+  }
+
   function baseImage() {
     var skin = core.skin();
     if (!skin) return '';
@@ -181,6 +286,10 @@
     if (!baseArt) return;
     var spirit = core.current();
     var skin = core.skin();
+    var extraActions = (skin && skin.extraActions) || (spirit && spirit.extraActions) || [];
+    if (action === 'hit' && extraActions.indexOf('hit') === -1) action = 'pet';
+    if (action === 'dizzy' && extraActions.indexOf('dizzy') === -1) action = 'sad';
+    var previousAction = currentAction;
     var file = ART_FILES[action];
     var src = baseArt;
     var actionDir = (skin && skin.actionDir) || (spirit && spirit.actionDir) || '';
@@ -191,10 +300,18 @@
     }
     art.dataset.action = action;
     currentAction = action;
-    root.classList.remove('act-idle', 'act-pet', 'act-jump', 'act-sit', 'act-happy', 'act-shy', 'act-sad', 'act-angry', 'act-sleepy', 'act-surprised', 'act-look');
+    root.classList.remove('act-idle', 'act-pet', 'act-jump', 'act-sit', 'act-hit', 'act-dizzy', 'act-happy', 'act-shy', 'act-sad', 'act-angry', 'act-sleepy', 'act-surprised', 'act-look');
     root.classList.add('act-' + action);
     if (root.classList.contains('is-alpha')) root.classList.remove('is-photo');
     else root.classList.add('is-photo');
+    if (previousAction !== action) {
+      if (action === 'pet' || action === 'happy' || action === 'shy') burst('heart', action === 'happy' ? 3 : 2);
+      else if (action === 'jump') burst('star', 5);
+      else if (action === 'sleepy') burst('z', 2);
+      else if (action === 'sad') burst('drop', 2);
+      else if (action === 'angry') burst('cloud', 2);
+      else if (action === 'surprised') burst('star', 3);
+    }
     clearTimeout(actionTimer);
     if (hold) actionTimer = setTimeout(function () { setAction('idle'); }, hold);
   }
@@ -271,6 +388,7 @@
     root.classList.add('walking', 'act-walk');
     setAction('idle');
     setPixel(left, top);
+    setTimeout(footSpark, 80);
     setTimeout(function () {
       if (!root) return;
       root.classList.remove('walking', 'act-walk');
@@ -317,13 +435,28 @@
         id: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        lastT: Date.now(),
         left: parseFloat(root.style.left || '0'),
         top: parseFloat(root.style.top || '0'),
         dim: d,
-        active: false
+        active: false,
+        speed: 0,
+        fastMs: 0,
+        lastTrail: 0,
+        lastBump: 0,
+        topEdge: false,
+        dizzy: false,
+        bumped: false,
+        longPress: false,
+        lastAngle: null,
+        angleAccum: 0,
+        dance: false
       };
       moved = false;
       clearTimeout(pressTimer);
+      clearTimeout(holdTimer);
       pressTimer = setTimeout(function () {
         if (!drag || moved) return;
         drag.active = true;
@@ -332,6 +465,15 @@
         mode = 'manual';
         clearTimeout(idleTimer);
       }, 160);
+      holdTimer = setTimeout(function () {
+        if (!drag || moved) return;
+        drag.longPress = true;
+        setAction('shy', 2200);
+        showAlert('唔…要带我去哪里呀。', 1800);
+        burst('heart', 2);
+        mode = 'manual';
+        clearTimeout(idleTimer);
+      }, 2000);
       try { body.setPointerCapture(event.pointerId); } catch (error) {}
     });
 
@@ -341,6 +483,7 @@
       var dy = event.clientY - drag.startY;
       if (!drag.active && Math.abs(dx) + Math.abs(dy) > 6) {
         clearTimeout(pressTimer);
+        clearTimeout(holdTimer);
         drag.active = true;
         moved = true;
         root.classList.add('dragging');
@@ -350,15 +493,54 @@
       }
       if (!drag.active) return;
       event.preventDefault();
+      var now = Date.now();
+      var stepX = event.clientX - drag.lastX;
+      var stepY = event.clientY - drag.lastY;
+      var dt = Math.max(1, Math.min(90, now - drag.lastT));
+      var speed = Math.sqrt(stepX * stepX + stepY * stepY) / dt;
+      drag.speed = speed;
+      if (speed > 0.4) drag.fastMs = Math.min(1800, drag.fastMs + dt);
+      else drag.fastMs = Math.max(0, drag.fastMs - dt * 0.7);
+      if (drag.fastMs > 900) dizzyNow();
+      if (speed > 0.3 && now - drag.lastTrail > 55) {
+        drag.lastTrail = now;
+        var trailBox = root.getBoundingClientRect();
+        burst('trail', 1, {
+          x: trailBox.left + trailBox.width * 0.5,
+          y: trailBox.top + trailBox.height * 0.56
+        });
+      }
+      var angle = Math.atan2(event.clientY - drag.startY, event.clientX - drag.startX);
+      if (drag.lastAngle == null) drag.lastAngle = angle;
+      var angleDelta = angle - drag.lastAngle;
+      while (angleDelta > Math.PI) angleDelta -= Math.PI * 2;
+      while (angleDelta < -Math.PI) angleDelta += Math.PI * 2;
+      if (Math.sqrt(dx * dx + dy * dy) > 40) drag.angleAccum = (drag.angleAccum || 0) + Math.abs(angleDelta);
+      drag.lastAngle = angle;
+      if (drag.angleAccum > Math.PI * 5 && !drag.dance) {
+        drag.dance = true;
+        setAction('jump', 1800);
+        showAlert('转圈圈~', 1600);
+        burst('star', 7);
+      }
+      drag.lastT = now;
+      drag.lastX = event.clientX;
+      drag.lastY = event.clientY;
+      root.style.setProperty('--sw-tilt', Math.max(-6, Math.min(6, stepX * 0.15)) + 'deg');
       setPixel(drag.left + dx, drag.top + dy);
     });
 
     function release(event) {
       if (!drag || drag.id !== event.pointerId) return;
       clearTimeout(pressTimer);
+      clearTimeout(holdTimer);
       var wasActive = drag.active;
       var wasMoved = moved;
-      root.classList.remove('dragging');
+      var wasDizzy = drag.dizzy;
+      var wasTop = drag.topEdge;
+      var wasLong = drag.longPress;
+      root.classList.remove('dragging', 'sw-bump');
+      root.style.removeProperty('--sw-tilt');
       document.body.classList.remove('sw-dragging');
       if (window.getSelection) { try { window.getSelection().removeAllRanges(); } catch (error) {} }
       try { body.releasePointerCapture(event.pointerId); } catch (error) {}
@@ -368,8 +550,27 @@
         return;
       }
       savePosition();
-      setAction('happy', 1200);
-      say(wasMoved ? '这里不错，我记住啦。' : '就放这里吧。', 2000);
+      clearTimeout(alertTimer);
+      root.classList.remove('sw-alert');
+      if (wasDizzy) {
+        setAction('dizzy', 0);
+        showAlert('松手啦……让我缓一缓。', 1800);
+        setTimeout(function () {
+          if (root && !drag && currentAction === 'dizzy') setAction('happy', 1000);
+        }, 1650);
+      } else if (wasTop) {
+        setAction('happy', 1800);
+        showAlert('哇……看得好远呀。', 1800);
+      } else if (wasLong) {
+        setAction('shy', 2000);
+        showAlert('唔……要带我去哪里呀。', 1800);
+      } else {
+        setAction('happy', 1200);
+        root.classList.add('sw-land');
+        burst('land', 1);
+        say(pick(DROP_LINES), 2000);
+        setTimeout(function () { if (root) root.classList.remove('sw-land'); }, 560);
+      }
       mode = 'manual';
       armAuto();
     }
@@ -448,12 +649,13 @@
     if (!document.body) return;
     build();
     render();
+    startSparkles();
     art.addEventListener('error', function () {
       if (art.dataset.fallback === '1') return;
       art.dataset.fallback = '1';
       if (baseArt) art.src = baseArt;
       currentAction = 'idle';
-      root.classList.remove('act-pet', 'act-jump', 'act-sit', 'act-happy', 'act-shy', 'act-sad', 'act-angry', 'act-sleepy', 'act-surprised');
+      root.classList.remove('act-pet', 'act-jump', 'act-sit', 'act-hit', 'act-dizzy', 'act-happy', 'act-shy', 'act-sad', 'act-angry', 'act-sleepy', 'act-surprised');
       root.classList.add('act-idle');
     });
   }
