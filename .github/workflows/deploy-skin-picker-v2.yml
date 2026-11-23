@@ -1,0 +1,27 @@
+name: Deploy skin picker v2
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-skin-picker-v2.yml'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch package
+        run: |
+          curl -L --fail --retry 3 -o /tmp/tafei-skin-picker-v2.tar.gz "https://aka.doubaocdn.com/s/RFRkD9gr7t"
+      - name: Apply package
+        run: |
+          tar -xzf /tmp/tafei-skin-picker-v2.tar.gz -C .
+          git config user.name "tafei-bot"
+          git config user.email "tafei-bot@users.noreply.github.com"
+          git add jingling.html js/jingling.js css/spirit-house.css
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "feat: polish skin picker layout"
+          git push origin HEAD:main
