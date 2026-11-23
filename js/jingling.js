@@ -137,7 +137,7 @@
       if (bond) bond.textContent = '—';
       var emptyBondLevel = $('partnerBondLevel');
       if (emptyBondLevel) emptyBondLevel.textContent = '—';
-      if (toggle) { toggle.hidden = true; toggle.disabled = true; }
+      if (toggle) { toggle.hidden = false; toggle.disabled = false; toggle.textContent = '先领一个伙伴'; }
       renderPartnerSkins(null, null);
       renderWallet();
       return;
@@ -163,7 +163,7 @@
       avatarBox.classList.toggle('has-bond-frame', bondInfo.level >= 7);
     }
     if (toggle) {
-      toggle.textContent = core.state().widget.on ? '收起全站伙伴' : '放出全站伙伴';
+      toggle.textContent = core.state().widget.on ? '收起全站挂件' : '放出全站挂件';
       toggle.classList.toggle('on', !!core.state().widget.on);
     }
     renderPartnerSkins(spirit, skin);
@@ -775,8 +775,13 @@
   $('shopTopup')?.addEventListener('click', addDemoCredits);
 
   $('widgetToggle')?.addEventListener('click', function () {
+    if (!core.current()) {
+      toast('先在图鉴里免费领取小挞飞，再放出全站挂件。');
+      document.getElementById('spiritGrid')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+      return;
+    }
     core.setWidget(!core.state().widget.on);
-    toast(core.state().widget.on ? '全站伙伴已出现：她会自己走动，也能拖到任意位置。' : '全站伙伴已收起。');
+    toast(core.state().widget.on ? '全站挂件已出现：电脑端会出现在页面右下角，也能拖到任意位置。' : '全站挂件已收起。');
     renderAll();
   });
 

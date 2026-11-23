@@ -10,6 +10,7 @@
   var speech = $('petMiniSpeech');
   var status = $('petStatus');
   var badge = $('petBadge');
+  var widgetBtn = $('petWidgetToggle');
   var actionTimer = 0;
   var speechTimer = 0;
   var lastAction = 0;
@@ -42,6 +43,14 @@
     speechTimer = setTimeout(function () { speech.textContent = idleLine(); }, hold || 3000);
   }
   function setStatus(text) { if (status) status.textContent = text || ''; }
+  function syncWidgetButton() {
+    if (!widgetBtn) return;
+    var has = !!core.current();
+    var on = has && !!(core.state() && core.state().widget && core.state().widget.on);
+    widgetBtn.textContent = has ? (on ? '收起全站挂件' : '放出全站挂件') : '先领一个伙伴';
+    widgetBtn.classList.toggle('on', on);
+    widgetBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
   function actionAnim(name) {
     if (!mini) return;
     mini.dataset.action = name;
@@ -73,6 +82,7 @@
       if (speech) speech.textContent = idleLine();
       if (badge) { badge.hidden = true; badge.textContent = ''; }
       if (button) button.setAttribute('aria-expanded', panel && !panel.hidden ? 'true' : 'false');
+      syncWidgetButton();
       return;
     }
     mini.classList.remove('is-empty');
@@ -127,6 +137,7 @@
     setBar('petEnergyBar', sleep);
     if (badge) { badge.hidden = true; badge.textContent = ''; }
     if (button) button.setAttribute('aria-expanded', panel && !panel.hidden ? 'true' : 'false');
+    syncWidgetButton();
     if (!panel || panel.hidden) return;
     if (speech) speech.textContent = idleLine();
   }
@@ -245,6 +256,19 @@
     if ($('petPetBtn')) $('petPetBtn').addEventListener('click', doPet);
     if ($('petFeedBtn')) $('petFeedBtn').addEventListener('click', doFeed);
     if ($('petPlayBtn')) $('petPlayBtn').addEventListener('click', doPlay);
+    if (widgetBtn) {
+      widgetBtn.addEventListener('click', function () {
+        if (!core.current()) {
+          window.open('jingling.html?from=tafei', '_blank', 'noopener');
+          setStatus('先去精灵小屋领一个伙伴，再放出全站挂件。');
+          return;
+        }
+        core.setWidget(!(core.state().widget && core.state().widget.on));
+        syncWidgetButton();
+        setStatus(core.state().widget.on ? '全站挂件已放出：电脑端会出现在页面右下角，可以拖动。' : '全站挂件已收起。');
+        render();
+      });
+    }
     if (mini) mini.addEventListener('click', doPet);
     core.subscribe(render);
   }
@@ -255,9 +279,5 @@
     if (speech) speech.textContent = idleLine();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  init();
 })();

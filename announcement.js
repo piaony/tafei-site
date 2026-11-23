@@ -93,6 +93,10 @@
       #tafei-announcement-status {
         margin: 12px 0 0; color: #ffc978; font-size: 13px; min-height: 18px;
       }
+      #tafei-announcement-note {
+        margin: 6px 0 10px; color: var(--tf-muted, #9aaccb); font-size: 12px;
+        line-height: 1.6;
+      }
       @media (prefers-reduced-motion: reduce) {
         #tafei-announcement-mask, #tafei-announcement-box { animation: none }
       }
@@ -133,6 +137,10 @@
     const status = document.createElement('p');
     status.id = 'tafei-announcement-status';
     status.setAttribute('aria-live', 'polite');
+
+    const note = document.createElement('p');
+    note.id = 'tafei-announcement-note';
+    note.textContent = '点右上角 ✕ 可先关闭；下次打开还会提醒。';
 
     const previousOverflow = document.body.style.overflow;
     const lastFocus = document.activeElement;
@@ -198,9 +206,28 @@
       }).catch(error => console.warn('公告确认留痕失败：', error));
     });
 
-    box.append(title, content, snooze, button, status);
+    box.append(title, note, content, snooze, button, status);
     mask.appendChild(box);
     document.body.appendChild(mask);
+    mask.addEventListener('click', function (event) {
+      if (event.target !== mask) return;
+      // 点遮罩即关闭公告，并把这一下点击交给下面的页面，
+      // 避免用户以为“伙伴/按钮点不开”。
+      var x = event.clientX;
+      var y = event.clientY;
+      closeModal();
+      var target = null;
+      try { target = document.elementFromPoint(x, y); } catch (error) {}
+      if (target && target !== document.body) {
+        target.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+          view: window
+        }));
+      }
+    });
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', onKeydown);
     // 聚焦到弹窗本身，避免一进来就出现按钮焦点环

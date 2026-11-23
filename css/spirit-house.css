@@ -29,6 +29,7 @@
 .partner-actions button,.partner-actions a{min-height:34px;padding:0 11px;border-radius:10px;border:1px solid rgba(255,211,110,.3);background:rgba(255,211,110,.08);color:var(--sp-gold);cursor:pointer;font-size:12px;display:inline-flex;align-items:center}
 .partner-actions button:hover,.partner-actions a:hover{background:rgba(255,211,110,.16)}
 .partner-actions .ghost{border-color:var(--sp-line);background:rgba(255,255,255,.04);color:var(--ang-muted)}
+.partner-widget-tip{margin:7px 0 0;color:rgba(110,231,255,.62);font-size:10.5px;line-height:1.5}
 .partner-wallet{margin-left:auto;padding:5px 9px;border-radius:8px;border:1px solid rgba(110,231,255,.24);color:var(--sp-cyan);font-size:11px;background:rgba(110,231,255,.06)}
 .partner-wallet.demo{border-color:rgba(255,211,110,.3);color:var(--sp-gold);background:rgba(255,211,110,.06)}
 .partner-skins{margin-top:13px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.09)}
@@ -67,7 +68,7 @@
 .partner-dock.is-empty .partner-status{display:none}
 .partner-dock.is-empty .partner-copy h2{color:var(--ang-muted)}
 .partner-dock.is-empty .partner-line{max-width:560px}
-.partner-dock.is-empty .partner-actions #widgetToggle{display:none}
+.partner-dock.is-empty .partner-actions #widgetToggle{display:inline-flex}
 
 .partner-status{padding:14px 16px;border:1px solid var(--sp-line);border-radius:18px;background:rgba(8,14,28,.64);display:flex;flex-direction:column;gap:10px}
 .partner-status .status-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
