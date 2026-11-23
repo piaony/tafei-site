@@ -91,6 +91,7 @@ body.sw-dragging,body.sw-dragging *{user-select:none!important;-webkit-user-sele
 
 /* 动作状态 */
 .spirit-widget.act-happy .sw-art{animation:swBounce .5s ease 2}
+.spirit-widget.act-pet .sw-art{animation:swPet .46s ease 2}
 .spirit-widget.act-jump .sw-art{animation:swJump .6s ease 2}
 .spirit-widget.act-hit .sw-art{animation:swHit .58s ease 1}
 .spirit-widget.act-dizzy .sw-art{animation:swDizzy .9s ease-in-out infinite;transform-origin:50% 70%}
@@ -104,11 +105,13 @@ body.sw-dragging,body.sw-dragging *{user-select:none!important;-webkit-user-sele
 .spirit-widget.mood-low .sw-art{filter:brightness(.9) saturate(.78)}
 .spirit-widget.mood-angry .sw-art{filter:brightness(.92) saturate(.9)}
 .spirit-widget.sw-land .sw-art{animation:swLand .55s ease}
+.spirit-widget.sw-changing .sw-art{opacity:.62;transition:opacity .12s ease}
 
 @keyframes swBreathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.012)}}
 @keyframes swBreathePhoto{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes swWalk{0%{transform:translateY(0) rotate(-2deg)}100%{transform:translateY(-4px) rotate(2deg)}}
 @keyframes swBounce{0%,100%{transform:translateY(0) scale(1)}36%{transform:translateY(-9px) scale(1.03)}68%{transform:translateY(1px) scale(.99)}}
+@keyframes swPet{0%,100%{transform:translateY(0) rotate(0)}40%{transform:translateY(-5px) rotate(-2deg)}70%{transform:translateY(0) rotate(2deg)}}
 @keyframes swJump{0%,100%{transform:translateY(0) scale(1)}32%{transform:translateY(-18px) scale(1.04)}62%{transform:translateY(-8px) scale(.98)}}
 @keyframes swHit{0%{transform:translate(0,0) rotate(0)}18%{transform:translate(-5px,-3px) rotate(-5deg)}38%{transform:translate(5px,1px) rotate(5deg)}62%{transform:translate(-3px,0) rotate(-3deg)}100%{transform:translate(0,0) rotate(0)}}
 @keyframes swDizzy{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-3px)}}

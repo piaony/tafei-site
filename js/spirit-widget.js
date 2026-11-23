@@ -6,7 +6,7 @@
   var core = window.TafeiSpirits;
   if (!core) return;
 
-  var CSS_HREF = 'css/spirit-widget.css?v=8';
+  var CSS_HREF = 'css/spirit-widget.css?v=9';
   var ART_FILES = {
     idle: 'action-idle.png',
     pet: 'action-pet.png',
@@ -48,7 +48,23 @@
   var BUMP_LINES = ['好疼……撞到啦。', '呜，撞得好疼。', '角角撞疼了。', '慢一点，好疼呀。'];
   var DIZZY_LINES = ['慢一点……好晕呀。', '要转晕啦……', '飞太快了，星星都在转。', '等我缓一缓。'];
   var DROP_LINES = ['这里不错，我记住啦。', '就放这里吧。', '呼……稳稳落地。'];
+  var HAPPY_LINES = ['今天也很开心。', '和你在一起，森林都亮了。', '再摸摸头吧。', '我把星光分你一点。'];
+  var HAPPY_FILES = {
+    yao: ['emotion-happy.png', 'emotion-happy-2.png', 'emotion-happy-3.png', 'emotion-happy-4.png']
+  };
+  var ACTION_PRIORITY = {idle: 0, walk: 0, sit: 1, look: 1, sleepy: 1, sad: 1, angry: 1, happy: 2, pet: 2, shy: 2, surprised: 3, jump: 3, hit: 4, dizzy: 4};
+  var ACTION_HOLD = {pet: 800, happy: 1200, shy: 1600, surprised: 1200, jump: 1400, hit: 700, dizzy: 1200};
   var AUTO_WALK_MS = 5000;
+  var YAO_IDLE_SIT_MS = 10000;
+  var YAO_IDLE_SLEEP_MS = 20000;
+  var clickStreak = 0;
+  var lastClickAt = 0;
+  var lastActiveAt = Date.now();
+  var restStage = '';
+  var restTimer = 0;
+  var actionPriority = 0;
+  var actionLockUntil = 0;
+  var happyPreloaded = false;
 
   function ensureCss() {
     if (!document.querySelector('link[data-spirit-widget]')) {
@@ -62,6 +78,59 @@
 
   function widgetOn() {
     return !!(core.state() && core.state().widget && core.state().widget.on);
+  }
+
+  function spiritId() {
+    var spirit = core.current();
+    return spirit && spirit.id;
+  }
+
+  function isYao() {
+    return spiritId() === 'yao';
+  }
+
+  function happyFileFor(id) {
+    var files = HAPPY_FILES[id];
+    return files && files.length ? files[Math.floor(Math.random() * files.length)] : '';
+  }
+
+  function preloadHappyFiles() {
+    if (happyPreloaded || !isYao()) return;
+    var skin = core.skin();
+    if (!skin) return;
+    happyPreloaded = true;
+    var dir = skin.actionDir || 'assets/spirits/yao-v23/';
+    HAPPY_FILES.yao.forEach(function (file) {
+      var img = new Image();
+      img.src = dir + file;
+    });
+  }
+
+  function resetRest() {
+    lastActiveAt = Date.now();
+    if (!restStage) return;
+    restStage = '';
+    if (currentAction === 'sit' || currentAction === 'sleepy') {
+      setAction('idle', 0, {force: true});
+    }
+  }
+
+  function restCheck() {
+    if (!isYao() || !root || !widgetOn() || document.hidden || drag) return;
+    var elapsed = Date.now() - lastActiveAt;
+    var stage = elapsed >= YAO_IDLE_SLEEP_MS ? 'sleepy' : (elapsed >= YAO_IDLE_SIT_MS ? 'sit' : '');
+    if (!stage || stage === restStage) return;
+    restStage = stage;
+    mode = 'manual';
+    clearTimeout(idleTimer);
+    clearTimeout(autoTimer);
+    if (stage === 'sit') {
+      setAction('sit', 0, {force: true});
+      say('坐一会儿，等你回来。', 2400);
+    } else {
+      setAction('sleepy', 0, {force: true});
+      say('我先眯一会儿……', 2400);
+    }
   }
 
   function build() {
@@ -281,11 +350,16 @@
     return skin.img || skin.avatar || skin.widget || '';
   }
 
-  function setAction(action, hold) {
-    if (!root || !art) return;
+  function setAction(action, hold, opts) {
+    if (!root || !art) return false;
+    var force = !!(opts && opts.force);
+    var nextPriority = ACTION_PRIORITY[action] || 0;
+    var now = Date.now();
+    if (!force && now < actionLockUntil && nextPriority < actionPriority) return false;
+    if (!force && action === currentAction && now < actionLockUntil && action !== 'idle') return false;
     var nextBase = baseImage();
     if (nextBase) baseArt = nextBase;
-    if (!baseArt) return;
+    if (!baseArt) return false;
     var spirit = core.current();
     var skin = core.skin();
     var extraActions = (skin && skin.extraActions) || (spirit && spirit.extraActions) || [];
@@ -293,6 +367,7 @@
     if (action === 'dizzy' && extraActions.indexOf('dizzy') === -1) action = 'sad';
     var previousAction = currentAction;
     var file = ART_FILES[action];
+    if (action === 'happy' && opts && opts.file) file = opts.file;
     var src = baseArt;
     var actionDir = (skin && skin.actionDir) || (spirit && spirit.actionDir) || '';
     if (actionDir && file) src = actionDir + file;
@@ -302,11 +377,13 @@
     }
     art.dataset.action = action;
     currentAction = action;
+    actionPriority = nextPriority;
+    actionLockUntil = now + (hold == null ? (ACTION_HOLD[action] || 900) : Math.max(hold, 700));
     root.classList.remove('act-idle', 'act-pet', 'act-jump', 'act-sit', 'act-hit', 'act-dizzy', 'act-happy', 'act-shy', 'act-sad', 'act-angry', 'act-sleepy', 'act-surprised', 'act-look');
     root.classList.add('act-' + action);
-    if (root.classList.contains('is-alpha')) root.classList.remove('is-photo');
-    else root.classList.add('is-photo');
     if (previousAction !== action) {
+      root.classList.add('sw-changing');
+      setTimeout(function () { if (root) root.classList.remove('sw-changing'); }, 220);
       if (action === 'pet' || action === 'happy' || action === 'shy') burst('heart', action === 'happy' ? 3 : 2);
       else if (action === 'jump') burst('star', 5);
       else if (action === 'sleepy') burst('z', 2);
@@ -314,8 +391,11 @@
       else if (action === 'angry') burst('cloud', 2);
       else if (action === 'surprised') burst('star', 3);
     }
+    if (root.classList.contains('is-alpha')) root.classList.remove('is-photo');
+    else root.classList.add('is-photo');
     clearTimeout(actionTimer);
-    if (hold) actionTimer = setTimeout(function () { setAction('idle'); }, hold);
+    if (hold) actionTimer = setTimeout(function () { setAction('idle', 0, {force: true}); }, hold + 30);
+    return true;
   }
 
   function armAuto(delay) {
@@ -335,6 +415,11 @@
 
   function idleBeat() {
     if (!widgetOn() || mode !== 'auto' || drag || document.hidden) return;
+    if (restStage) return;
+    if (isYao() && Date.now() - lastActiveAt >= YAO_IDLE_SIT_MS) {
+      restCheck();
+      return;
+    }
     var condition = core.condition();
     if (condition === 'sleep') {
       setAction('sleepy', 3600);
@@ -362,7 +447,7 @@
   }
 
   function walkStep() {
-    if (!root || !widgetOn() || mode !== 'auto' || drag || document.hidden) return;
+    if (!root || !widgetOn() || mode !== 'auto' || drag || document.hidden || restStage) return;
     var d = dims();
     var left = parseFloat(root.style.left || '0');
     var top = parseFloat(root.style.top || '0');
@@ -386,17 +471,39 @@
 
   function interact() {
     if (!root || !widgetOn()) return;
+    resetRest();
     var spirit = core.current();
     if (!spirit) { say('还没有伙伴，先去精灵小屋领取一个。'); return; }
+    var now = Date.now();
+    clickStreak = now - lastClickAt < 1100 ? clickStreak + 1 : 1;
+    lastClickAt = now;
     var beforeLevel = core.bondInfo(spirit.id).level;
     core.pet(spirit.id);
     var afterInfo = core.bondInfo(spirit.id);
     var leveled = afterInfo.level > beforeLevel;
-    setAction('pet', 720);
+    if (clickStreak >= 3) {
+      clickStreak = 0;
+      setAction('surprised', 1200, {force: true});
+      say('你点太快啦……等我一下。', 1800);
+      burst('star', 4);
+      mode = 'manual';
+      armAuto();
+      return;
+    }
+    if (clickStreak === 2 && !leveled) {
+      var happyFile = happyFileFor(spirit.id);
+      setAction('happy', 1600, {force: true, file: happyFile});
+      say(happyFile ? pick(HAPPY_LINES) : '被你摸到了，亲密度 +1。', 1900);
+      mode = 'manual';
+      armAuto();
+      return;
+    }
+    setAction('pet', 800, {force: true});
     setTimeout(function () {
-      if (!root || !widgetOn()) return;
-      setAction(leveled ? 'jump' : 'happy', leveled ? 2600 : 1800);
-    }, 720);
+      if (!root || !widgetOn() || drag || currentAction !== 'pet') return;
+      if (leveled) setAction('jump', 2600, {force: true});
+      else setAction('idle', 0, {force: true});
+    }, 760);
     var condition = core.condition();
     if (leveled) say('亲密度升到 Lv.' + afterInfo.level + '，' + afterInfo.title + '。', 3400);
     else if (condition === 'sleep') say('唔……再睡一小会儿。');
@@ -405,13 +512,13 @@
     else say('被你摸到了，亲密度 +1。');
     mode = 'manual';
     armAuto();
-    clearTimeout(actionTimer);
   }
 
   function bind() {
     body.addEventListener('pointerdown', function (event) {
       if (event.button != null && event.button !== 0) return;
       if (!widgetOn()) return;
+      resetRest();
       event.preventDefault();
       document.body.classList.add('sw-dragging');
       root.classList.remove('walking', 'act-walk');
@@ -538,20 +645,21 @@
       savePosition();
       clearTimeout(alertTimer);
       root.classList.remove('sw-alert');
+      var happyFile = happyFileFor(spiritId());
       if (wasDizzy) {
-        setAction('dizzy', 0);
+        setAction('dizzy', 0, {force: true});
         showAlert('松手啦……让我缓一缓。', 1800);
         setTimeout(function () {
-          if (root && !drag && currentAction === 'dizzy') setAction('happy', 1000);
+          if (root && !drag && currentAction === 'dizzy') setAction('happy', 1000, {force: true, file: happyFile});
         }, 1650);
       } else if (wasTop) {
-        setAction('happy', 1800);
+        setAction('happy', 1800, {force: true, file: happyFile});
         showAlert('哇……看得好远呀。', 1800);
       } else if (wasLong) {
-        setAction('shy', 2000);
+        setAction('shy', 2000, {force: true});
         showAlert('唔……要带我去哪里呀。', 1800);
       } else {
-        setAction('happy', 1200);
+        setAction('idle', 0, {force: true});
         root.classList.add('sw-land');
         burst('land', 1);
         say(pick(DROP_LINES), 2000);
@@ -564,10 +672,14 @@
     body.addEventListener('pointerup', release);
     body.addEventListener('pointercancel', release);
     body.addEventListener('contextmenu', function (event) { event.preventDefault(); });
+    window.addEventListener('scroll', resetRest, {passive: true});
+    window.addEventListener('wheel', resetRest, {passive: true});
+    window.addEventListener('keydown', resetRest);
     window.addEventListener('blur', function () { document.body.classList.remove('sw-dragging'); });
     body.addEventListener('dblclick', function (event) {
       event.preventDefault();
-      window.location.href = 'jingling.html';
+      setAction('surprised', 700, {force: true});
+      setTimeout(function () { window.location.href = 'jingling.html'; }, 320);
     });
 
     window.addEventListener('resize', function () {
@@ -582,6 +694,7 @@
         clearTimeout(idleTimer);
         clearTimeout(autoTimer);
       } else if (widgetOn()) {
+        if (restStage) return;
         mode = 'auto';
         scheduleIdle(AUTO_WALK_MS);
       }
@@ -617,6 +730,7 @@
     }
     if (!currentAction) setAction('idle');
     root.hidden = false;
+    preloadHappyFiles();
     applyPosition();
     requestAnimationFrame(function () {
       if (!root) return;
@@ -636,6 +750,8 @@
     build();
     render();
     startSparkles();
+    clearInterval(restTimer);
+    restTimer = setInterval(restCheck, 1000);
     art.addEventListener('error', function () {
       if (art.dataset.fallback === '1') return;
       art.dataset.fallback = '1';
