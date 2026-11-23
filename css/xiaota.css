@@ -58,6 +58,7 @@ button{font:inherit}
 .ang-badge{border:1px solid var(--ang-line);border-radius:30px;padding:6px 11px;color:var(--ang-muted);font-size:12px;background:rgba(255,255,255,.03)}
 .ang-badge b{color:var(--ang-gold);font-weight:650}
 .ang-copy-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.ang-fx-hint{margin:12px 0 0;color:rgba(234,243,255,.44);font-size:11px;line-height:1.65}
 .ang-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 17px;border:1px solid var(--ang-line);border-radius:13px;background:var(--ang-card);color:var(--ang-text);cursor:pointer;transition:.2s;font-size:14px}
 .ang-btn:hover{transform:translateY(-2px);border-color:rgba(110,231,255,.55)}
 .ang-btn.primary{background:linear-gradient(110deg,#ff7aa8,#8b6dff 58%,#57d9ff);border:0;color:#fff;box-shadow:0 12px 34px rgba(147,95,255,.32)}

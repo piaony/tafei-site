@@ -20,6 +20,7 @@
 .pet-mini-stage .pet-mini-photo + .pet-mini-speech{z-index:4}
 .pet-identity .pet-mini-label{letter-spacing:.14em}
 .pet-actions .pet-action span{font-size:14px}
+.pet-fx-hint{margin:7px 0 0;color:rgba(234,243,255,.42);font-size:10px;line-height:1.5}
 .pet-panel-nav{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .pet-switch{display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border:1px solid rgba(255,211,110,.36);border-radius:9px;color:var(--gold,#ffd36e);font-size:12px;text-decoration:none;white-space:nowrap}
 .pet-switch:hover{border-color:rgba(255,211,110,.72);background:rgba(255,211,110,.08)}

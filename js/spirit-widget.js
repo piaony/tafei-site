@@ -642,14 +642,6 @@
       started = true;
       mode = 'auto';
       scheduleIdle(3500);
-      try {
-        if (!sessionStorage.getItem('tafei-spirit-fx-tip')) {
-          sessionStorage.setItem('tafei-spirit-fx-tip', '1');
-          setTimeout(function () {
-            if (root && widgetOn() && !drag) showAlert('拖我到左右边缘会撞墙，快速晃我会眩晕。', 3200);
-          }, 900);
-        }
-      } catch (error) {}
     }
   }
 
