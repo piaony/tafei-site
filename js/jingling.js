@@ -74,6 +74,44 @@
     setMeter(prefix, 'Sleep', s.sleepiness);
   }
 
+  function skinImage(skin) {
+    var src = skin && (skin.avatar || skin.img);
+    return src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<span class="skin-swatch-fallback">✦</span>';
+  }
+
+  function skinOptionHtml(skin, active) {
+    var owned = core.isSkinOwned(skin.id);
+    var price = core.priceOfSkin(skin.id);
+    var meta = active ? '当前穿着' : owned ? '已拥有' : (price > 0 ? price + ' 额度' : '待解锁');
+    return '<button type="button" class="skin-option' + (active ? ' active' : '') + (owned ? '' : ' locked') + '"'
+      + ' data-skin="' + esc(skin.id) + '" aria-pressed="' + (active ? 'true' : 'false') + '">'
+      + skinImage(skin)
+      + '<i class="skin-option-copy"><b>' + esc(skin.name) + '</b><em>' + esc(meta) + '</em></i>'
+      + '</button>';
+  }
+
+  function skinMoreHtml() {
+    return '<div class="skin-more" aria-hidden="true"><span>+</span><b>更多皮肤</b><em>后续上新</em></div>';
+  }
+
+  function renderPartnerSkins(spirit, skin) {
+    var wrap = $('partnerSkins');
+    var list = $('partnerSkinList');
+    var meta = $('partnerSkinMeta');
+    if (!wrap || !list) return;
+    if (!spirit || !skin) {
+      wrap.hidden = true;
+      list.innerHTML = '';
+      return;
+    }
+    var skins = core.skinsOf(spirit.id);
+    wrap.hidden = false;
+    if (meta) meta.textContent = skins.length + ' 款 · 点选换装';
+    list.innerHTML = skins.map(function (item) {
+      return skinOptionHtml(item, item.id === skin.id);
+    }).join('') + skinMoreHtml();
+  }
+
   function renderDock() {
     var snap = core.snapshot();
     var spirit = snap.current;
@@ -100,6 +138,7 @@
       var emptyBondLevel = $('partnerBondLevel');
       if (emptyBondLevel) emptyBondLevel.textContent = '—';
       if (toggle) { toggle.hidden = true; toggle.disabled = true; }
+      renderPartnerSkins(null, null);
       renderWallet();
       return;
     }
@@ -127,6 +166,7 @@
       toggle.textContent = core.state().widget.on ? '收起全站伙伴' : '放出全站伙伴';
       toggle.classList.toggle('on', !!core.state().widget.on);
     }
+    renderPartnerSkins(spirit, skin);
     renderWallet();
   }
 
@@ -222,20 +262,17 @@
     }
     var skins = core.skinsOf(spirit.id);
     if (!forms) return;
-    if (skins.length <= 1) {
-      forms.innerHTML = '';
-      forms.hidden = true;
-      return;
-    }
     forms.hidden = false;
-    forms.innerHTML = skins.map(function (skin) {
-      var owned = core.isSkinOwned(skin.id);
-      var active = core.state().selectedSkin === skin.id && core.state().selected === spirit.id;
-      var price = core.priceOfSkin(skin.id);
-      return '<button type="button" data-skin="' + esc(skin.id) + '" class="' + (active ? 'active' : '') + (owned ? '' : ' locked') + '" aria-pressed="' + (active ? 'true' : 'false') + '">'
-        + esc(skin.name) + (!owned ? '<span>' + price + ' 额度</span>' : '')
-        + '</button>';
-    }).join('');
+    forms.classList.add('spirit-skin-gallery');
+    var selectedSkin = core.state().selectedSkin;
+    if (core.state().selected !== spirit.id) {
+      selectedSkin = (core.skinById(spirit.defaultSkin) || skins[0] || {}).id;
+    }
+    forms.innerHTML = '<div class="spirit-skins-head"><span>皮肤选择</span><em>' + skins.length + ' 款 · 点选换装</em></div>'
+      + '<div class="spirit-skin-list">'
+      + skins.map(function (skin) { return skinOptionHtml(skin, skin.id === selectedSkin); }).join('')
+      + skinMoreHtml()
+      + '</div>';
   }
 
   function renderModal() {
