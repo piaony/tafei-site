@@ -1,0 +1,30 @@
+name: Deploy spirit v2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-spirit-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download and unpack
+        run: |
+          curl --fail --location --retry 3 "https://aka.doubaocdn.com/s/Ub84sAVTQx" -o /tmp/tafei-spirit-v2.tar.gz
+          tar -xzf /tmp/tafei-spirit-v2.tar.gz -C .
+      - name: Commit changes and remove workflow
+        run: |
+          git config user.name "tafei-spirit-bot"
+          git config user.email "tafei-spirit-bot@users.noreply.github.com"
+          rm -f .github/workflows/deploy-spirit-v2.yml
+          git add -A
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git commit -m "v23.1 spirit widget settings, ambient lines and interaction polish"
+          git push origin HEAD:main
