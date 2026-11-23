@@ -285,3 +285,10 @@ body.spirit-memorial-open{overflow:hidden}
   .spirit-memorial{padding:10px}
   .spirit-memorial-card{padding:13px;border-radius:18px}
 }
+
+/* v11 · 移动端渲染减负：保留暗色卡片观感，去掉大面积实时模糊 */
+@media(max-width:620px){
+  .jingling-page .ang-top{backdrop-filter:none;background:rgba(7,11,24,.94)}
+  .spirit-card,.spirit-side{backdrop-filter:none;background:rgba(11,19,38,.94)}
+  .spirit-modal{backdrop-filter:none;background:rgba(3,7,17,.92)}
+}

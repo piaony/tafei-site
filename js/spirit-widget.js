@@ -5,6 +5,7 @@
   'use strict';
   var core = window.TafeiSpirits;
   if (!core) return;
+  window.TafeiSpiritWidgetLoaded = true;
 
   var CSS_HREF = 'css/spirit-widget.css?v=9';
   var ART_FILES = {
@@ -39,6 +40,8 @@
   var idleTimer = 0;
   var sparkTimer = 0;
   var alertTimer = 0;
+  var scrollTimer = 0;
+  var scrolling = false;
   var started = false;
   var mode = 'auto';
   var currentAction = '';
@@ -113,6 +116,13 @@
     if (currentAction === 'sit' || currentAction === 'sleepy') {
       setAction('idle', 0, {force: true});
     }
+  }
+
+  function onPageScroll() {
+    scrolling = true;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () { scrolling = false; }, 180);
+    resetRest();
   }
 
   function restCheck() {
@@ -336,7 +346,7 @@
   function startSparkles() {
     clearInterval(sparkTimer);
     sparkTimer = setInterval(function () {
-      if (!root || !widgetOn() || drag || document.hidden) return;
+      if (!root || !widgetOn() || drag || document.hidden || scrolling) return;
       if (Date.now() - lastSpark < 2200) return;
       lastSpark = Date.now();
       var box = root.getBoundingClientRect();
@@ -672,8 +682,8 @@
     body.addEventListener('pointerup', release);
     body.addEventListener('pointercancel', release);
     body.addEventListener('contextmenu', function (event) { event.preventDefault(); });
-    window.addEventListener('scroll', resetRest, {passive: true});
-    window.addEventListener('wheel', resetRest, {passive: true});
+    window.addEventListener('scroll', onPageScroll, {passive: true});
+    window.addEventListener('wheel', onPageScroll, {passive: true});
     window.addEventListener('keydown', resetRest);
     window.addEventListener('blur', function () { document.body.classList.remove('sw-dragging'); });
     body.addEventListener('dblclick', function (event) {

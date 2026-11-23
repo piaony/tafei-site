@@ -15,6 +15,40 @@
   var currentModal = null;
   var busy = false;
   var CONTACT_QQ = '3659229103';
+  var gridSig = '';
+  var shopSig = '';
+  var widgetLoader = null;
+
+  function loadWidgetScript() {
+    if (window.TafeiSpiritWidgetLoaded) return Promise.resolve();
+    if (widgetLoader) return widgetLoader;
+    widgetLoader = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = 'js/spirit-widget.js?v=17';
+      script.async = true;
+      script.onload = function () {
+        window.TafeiSpiritWidgetLoaded = true;
+        resolve();
+      };
+      script.onerror = function () {
+        widgetLoader = null;
+        reject(new Error('widget script failed'));
+      };
+      document.body.appendChild(script);
+    });
+    return widgetLoader;
+  }
+
+  function primeWidget() {
+    if (window.TafeiSpiritWidgetLoaded) return;
+    if (!core.state() || !core.state().widget || !core.state().widget.on) return;
+    var run = function () { loadWidgetScript().catch(function () {}); };
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      setTimeout(run, 700);
+    }
+  }
 
   function num(value) { return Math.round(Number(value) || 0); }
   function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
@@ -246,6 +280,11 @@
     if (!grid) return;
     var selected = core.state().selected;
     var selectedLevel = selected ? core.bondInfo(selected).level : 0;
+    var signature = selected + '|' + selectedLevel + '|' + core.SPIRITS.map(function (spirit) {
+      return spirit.id + ':' + (core.isUnlocked(spirit.id) ? 1 : 0) + ':' + core.modeOfSpirit(spirit.id) + ':' + core.priceOfSpirit(spirit.id);
+    }).join(',');
+    if (signature === gridSig) return;
+    gridSig = signature;
     grid.innerHTML = core.SPIRITS.map(function (spirit) {
       var unlocked = core.isUnlocked(spirit.id);
       var isSelected = selected === spirit.id;
@@ -257,7 +296,7 @@
       return '<article class="spirit-card' + (unlocked ? '' : ' is-locked') + (isSelected ? ' is-selected' : '') + frame + '">'
         + '<div class="spirit-flag' + (spirit.original ? ' original' : '') + '">' + esc(spirit.tag) + '</div>'
         + '<button class="spirit-cover" type="button" data-card-action="open" data-id="' + esc(spirit.id) + '" aria-label="查看' + esc(spirit.name) + '">'
-        + '<img src="' + esc(skin.img) + '" alt="' + esc(spirit.name) + ' Q 版角色卡" loading="lazy"></button>'
+        + '<img src="' + esc(skin.img) + '" alt="' + esc(spirit.name) + ' Q 版角色卡" width="512" height="512" loading="lazy" decoding="async" fetchpriority="low"></button>'
         + '<div class="spirit-info"><span class="spirit-game">' + esc(spirit.game) + '</span><h2>' + esc(spirit.name) + '</h2><p>' + esc(spirit.intro) + '</p>'
         + '<div class="spirit-price-line"><span>' + (unlocked ? '已在小屋里' : '未解锁') + '</span>' + priceLabel + '</div>'
         + cardButton(spirit, unlocked, isSelected)
@@ -596,8 +635,15 @@
   }
 
   function renderShop() {
-    if (foodGrid) foodGrid.innerHTML = core.ITEMS.filter(function (i) { return i.kind === 'food'; }).map(itemCard).join('');
-    if (toyGrid) toyGrid.innerHTML = core.ITEMS.filter(function (i) { return i.kind === 'toy'; }).map(itemCard).join('');
+    var signature = core.ITEMS.map(function (item) {
+      var used = item.kind === 'toy' ? (Number(core.state().today.toys[item.id]) || 0) : 0;
+      return item.id + ':' + core.inventoryOf(item.id) + ':' + used;
+    }).join(',');
+    if (signature !== shopSig) {
+      shopSig = signature;
+      if (foodGrid) foodGrid.innerHTML = core.ITEMS.filter(function (i) { return i.kind === 'food'; }).map(itemCard).join('');
+      if (toyGrid) toyGrid.innerHTML = core.ITEMS.filter(function (i) { return i.kind === 'toy'; }).map(itemCard).join('');
+    }
     renderWallet();
   }
 
@@ -792,14 +838,27 @@
       document.getElementById('spiritGrid')?.scrollIntoView({behavior: 'smooth', block: 'start'});
       return;
     }
-    core.setWidget(!core.state().widget.on);
-    toast(core.state().widget.on ? '全站挂件已出现：电脑端会出现在页面右下角，也能拖到任意位置。' : '全站挂件已收起。');
+    var nextOn = !core.state().widget.on;
+    core.setWidget(nextOn);
     renderAll();
+    if (nextOn) {
+      loadWidgetScript().catch(function () {
+        if (!core.state().widget.on) return;
+        core.setWidget(false);
+        renderAll();
+        toast('挂件加载失败，请刷新页面再试。', true);
+      });
+    }
+    toast(nextOn ? '全站挂件已出现：电脑端会出现在页面右下角，也能拖到任意位置。' : '全站挂件已收起。');
   });
 
-  core.subscribe(renderAll);
+  core.subscribe(function () {
+    renderAll();
+    primeWidget();
+  });
   core.refreshWallet().finally(renderAll);
 
   // 初次渲染
   renderAll();
+  primeWidget();
 })();
