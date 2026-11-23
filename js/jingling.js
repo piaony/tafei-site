@@ -650,7 +650,7 @@
     if (select) {
       try {
         core.selectSpirit(select.getAttribute('data-id'));
-        toast('已换成 ' + core.current().name + '，挂件会同步更新。');
+        toast('已换成 ' + core.current().name + '，全站伙伴会同步更新。');
         renderAll();
       } catch (error) { toast(error.message || '切换失败。', true); }
       return;

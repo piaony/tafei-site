@@ -18,7 +18,7 @@
   // 亲密度等级：数值只增不减；每级奖励由后台 catalog.bondLevels 覆盖
   var BOND_LEVELS = [
     { level: 1, need: 0, title: '初见', reward: '伙伴档案已建立' },
-    { level: 2, need: 5, title: '眼熟', reward: '全站挂件等级铭牌' },
+    { level: 2, need: 5, title: '眼熟', reward: '全站伙伴成长铭牌' },
     { level: 3, need: 12, title: '常来', reward: '专属头像光环' },
     { level: 4, need: 22, title: '有默契', reward: '专属互动台词' },
     { level: 5, need: 35, title: '老朋友', reward: '服务预约优先排期' },
