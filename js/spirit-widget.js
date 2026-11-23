@@ -144,7 +144,7 @@
     var d = dims();
     var rawLeft = left;
     var rawTop = top;
-    var hitWall = left < 8 || left > d.maxLeft || top < d.minTop || top > d.maxTop;
+    var hitWall = left < 8 || left > d.maxLeft || top > d.maxTop;
     if (drag && drag.active) {
       if (rawTop <= d.minTop + 10) drag.topEdge = true;
       if (hitWall && !drag.dizzy && (drag.speed || 0) > 0.4) bumpWall();
