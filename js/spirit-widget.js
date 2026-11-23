@@ -48,6 +48,7 @@
   var BUMP_LINES = ['好疼……撞到啦。', '呜，撞得好疼。', '角角撞疼了。', '慢一点，好疼呀。'];
   var DIZZY_LINES = ['慢一点……好晕呀。', '要转晕啦……', '飞太快了，星星都在转。', '等我缓一缓。'];
   var DROP_LINES = ['这里不错，我记住啦。', '就放这里吧。', '呼……稳稳落地。'];
+  var AUTO_WALK_MS = 5000;
 
   function ensureCss() {
     if (!document.querySelector('link[data-spirit-widget]')) {
@@ -322,8 +323,8 @@
     autoTimer = setTimeout(function () {
       if (!widgetOn() || drag || document.hidden) return;
       mode = 'auto';
-      scheduleIdle(3500);
-    }, delay == null ? 30000 : delay);
+      walkStep();
+    }, delay == null ? AUTO_WALK_MS : delay);
   }
 
   function scheduleIdle(delay) {
@@ -357,23 +358,7 @@
       scheduleIdle(6000);
       return;
     }
-    var roll = Math.random();
-    if (roll < 0.44) {
-      walkStep();
-      scheduleIdle(1600);
-    } else if (roll < 0.56) {
-      setAction('happy', 2600);
-      scheduleIdle(5000);
-    } else if (roll < 0.7) {
-      setAction('look', 2400);
-      scheduleIdle(5000);
-    } else if (roll < 0.82) {
-      setAction('sit', 3200);
-      scheduleIdle(6000);
-    } else {
-      setAction('idle');
-      scheduleIdle(7000);
-    }
+    walkStep();
   }
 
   function walkStep() {
@@ -395,7 +380,7 @@
       root.classList.remove('walking', 'act-walk');
       savePosition();
       setAction('idle');
-      scheduleIdle(4500);
+      scheduleIdle(AUTO_WALK_MS - 1000);
     }, 980);
   }
 
@@ -598,7 +583,7 @@
         clearTimeout(autoTimer);
       } else if (widgetOn()) {
         mode = 'auto';
-        scheduleIdle(3500);
+        scheduleIdle(AUTO_WALK_MS);
       }
     });
     core.subscribe(render);
@@ -641,7 +626,7 @@
     if (!started) {
       started = true;
       mode = 'auto';
-      scheduleIdle(3500);
+      scheduleIdle(AUTO_WALK_MS);
     }
   }
 
