@@ -46,7 +46,8 @@
     ['partnerWallet', 'gridWallet'].forEach(function (id) {
       var node = $(id);
       if (!node) return;
-      node.textContent = text;
+      node.hidden = !wallet.real;
+      if (wallet.real) node.textContent = text;
       node.classList.toggle('demo', !wallet.real);
     });
     var shop = $('shopWallet');
@@ -54,10 +55,23 @@
     var topups = ['demoTopup', 'shopTopup'];
     topups.forEach(function (id) {
       var node = $(id);
-      if (node) node.hidden = !!wallet.real;
+      if (node) node.hidden = true;
     });
     var mode = $('modeBadge');
-    if (mode) mode.textContent = wallet.real ? '账户额度' : '本地原型';
+    if (mode) mode.hidden = true;
+  }
+
+  function renderWidgetSwitch() {
+    var toggle = $('widgetToggle');
+    var state = $('widgetStateText');
+    if (!toggle) return;
+    var has = !!core.current();
+    var on = has && !!(core.state() && core.state().widget && core.state().widget.on);
+    toggle.hidden = false;
+    toggle.disabled = false;
+    toggle.classList.toggle('on', on);
+    toggle.setAttribute('aria-checked', on ? 'true' : 'false');
+    if (state) state.textContent = has ? (on ? '已放出' : '未放出') : '先领一个伙伴';
   }
 
   function setMeter(prefix, key, value) {
@@ -137,13 +151,12 @@
       if (bond) bond.textContent = '—';
       var emptyBondLevel = $('partnerBondLevel');
       if (emptyBondLevel) emptyBondLevel.textContent = '—';
-      if (toggle) { toggle.hidden = false; toggle.disabled = false; toggle.textContent = '先领一个伙伴'; }
+      renderWidgetSwitch();
       renderPartnerSkins(null, null);
       renderWallet();
       return;
     }
     if (dock) dock.classList.remove('is-empty');
-    if (toggle) { toggle.hidden = false; toggle.disabled = false; }
     if (img) {
       img.src = skin.avatar || skin.img;
       img.alt = spirit.name + ' · ' + skin.name;
@@ -163,8 +176,7 @@
       avatarBox.classList.toggle('has-bond-frame', bondInfo.level >= 7);
     }
     if (toggle) {
-      toggle.textContent = core.state().widget.on ? '收起全站挂件' : '放出全站挂件';
-      toggle.classList.toggle('on', !!core.state().widget.on);
+      renderWidgetSwitch();
     }
     renderPartnerSkins(spirit, skin);
     renderWallet();
@@ -302,7 +314,7 @@
       $('spiritBondHint').textContent += ' · 专属称号「' + modalInfo.honor + '」';
     }
     var note = $('spiritModalNote');
-    if (note) note.textContent = core.modeOfSpirit(spirit.id) === 'request' ? '这款不开放额度购买；把账号和款式发给站长，由后台私下发放。' : '同人 Q 版展示，非官方原画；本地原型使用演示额度，云端表启用后自动切换为站内额度。';
+    if (note) note.textContent = core.modeOfSpirit(spirit.id) === 'request' ? '这款不开放额度购买；把账号和款式发给站长，由后台私下发放。' : '同人 Q 版展示，非官方原画；额度以站内账户为准。';
     renderMeters('modal');
     renderSkins();
     var unlock = $('spiritUnlock');

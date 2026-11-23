@@ -30,6 +30,16 @@
 .partner-actions button:hover,.partner-actions a:hover{background:rgba(255,211,110,.16)}
 .partner-actions .ghost{border-color:var(--sp-line);background:rgba(255,255,255,.04);color:var(--ang-muted)}
 .partner-widget-tip{margin:7px 0 0;color:rgba(110,231,255,.62);font-size:10.5px;line-height:1.5}
+.widget-switch-card{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;border:1px solid rgba(110,231,255,.2);border-radius:13px;background:rgba(110,231,255,.055)}
+.widget-switch-copy{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
+.widget-switch-copy b{color:var(--sp-cyan);font-size:12px;letter-spacing:.04em}
+.widget-switch-copy span{color:var(--sp-gold);font-size:11px}
+.widget-switch-copy small{flex-basis:100%;color:rgba(255,255,255,.46);font-size:10.5px;line-height:1.5}
+.widget-switch{flex:0 0 auto;width:50px;height:28px;padding:0;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(255,255,255,.08);position:relative;cursor:pointer;transition:background .18s,border-color .18s}
+.widget-switch i{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#9aaccb;transition:transform .18s,background .18s}
+.widget-switch.on{background:rgba(110,231,255,.18);border-color:rgba(110,231,255,.62)}
+.widget-switch.on i{transform:translateX(24px);background:#64e8ff;box-shadow:0 0 10px rgba(110,231,255,.6)}
+.widget-switch:focus-visible{outline:2px solid rgba(110,231,255,.8);outline-offset:2px}
 .partner-wallet{margin-left:auto;padding:5px 9px;border-radius:8px;border:1px solid rgba(110,231,255,.24);color:var(--sp-cyan);font-size:11px;background:rgba(110,231,255,.06)}
 .partner-wallet.demo{border-color:rgba(255,211,110,.3);color:var(--sp-gold);background:rgba(255,211,110,.06)}
 .partner-skins{margin-top:13px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.09)}
