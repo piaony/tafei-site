@@ -294,7 +294,11 @@
     status: { satiety: 72, mood: 76, anger: 8, sleepiness: 20 },
     bond: {},
     credits: DEFAULT_DEMO_CREDITS,
-    widget: { on: false, x: 0.72, y: 0.62, corner: 'free' },
+    widget: {
+      on: false, x: 0.72, y: 0.62, corner: 'free',
+      size: 1, opacity: 1, autoWalk: true, particles: true,
+      speech: true, sound: false, edgeHide: true, mode: 'lively'
+    },
     lastTick: 0,
     lastInteraction: 0,
     today: { date: '', toys: {} },
@@ -321,7 +325,15 @@
         next.widget.on = !!saved.widget.on;
         next.widget.x = clamp(saved.widget.x, 0, 1);
         next.widget.y = clamp(saved.widget.y, 0, 1);
-        next.widget.corner = saved.widget.corner || 'br';
+        next.widget.corner = saved.widget.corner || 'free';
+        next.widget.size = clamp(saved.widget.size == null ? 1 : saved.widget.size, 0.72, 1.25);
+        next.widget.opacity = clamp(saved.widget.opacity == null ? 1 : saved.widget.opacity, 0.45, 1);
+        next.widget.autoWalk = saved.widget.autoWalk !== false;
+        next.widget.particles = saved.widget.particles !== false;
+        next.widget.speech = saved.widget.speech !== false;
+        next.widget.sound = saved.widget.sound === true;
+        next.widget.edgeHide = saved.widget.edgeHide !== false;
+        next.widget.mode = saved.widget.mode === 'quiet' ? 'quiet' : 'lively';
       }
       next.lastTick = Number(saved.lastTick) || 0;
       next.lastInteraction = Number(saved.lastInteraction) || 0;
@@ -869,6 +881,20 @@
     save(false);
   }
 
+  function setWidgetOptions(patch) {
+    patch = patch || {};
+    if (patch.size != null) state.widget.size = clamp(patch.size, 0.72, 1.25);
+    if (patch.opacity != null) state.widget.opacity = clamp(patch.opacity, 0.45, 1);
+    if (patch.autoWalk != null) state.widget.autoWalk = !!patch.autoWalk;
+    if (patch.particles != null) state.widget.particles = !!patch.particles;
+    if (patch.speech != null) state.widget.speech = !!patch.speech;
+    if (patch.sound != null) state.widget.sound = !!patch.sound;
+    if (patch.edgeHide != null) state.widget.edgeHide = !!patch.edgeHide;
+    if (patch.mode != null) state.widget.mode = patch.mode === 'quiet' ? 'quiet' : 'lively';
+    state.lastInteraction = Date.now();
+    save();
+  }
+
   function reset() {
     state = normalizeState(null);
     persist();
@@ -947,6 +973,7 @@
     adjustBond: adjustBond,
     setWidget: setWidget,
     setWidgetPosition: setWidgetPosition,
+    setWidgetOptions: setWidgetOptions,
     setDemoCredits: setDemoCredits,
     updateStatus: updateStatus,
     reset: reset,

@@ -179,7 +179,7 @@
   function loadSpiritWidget() {
     if (document.querySelector('script[src*="spirit-widget"]')) return;
     var script = document.createElement('script');
-    script.src = 'js/spirit-widget.js?v=11';
+    script.src = 'js/spirit-widget.js?v=18';
     script.defer = true;
     document.body.appendChild(script);
   }
@@ -190,7 +190,7 @@
       return;
     }
     var script = document.createElement('script');
-    script.src = 'js/spirit-core.js?v=11';
+    script.src = 'js/spirit-core.js?v=12';
     script.onload = loadSpiritWidget;
     document.body.appendChild(script);
   }

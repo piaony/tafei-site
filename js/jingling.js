@@ -24,7 +24,7 @@
     if (widgetLoader) return widgetLoader;
     widgetLoader = new Promise(function (resolve, reject) {
       var script = document.createElement('script');
-      script.src = 'js/spirit-widget.js?v=17';
+      script.src = 'js/spirit-widget.js?v=18';
       script.async = true;
       script.onload = function () {
         window.TafeiSpiritWidgetLoaded = true;
@@ -109,6 +109,26 @@
     toggle.setAttribute('aria-checked', on ? 'true' : 'false');
     var pending = has && on && !window.TafeiSpiritWidgetLoaded;
     if (state) state.textContent = has ? (pending ? '正在放出…' : (on ? '已放出' : '未放出')) : '先领一个伙伴';
+  }
+
+  function renderWidgetSettings() {
+    var w = (core.state() && core.state().widget) || {};
+    var size = Number(w.size) || 1;
+    var opacity = w.opacity == null ? 1 : Number(w.opacity);
+    var sizeInput = $('wsSize');
+    var opacityInput = $('wsOpacity');
+    if (sizeInput) sizeInput.value = String(Math.round(size * 100));
+    if (opacityInput) opacityInput.value = String(Math.round(opacity * 100));
+    if ($('wsSizeVal')) $('wsSizeVal').textContent = Math.round(size * 100) + '%';
+    if ($('wsOpacityVal')) $('wsOpacityVal').textContent = Math.round(opacity * 100) + '%';
+    if ($('wsAutoWalk')) $('wsAutoWalk').checked = w.autoWalk !== false;
+    if ($('wsParticles')) $('wsParticles').checked = w.particles !== false;
+    if ($('wsSpeech')) $('wsSpeech').checked = w.speech !== false;
+    if ($('wsSound')) $('wsSound').checked = w.sound === true;
+    if ($('wsEdgeHide')) $('wsEdgeHide').checked = w.edgeHide !== false;
+    document.querySelectorAll('[data-ws-mode]').forEach(function (button) {
+      button.classList.toggle('active', button.getAttribute('data-ws-mode') === (w.mode || 'lively'));
+    });
   }
 
   function setMeter(prefix, key, value) {
@@ -676,6 +696,7 @@
     renderBond();
     renderGrid();
     renderShop();
+    renderWidgetSettings();
     if (currentModal) renderModal();
   }
 
@@ -880,6 +901,50 @@
     } else {
       toast('全站挂件已收起。');
     }
+  });
+
+  $('widgetSettingsToggle')?.addEventListener('click', function () {
+    var panel = $('widgetSettings');
+    if (!panel) return;
+    var open = panel.hidden;
+    panel.hidden = !open;
+    this.setAttribute('aria-expanded', String(open));
+    var widget = document.getElementById('spiritWidget');
+    if (widget) widget.classList.toggle('settings-open', open);
+    if (open) renderWidgetSettings();
+  });
+
+  function saveWidgetInput(key, value) {
+    var patch = {};
+    patch[key] = value;
+    core.setWidgetOptions(patch);
+  }
+
+  ['wsSize', 'wsOpacity'].forEach(function (id) {
+    var input = $(id);
+    if (!input) return;
+    input.addEventListener('input', function () {
+      var out = $(id === 'wsSize' ? 'wsSizeVal' : 'wsOpacityVal');
+      if (out) out.textContent = Math.round(Number(input.value)) + '%';
+    });
+    input.addEventListener('change', function () {
+      saveWidgetInput(id === 'wsSize' ? 'size' : 'opacity', Number(input.value) / 100);
+    });
+  });
+
+  [['wsAutoWalk', 'autoWalk'], ['wsParticles', 'particles'], ['wsSpeech', 'speech'], ['wsSound', 'sound'], ['wsEdgeHide', 'edgeHide']].forEach(function (row) {
+    var input = $(row[0]);
+    if (!input) return;
+    input.addEventListener('change', function () { saveWidgetInput(row[1], input.checked); });
+  });
+
+  document.querySelectorAll('[data-ws-mode]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var mode = button.getAttribute('data-ws-mode');
+      if (mode === 'quiet') core.setWidgetOptions({mode: 'quiet', particles: false, speech: false});
+      else core.setWidgetOptions({mode: 'lively', particles: true, speech: true});
+      renderWidgetSettings();
+    });
   });
 
   core.subscribe(function () {

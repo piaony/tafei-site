@@ -7,7 +7,7 @@
   if (!core) return;
   window.TafeiSpiritWidgetLoaded = true;
 
-  var CSS_HREF = 'css/spirit-widget.css?v=9';
+  var CSS_HREF = 'css/spirit-widget.css?v=10';
   var ART_FILES = {
     idle: 'action-idle.png',
     pet: 'action-pet.png',
@@ -52,6 +52,8 @@
   var DIZZY_LINES = ['慢一点……好晕呀。', '要转晕啦……', '飞太快了，星星都在转。', '等我缓一缓。'];
   var DROP_LINES = ['这里不错，我记住啦。', '就放这里吧。', '呼……稳稳落地。'];
   var HAPPY_LINES = ['今天也很开心。', '和你在一起，森林都亮了。', '再摸摸头吧。', '我把星光分你一点。'];
+  var BODY_LINES = ['唔，有点痒。', '别挠我腰，我怕痒。', '这里不可以乱碰啦。'];
+  var ACCESSORY_LINES = ['这是我的小物件，要轻一点。', '碰到我的宝贝啦。', '小心，别弄坏它。'];
   var HAPPY_FILES = {
     yao: ['emotion-happy.png', 'emotion-happy-2.png', 'emotion-happy-3.png', 'emotion-happy-4.png']
   };
@@ -81,6 +83,147 @@
 
   function widgetOn() {
     return !!(core.state() && core.state().widget && core.state().widget.on);
+  }
+
+  function widgetConf(key, fallback) {
+    var w = core.state() && core.state().widget;
+    return w && w[key] != null ? w[key] : fallback;
+  }
+
+  function quietMode() {
+    return widgetConf('mode', 'lively') === 'quiet';
+  }
+
+  function particlesEnabled() {
+    return widgetConf('particles', true) !== false;
+  }
+
+  function speechEnabled() {
+    return widgetConf('speech', true) !== false;
+  }
+
+  function autoWalkEnabled() {
+    return widgetConf('autoWalk', true) !== false;
+  }
+
+  function conditionPace() {
+    var condition = core.condition();
+    if (condition === 'sleep' || condition === 'hungry' || condition === 'sad') return 1.3;
+    if (condition === 'angry') return 1.15;
+    if (condition === 'happy') return 0.85;
+    return 1;
+  }
+
+  function edgeHideEnabled() {
+    return widgetConf('edgeHide', true) !== false;
+  }
+
+  function liteQuality() {
+    try {
+      return (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+        || (navigator.deviceMemory && navigator.deviceMemory <= 4)
+        || !!(navigator.connection && navigator.connection.saveData);
+    } catch (error) { return false; }
+  }
+
+  var LITE = liteQuality();
+
+  var PAGE_LINES = {
+    home: ['首页的公告，我也有认真看。', '今天想先修手机，还是先休息？'],
+    service: ['手机急救室……希望大家都用不上。', '有问题慢慢说，我陪你等。'],
+    device: ['这台机器的参数，我记住啦。', '挑手机别只看跑分，也要看手感。'],
+    community: ['社区里有人说话，我听见啦。', '今天有没有遇到好玩的事？'],
+    shop: ['小店里的东西，都是认真挑过的。', '需要什么，我帮你看看。'],
+    jingling: ['回到小屋啦，先歇一会儿。', '今天想和谁一起值班？'],
+    default: ['我在这里，陪你待一会儿。', '累了就停一停，没关系的。']
+  };
+
+  var TIME_LINES = {
+    dawn: ['天快亮了，你怎么还没睡？', '清晨的风有一点凉。'],
+    morning: ['早上好，今天也慢慢来。', '早安，先喝口水吧。'],
+    noon: ['中午啦，记得吃点东西。', '太阳正好，歇一会儿吧。'],
+    afternoon: ['下午好，别一直坐着。', '忙到现在，要不要伸个懒腰？'],
+    evening: ['晚上好，今天辛苦了。', '天黑了，适合慢一点。'],
+    night: ['夜深了，早点休息。', '夜里安静，我陪你一小会儿。']
+  };
+
+  var sessionGreeted = false;
+  var audioCtx = null;
+
+  function pageKey() {
+    var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    if (file === 'jingling.html') return 'jingling';
+    if (file === 'service.html') return 'service';
+    if (file === 'device.html' || file === 'devices.html') return 'device';
+    if (file === 'community.html') return 'community';
+    if (file === 'shop.html') return 'shop';
+    if (file === 'index.html' || file === '') return 'home';
+    return 'default';
+  }
+
+  function timeKey() {
+    var hour = new Date().getHours();
+    if (hour < 6) return 'night';
+    if (hour < 9) return 'dawn';
+    if (hour < 12) return 'morning';
+    if (hour < 14) return 'noon';
+    if (hour < 18) return 'afternoon';
+    if (hour < 22) return 'evening';
+    return 'night';
+  }
+
+  function ambientLine(useTime) {
+    if (useTime && Math.random() < 0.5) return pick(TIME_LINES[timeKey()] || TIME_LINES.evening);
+    return pick(PAGE_LINES[pageKey()] || PAGE_LINES.default);
+  }
+
+  function playSound(kind) {
+    if (!widgetConf('sound', false)) return;
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audioCtx = audioCtx || new Ctx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      var freq = kind === 'bump' ? 150 : (kind === 'happy' ? 620 : 460);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.18, now + 0.12);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.028, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.22);
+    } catch (error) {}
+  }
+
+  function applyWidgetSettings() {
+    if (!root) return;
+    var size = Number(widgetConf('size', 1)) || 1;
+    var opacity = Number(widgetConf('opacity', 1));
+    if (!Number.isFinite(opacity)) opacity = 1;
+    root.style.setProperty('--sw-scale', String(Math.max(0.72, Math.min(1.25, size))));
+    root.style.setProperty('--sw-opacity', String(Math.max(0.45, Math.min(1, opacity))));
+    root.classList.toggle('sw-quiet', quietMode());
+    root.classList.toggle('sw-lite', LITE);
+    if (!particlesEnabled()) {
+      clearInterval(sparkTimer);
+      sparkTimer = 0;
+    } else if (!sparkTimer && widgetOn()) {
+      startSparkles();
+    }
+  }
+
+  function applyEdgePeek() {
+    if (!root) return;
+    var d = dims();
+    var left = parseFloat(root.style.left || '0');
+    var near = left < 34 || left > d.maxLeft - 26;
+    root.classList.toggle('edge-peek', edgeHideEnabled() && near && !drag);
   }
 
   function spiritId() {
@@ -235,6 +378,7 @@
     root.style.top = Math.round(top) + 'px';
     root.classList.toggle('flip', left + d.w / 2 > innerWidth / 2);
     root.classList.toggle('near-bottom', top > d.maxTop - 46);
+    if (!drag) applyEdgePeek();
   }
 
   function applyPosition() {
@@ -260,10 +404,11 @@
       Math.max(0, Math.min(1, y)),
       'free'
     );
+    applyEdgePeek();
   }
 
   function say(text, hold) {
-    if (!speech || !root) return;
+    if (!speech || !root || !speechEnabled()) return;
     speech.textContent = text;
     var d = dims();
     root.classList.toggle('speech-below', parseFloat(root.style.top || '0') < 84);
@@ -278,7 +423,8 @@
   }
 
   function burst(kind, count, origin) {
-    if (!root || !widgetOn()) return;
+    if (!root || !widgetOn() || !particlesEnabled()) return;
+    if (LITE && kind !== 'trail') count = Math.max(1, Math.round((count || 4) / 2));
     var box = root.getBoundingClientRect();
     var x = origin && Number.isFinite(origin.x) ? origin.x : box.left + box.width / 2;
     var y = origin && Number.isFinite(origin.y) ? origin.y : box.top + box.height * 0.42;
@@ -323,6 +469,7 @@
     drag.bumped = true;
     setAction('hit', 700);
     showAlert(pick(BUMP_LINES), 1550);
+    playSound('bump');
     root.classList.add('sw-bump');
     burst('bump', 1);
     burst('dizzy', 4);
@@ -345,13 +492,16 @@
 
   function startSparkles() {
     clearInterval(sparkTimer);
+    sparkTimer = 0;
+    if (!particlesEnabled()) return;
+    var every = quietMode() ? 4600 : (LITE ? 3200 : 2600);
     sparkTimer = setInterval(function () {
       if (!root || !widgetOn() || drag || document.hidden || scrolling) return;
       if (Date.now() - lastSpark < 2200) return;
       lastSpark = Date.now();
       var box = root.getBoundingClientRect();
-      burst('idle', 2, { x: box.left + box.width * 0.5, y: box.top + box.height * 0.82 });
-    }, 2600);
+      burst('idle', quietMode() ? 1 : (LITE ? 1 : 2), { x: box.left + box.width * 0.5, y: box.top + box.height * 0.82 });
+    }, every);
   }
 
   function baseImage() {
@@ -413,14 +563,15 @@
     autoTimer = setTimeout(function () {
       if (!widgetOn() || drag || document.hidden) return;
       mode = 'auto';
+      if (!autoWalkEnabled()) { scheduleIdle(9000); return; }
       walkStep();
-    }, delay == null ? AUTO_WALK_MS : delay);
+    }, delay == null ? (quietMode() ? 7000 : AUTO_WALK_MS) * conditionPace() : delay);
   }
 
   function scheduleIdle(delay) {
     clearTimeout(idleTimer);
     if (!widgetOn() || mode !== 'auto' || drag || document.hidden) return;
-    idleTimer = setTimeout(idleBeat, delay == null ? 7000 + Math.random() * 5000 : delay);
+    idleTimer = setTimeout(idleBeat, delay == null ? ((quietMode() ? 9500 : 7000) + Math.random() * 5000) * conditionPace() : delay);
   }
 
   function idleBeat() {
@@ -458,6 +609,7 @@
 
   function walkStep() {
     if (!root || !widgetOn() || mode !== 'auto' || drag || document.hidden || restStage) return;
+    if (!autoWalkEnabled()) { scheduleIdle(9000); return; }
     var d = dims();
     var left = parseFloat(root.style.left || '0');
     var top = parseFloat(root.style.top || '0');
@@ -476,19 +628,31 @@
       savePosition();
       setAction('idle');
       scheduleIdle(AUTO_WALK_MS - 1000);
-    }, 980);
+    }, (quietMode() ? 1120 : 980) * conditionPace());
   }
 
-  function interact() {
+  function hitPart(event) {
+    if (!root || !event) return 'head';
+    var box = root.getBoundingClientRect();
+    var xRatio = (event.clientX - box.left) / Math.max(1, box.width);
+    var yRatio = (event.clientY - box.top) / Math.max(1, box.height);
+    if (yRatio < 0.34) return 'head';
+    if (xRatio > 0.8 || xRatio < 0.2) return 'accessory';
+    return 'body';
+  }
+
+  function interact(event) {
     if (!root || !widgetOn()) return;
     resetRest();
     var spirit = core.current();
     if (!spirit) { say('还没有伙伴，先去精灵小屋领取一个。'); return; }
     var now = Date.now();
+    var part = hitPart(event);
     clickStreak = now - lastClickAt < 1100 ? clickStreak + 1 : 1;
     lastClickAt = now;
     var beforeLevel = core.bondInfo(spirit.id).level;
     core.pet(spirit.id);
+    playSound(part === 'head' ? 'pet' : 'happy');
     var afterInfo = core.bondInfo(spirit.id);
     var leveled = afterInfo.level > beforeLevel;
     if (clickStreak >= 3) {
@@ -503,7 +667,14 @@
     if (clickStreak === 2 && !leveled) {
       var happyFile = happyFileFor(spirit.id);
       setAction('happy', 1600, {force: true, file: happyFile});
-      say(happyFile ? pick(HAPPY_LINES) : '被你摸到了，亲密度 +1。', 1900);
+      say(part === 'body' ? pick(BODY_LINES) : (happyFile ? pick(HAPPY_LINES) : '被你摸到了，亲密度 +1。'), 1900);
+      mode = 'manual';
+      armAuto();
+      return;
+    }
+    if (part === 'body' && !leveled) {
+      setAction('shy', 1400, {force: true});
+      say(pick(BODY_LINES), 1900);
       mode = 'manual';
       armAuto();
       return;
@@ -519,6 +690,7 @@
     else if (condition === 'sleep') say('唔……再睡一小会儿。');
     else if (condition === 'angry') say('哼，先让我冷静一下。');
     else if (condition === 'hungry') say('肚子有点饿了，想吃点东西。');
+    else if (part === 'accessory') say(pick(ACCESSORY_LINES), 1900);
     else say('被你摸到了，亲密度 +1。');
     mode = 'manual';
     armAuto();
@@ -649,7 +821,7 @@
       try { body.releasePointerCapture(event.pointerId); } catch (error) {}
       drag = null;
       if (!wasActive && !wasMoved) {
-        interact();
+        interact(event);
         return;
       }
       savePosition();
@@ -681,6 +853,27 @@
 
     body.addEventListener('pointerup', release);
     body.addEventListener('pointercancel', release);
+    root.addEventListener('pointerenter', function () { if (root) root.classList.remove('edge-peek'); });
+    root.addEventListener('pointerleave', function () { if (!drag) applyEdgePeek(); });
+    body.addEventListener('focus', function () { if (root) root.classList.remove('edge-peek'); });
+    body.addEventListener('blur', function () { if (!drag) applyEdgePeek(); });
+    body.addEventListener('keydown', function (event) {
+      if (!widgetOn()) return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        interact();
+        return;
+      }
+      var dx = event.key === 'ArrowLeft' ? -12 : (event.key === 'ArrowRight' ? 12 : 0);
+      var dy = event.key === 'ArrowUp' ? -12 : (event.key === 'ArrowDown' ? 12 : 0);
+      if (!dx && !dy) return;
+      event.preventDefault();
+      var left = parseFloat(root.style.left || '0') + dx;
+      var top = parseFloat(root.style.top || '0') + dy;
+      setPixel(left, top);
+      savePosition();
+      root.classList.remove('edge-peek');
+    });
     body.addEventListener('contextmenu', function (event) { event.preventDefault(); });
     window.addEventListener('scroll', onPageScroll, {passive: true});
     window.addEventListener('wheel', onPageScroll, {passive: true});
@@ -703,7 +896,13 @@
       if (document.hidden) {
         clearTimeout(idleTimer);
         clearTimeout(autoTimer);
+        clearInterval(sparkTimer);
+        sparkTimer = 0;
+        clearInterval(restTimer);
+        restTimer = 0;
       } else if (widgetOn()) {
+        if (!sparkTimer) startSparkles();
+        if (!restTimer) restTimer = setInterval(restCheck, 1000);
         if (restStage) return;
         mode = 'auto';
         scheduleIdle(AUTO_WALK_MS);
@@ -727,6 +926,8 @@
     root.classList.toggle('is-alpha', isAlpha);
     root.classList.toggle('is-photo', !isAlpha);
     art.alt = spirit.name + ' · ' + skin.name;
+    if (body) body.setAttribute('aria-label', spirit.name + '，方向键移动，回车互动');
+    applyWidgetSettings();
     if (!state.widget.on) {
       root.classList.remove('show');
       root.hidden = true;
@@ -751,6 +952,12 @@
       started = true;
       mode = 'auto';
       scheduleIdle(AUTO_WALK_MS);
+      setTimeout(function () {
+        if (!sessionGreeted && root && widgetOn() && !drag) {
+          sessionGreeted = true;
+          say(ambientLine(true), 3000);
+        }
+      }, 1300);
     }
   }
 
@@ -758,6 +965,7 @@
     ensureCss();
     if (!document.body) return;
     build();
+    applyWidgetSettings();
     render();
     startSparkles();
     clearInterval(restTimer);
