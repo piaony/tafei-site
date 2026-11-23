@@ -1,0 +1,43 @@
+name: Publish all spirit interaction assets
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-spirits-phase2.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-spirits-phase2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download package
+        run: |
+          curl -L --fail --retry 3 -o /tmp/tafei-spirits-phase2.tar.gz "https://aka.doubaocdn.com/s/pR1nsTWQYv"
+          echo "f073d93b6212c1834deac0359bea9ead2e021589e60064d957d9688899c18d9b  /tmp/tafei-spirits-phase2.tar.gz" | sha256sum -c -
+
+      - name: Extract package
+        run: tar -xzf /tmp/tafei-spirits-phase2.tar.gz
+
+      - name: Commit and push
+        run: |
+          git config user.name "tafei-publisher"
+          git config user.email "publisher@users.noreply.github.com"
+          git add index.html angela.html xiaota.html jingling.html js/spirit-core.js js/spirit-widget.js js/tafei-ui.js css/spirit-widget.css assets/spirits/xiaota-v23 assets/spirits/xi-shi-v23 assets/spirits/angela-v23 assets/spirits/gardener-v23 assets/spirits/doctor-v23 assets/spirits/mechanic-v23 assets/spirits/perfumer-v23 assets/spirits/tanluning-v23
+          if git diff --cached --quiet; then
+            echo "No changes to publish"
+            exit 0
+          fi
+          git commit -m "feat: publish full v23 spirit assets, core v11, interaction effects"
+          git push origin HEAD:main
