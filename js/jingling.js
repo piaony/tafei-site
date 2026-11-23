@@ -24,7 +24,7 @@
     if (widgetLoader) return widgetLoader;
     widgetLoader = new Promise(function (resolve, reject) {
       var script = document.createElement('script');
-      script.src = 'js/spirit-widget.js?v=18';
+      script.src = 'js/spirit-widget.js?v=19';
       script.async = true;
       script.onload = function () {
         window.TafeiSpiritWidgetLoaded = true;
@@ -109,6 +109,23 @@
     toggle.setAttribute('aria-checked', on ? 'true' : 'false');
     var pending = has && on && !window.TafeiSpiritWidgetLoaded;
     if (state) state.textContent = has ? (pending ? '正在放出…' : (on ? '已放出' : '未放出')) : '先领一个伙伴';
+  }
+
+  function renderStats() {
+    var stats = core.stats ? core.stats() : {interactions: 0, pets: 0, drags: 0, bumps: 0, days: []};
+    var days = Array.isArray(stats.days) ? stats.days.length : 0;
+    if ($('statInteractions')) $('statInteractions').textContent = String(stats.interactions || 0);
+    if ($('statDays')) $('statDays').textContent = String(days);
+    if ($('statBumps')) $('statBumps').textContent = String(stats.bumps || 0);
+    if ($('statDrags')) $('statDrags').textContent = String(stats.drags || 0);
+    if ($('companionDays')) $('companionDays').textContent = '陪伴 ' + days + ' 天';
+    var badges = $('companionBadges');
+    if (!badges || !core.achievements) return;
+    badges.innerHTML = core.achievements().map(function (item) {
+      return '<span class="cs-badge' + (item.done ? ' done' : '') + '" title="' + item.desc + '">'
+        + (item.done ? '✓ ' : '') + item.title
+        + '<i>' + Math.min(item.current, item.need) + '/' + item.need + '</i></span>';
+    }).join('');
   }
 
   function renderWidgetSettings() {
@@ -696,6 +713,7 @@
     renderBond();
     renderGrid();
     renderShop();
+    renderStats();
     renderWidgetSettings();
     if (currentModal) renderModal();
   }

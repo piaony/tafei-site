@@ -293,6 +293,7 @@
     inventory: {},
     status: { satiety: 72, mood: 76, anger: 8, sleepiness: 20 },
     bond: {},
+    stats: { interactions: 0, pets: 0, drags: 0, bumps: 0, days: [] },
     credits: DEFAULT_DEMO_CREDITS,
     widget: {
       on: false, x: 0.72, y: 0.62, corner: 'free',
@@ -318,6 +319,13 @@
         next.status.sleepiness = clamp(saved.status.sleepiness, 0, 100);
       }
       if (saved.bond && typeof saved.bond === 'object') next.bond = copy(saved.bond);
+      if (saved.stats && typeof saved.stats === 'object') {
+        next.stats.interactions = Math.max(0, Number(saved.stats.interactions) || 0);
+        next.stats.pets = Math.max(0, Number(saved.stats.pets) || 0);
+        next.stats.drags = Math.max(0, Number(saved.stats.drags) || 0);
+        next.stats.bumps = Math.max(0, Number(saved.stats.bumps) || 0);
+        next.stats.days = Array.isArray(saved.stats.days) ? saved.stats.days.filter(function (day) { return typeof day === 'string'; }).slice(-60) : [];
+      }
       if (typeof saved.selected === 'string') next.selected = saved.selected;
       if (typeof saved.selectedSkin === 'string') next.selectedSkin = saved.selectedSkin;
       if (typeof saved.credits === 'number' && Number.isFinite(saved.credits)) next.credits = Math.max(0, saved.credits);
@@ -832,8 +840,49 @@
     return item;
   }
 
+  var ACHIEVEMENTS = [
+    { id: 'first_pet', title: '第一次摸头', desc: '互动 1 次', stat: 'pets', need: 1 },
+    { id: 'chatty', title: '话匣子', desc: '互动 20 次', stat: 'interactions', need: 20 },
+    { id: 'wall_10', title: '撞墙收藏家', desc: '撞墙 10 次', stat: 'bumps', need: 10 },
+    { id: 'mover_10', title: '搬家达人', desc: '拖动 10 次', stat: 'drags', need: 10 },
+    { id: 'resident_3', title: '常住居民', desc: '陪伴 3 天', stat: 'days', need: 3 }
+  ];
+
+  function recordVisit() {
+    var key = todayKey();
+    if (state.stats.days.indexOf(key) !== -1) return false;
+    state.stats.days.push(key);
+    state.stats.days = state.stats.days.slice(-60);
+    save();
+    return true;
+  }
+
+  function recordWidget(type) {
+    if (type === 'drag') state.stats.drags += 1;
+    else if (type === 'bump') state.stats.bumps += 1;
+    else return;
+    save();
+  }
+
+  function achievements() {
+    var days = state.stats.days.length;
+    return ACHIEVEMENTS.map(function (item) {
+      var current = item.stat === 'days' ? days : (Number(state.stats[item.stat]) || 0);
+      return {
+        id: item.id,
+        title: item.title,
+        desc: item.desc,
+        current: current,
+        need: item.need,
+        done: current >= item.need
+      };
+    });
+  }
+
   function pet(spiritId) {
     var s = statusOf(spiritId);
+    state.stats.interactions += 1;
+    state.stats.pets += 1;
     s.mood = clamp(s.mood + 4, 0, 100);
     s.anger = clamp(s.anger - 3, 0, 100);
     addBond(spiritId || state.selected, 1);
@@ -974,6 +1023,10 @@
     setWidget: setWidget,
     setWidgetPosition: setWidgetPosition,
     setWidgetOptions: setWidgetOptions,
+    stats: function () { return copy(state.stats); },
+    recordVisit: recordVisit,
+    recordWidget: recordWidget,
+    achievements: achievements,
     setDemoCredits: setDemoCredits,
     updateStatus: updateStatus,
     reset: reset,

@@ -317,3 +317,22 @@ body.spirit-memorial-open{overflow:hidden}
   .ws-toggles{grid-template-columns:1fr 1fr;gap:7px 8px}
   .ws-range{grid-template-columns:42px minmax(0,1fr) 38px;font-size:10.5px}
 }
+
+/* v13 · 陪伴足迹：轻量统计与成就徽章 */
+.companion-stats{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+.cs-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.cs-head h3{margin:0;font-size:14px;font-weight:500;color:var(--ang-text)}
+.cs-head span{color:var(--ang-muted);font-size:10px}
+.cs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.cs-grid div{min-width:0;padding:8px 8px 7px;border:1px solid rgba(110,231,255,.12);border-radius:9px;background:rgba(110,231,255,.035)}
+.cs-grid b{display:block;color:var(--sp-cyan);font-size:18px;line-height:1.1;font-weight:600}
+.cs-grid span{display:block;margin-top:3px;color:var(--ang-muted);font-size:9.5px;white-space:nowrap}
+.cs-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.cs-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border:1px solid rgba(255,255,255,.08);border-radius:999px;color:var(--ang-muted);font-size:9.5px;line-height:1.35}
+.cs-badge.done{border-color:rgba(255,211,110,.4);background:rgba(255,211,110,.08);color:var(--sp-gold)}
+.cs-badge i{font-style:normal;opacity:.65}
+@media(max-width:620px){
+  .cs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cs-grid b{font-size:16px}
+  .cs-badge{font-size:9px}
+}

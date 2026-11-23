@@ -467,6 +467,7 @@
     if (now - (drag.lastBump || 0) < 850) return;
     drag.lastBump = now;
     drag.bumped = true;
+    if (core.recordWidget) core.recordWidget('bump');
     setAction('hit', 700);
     showAlert(pick(BUMP_LINES), 1550);
     playSound('bump');
@@ -820,6 +821,7 @@
       if (window.getSelection) { try { window.getSelection().removeAllRanges(); } catch (error) {} }
       try { body.releasePointerCapture(event.pointerId); } catch (error) {}
       drag = null;
+      if ((wasActive || wasMoved) && core.recordWidget) core.recordWidget('drag');
       if (!wasActive && !wasMoved) {
         interact(event);
         return;
@@ -879,11 +881,6 @@
     window.addEventListener('wheel', onPageScroll, {passive: true});
     window.addEventListener('keydown', resetRest);
     window.addEventListener('blur', function () { document.body.classList.remove('sw-dragging'); });
-    body.addEventListener('dblclick', function (event) {
-      event.preventDefault();
-      setAction('surprised', 700, {force: true});
-      setTimeout(function () { window.location.href = 'jingling.html'; }, 320);
-    });
 
     window.addEventListener('resize', function () {
       applyPosition();
@@ -941,6 +938,7 @@
     }
     if (!currentAction) setAction('idle');
     root.hidden = false;
+    if (core.recordVisit) core.recordVisit();
     preloadHappyFiles();
     applyPosition();
     requestAnimationFrame(function () {
