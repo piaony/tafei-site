@@ -268,10 +268,9 @@
     if (core.state().selected !== spirit.id) {
       selectedSkin = (core.skinById(spirit.defaultSkin) || skins[0] || {}).id;
     }
-    forms.innerHTML = '<div class="spirit-skins-head"><span>皮肤选择</span><em>' + skins.length + ' 款 · 点选换装</em></div>'
+    forms.innerHTML = '<div class="spirit-skins-head"><span>皮肤选择</span><em>' + skins.length + ' 款 · 点选换装 · 后续可加</em></div>'
       + '<div class="spirit-skin-list">'
       + skins.map(function (skin) { return skinOptionHtml(skin, skin.id === selectedSkin); }).join('')
-      + skinMoreHtml()
       + '</div>';
   }
 
