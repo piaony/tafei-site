@@ -33,6 +33,7 @@
 .partner-wallet.demo{border-color:rgba(255,211,110,.3);color:var(--sp-gold);background:rgba(255,211,110,.06)}
 .partner-skins{margin-top:13px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.09)}
 .partner-skins[hidden]{display:none!important}
+.partner-fx-hint{margin:7px 0 0;color:rgba(255,255,255,.4);font-size:10px;line-height:1.5}
 .partner-skins-head,.spirit-skins-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
 .partner-skins-head span,.spirit-skins-head span{color:var(--sp-cyan);font-size:10.5px;letter-spacing:.14em}
 .partner-skins-head em,.spirit-skins-head em{color:var(--ang-muted);font-size:10px;font-style:normal}
