@@ -6,7 +6,7 @@
   var core = window.TafeiSpirits;
   if (!core) return;
 
-  var CSS_HREF = 'css/spirit-widget.css?v=7';
+  var CSS_HREF = 'css/spirit-widget.css?v=8';
   var ART_FILES = {
     idle: 'action-idle.png',
     pet: 'action-pet.png',
