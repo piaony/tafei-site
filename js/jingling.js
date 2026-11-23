@@ -42,7 +42,9 @@
   function primeWidget() {
     if (window.TafeiSpiritWidgetLoaded) return;
     if (!core.state() || !core.state().widget || !core.state().widget.on) return;
-    var run = function () { loadWidgetScript().catch(function () {}); };
+    var run = function () {
+      loadWidgetScript().then(function () { renderAll(); }).catch(function () {});
+    };
     if ('requestIdleCallback' in window) {
       window.requestIdleCallback(run, { timeout: 1500 });
     } else {
@@ -105,7 +107,8 @@
     toggle.disabled = false;
     toggle.classList.toggle('on', on);
     toggle.setAttribute('aria-checked', on ? 'true' : 'false');
-    if (state) state.textContent = has ? (on ? '已放出' : '未放出') : '先领一个伙伴';
+    var pending = has && on && !window.TafeiSpiritWidgetLoaded;
+    if (state) state.textContent = has ? (pending ? '正在放出…' : (on ? '已放出' : '未放出')) : '先领一个伙伴';
   }
 
   function setMeter(prefix, key, value) {
@@ -860,17 +863,23 @@
       return;
     }
     var nextOn = !core.state().widget.on;
+    var wasLoaded = !!window.TafeiSpiritWidgetLoaded;
     core.setWidget(nextOn);
     renderAll();
     if (nextOn) {
-      loadWidgetScript().catch(function () {
+      if (!wasLoaded) toast('正在放出全站挂件…');
+      loadWidgetScript().then(function () {
+        renderAll();
+        if (core.state().widget.on) toast('全站挂件已出现：电脑端会出现在页面右下角，也能拖到任意位置。');
+      }).catch(function () {
         if (!core.state().widget.on) return;
         core.setWidget(false);
         renderAll();
         toast('挂件加载失败，请刷新页面再试。', true);
       });
+    } else {
+      toast('全站挂件已收起。');
     }
-    toast(nextOn ? '全站挂件已出现：电脑端会出现在页面右下角，也能拖到任意位置。' : '全站挂件已收起。');
   });
 
   core.subscribe(function () {
