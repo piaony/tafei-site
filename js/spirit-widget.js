@@ -821,12 +821,12 @@
       if (window.getSelection) { try { window.getSelection().removeAllRanges(); } catch (error) {} }
       try { body.releasePointerCapture(event.pointerId); } catch (error) {}
       drag = null;
-      if ((wasActive || wasMoved) && core.recordWidget) core.recordWidget('drag');
       if (!wasActive && !wasMoved) {
         interact(event);
         return;
       }
       savePosition();
+      if (core.recordWidget) core.recordWidget('drag');
       clearTimeout(alertTimer);
       root.classList.remove('sw-alert');
       var happyFile = happyFileFor(spiritId());

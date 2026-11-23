@@ -24,7 +24,7 @@
     if (widgetLoader) return widgetLoader;
     widgetLoader = new Promise(function (resolve, reject) {
       var script = document.createElement('script');
-      script.src = 'js/spirit-widget.js?v=19';
+      script.src = 'js/spirit-widget.js?v=20';
       script.async = true;
       script.onload = function () {
         window.TafeiSpiritWidgetLoaded = true;
