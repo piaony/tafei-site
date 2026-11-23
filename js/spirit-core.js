@@ -131,12 +131,16 @@
       intro: '粉色双马尾、圆眼镜，还有一本会发光的书。'
     },
     {
-      id: 'yao', name: '瑶', game: '王者荣耀 · 鹿灵守心', tag: '王者荣耀',
-      img: 'assets/spirits/yao.jpg', accent: '#ffb3d9',
-      line: '森林里没有陌生人，只有还没认识的朋友。',
-      quote: '小鹿说，今天适合去林子里散步。',
+      id: 'yao', name: '瑶', game: '王者荣耀 · 时之祈愿', tag: '王者荣耀',
+      img: 'assets/spirits/yao-v23/main.png',
+      avatar: 'assets/spirits/yao-v23/avatar.png',
+      widget: 'assets/spirits/yao-v23/widget-128.png',
+      actionDir: 'assets/spirits/yao-v23/',
+      accent: '#b8c7ff',
+      line: '星星会记住每一个愿望。',
+      quote: '把愿望说出来，星鹿就会听见。',
       defaultSkin: 'yao-default',
-      intro: '鹿角、森林和一只跟着她的小鹿。'
+      intro: '浅金发、鹿角、花饰与星晶权杖，一场写给星星的祈愿。'
     },
     {
       id: 'gardener', name: '园丁', game: '第五人格 · 艾玛·伍兹', tag: '第五人格',
@@ -184,7 +188,7 @@
     { id: 'xiaota-default', spirit: 'xiaota', name: '奶油挞壳', img: 'assets/spirits/xiaota-v23/main.png', avatar: 'assets/spirits/xiaota-v23/avatar.png', widget: 'assets/spirits/xiaota-v23/widget-128.png', actionDir: 'assets/spirits/xiaota-v23/', price: 0, default: true, quote: '挞壳是帽子，奶油是裙摆，围巾是青绿色的风。' },
     { id: 'xi-shi-default', spirit: 'xi-shi', name: '幻纱之灵', img: 'assets/spirits/xi-shi.jpg', price: 0, default: true },
     { id: 'angela-default', spirit: 'angela', name: '暗夜萝莉', img: 'assets/spirits/angela-v23/main.png', avatar: 'assets/spirits/angela-v23/avatar.png', widget: 'assets/spirits/angela-v23/widget-128.png', actionDir: 'assets/spirits/angela-v23/', price: 0, default: true },
-    { id: 'yao-default', spirit: 'yao', name: '鹿灵守心', img: 'assets/spirits/yao.jpg', price: 0, default: true },
+    { id: 'yao-default', spirit: 'yao', name: '时之祈愿', img: 'assets/spirits/yao-v23/main.png', avatar: 'assets/spirits/yao-v23/avatar.png', widget: 'assets/spirits/yao-v23/widget-128.png', actionDir: 'assets/spirits/yao-v23/', price: 0, default: true, quote: '把愿望说出来，星鹿就会听见。' },
     { id: 'gardener-default', spirit: 'gardener', name: '园丁日常', img: 'assets/spirits/gardener.jpg', price: 0, default: true },
     { id: 'doctor-default', spirit: 'doctor', name: '医生日常', img: 'assets/spirits/doctor.jpg', price: 0, default: true },
     { id: 'mechanic-default', spirit: 'mechanic', name: '机械师日常', img: 'assets/spirits/mechanic.jpg', price: 0, default: true },

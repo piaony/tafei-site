@@ -190,7 +190,7 @@
       return;
     }
     var script = document.createElement('script');
-    script.src = 'js/spirit-core.js?v=8';
+    script.src = 'js/spirit-core.js?v=9';
     script.onload = loadSpiritWidget;
     document.body.appendChild(script);
   }
