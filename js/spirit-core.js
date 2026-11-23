@@ -253,7 +253,7 @@
     status: { satiety: 72, mood: 76, anger: 8, sleepiness: 20 },
     bond: {},
     credits: DEFAULT_DEMO_CREDITS,
-    widget: { on: false, x: 0.86, y: 0.7, corner: 'br' },
+    widget: { on: false, x: 0.72, y: 0.62, corner: 'free' },
     lastTick: 0,
     lastInteraction: 0,
     today: { date: '', toys: {} },

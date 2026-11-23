@@ -124,7 +124,7 @@
       avatarBox.classList.toggle('has-bond-frame', bondInfo.level >= 7);
     }
     if (toggle) {
-      toggle.textContent = core.state().widget.on ? '关闭全站挂件' : '开启全站挂件';
+      toggle.textContent = core.state().widget.on ? '收起全站伙伴' : '放出全站伙伴';
       toggle.classList.toggle('on', !!core.state().widget.on);
     }
     renderWallet();
@@ -725,7 +725,7 @@
     if (!currentModal) return;
     try {
       core.selectSpirit(currentModal, core.spiritById(currentModal).defaultSkin);
-      toast('已设成全站伙伴，首页和全站挂件会同步更新。');
+      toast('已设成全站伙伴，首页和她站里的位置会同步更新。');
       renderAll();
     } catch (error) { toast(error.message || '切换失败。', true); }
   });
@@ -740,7 +740,7 @@
 
   $('widgetToggle')?.addEventListener('click', function () {
     core.setWidget(!core.state().widget.on);
-    toast(core.state().widget.on ? '全站挂件已打开，拖一拖她试试。' : '全站挂件已收起。');
+    toast(core.state().widget.on ? '全站伙伴已出现：她会自己走动，也能拖到任意位置。' : '全站伙伴已收起。');
     renderAll();
   });
 
