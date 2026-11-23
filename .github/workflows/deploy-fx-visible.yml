@@ -1,0 +1,22 @@
+name: deploy-fx-visible
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-fx-visible.yml'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply package
+        run: |
+          curl -L --fail 'https://aka.doubaocdn.com/s/vvzGUy3xny' -o /tmp/fx.tgz
+          tar -xzf /tmp/fx.tgz -C .
+          git config user.name 'tafei-deploy'
+          git config user.email 'tafei-deploy@users.noreply.github.com'
+          git add jingling.html js/jingling.js css/spirit-house.css
+          if git diff --cached --quiet; then echo 'no changes'; else git commit -m 'fix: show floating spirit effects on jingling page'; git push origin main; fi
