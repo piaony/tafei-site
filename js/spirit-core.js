@@ -861,7 +861,7 @@
     if (type === 'drag') state.stats.drags += 1;
     else if (type === 'bump') state.stats.bumps += 1;
     else return;
-    save();
+    save(type === 'drag');
   }
 
   function achievements() {
