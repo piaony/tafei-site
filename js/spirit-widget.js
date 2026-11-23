@@ -45,7 +45,7 @@
   var baseArt = '';
   var lastFxAction = '';
   var lastSpark = 0;
-  var BUMP_LINES = ['好疼……撞到啦。', '呜，头有点晕。', '小心一点呀。', '角角撞疼了。'];
+  var BUMP_LINES = ['好疼……撞到啦。', '呜，撞得好疼。', '角角撞疼了。', '慢一点，好疼呀。'];
   var DIZZY_LINES = ['慢一点……好晕呀。', '要转晕啦……', '飞太快了，星星都在转。', '等我缓一缓。'];
   var DROP_LINES = ['这里不错，我记住啦。', '就放这里吧。', '呼……稳稳落地。'];
 
@@ -245,6 +245,7 @@
     showAlert(pick(BUMP_LINES), 1550);
     root.classList.add('sw-bump');
     burst('bump', 1);
+    burst('dizzy', 4);
     setTimeout(function () { if (root) root.classList.remove('sw-bump'); }, 620);
   }
 
