@@ -122,9 +122,17 @@
     setMeter(prefix, 'Sleep', s.sleepiness);
   }
 
+  function webpAvatar(src) {
+    return src && /avatar\.png(?:\?.*)?$/i.test(src) ? src.replace(/avatar\.png(?:\?.*)?$/i, 'avatar.webp') : src;
+  }
+
+  function webpGrid(src) {
+    return src && /main\.png(?:\?.*)?$/i.test(src) ? src.replace(/main\.png(?:\?.*)?$/i, 'grid.webp') : src;
+  }
+
   function skinImage(skin) {
     var src = skin && (skin.avatar || skin.img);
-    return src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<span class="skin-swatch-fallback">✦</span>';
+    return src ? '<img src="' + esc(webpAvatar(src)) + '" alt="" loading="lazy" decoding="async">' : '<span class="skin-swatch-fallback">✦</span>';
   }
 
   function skinOptionHtml(skin, active) {
@@ -192,7 +200,13 @@
     }
     if (dock) dock.classList.remove('is-empty');
     if (img) {
-      img.src = skin.avatar || skin.img;
+      var avatar = skin.avatar || skin.img;
+      var avatarSrc = webpAvatar(avatar);
+      img.onerror = function () {
+        img.onerror = null;
+        if (avatar) img.src = avatar;
+      };
+      if (img.getAttribute('src') !== avatarSrc) img.src = avatarSrc;
       img.alt = spirit.name + ' · ' + skin.name;
     }
     if (tag) tag.textContent = spirit.tag;
@@ -296,12 +310,19 @@
       return '<article class="spirit-card' + (unlocked ? '' : ' is-locked') + (isSelected ? ' is-selected' : '') + frame + '">'
         + '<div class="spirit-flag' + (spirit.original ? ' original' : '') + '">' + esc(spirit.tag) + '</div>'
         + '<button class="spirit-cover" type="button" data-card-action="open" data-id="' + esc(spirit.id) + '" aria-label="查看' + esc(spirit.name) + '">'
-        + '<img src="' + esc(skin.img) + '" alt="' + esc(spirit.name) + ' Q 版角色卡" width="512" height="512" loading="lazy" decoding="async" fetchpriority="low"></button>'
+        + '<img src="' + esc(webpGrid(skin.img)) + '" data-fallback="' + esc(skin.img) + '" alt="' + esc(spirit.name) + ' Q 版角色卡" width="512" height="512" loading="lazy" decoding="async" fetchpriority="low"></button>'
         + '<div class="spirit-info"><span class="spirit-game">' + esc(spirit.game) + '</span><h2>' + esc(spirit.name) + '</h2><p>' + esc(spirit.intro) + '</p>'
         + '<div class="spirit-price-line"><span>' + (unlocked ? '已在小屋里' : '未解锁') + '</span>' + priceLabel + '</div>'
         + cardButton(spirit, unlocked, isSelected)
         + '</div></article>';
     }).join('');
+    Array.prototype.forEach.call(grid.querySelectorAll('img[data-fallback]'), function (img) {
+      img.addEventListener('error', function () {
+        if (img.dataset.fallbackApplied) return;
+        img.dataset.fallbackApplied = '1';
+        img.src = img.dataset.fallback;
+      });
+    });
   }
 
   function renderSkins() {
