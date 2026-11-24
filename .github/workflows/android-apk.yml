@@ -81,6 +81,21 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Bump app shell asset version
+        run: |
+          SHELL_VER="${{ github.run_number }}"
+          python3 - "$SHELL_VER" <<'PY'
+          import glob, sys
+          ver = sys.argv[1]
+          for f in glob.glob("www/*.html"):
+              s = open(f, encoding="utf-8").read()
+              for pref in ("css/app-shell.css?v=", "js/app-shell.js?v="):
+                  for old in ("2", "3"):
+                      s = s.replace(pref + old, pref + ver)
+              open(f, "w", encoding="utf-8").write(s)
+          print("shell asset version ->", ver)
+          PY
+
       - name: Sync Capacitor
         run: npx cap sync android
 
