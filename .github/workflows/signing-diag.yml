@@ -25,41 +25,39 @@ jobs:
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           set +e
           {
             echo "probe_at=$(date -u +%FT%TZ)"
-            echo "b64_len=${#KS_B64}"
+            echo "raw_len=${#KS_B64}"
             echo "pass_len=${#KS_PASS}"
-            echo "alias_len=${#KS_ALIAS}"
-            if [ -z "$KS_B64" ] && [ -z "$KS_PASS" ]; then
-              echo "verdict=no_secrets_visible"
-            elif [ -z "$KS_B64" ]; then
-              echo "verdict=b64_missing"
-            elif [ -z "$KS_PASS" ]; then
-              echo "verdict=password_missing"
-            else
-              printf '%s' "$KS_B64" | tr -d ' \n\r\t' | base64 -d > /tmp/k.jks 2> /tmp/derr.txt
-              if [ -s /tmp/k.jks ]; then
-                echo "b64_decode=ok bytes=$(wc -c < /tmp/k.jks)"
-                if keytool -list -keystore /tmp/k.jks -storepass "$KS_PASS" > /tmp/list.txt 2>&1; then
-                  echo "unlock=ok"
-                  ALIAS=$(awk -F, '/PrivateKeyEntry/ {print $1; exit}' /tmp/list.txt | tr -d ' ')
-                  echo "alias=$(printf '%s' "$ALIAS" | sed 's/.*/&/')${ALIAS:+}"
-                  echo "verdict=ready"
-                else
-                  echo "unlock=fail"
-                  tail -3 /tmp/list.txt
-                  echo "verdict=password_wrong"
-                fi
-              else
-                echo "b64_decode=fail"
-                head -3 /tmp/derr.txt
-                echo "verdict=b64_corrupt"
-              fi
+            KM=$(printf '%s' "$KS_B64" | tr -cd 'A-Za-z0-9+/=')
+            echo "clean_len=${#KM}"
+            echo "clean_mod4=$(( ${#KM} % 4 ))"
+            junk=$(( ${#KS_B64} - ${#KM} ))
+            echo "anna_removed=$junk"
+            R=$(( ${#KM} % 4 ))
+            if [ "$R" -ne 0 ]; then
+              KM="$KM$(printf '=%.0s' $(seq 1 $((4-R))))"
             fi
-          } > diag.txt
+            printf '%s' "$KM" | base64 -d > /tmp/k.jks 2> /tmp/derr.txt
+            echo "decoded_bytes=$(wc -c < /tmp/k.jks 2>/dev/null)"
+            if [ -s /tmp/k.jks ]; then
+              if keytool -list -keystore /tmp/k.jks -storepass "$KS_PASS" > /tmp/list.txt 2>&1; then
+                echo "unlock=ok"
+                awk -F, '/PrivateKeyEntry/ {print "alias=" $1}' /tmp/list.txt | tr -d ' ' | head -2
+                echo "verdict=ready"
+              else
+                echo "unlock=fail"
+                tail -3 /tmp/list.txt
+                echo "verdict=password_or_key_mismatch"
+              fi
+            else
+              echo "decode=fail"
+              head -3 /tmp/derr.txt
+              echo "verdict=b64_damaged"
+            fi
+          } > diag.txt 2>&1
           cat diag.txt
 
       - name: Publish diag result
@@ -68,5 +66,5 @@ jobs:
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
           git add -f diag.txt
-          git commit -m "diag: signing secrets probe [skip ci]" || true
+          git commit -m "diag: signing secret probe v2 [skip ci]" || true
           git push -f origin HEAD:diag || true
