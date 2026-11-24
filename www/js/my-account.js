@@ -238,7 +238,7 @@
     fbRow.className = 'row';
     fbRow.id = 'mcFeedback';
     fbRow.style.cssText = 'width:100%;background:transparent;border:0;border-bottom:1px solid rgba(130,170,255,.12);color:inherit;text-align:left;font:inherit';
-    fbRow.innerHTML = '<span class="l"><span class="dot">反</span><span>问题反馈</span></span>'
+    fbRow.innerHTML = '<span class="l"><span class="dot" data-ti="feedback"></span><span>问题反馈</span></span>'
       + '<span class="r"><span>QQ / TG</span><span>›</span></span>';
     listBox.appendChild(fbRow);
   }
@@ -248,9 +248,9 @@
   var sheet = document.createElement('div');
   sheet.className = 'mc-sheet';
   sheet.innerHTML = '<h3>问题反馈</h3><p>遇到 bug、提需求或需要售后，直接找我本人。</p>'
-    + '<button class="mc-row" type="button" data-fb="qq"><span class="g">Q</span>'
+    + '<button class="mc-row" type="button" data-fb="qq"><span class="g" data-ti="chat"></span>'
     + '<span><b>QQ · 3659229103</b><small>点按复制号码并尝试打开 QQ 会话</small></span></button>'
-    + '<button class="mc-row" type="button" data-fb="tg"><span class="g">T</span>'
+    + '<button class="mc-row" type="button" data-fb="tg"><span class="g" data-ti="paper"></span>'
     + '<span><b>Telegram · @piaopiaony</b><small>点按打开 t.me/piaopiaony</small></span></button>'
     + '<button class="mc-close" type="button">关闭</button>';
   document.body.appendChild(mask);

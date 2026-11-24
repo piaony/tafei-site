@@ -1,0 +1,47 @@
+/* TAFEI ICON SYSTEM v34 · 统一线性图标
+   取代"用单个汉字当图标"：容器加 data-ti="fix" 即可自动补图标
+   图标尺寸默认 18px，可按容器覆盖；颜色跟随容器 color */
+
+.ti-svg{
+  width:18px;height:18px;display:inline-block;vertical-align:middle;
+  stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;
+  flex:0 0 auto;
+}
+
+/* 首页宫格 / 快捷行的大图标 */
+.ti-svg.ti-lg{width:22px;height:22px;stroke-width:1.6}
+.ti-svg.ti-sm{width:15px;height:15px;stroke-width:1.8}
+
+/* 通用彩色图标底座 */
+.ti-chip{
+  display:inline-grid;place-items:center;flex:0 0 auto;
+  width:34px;height:34px;border-radius:11px;
+  background:linear-gradient(120deg,#53ddff,#728cff 60%,#b28cff);
+  color:#06101f;
+}
+.ti-chip>.ti-svg{width:18px;height:18px}
+
+/* 工具页、我的页里原有的 .ico / .dot 底座：保留形状，图标替换掉汉字 */
+.card .ico>.ti-svg,.row .dot>.ti-svg{width:17px;height:17px;stroke-width:1.8;color:#06101f}
+.row .dot>.ti-svg{width:14px;height:14px;stroke-width:1.9}
+
+/* 首页小图标容器 */
+.hv-ic{display:inline-grid;place-items:center}
+.hv-ic>.ti-svg{width:16px;height:16px;color:var(--cyan)}
+.mc-row .g>.ti-svg{width:17px;height:17px;color:#06101f}
+
+/* 首页隐藏旧的浮动搜索球（首屏已有搜索条，避免遮挡列表） */
+body.page-home .tf2-fab{display:none!important}
+
+/* 工具页：按模块语义给图标底座配色 */
+.card .ico[data-ti="fix"]{background:linear-gradient(135deg,#ff7b6b,#ffab5e)}
+.card .ico[data-ti="calendar"]{background:linear-gradient(135deg,#35e0a5,#4fc3ff)}
+.card .ico[data-ti="device"]{background:linear-gradient(135deg,#4f8bff,#63d6ff)}
+.card .ico[data-ti="search"]{background:linear-gradient(135deg,#3ec8ff,#7d8dff)}
+.card .ico[data-ti="shop"]{background:linear-gradient(135deg,#ffb457,#ff7a8a)}
+.card .ico[data-ti="book"]{background:linear-gradient(135deg,#7d8dff,#a98bff)}
+.card .ico[data-ti="spirit"]{background:linear-gradient(135deg,#b98cff,#ff8fd8)}
+.card .ico[data-ti="smile"]{background:linear-gradient(135deg,#ff8fd8,#ffb7e4)}
+.card .ico[data-ti="about"]{background:linear-gradient(135deg,#8fa8cc,#c3d3ea)}
+.card .ico[data-ti="me"]{background:linear-gradient(135deg,#64e8ff,#50a8ff)}

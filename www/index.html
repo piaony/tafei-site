@@ -22,6 +22,8 @@
 <link rel="stylesheet" href="css/partner-panel.css?v=4">
 <link rel="stylesheet" href="css/spirit-chat.css?v=2">
 <link rel="stylesheet" href="css/app-shell.css?v=2">
+<link rel="stylesheet" href="css/tafei-ico.css?v=34">
+<link rel="stylesheet" href="css/home-v2.css?v=34">
 <script src="js/app-shell.js?v=2" defer></script>
 </head>
 <body class="page-home">
@@ -59,60 +61,70 @@
 <div class="navright"><button class="iconbtn" id="themeBtn" aria-label="切换主题">☼</button><button class="menuBtn" id="menuBtn" aria-label="打开菜单">☰</button></div>
 </div></header>
 <main class="wrap">
-<section class="hero" id="home">
-<div><div class="status"><i class="dot"></i> SERVICE STATION · 23.0</div><div class="eyebrow" style="margin-top:22px">临沂 · 手机技术服务 / 玩机社区</div>
-<h1 style="font-size:clamp(36px,5.2vw,66px)">手机出问题，<br><span class="gradient">先来挞飞自检。</span></h1>
-<p>先判断、再报价、后动手。手机急救室用 2 分钟帮你缩小故障范围；解 BL、Root、救砖、性能优化由站长本人接单，全程录屏，7 天售后。机型档案和玩机资料继续免费看。</p>
-<div class="actions">
- <a class="btn primary" href="fix.html">手机急救室 ↗</a>
- <a class="btn" href="service.html">技术服务</a>
- <a class="btn" href="device.html">查机型档案</a>
+<section class="hero hv" id="home">
+<div class="hv-acc" id="hvAcc">
+ <span class="hv-ava" id="hvAva">访</span>
+ <div class="hv-acc-main">
+  <p class="hv-hi" id="hvHi">晚上好，欢迎来挞飞</p>
+  <p class="hv-sub" id="hvSub">未登录 · 登录后同步数据</p>
+ </div>
+ <a class="hv-act" id="hvAct" href="index.html#community">立即登录</a>
+ <div class="hv-metrics">
+  <div class="hv-metric"><span class="hv-ic" data-ti="coin"></span><b id="hvBal">—</b>额度</div>
+  <div class="hv-metric"><span class="hv-ic" data-ti="book"></span><b id="hvPost">—</b>我的帖子</div>
+  <div class="hv-metric"><span class="hv-ic" data-ti="chat"></span><b id="hvDm">—</b>未读私信</div>
+ </div>
 </div>
-<div class="stats-row"><div class="stat-chip"><strong>2 分钟</strong>自助判断</div><div class="stat-chip"><strong>0</strong>设备数据上传</div><div class="stat-chip"><strong>7 天</strong>站内售后</div></div>
-<p class="note" style="margin-top:18px">LOCAL TIME · <span id="clock">正在读取时间…</span></p></div>
-<div class="orb-wrap"><div class="orb" aria-label="科技感发光球体"></div></div>
-</section>
 
-<section id="care-entry" class="reveal">
- <div class="panel service-strip">
-  <div>
-   <div class="kicker">TAFEI CARE · 新功能</div>
-   <h3>黑屏、卡顿、耗电、刷机失败？先做一次 5 步自检</h3>
-   <p>不收集设备数据 · 给出可以先做 / 先别做 / 可能原因 / 参考区间，并可一键复制摘要给站长。</p>
-  </div>
-  <div class="ss-actions">
-   <a class="btn primary" href="fix.html">进入手机急救室 →</a>
-   <a class="btn" href="service.html#book">直接报修</a>
-  </div>
- </div>
-</section>
+<a class="hv-search" href="search.html">
+ <span class="hv-ic" data-ti="search"></span>
+ <span>搜索机型、故障、文章</span>
+ <i>搜索</i>
+</a>
 
-<section id="service-entry" class="reveal">
- <div class="panel service-strip">
-  <div>
-   <div class="kicker">TECH SERVICE</div>
-   <h3>刷机、Root、模块、救砖，远程帮你弄好</h3>
-   <p>先检测机型再报价 · 解 BL / Root ¥30 起 · 救砖 ¥40 起 · 全程录屏，7 天售后</p>
-  </div>
-  <div class="ss-actions">
-   <a class="btn primary" href="service.html">技术服务 ↗</a>
-   <a class="btn" href="device.html">查机型档案</a>
-  </div>
- </div>
-</section>
+<div class="hv-grid">
+ <a class="hv-tile" href="fix.html" style="--grad:linear-gradient(135deg,#ff7b6b,#ffab5e);--glow:rgba(255,140,90,.3)">
+  <span class="hv-ico" data-ti="fix"></span>
+  <b>手机急救室</b>
+  <small>5 步自检 · 2 分钟出结论</small>
+ </a>
+ <a class="hv-tile" href="device.html" style="--grad:linear-gradient(135deg,#4f8bff,#63d6ff);--glow:rgba(80,150,255,.3)">
+  <span class="hv-ico" data-ti="device"></span>
+  <b>查机型档案</b>
+  <small>425 台 · 参数与二手避坑</small>
+ </a>
+ <a class="hv-tile" href="jingling.html?from=tafei" style="--grad:linear-gradient(135deg,#b98cff,#ff8fd8);--glow:rgba(190,140,255,.32)">
+  <span class="hv-ico" data-ti="spirit"></span>
+  <span class="hv-tag">NEW</span>
+  <b>精灵小屋</b>
+  <small>9 位伙伴 · 养成与彩蛋</small>
+ </a>
+ <a class="hv-tile" href="service.html#book" style="--grad:linear-gradient(135deg,#35e0a5,#4fc3ff);--glow:rgba(60,220,180,.28)">
+  <span class="hv-ico" data-ti="calendar"></span>
+  <b>技术服务预约</b>
+  <small>解 BL / Root / 救砖 / 上门</small>
+ </a>
+</div>
 
-<section id="shop-entry" class="reveal">
- <div class="panel service-strip shop-strip">
-  <div>
-   <div class="kicker">TAFEI SHOP / 独立模块</div>
-   <h3>商城独立入口：资料包、工具包与站长服务</h3>
-   <p>数码资源、学习资料、定制服务统一放在商城；额度兑换、站内交付、全程留痕。</p>
-  </div>
-  <div class="ss-actions">
-   <a class="btn primary" href="#shop" data-view="shop">进入商城 ↗</a>
-   <a class="btn" href="service.html">先看服务</a>
-  </div>
- </div>
+<a class="hv-shop" href="#shop" data-view="shop">
+ <span class="hv-ico" data-ti="shop"></span>
+ <span class="hv-shop-main"><b>挞飞商城</b><small>资料包 · 折腾工具 · 站长定制服务</small></span>
+ <span class="hv-shop-go">进入<svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></span>
+</a>
+
+<div class="hv-list">
+ <a class="hv-row" href="naiwa.html"><span class="hv-mini" data-ti="game"></span><b>奶娃小游戏</b><i>27 款 · 点开就玩</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+ <a class="hv-row" href="#articles"><span class="hv-mini" data-ti="book"></span><b>文章攻略</b><i>Root / 刷机 / 选购实测</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+ <a class="hv-row" href="#changelog"><span class="hv-mini" data-ti="update"></span><b>更新日志</b><i>每次改动都记录</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+</div>
+
+<div class="hv-intro">
+ <div class="kic">临沂 · 手机技术服务 / 玩机社区</div>
+ <h1>手机出问题，<span class="gradient">先来挞飞自检。</span></h1>
+ <p>先判断、再报价、后动手。急救室 2 分钟帮你缩小故障范围；解 BL、Root、救砖、性能优化由站长本人接单，全程录屏，7 天售后；机型档案和玩机资料继续免费看。</p>
+ <div class="hv-chips"><span><b>2 分钟</b>自助判断</span><span><b>0</b>设备数据上传</span><span><b>7 天</b>站内售后</span></div>
+ <p class="hv-clock">LOCAL TIME · <span id="clock">正在读取时间…</span></p>
+</div>
 </section>
 
 <section id="shop" class="reveal" aria-label="挞飞商城">
@@ -148,33 +160,6 @@
  </div>
 </section>
 
-<section id="device-entry" class="reveal">
- <div class="panel service-strip">
-  <div>
-   <div class="kicker">DEVICE LIBRARY</div>
-   <h3>机型库：425 台，4 台深度档案 + 421 台公开规格</h3>
-   <p>苹果 · 三星 · 华为 · 荣耀 · 小米 · OPPO · vivo · 一加等 24 个品牌 · 支持品牌筛选、关键词搜索和 3 台对比，参数可回溯到公开规格来源页</p>
-  </div>
-  <div class="ss-actions">
-   <a class="btn primary" href="device.html">查机型档案 ↗</a>
-   <a class="btn" href="device.html?cmp=redmi-k40,redmi-note-12-turbo">看看对比</a>
-  </div>
- </div>
-</section>
-
-<section id="naiwa-entry" class="reveal">
- <div class="panel service-strip">
-  <div>
-   <div class="kicker">NAIWA ARCADE</div>
-   <h3>奶娃小游戏：27 个网页小游戏，点开就玩</h3>
-   <p>奶蛙系列 · 不用下载 · 手机浏览器直接玩，玩完关掉不占内存</p>
-  </div>
-  <div class="ss-actions">
-   <a class="btn primary" href="naiwa.html">去玩 ↗</a>
-   <a class="btn" href="https://milkyfrog.com/games" target="_blank" rel="noopener noreferrer">官方合集</a>
-  </div>
- </div>
-</section>
 
 <section id="articles" class="reveal" aria-label="文章内容"></section>
 
@@ -702,6 +687,7 @@
 </main>
 <footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界 · <a href="fix.html">手机急救室</a> · <a href="jingling.html?from=tafei" target="_blank" rel="noopener">精灵小屋</a><div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
+<script src="js/tafei-icons.js?v=34"></script>
 <script src="js/home-core.js?v=7"></script>
 <script src="js/spirit-core.js?v=14"></script>
 <script src="js/profile-spirit.js?v=2" defer></script>
@@ -717,6 +703,7 @@
 </nav>
 
 
+<script src="js/home-v2.js?v=34"></script>
 <script src="js/home-views.js?v=7"></script>
 <script src="js/community-hub.js?v=2"></script>
 <script src="js/shop-view.js?v=2"></script>
