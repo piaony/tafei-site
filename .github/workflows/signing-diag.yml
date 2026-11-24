@@ -25,7 +25,8 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Install encrypted key into repo\n        run: |
+      - name: Install encrypted key into repo
+        run: |
           set -e
           mkdir -p android/signing
           curl -fsSL --retry 3 "$ENC_URL" -o "$ENC_PATH"
@@ -58,13 +59,13 @@ jobs:
           } > diag.txt 2>&1
           cat diag.txt
 
-      - name: Commit signed-key blob
+      - name: Commit encrypted key
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
           git add -f "$ENC_PATH" diag.txt
-          git diff --cached --quiet || git commit -m "chore(signing): 加密密钥入仓（AES-256）[skip ci]"
-          git fetch origin app/capacitor-setup
+          git diff --cached --quiet || git commit -m "chore(signing): AES 加密密钥入仓 [skip ci]"
+          git fetch origin app/capacitor-setup || true
           git rebase origin/app/capacitor-setup || git rebase --abort || true
           git push origin HEAD:app/capacitor-setup || true
 
@@ -74,5 +75,5 @@ jobs:
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
           git add -f diag.txt || true
-          git commit -m "diag: signing probe v4 [skip ci]" || true
+          git commit -m "diag: signing probe v5 [skip ci]" || true
           git push -f origin HEAD:diag || true
