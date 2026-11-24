@@ -200,10 +200,27 @@
   try {
     if (!document.querySelector('script[data-sw-menu]')) {
       var sm = document.createElement('script');
-      sm.src = 'js/spirit-widget-menu.js?v=1';
+      sm.src = 'js/spirit-widget-menu.js?v=20261124b';
       sm.setAttribute('data-sw-menu', '1');
       sm.defer = true;
       document.head.appendChild(sm);
+    }
+  } catch (e) {}
+
+  /* —— 统一登录态入口：全站共用 tafei-session.js —— */
+  try {
+    if (!window.TafeiSession && !document.querySelector('script[data-tf-session]')) {
+      var ss = document.createElement('script');
+      ss.src = 'js/tafei-session.js?v=20261124b';
+      ss.setAttribute('data-tf-session', '1');
+      document.head.appendChild(ss);
+    }
+    /* 「我的」页额外挂上账号同步与问题反馈 */
+    if (/my\.html($|[?#])/.test(location.pathname + location.search) && !document.querySelector('script[data-tf-account]')) {
+      var ac = document.createElement('script');
+      ac.src = 'js/my-account.js?v=20261124b';
+      ac.setAttribute('data-tf-account', '1');
+      document.head.appendChild(ac);
     }
   } catch (e) {}
 

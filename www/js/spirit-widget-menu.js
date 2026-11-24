@@ -1,13 +1,13 @@
-/* TAFEI 挂件长按菜单 · 与精灵挂件的单击动作互不冲突
+/* TAFEI 挂件长按菜单 v3 · 与精灵挂件的单击动作互不冲突
    交互：单击 = 原有摸摸动作（完全不动原有逻辑）；长按 0.5 秒 = 弹出快捷菜单
    菜单：查看详情 / 喂一份零食 / 收起挂件；拖动超过 8px 不触发菜单 */
 (function () {
   'use strict';
-  if (window.__tafeiWidgetMenu) return;
-  window.__tafeiWidgetMenu = true;
+  if (window.__tafeiWidgetMenu === 'v3') return;
+  window.__tafeiWidgetMenu = 'v3';
 
-  var HOLD_MS = 500;
-  var MOVE_TOL = 8;
+  var HOLD_MS = 450;
+  var MOVE_TOL = 18;
   var menu = null;
   var timer = 0;
   var startX = 0, startY = 0, pressed = false, opened = false;
@@ -137,7 +137,7 @@
 
     root.addEventListener('pointermove', function (e) {
       if (!pressed) return;
-      if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > MOVE_TOL) {
+      if (Math.abs(e.clientX - startX) > MOVE_TOL || Math.abs(e.clientY - startY) > MOVE_TOL) {
         clearTimeout(timer);
         pressed = false;
         closeMenu();

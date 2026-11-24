@@ -52,6 +52,8 @@ public class UpdateChecker {
 
     public static void maybeCheck(Activity activity) {
         if (activity == null || running) return;
+        /* 从「允许安装未知应用」设置页返回后，自动续装已下载的更新包 */
+        InAppUpdater.installPending(activity);
         final SharedPreferences sp = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         if (System.currentTimeMillis() - sp.getLong(K_LAST, 0L) < CHECK_INTERVAL_MS) return;
 
@@ -120,7 +122,7 @@ public class UpdateChecker {
             new AlertDialog.Builder(act, R.style.TafeiDialog)
                 .setTitle("发现新版本 v" + r.name)
                 .setMessage(msg.toString())
-                .setPositiveButton("立即更新", (dialog, which) -> openDownload(act))
+                .setPositiveButton("立即更新", (dialog, which) -> InAppUpdater.start(act))
                 .setNegativeButton("稍后再说", null)
                 .setNeutralButton("忽略此版本", (dialog, which) -> sp.edit().putInt(K_SKIP, r.code).apply())
                 .show();
