@@ -1,0 +1,43 @@
+name: tafei-app-shell
+on:
+  push:
+    paths:
+      - '.github/workflows/app-shell.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: inject shell into www pages
+        run: |
+          python3 - <<'PY'
+          import glob
+          LINK = '<link rel="stylesheet" href="css/app-shell.css?v=1">'
+          SCRIPT = '<script src="js/app-shell.js?v=1" defer></script>'
+          changed = 0
+          for p in sorted(glob.glob('www/*.html')):
+              name = p.split('/')[-1]
+              if name.startswith('admin') or name == 'service-admin.html':
+                  continue
+              s = open(p, encoding='utf-8').read()
+              if 'app-shell.css' in s:
+                  print('already', p)
+                  continue
+              if '</head>' not in s:
+                  print('skip(no head)', p)
+                  continue
+              s = s.replace('</head>', LINK + '\n' + SCRIPT + '\n</head>', 1)
+              open(p, 'w', encoding='utf-8').write(s)
+              changed += 1
+              print('patched', p)
+          print('total', changed)
+          PY
+      - name: commit
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A www
+          git commit -m "feat(app): 注入 App 外壳（统一 4 项底部导航）" || echo "nothing to commit"
+          git push

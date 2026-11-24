@@ -1,0 +1,72 @@
+/* TAFEI APP SHELL · 仅供安卓 App 内的页面使用
+   作用：统一底部导航（4 项）、给内容区留出导航高度、避免底部元素被导航压住 */
+
+html.in-app{background:#080d1b}
+
+body.in-app{
+  padding-bottom:calc(96px + env(safe-area-inset-bottom))!important;
+  overscroll-behavior-y:contain;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* —— 统一底部导航（覆盖各页面自己的样式） —— */
+.in-app .mobile-bottom-nav{
+  position:fixed!important;
+  left:0!important;right:0!important;bottom:0!important;top:auto!important;
+  z-index:99999!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  gap:2px;
+  margin:0!important;
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom))!important;
+  background:rgba(11,18,34,.97)!important;
+  border:0!important;border-top:1px solid rgba(122,170,255,.16)!important;
+  border-radius:0!important;
+  box-shadow:0 -8px 28px rgba(4,10,25,.45)!important;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+.in-app .mobile-bottom-nav a,
+.in-app .mobile-bottom-nav a span{
+  text-decoration:none!important;
+}
+
+.in-app .mobile-bottom-nav a{
+  display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;
+  gap:3px;
+  min-height:46px;
+  padding:0!important;margin:0!important;
+  border:0!important;border-radius:12px!important;
+  background:transparent!important;
+  color:#9db0cc!important;
+  font-size:11.5px!important;font-weight:500!important;line-height:1.35!important;
+  letter-spacing:.02em;
+  transition:color .2s ease,background-color .2s ease,transform .12s ease;
+}
+
+.in-app .mobile-bottom-nav a .tf-ico,
+.in-app .mobile-bottom-nav a svg{
+  width:22px!important;height:22px!important;display:block;
+  flex:0 0 auto;
+}
+
+.in-app .mobile-bottom-nav a.active{
+  color:#64e8ff!important;
+  font-weight:700!important;
+  background:rgba(100,232,255,.1)!important;
+}
+
+.in-app .mobile-bottom-nav a:active{transform:scale(.94)}
+
+/* —— 底部浮动元素让位 —— */
+@media (max-width:760px){
+  .in-app .tf2-fab{bottom:calc(106px + env(safe-area-inset-bottom))!important}
+  .in-app .tf-backtop{bottom:calc(110px + env(safe-area-inset-bottom))!important}
+  .in-app .dev-cmp-bar{bottom:calc(96px + env(safe-area-inset-bottom))!important}
+  .in-app .spirit-toast,.in-app .tf2-toast{bottom:calc(104px + env(safe-area-inset-bottom))!important}
+}
+
+/* —— 更顺滑的滚动 —— */
+.in-app{-webkit-overflow-scrolling:touch}
