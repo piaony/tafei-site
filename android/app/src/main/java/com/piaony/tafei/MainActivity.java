@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -21,7 +22,8 @@ import com.getcapacitor.BridgeActivity;
  * 挞飞 App 外壳：
  * 1) 系统栏安全区适配（顶部状态栏 / 底部手势区不再压住内容）
  * 2) 返回键分级处理：先关弹层 → 再退上一页 → 最后“再按一次退出”
- * 3) 启动 / 回到前台时检查新版本（12 小时内最多一次）
+ * 3) 启动 / 回到前台时检查新版本（12 小时内最多一次），「我的」页可手动触发
+ * 4) 给网页暴露 TafeiNative 桥，用于读版本号 / 手动检查更新
  */
 public class MainActivity extends BridgeActivity {
 
@@ -40,6 +42,7 @@ public class MainActivity extends BridgeActivity {
         if (webView == null) return;
 
         webView.setBackgroundColor(Color.parseColor(BG));
+        webView.addJavascriptInterface(new NativeBridge(this), "TafeiNative");
 
         ViewCompat.setOnApplyWindowInsetsListener(webView, new OnApplyWindowInsetsListener() {
             @Override
@@ -100,5 +103,46 @@ public class MainActivity extends BridgeActivity {
         }
         lastBackAt = now;
         Toast.makeText(getApplicationContext(), "再按一次退出挞飞", Toast.LENGTH_SHORT).show();
+    }
+
+    /* 供「我的」页调用：读版本号、手动检查更新 */
+    public static class NativeBridge {
+        private final MainActivity act;
+
+        NativeBridge(MainActivity a) {
+            this.act = a;
+        }
+
+        @JavascriptInterface
+        public String appVersion() {
+            return UpdateChecker.versionNameOf(act);
+        }
+
+        @JavascriptInterface
+        public int appCode() {
+            return UpdateChecker.currentVersionCode(act);
+        }
+
+        @JavascriptInterface
+        public void checkUpdate() {
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    act.getSharedPreferences("tafei_app", 0).edit().remove("last_check_at").apply();
+                    UpdateChecker.maybeCheck(act);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void toast(String msg) {
+            final String m = msg;
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(act, m, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }
