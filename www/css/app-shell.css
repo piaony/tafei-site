@@ -72,10 +72,52 @@ body.in-app{
 .in-app{-webkit-overflow-scrolling:touch}
 
 /* —— 若用户手动切到浅色主题，导航跟随变浅 —— */
-body.in-app.light .mobile-bottom-nav{
+html.in-app body.light .mobile-bottom-nav{
   background:rgba(255,255,255,.95)!important;
   border-top:1px solid rgba(55,91,160,.18)!important;
   box-shadow:0 -8px 28px rgba(48,74,130,.14)!important;
 }
-body.in-app.light .mobile-bottom-nav a{color:#5f7291!important}
-body.in-app.light .mobile-bottom-nav a.active{color:#0f9ec4!important;background:rgba(15,158,196,.1)!important}
+html.in-app body.light .mobile-bottom-nav a{color:#5f7291!important}
+html.in-app body.light .mobile-bottom-nav a.active{color:#0f9ec4!important;background:rgba(15,158,196,.1)!important}
+
+/* —— 排版与节奏统一（第一阶段） —— */
+html.in-app{
+  --tf-gap:14px;
+  --tf-gap-lg:22px;
+  --tf-radius:16px;
+  --tf-radius-sm:12px;
+  --tf-font-body:15px;
+  --tf-font-small:12px;
+  --tf-line:1.68;
+}
+/* 正文/说明类：限制行宽，避免一行太长 */
+.in-app .page-inner main .wrap,
+.in-app .page-inner .wrap{max-width:720px}
+/* 列表/卡片：统一圆角与间距 */
+.in-app main .grid{gap:var(--tf-gap)!important}
+.in-app main .card{border-radius:var(--tf-radius)!important}
+.in-app main h1{letter-spacing:-.02em}
+.in-app main .sub{line-height:var(--tf-line)}
+
+/* —— 浅色模式（跟随系统）下的通用兜底 —— */
+html.in-app body.light{background:#f4f7fd!important;color:#16233c!important}
+html.in-app body.light main,
+html.in-app body.light .wrap{color:#16233c}
+html.in-app body.light .sub,
+html.in-app body.light .foot,
+html.in-app body.light .hint{color:#5f7291!important}
+html.in-app body.light main .card,
+html.in-app body.light main .row,
+html.in-app body.light main .list{background:rgba(255,255,255,.94)!important;border-color:rgba(55,91,160,.16)!important;color:#16233c!important}
+html.in-app body.light main .card p{color:#5f7291!important}
+
+/* —— 浅色模式：账号卡与高亮块 —— */
+html.in-app body.light .me,
+body.light .me{background:linear-gradient(150deg,rgba(214,232,255,.9),rgba(236,243,255,.92))!important;border-color:rgba(55,91,160,.24)!important}
+body.light .me-main b{color:#16233c!important}
+body.light .me-main p{color:#5f7291!important}
+body.light .stat{background:rgba(255,255,255,.94)!important;border-color:rgba(55,91,160,.16)!important}
+body.light .stat span{color:#5f7291!important}
+body.light .stat strong{color:#0f9ec4!important}
+body.light .list{border-color:rgba(55,91,160,.16)!important}
+body.light .row{border-bottom-color:rgba(55,91,160,.12)!important}
