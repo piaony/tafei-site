@@ -120,7 +120,6 @@ body.light{--bg:#f3f6fc;--panel:rgba(255,255,255,.92);--line:rgba(55,91,160,.16)
     </button>
     <a class="row" href="jingling.html"><span class="l"><span class="dot">灵</span><span>精灵小屋</span></span><span class="r">去逛逛 ›</span></a>
     <a class="row" href="about.html"><span class="l"><span class="dot">关</span><span>关于挞飞</span></span><span class="r">›</span></a>
-    <a class="row" href="https://github.com/Piaony/tafei-site" target="_blank" rel="noopener"><span class="l"><span class="dot">源</span><span>项目仓库</span></span><span class="r">GitHub ›</span></a>
   </div>
 
   <div class="foot">
@@ -147,7 +146,6 @@ body.light{--bg:#f3f6fc;--panel:rgba(255,255,255,.92);--line:rgba(55,91,160,.16)
     toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
   }
 
-  /* 版本号：原生 App 内可直接拿到，浏览器里显示预览提示 */
   var ver = '';
   try { if (NATIVE && NATIVE.appVersion) ver = NATIVE.appVersion(); } catch (e) {}
   if (ver) {
@@ -158,7 +156,6 @@ body.light{--bg:#f3f6fc;--panel:rgba(255,255,255,.92);--line:rgba(55,91,160,.16)
     verPill.textContent = '网页预览';
   }
 
-  /* 主题三选 */
   var row = document.getElementById('themeRow');
   function currentTheme() {
     try { return localStorage.getItem('tafei-theme') || 'auto'; } catch (e) { return 'auto'; }
@@ -186,7 +183,6 @@ body.light{--bg:#f3f6fc;--panel:rgba(255,255,255,.92);--line:rgba(55,91,160,.16)
   });
   paint();
 
-  /* 检查更新 */
   document.getElementById('btnCheck').addEventListener('click', function () {
     if (NATIVE && NATIVE.checkUpdate) {
       toast('正在检查更新…');
