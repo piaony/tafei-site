@@ -3,6 +3,8 @@ package com.piaony.tafei;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.view.View;
 import android.webkit.WebView;
@@ -19,12 +21,14 @@ import com.getcapacitor.BridgeActivity;
  * 挞飞 App 外壳：
  * 1) 系统栏安全区适配（顶部状态栏 / 底部手势区不再压住内容）
  * 2) 返回键分级处理：先关弹层 → 再退上一页 → 最后“再按一次退出”
+ * 3) 启动 / 回到前台时检查新版本（12 小时内最多一次）
  */
 public class MainActivity extends BridgeActivity {
 
     private static final String BG = "#080D1B";
     private long lastBackAt = 0L;
     private long lastBackCallAt = 0L;
+    private boolean firstCheckDone = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,23 @@ public class MainActivity extends BridgeActivity {
             }
         });
         ViewCompat.requestApplyInsets(webView);
+
+        /* 启动后稍等一会儿再检查更新，避免和启动图、首屏加载抢资源 */
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isFinishing()) return;
+                firstCheckDone = true;
+                UpdateChecker.maybeCheck(MainActivity.this);
+            }
+        }, 1600L);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        /* 切回前台时再检查一次（内部有 12 小时节流，不会频繁请求） */
+        if (firstCheckDone) UpdateChecker.maybeCheck(this);
     }
 
     @Override

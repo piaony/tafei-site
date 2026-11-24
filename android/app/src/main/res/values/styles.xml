@@ -28,4 +28,7 @@
         <item name="android:navigationBarColor">#080D1B</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <!-- 更新弹窗专用主题（启动页主题不是 AppCompat 弹窗主题，必须单独指定） -->
+    <style name="TafeiDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert" />
 </resources>
