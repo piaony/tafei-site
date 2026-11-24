@@ -118,59 +118,121 @@ jobs:
       - name: Convert app images to WebP
         continue-on-error: true
         run: |
-          python3 - <<'PY'
-          import os, re
-          try:
-              from PIL import Image
-          except Exception:
-              os.system("python3 -m pip install --quiet pillow")
-              from PIL import Image
+          mkdir -p ci-logs
+          cat > /tmp/tafei_webp.py <<'PYFILE'
+          import sys, os
+          from PIL import Image
+          Image.MAX_IMAGE_PIXELS = None
+          src = sys.argv[1]
+          dst = os.path.splitext(src)[0] + ".webp"
+          im = Image.open(src)
+          im.load()
+          w, h = im.size
+          if max(w, h) > 1800:
+              im.thumbnail((1800, 1800), Image.LANCZOS)
+          if im.mode not in ("RGB", "RGBA"):
+              im = im.convert("RGBA" if "A" in im.getbands() or im.mode == "P" else "RGB")
+          im.save(dst, "WEBP", quality=80, method=4)
+          print("ok %s %dx%d -> %dKB" % (src, im.size[0], im.size[1], os.path.getsize(dst) // 1024))
+          PYFILE
 
+          find www -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) | sort > /tmp/imgs.txt
+          : > ci-logs/webp.log
+          ok=0; fail=0
+          while IFS= read -r f; do
+            if python3 /tmp/tafei_webp.py "$f" >> ci-logs/webp.log 2>&1; then
+              ok=$((ok+1))
+            else
+              echo "FAIL $f" | tee -a ci-logs/webp.log
+              fail=$((fail+1))
+            fi
+          done < /tmp/imgs.txt
+          echo "webp convert ok=$ok fail=$fail" | tee -a ci-logs/webp.log
+
+          python3 - <<'PYLINK'
+          import os, re
           ROOT = "www"
           EXT = (".png", ".jpg", ".jpeg")
           TEXT = (".html", ".css", ".js", ".json", ".md", ".xml")
+          pat = re.compile(r"[^\s\"'()<>,;:]+\.(png|jpg|jpeg)(?![A-Za-z0-9])", re.I)
 
-          before = after = 0
-          converted = 0
-          for dirpath, _, files in os.walk(ROOT):
-              for fn in files:
+          def has(p):
+              return os.path.isfile(p)
+
+          webbase = set()
+          for dp, _, fs in os.walk(ROOT):
+              for fn in fs:
+                  if fn.lower().endswith(".webp"):
+                      webbase.add(fn.lower())
+
+          def repl(m, dp=""):
+              tok = m.group(0)
+              cut = max(tok.rfind("."), 0)
+              new = tok[:cut] + ".webp"
+              base = new.split("/")[-1].lower()
+              if base in webbase:
+                  return new
+              if has(os.path.join(ROOT, new)) or has(os.path.join(dp, new)):
+                  return new
+              return tok
+
+          texts = []
+          rewritten = 0
+          for dp, _, fs in os.walk(ROOT):
+              for fn in fs:
+                  if not fn.lower().endswith(TEXT):
+                      continue
+                  p = os.path.join(dp, fn)
+                  try:
+                      s = open(p, encoding="utf-8").read()
+                  except Exception:
+                      continue
+                  ns = pat.sub(lambda m: repl(m, dp), s)
+                  if ns != s:
+                      open(p, "w", encoding="utf-8").write(ns)
+                      rewritten += 1
+                  texts.append(ns)
+
+          blob = "\n".join(texts)
+
+          fixed = 0
+          for dp, _, fs in os.walk(ROOT):
+              for fn in fs:
+                  if not fn.lower().endswith(".js"):
+                      continue
+                  p = os.path.join(dp, fn)
+                  s = open(p, encoding="utf-8").read()
+                  ns = s.replace(r"/\.png($|\?)/i", r"/\.(png|webp)($|\?)/i")
+                  if ns != s:
+                      open(p, "w", encoding="utf-8").write(ns)
+                      fixed += 1
+
+          removed = 0
+          kept = 0
+          for dp, _, fs in os.walk(ROOT):
+              for fn in fs:
                   if not fn.lower().endswith(EXT):
                       continue
-                  src = os.path.join(dirpath, fn)
-                  dst = os.path.splitext(src)[0] + ".webp"
-                  try:
-                      im = Image.open(src)
-                      im.load()
-                      if im.mode not in ("RGB", "RGBA"):
-                          im = im.convert("RGBA" if "A" in im.getbands() or im.mode == "P" else "RGB")
-                      im.save(dst, "WEBP", quality=80, method=4)
-                      before += os.path.getsize(src)
-                      after += os.path.getsize(dst)
-                      if os.path.abspath(src) != os.path.abspath(dst):
-                          os.remove(src)
-                      converted += 1
-                  except Exception as e:
-                      print("skip", src, e)
+                  src = os.path.join(dp, fn)
+                  web = os.path.splitext(src)[0] + ".webp"
+                  if not has(web):
+                      continue
+                  if fn in blob:
+                      kept += 1
+                      continue
+                  os.remove(src)
+                  removed += 1
 
-          pat = re.compile(r"\.(png|jpg|jpeg)(?![A-Za-z0-9])", re.I)
-          for dirpath, _, files in os.walk(ROOT):
-              for fn in files:
-                  if fn.lower().endswith(TEXT):
-                      p = os.path.join(dirpath, fn)
-                      s = open(p, encoding="utf-8").read()
-                      ns = pat.sub(".webp", s)
-                      if ns != s:
-                          open(p, "w", encoding="utf-8").write(ns)
-
-          print("webp converted=%d  %.1fMB -> %.1fMB (saved %.1fMB)" % (
-              converted, before / 1048576.0, after / 1048576.0, (before - after) / 1048576.0))
-          PY
+          left = 0
+          for dp, _, fs in os.walk(ROOT):
+              for fn in fs:
+                  if fn.lower().endswith(".webp"):
+                      left += 1
+          print("refs rewritten in %d files; removed %d originals; kept %d still referenced; webp total %d" % (rewritten, removed, kept, left))
+          PYLINK
 
       - name: Sync Capacitor
-        run: |
-          mkdir -p ci-logs
-          set -o pipefail
-          npx cap sync android 2>&1 | tee ci-logs/cap-sync.log
+        run: npx cap sync android
 
       - name: Bump version
         run: |
@@ -214,8 +276,7 @@ jobs:
 
             - versionCode ${{ github.run_number }}
             - versionName 1.0.${{ github.run_number }}
-            - 应用内更新：我的页「检查更新」后台下载并拉起安装
-            - 图片已转 WebP，安装包更小
+            - 安装前允许「安装未知来源」；覆盖升级需与上一版同签名
 
             下载：直接点下方 app-release.apk。
           files: out/app-release.apk
@@ -231,6 +292,7 @@ jobs:
             echo "--- java"; java -version 2>&1 | head -3
             echo "--- node"; node -v 2>/dev/null
             echo "--- sdk"; ls -1 "$ANDROID_HOME/platforms" 2>/dev/null; ls -1 "$ANDROID_HOME/build-tools" 2>/dev/null
+            echo "--- reports"; ls -1 android/app/build/reports 2>/dev/null
           } 2>&1 | tee ci-logs/env.log || true
           if [ -d android/app/build/reports ]; then cp -r android/app/build/reports/* ci-logs/ 2>/dev/null || true; fi
           ls -la ci-logs || true
