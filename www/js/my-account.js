@@ -39,9 +39,9 @@
   /* 样式：反馈面板与提示 */
   var style = document.createElement('style');
   style.textContent = [
-    '.mc-mask{position:fixed;inset:0;background:rgba(3,7,16,.6);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9998}',
+    '.mc-mask{position:fixed;inset:0;background:rgba(3,7,16,.6);opacity:0;pointer-events:none;transition:opacity .2s;z-index:100001}',
     '.mc-mask.on{opacity:1;pointer-events:auto}',
-    '.mc-sheet{position:fixed;left:0;right:0;bottom:0;transform:translateY(100%);transition:transform .22s ease;z-index:9999;',
+    '.mc-sheet{position:fixed;left:0;right:0;bottom:0;transform:translateY(100%);transition:transform .22s ease;z-index:100002;max-height:74vh;overflow-y:auto;',
     'background:#0d1526;border-top:1px solid rgba(130,170,255,.3);border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));',
     'color:#eef4ff;font:15px/1.6 -apple-system,"PingFang SC",sans-serif}',
     '.mc-sheet.on{transform:translateY(0)}',
@@ -56,9 +56,9 @@
     '.mc-row b{display:block;font-size:13.5px}',
     '.mc-row small{display:block;font-size:11px;color:#9aaccb;margin-top:2px}',
     '.mc-close{width:100%;padding:12px;border-radius:13px;border:1px solid rgba(130,170,255,.28);background:transparent;color:#9aaccb;cursor:pointer}',
-    '.mc-toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:80vw;',
+    '.mc-toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:80vw;',
     'padding:10px 16px;border-radius:12px;background:rgba(10,18,34,.96);border:1px solid rgba(130,170,255,.34);color:#eef4ff;',
-    'font:13px/1.5 -apple-system,"PingFang SC",sans-serif;opacity:0;transition:opacity .2s;pointer-events:none;z-index:100000;text-align:center}',
+    'font:13px/1.5 -apple-system,"PingFang SC",sans-serif;opacity:0;transition:opacity .2s;pointer-events:none;z-index:200000;text-align:center}',
     '.mc-toast.on{opacity:1}'
   ].join('');
   document.head.appendChild(style);
