@@ -1,6 +1,6 @@
 /* TAFEI 挂件长按菜单 v3 · 与精灵挂件的单击动作互不冲突
-   交互：单击 = 原有摸摸动作（完全不动原有逻辑）；长按 0.5 秒 = 弹出快捷菜单
-   菜单：查看详情 / 喂一份零食 / 收起挂件；拖动超过 8px 不触发菜单 */
+   交互：单击 = 原有摸摸动作（完全不动原有逻辑）；长按 0.45 秒 = 弹出快捷菜单
+   菜单：查看详情 / 喂一份零食 / 收起挂件；拖动超过 18px 不触发菜单 */
 (function () {
   'use strict';
   if (window.__tafeiWidgetMenu === 'v3') return;
@@ -167,14 +167,30 @@
   function watch() {
     var root = document.getElementById('spiritWidget');
     if (root) attach(root);
+    return !!(root && root.dataset.wmBound === '1');
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    watch();
-    if (window.MutationObserver) {
-      new MutationObserver(watch).observe(document.body, { childList: true });
+  /* 该脚本由 app-shell 在页面加载后动态注入，DOMContentLoaded 可能已经过去，
+     所以这里既做即时绑定，也做轮询与子树监听，保证挂件出现后一定能绑上 */
+  function boot() {
+    if (window.__tafeiWmBooted) return;
+    window.__tafeiWmBooted = true;
+    if (document.body && window.MutationObserver) {
+      new MutationObserver(watch).observe(document.body, { childList: true, subtree: true });
     }
-  });
+    watch();
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      if (watch() || tries > 60) clearInterval(iv);
+    }, 250);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
 
   document.addEventListener('pointerdown', function (e) {
     if (menu && !menu.contains(e.target) && !(e.target.closest && e.target.closest('#spiritWidget'))) closeMenu();

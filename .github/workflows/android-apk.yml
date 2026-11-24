@@ -114,6 +114,9 @@ jobs:
               open(f, "w", encoding="utf-8").write(s)
           print("shell asset version ->", ver)
           PY
+          sed -i -E "s#(spirit-widget-menu\\.js\\?v=)[0-9A-Za-z]+#\\1${SHELL_VER}#g" www/js/app-shell.js
+          sed -i -E "s#(spirit-widget\\.js\\?v=)[0-9]+#\\1${SHELL_VER}#g" www/js/app-shell.js
+          grep -o "spirit-widget[a-z-]*\\.js?v=[0-9A-Za-z]*" www/js/app-shell.js | sort -u
 
       - name: Convert app images to WebP
         continue-on-error: true
@@ -295,8 +298,6 @@ jobs:
             echo "run=${{ github.run_number }} sha=${{ github.sha }}"
             echo "--- git status"
             git status --short | head -50
-            echo "--- java"; java -version 2>&1 | head -3
-            echo "--- node"; node -v 2>/dev/null
           } 2>&1 | tee ci-logs/env.log || true
           ls -la ci-logs || true
           git config user.name "tafei-bot"
