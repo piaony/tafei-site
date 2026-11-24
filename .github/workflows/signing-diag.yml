@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+env:
+  ENC_URL: https://aka.doubaocdn.com/s/Feyz4L7VlR
+  ENC_PATH: android/signing/release.jks.enc.b64
+
 jobs:
   diag:
     runs-on: ubuntu-latest
@@ -21,49 +25,54 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Install encrypted key into repo\n        run: |
+          set -e
+          mkdir -p android/signing
+          curl -fsSL --retry 3 "$ENC_URL" -o "$ENC_PATH"
+          echo "enc_bytes=$(wc -c < $ENC_PATH)"
+          echo "enc_sha256=$(sha256sum $ENC_PATH | cut -d' ' -f1)"
+
       - name: Probe signing secrets
         env:
-          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           set +e
           {
             echo "probe_at=$(date -u +%FT%TZ)"
-            echo "raw_len=${#KS_B64}"
             echo "pass_len=${#KS_PASS}"
-            KM=$(printf '%s' "$KS_B64" | tr -cd 'A-Za-z0-9+/=')
-            echo "clean_len=${#KM}"
-            echo "clean_mod4=$(( ${#KM} % 4 ))"
-            echo "junk_removed=$(( ${#KS_B64} - ${#KM} ))"
-            R=$(( ${#KM} % 4 ))
-            if [ "$R" -ne 0 ]; then
-              KM="$KM$(printf '=%.0s' $(seq 1 $((4-R))))"
-            fi
-            printf '%s' "$KM" | base64 -d > /tmp/k.jks 2> /tmp/derr.txt
-            echo "decoded_bytes=$(wc -c < /tmp/k.jks 2>/dev/null)"
-            if [ -s /tmp/k.jks ]; then
-              if keytool -list -keystore /tmp/k.jks -storepass "$KS_PASS" > /tmp/list.txt 2>&1; then
-                echo "unlock=ok"
-                awk -F, '/PrivateKeyEntry/ {print "alias=" $1}' /tmp/list.txt | tr -d ' ' | head -2
-                echo "verdict=ready"
-              else
-                echo "unlock=fail"
-                tail -3 /tmp/list.txt
-                echo "verdict=password_or_key_mismatch"
-              fi
+            base64 -d "$ENC_PATH" > /tmp/k.enc 2>/tmp/e1.txt
+            echo "enc_b64_decode=$? bytes=$(wc -c < /tmp/k.enc 2>/dev/null)"
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in /tmp/k.enc -out /tmp/k.jks -pass env:KS_PASS 2>/tmp/e2.txt
+            echo "decrypt_exit=$? jks_bytes=$(wc -c < /tmp/k.jks 2>/dev/null)"
+            if [ -s /tmp/k.jks ] && keytool -list -keystore /tmp/k.jks -storepass "$KS_PASS" > /tmp/list.txt 2>&1; then
+              echo "unlock=ok"
+              awk -F, '/PrivateKeyEntry/ {print "alias=" $1}' /tmp/list.txt | tr -d ' ' | head -2
+              keytool -list -v -keystore /tmp/k.jks -storepass "$KS_PASS" 2>/dev/null | grep -E "SHA256:" | head -1
+              echo "verdict=ready"
             else
-              echo "decode=fail"
-              head -3 /tmp/derr.txt
-              echo "verdict=b64_damaged"
+              echo "unlock=fail"
+              head -3 /tmp/e2.txt
+              tail -3 /tmp/list.txt 2>/dev/null
+              echo "verdict=key_or_password_problem"
             fi
           } > diag.txt 2>&1
           cat diag.txt
+
+      - name: Commit signed-key blob
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -f "$ENC_PATH" diag.txt
+          git diff --cached --quiet || git commit -m "chore(signing): 加密密钥入仓（AES-256）[skip ci]"
+          git fetch origin app/capacitor-setup
+          git rebase origin/app/capacitor-setup || git rebase --abort || true
+          git push origin HEAD:app/capacitor-setup || true
 
       - name: Publish diag result
         if: always()
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add -f diag.txt
-          git commit -m "diag: signing secret probe v3 [skip ci]" || true
+          git add -f diag.txt || true
+          git commit -m "diag: signing probe v4 [skip ci]" || true
           git push -f origin HEAD:diag || true
