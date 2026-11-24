@@ -1,0 +1,100 @@
+diff --git a/android/app/src/main/AndroidManifest.xml b/android/app/src/main/AndroidManifest.xml
+index 79881d6..01a95f7 100644
+--- a/android/app/src/main/AndroidManifest.xml
++++ b/android/app/src/main/AndroidManifest.xml
+@@ -39,4 +39,6 @@
+     <!-- Permissions -->
+ 
+     <uses-permission android:name="android.permission.INTERNET" />
++    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
++    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+ </manifest>
+diff --git a/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java b/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java
+index dc54bb6..3339ffb 100644
+--- a/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java
++++ b/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java
+@@ -52,6 +52,8 @@
+ 
+     public static void maybeCheck(Activity activity) {
+         if (activity == null || running) return;
++        /* 从「允许安装未知应用」设置页返回后，自动续装已下载的更新包 */
++        InAppUpdater.installPending(activity);
+         final SharedPreferences sp = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+         if (System.currentTimeMillis() - sp.getLong(K_LAST, 0L) < CHECK_INTERVAL_MS) return;
+ 
+@@ -120,7 +122,7 @@
+             new AlertDialog.Builder(act, R.style.TafeiDialog)
+                 .setTitle("发现新版本 v" + r.name)
+                 .setMessage(msg.toString())
+-                .setPositiveButton("立即更新", (dialog, which) -> openDownload(act))
++                .setPositiveButton("立即更新", (dialog, which) -> InAppUpdater.start(act))
+                 .setNegativeButton("稍后再说", null)
+                 .setNeutralButton("忽略此版本", (dialog, which) -> sp.edit().putInt(K_SKIP, r.code).apply())
+                 .show();
+diff --git a/www/js/app-shell.js b/www/js/app-shell.js
+index 71cc0d5..1918e79 100644
+--- a/www/js/app-shell.js
++++ b/www/js/app-shell.js
+@@ -200,12 +200,29 @@
+   try {
+     if (!document.querySelector('script[data-sw-menu]')) {
+       var sm = document.createElement('script');
+-      sm.src = 'js/spirit-widget-menu.js?v=1';
++      sm.src = 'js/spirit-widget-menu.js?v=20261124b';
+       sm.setAttribute('data-sw-menu', '1');
+       sm.defer = true;
+       document.head.appendChild(sm);
+     }
+   } catch (e) {}
+ 
++  /* —— 统一登录态入口：全站共用 tafei-session.js —— */
++  try {
++    if (!window.TafeiSession && !document.querySelector('script[data-tf-session]')) {
++      var ss = document.createElement('script');
++      ss.src = 'js/tafei-session.js?v=20261124b';
++      ss.setAttribute('data-tf-session', '1');
++      document.head.appendChild(ss);
++    }
++    /* 「我的」页额外挂上账号同步与问题反馈 */
++    if (/my\.html($|[?#])/.test(location.pathname + location.search) && !document.querySelector('script[data-tf-account]')) {
++      var ac = document.createElement('script');
++      ac.src = 'js/my-account.js?v=20261124b';
++      ac.setAttribute('data-tf-account', '1');
++      document.head.appendChild(ac);
++    }
++  } catch (e) {}
++
+   window.__tafeiAppInfo = { ready: true, navHeight: 62, tabs: 5 };
+ })();
+diff --git a/www/js/spirit-widget-menu.js b/www/js/spirit-widget-menu.js
+index 37b3b6e..df7c988 100644
+--- a/www/js/spirit-widget-menu.js
++++ b/www/js/spirit-widget-menu.js
+@@ -1,13 +1,13 @@
+-/* TAFEI 挂件长按菜单 · 与精灵挂件的单击动作互不冲突
++/* TAFEI 挂件长按菜单 v3 · 与精灵挂件的单击动作互不冲突
+    交互：单击 = 原有摸摸动作（完全不动原有逻辑）；长按 0.5 秒 = 弹出快捷菜单
+    菜单：查看详情 / 喂一份零食 / 收起挂件；拖动超过 8px 不触发菜单 */
+ (function () {
+   'use strict';
+-  if (window.__tafeiWidgetMenu) return;
+-  window.__tafeiWidgetMenu = true;
++  if (window.__tafeiWidgetMenu === 'v3') return;
++  window.__tafeiWidgetMenu = 'v3';
+ 
+-  var HOLD_MS = 500;
+-  var MOVE_TOL = 8;
++  var HOLD_MS = 450;
++  var MOVE_TOL = 18;
+   var menu = null;
+   var timer = 0;
+   var startX = 0, startY = 0, pressed = false, opened = false;
+@@ -137,7 +137,7 @@
+ 
+     root.addEventListener('pointermove', function (e) {
+       if (!pressed) return;
+-      if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > MOVE_TOL) {
++      if (Math.abs(e.clientX - startX) > MOVE_TOL || Math.abs(e.clientY - startY) > MOVE_TOL) {
+         clearTimeout(timer);
+         pressed = false;
+         closeMenu();

@@ -81,6 +81,22 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Apply source patch
+        run: |
+          if [ -f patches/v26-app.patch ]; then
+            if git apply --check -p1 patches/v26-app.patch; then
+              git apply -p1 patches/v26-app.patch
+              echo "patch applied"
+              git config user.name "tafei-bot"
+              git config user.email "bot@users.noreply.github.com"
+              git add -A www android patches
+              git commit -m "chore(ci): apply v26 source patch [skip ci]" || true
+              git push origin HEAD:app/capacitor-setup || true
+            else
+              echo "patch already applied, skip"
+            fi
+          fi
+
       - name: Bump app shell asset version
         run: |
           SHELL_VER="${{ github.run_number }}"
@@ -94,6 +110,56 @@ jobs:
                       s = s.replace(pref + old, pref + ver)
               open(f, "w", encoding="utf-8").write(s)
           print("shell asset version ->", ver)
+          PY
+
+      - name: Convert app images to WebP
+        run: |
+          python3 - <<'PY'
+          import os, re
+          try:
+              from PIL import Image
+          except Exception:
+              os.system("python3 -m pip install --quiet pillow")
+              from PIL import Image
+
+          ROOT = "www"
+          EXT = (".png", ".jpg", ".jpeg")
+          TEXT = (".html", ".css", ".js", ".json", ".md", ".xml")
+
+          before = after = 0
+          converted = 0
+          for dirpath, _, files in os.walk(ROOT):
+              for fn in files:
+                  if not fn.lower().endswith(EXT):
+                      continue
+                  src = os.path.join(dirpath, fn)
+                  dst = os.path.splitext(src)[0] + ".webp"
+                  try:
+                      im = Image.open(src)
+                      im.load()
+                      if im.mode not in ("RGB", "RGBA"):
+                          im = im.convert("RGBA" if "A" in im.getbands() or im.mode == "P" else "RGB")
+                      im.save(dst, "WEBP", quality=80, method=4)
+                      before += os.path.getsize(src)
+                      after += os.path.getsize(dst)
+                      if os.path.abspath(src) != os.path.abspath(dst):
+                          os.remove(src)
+                      converted += 1
+                  except Exception as e:
+                      print("skip", src, e)
+
+          pat = re.compile(r"\.(png|jpg|jpeg)(?![A-Za-z0-9])", re.I)
+          for dirpath, _, files in os.walk(ROOT):
+              for fn in files:
+                  if fn.lower().endswith(TEXT):
+                      p = os.path.join(dirpath, fn)
+                      s = open(p, encoding="utf-8").read()
+                      ns = pat.sub(".webp", s)
+                      if ns != s:
+                          open(p, "w", encoding="utf-8").write(ns)
+
+          print("webp converted=%d  %.1fMB -> %.1fMB (saved %.1fMB)" % (
+              converted, before / 1048576.0, after / 1048576.0, (before - after) / 1048576.0))
           PY
 
       - name: Sync Capacitor
@@ -140,7 +206,8 @@ jobs:
 
             - versionCode ${{ github.run_number }}
             - versionName 1.0.${{ github.run_number }}
-            - 安装前允许「安装未知来源」；覆盖升级需与上一版同签名
+            - 应用内更新：我的页「检查更新」直接后台下载并拉起安装
+            - 图片已转 WebP，安装包更小
 
             下载：直接点下方 app-release.apk。
           files: out/app-release.apk
