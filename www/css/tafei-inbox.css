@@ -1,0 +1,191 @@
+/* ============================================================
+   TAFEI · 信息中心（系统通知 / 公告 / 私信）
+   叠加层：删除本文件与 js/tafei-inbox.js、index.html 的引用即回退
+   ============================================================ */
+
+.tf3{
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));
+  border-radius:var(--tf-r-lg,22px);
+  background:var(--tf-panel,rgba(16,25,48,.78));
+  box-shadow:var(--tf-e2,0 12px 32px rgba(4,10,25,.34));
+  overflow:hidden;
+}
+body.light .tf3{background:#fff}
+
+/* ---------------- 顶部：分类 + 全部已读 ---------------- */
+.tf3-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;
+  padding:12px 14px;border-bottom:1px solid var(--tf-line,rgba(130,170,255,.18))}
+.tf3-tabs{display:flex;flex:1 1 auto;min-width:0;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tf3-tabs::-webkit-scrollbar{display:none}
+.tf3-tab{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 14px;cursor:pointer;
+  border:1px solid transparent;border-radius:var(--tf-r-pill,999px);background:transparent;
+  color:var(--tf-muted,#9aaccb);font:inherit;font-size:13.5px;white-space:nowrap;
+  transition:color var(--tf-dur-2,220ms) ease,background-color var(--tf-dur-2,220ms) ease,border-color var(--tf-dur-2,220ms) ease}
+.tf3-tab:hover{color:var(--tf-text,#eef4ff);background:rgba(100,232,255,.07)}
+body.light .tf3-tab:hover{color:#15213b;background:rgba(15,158,196,.07)}
+body.light .tf3-tab.is-active,body.light .tf3-tab.is-active:hover{color:#fff;background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff))}
+.tf3-tab.is-active{color:var(--tf-text,#eef4ff);background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff));
+  border-color:transparent;box-shadow:var(--tf-glow-brand,0 10px 30px rgba(75,121,255,.28))}
+body.light .tf3-tab.is-active{color:#fff}
+.tf3-tab:focus-visible{outline:2px solid var(--tf-cyan,#64e8ff);outline-offset:2px}
+.tf3-badge[hidden]{display:none}
+.tf3-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:inline-grid;place-items:center;
+  font-size:11px;font-weight:600;line-height:1;background:rgba(100,232,255,.18);color:var(--tf-cyan,#64e8ff)}
+.tf3-tab.is-active .tf3-badge{background:rgba(255,255,255,.24);color:#fff}
+.tf3-readall{flex:0 0 auto;white-space:nowrap;min-height:36px;padding:0 12px;cursor:pointer;border-radius:var(--tf-r-sm,12px);
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));background:transparent;
+  color:var(--tf-muted,#9aaccb);font:inherit;font-size:12.5px;
+  transition:color var(--tf-dur-2,220ms) ease,border-color var(--tf-dur-2,220ms) ease}
+.tf3-readall:hover{color:var(--tf-text,#eef4ff);border-color:var(--tf-line-strong,rgba(130,170,255,.38))}
+.tf3-readall:disabled{opacity:.45;cursor:default}
+
+/* ---------------- 列表 ---------------- */
+.tf3-pane{display:block}
+.tf3-pane[hidden]{display:none}
+.tf3-list{padding:10px;display:flex;flex-direction:column;gap:8px}
+.tf3-hint{padding:26px 12px;text-align:center;color:var(--tf-muted,#9aaccb);font-size:13px;line-height:1.7}
+
+.tf3-row{position:relative;display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  padding:13px 14px;cursor:pointer;border-radius:var(--tf-r-md,16px);
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));background:rgba(100,232,255,.02);
+  color:inherit;font:inherit;transition:border-color var(--tf-dur-2,220ms) ease,transform var(--tf-dur-2,220ms) var(--tf-ease,cubic-bezier(.22,.61,.36,1))}
+.tf3-row:hover{transform:translateY(-2px);border-color:var(--tf-line-strong,rgba(130,170,255,.38))}
+.tf3-row:focus-visible{outline:2px solid var(--tf-cyan,#64e8ff);outline-offset:2px}
+.tf3-row.is-read{opacity:.72}
+.tf3-ico{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  font-size:15px;background:rgba(100,232,255,.12);color:var(--tf-cyan,#64e8ff)}
+.tf3-ico.is-warn{background:rgba(255,176,86,.14);color:#ffb056}
+.tf3-ico.is-info{background:rgba(120,160,255,.14);color:var(--tf-blue,#7297ff)}
+.tf3-body{display:block;min-width:0;flex:1}
+.tf3-title{display:block;font-size:14.5px;font-weight:600;line-height:1.5}
+.tf3-sub{display:block;margin-top:2px;font-size:12.5px;color:var(--tf-muted,#9aaccb);line-height:1.6}
+.tf3-text{display:block;margin-top:8px;font-size:13px;line-height:1.8;color:var(--tf-text,#eef4ff);
+  white-space:pre-wrap;overflow-wrap:anywhere}
+.tf3-text[hidden]{display:none}
+.tf3-link{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--tf-cyan,#64e8ff);text-decoration:none}
+.tf3-link:hover{text-decoration:underline}
+.tf3-dot{flex:0 0 auto;width:8px;height:8px;margin-top:6px;border-radius:50%;
+  background:var(--tf-cyan,#64e8ff);box-shadow:0 0 10px rgba(100,232,255,.6)}
+.tf3-dot[hidden]{display:none}
+
+/* ---------------- 私信：会话列表 ---------------- */
+.tf3-dmhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 4px 10px}
+.tf3-dmhead h4{margin:0;font-size:14px;font-weight:600}
+.tf3-newbtn{min-height:38px;padding:0 14px;cursor:pointer;border:0;border-radius:var(--tf-r-sm,12px);
+  background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff));color:#fff;
+  font:inherit;font-size:13px;box-shadow:var(--tf-glow-brand,0 10px 30px rgba(75,121,255,.28));
+  transition:transform var(--tf-dur-1,120ms) ease}
+.tf3-newbtn:active{transform:scale(.97)}
+
+.tf3-thread{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;cursor:pointer;
+  border-radius:var(--tf-r-md,16px);border:1px solid var(--tf-line,rgba(130,170,255,.18));
+  background:transparent;color:inherit;font:inherit;
+  transition:border-color var(--tf-dur-2,220ms) ease,background-color var(--tf-dur-2,220ms) ease}
+.tf3-thread:hover{border-color:var(--tf-line-strong,rgba(130,170,255,.38));background:rgba(100,232,255,.05)}
+.tf3-avatar{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  font-size:14px;font-weight:600;color:#fff;background:linear-gradient(120deg,#3b8fff,#846bff)}
+.tf3-thread-main{min-width:0;flex:1}
+.tf3-thread-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.tf3-thread-last{margin-top:2px;font-size:12.5px;color:var(--tf-muted,#9aaccb);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tf3-thread-side{flex:0 0 auto;text-align:right;font-size:11.5px;color:var(--tf-muted,#9aaccb)}
+.tf3-unread{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-top:6px;padding:0 6px;
+  border-radius:999px;background:var(--tf-cyan,#64e8ff);color:#061020;font-size:11px;font-weight:700}
+
+/* ---------------- 私信：会话内容 ---------------- */
+.tf3-threadhead{display:flex;align-items:center;gap:10px;padding:2px 2px 10px}
+.tf3-back{min-height:36px;padding:0 12px;cursor:pointer;border-radius:var(--tf-r-sm,12px);
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));background:transparent;color:var(--tf-muted,#9aaccb);
+  font:inherit;font-size:12.5px}
+.tf3-back:hover{color:var(--tf-text,#eef4ff);border-color:var(--tf-line-strong,rgba(130,170,255,.38))}
+.tf3-threadhead strong{font-size:14px}
+.tf3-msgs{display:flex;flex-direction:column;gap:10px;max-height:min(52vh,460px);overflow-y:auto;
+  padding:12px;border-radius:var(--tf-r-md,16px);background:rgba(6,12,26,.28);
+  border:1px solid var(--tf-line,rgba(130,170,255,.18))}
+body.light .tf3-msgs{background:rgba(240,245,255,.7)}
+.tf3-msg{max-width:82%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.7;
+  white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--tf-line,rgba(130,170,255,.18));
+  background:var(--tf-panel,rgba(16,25,48,.78))}
+.tf3-msg.is-mine{align-self:flex-end;background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff));
+  color:#fff;border-color:transparent}
+.tf3-msg time{display:block;margin-top:4px;font-size:11px;opacity:.7;text-align:right}
+.tf3-composer{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
+.tf3-input{flex:1;min-height:44px;max-height:140px;resize:vertical;padding:11px 13px;border-radius:var(--tf-r-sm,12px);
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));background:var(--tf-panel2,var(--tf-panel,#111d37));
+  color:var(--tf-text,#eef4ff);font:inherit;font-size:13.5px;line-height:1.6;outline:none}
+body.light .tf3-input{background:#fff;color:#15213b}
+.tf3-input:focus{border-color:var(--tf-cyan,#64e8ff);box-shadow:var(--tf-e-focus,0 0 0 3px rgba(100,232,255,.28))}
+.tf3-send{min-width:72px;min-height:44px;padding:0 16px;cursor:pointer;border:0;border-radius:var(--tf-r-sm,12px);
+  background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff));color:#fff;font:inherit;font-size:13.5px;
+  font-weight:600;transition:transform var(--tf-dur-1,120ms) ease,opacity var(--tf-dur-2,220ms) ease}
+.tf3-send:active{transform:scale(.97)}
+.tf3-send:disabled{opacity:.5;cursor:default}
+.tf3-status{margin-top:8px;font-size:12px;color:var(--tf-muted,#9aaccb);min-height:16px}
+
+/* ---------------- 私信：新建 ---------------- */
+.tf3-form{display:flex;flex-direction:column;gap:10px}
+.tf3-searchrow{display:flex;gap:8px;align-items:stretch}
+.tf3-searchrow .tf3-input{flex:1 1 auto;min-width:0}
+.tf3-lookup{flex:0 0 auto;min-height:44px;padding:0 16px;cursor:pointer;border:1px solid var(--tf-line,rgba(130,170,255,.18));
+  border-radius:var(--tf-r-sm,12px);background:transparent;color:var(--tf-muted,#9aaccb);font:inherit;font-size:13px}
+.tf3-lookup:hover{color:var(--tf-text,#eef4ff);border-color:var(--tf-line-strong,rgba(130,170,255,.38))}
+.tf3-lookup:disabled{opacity:.5;cursor:default}
+.tf3-label{font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+.tf3-select{min-height:44px;padding:0 12px;border-radius:var(--tf-r-sm,12px);
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));background:var(--tf-panel2,var(--tf-panel,#111d37));
+  color:var(--tf-text,#eef4ff);font:inherit;font-size:13.5px}
+body.light .tf3-select{background:#fff;color:#15213b}
+
+/* ---------------- 空态 / 提示 / 激活卡 ---------------- */
+.tf3-empty{padding:30px 16px;text-align:center;color:var(--tf-muted,#9aaccb);font-size:13.5px;line-height:1.8}
+.tf3-empty .tf3-cta{display:inline-flex;align-items:center;min-height:40px;margin-top:12px;padding:0 16px;
+  cursor:pointer;border:0;border-radius:var(--tf-r-sm,12px);color:#fff;font:inherit;font-size:13px;
+  background:var(--tf-grad-action,linear-gradient(110deg,#3b8fff,#846bff));
+  box-shadow:var(--tf-glow-brand,0 10px 30px rgba(75,121,255,.28))}
+.tf3-setup{padding:16px;border-radius:var(--tf-r-md,16px);border:1px dashed var(--tf-line-strong,rgba(130,170,255,.38));
+  background:rgba(100,232,255,.03)}
+.tf3-setup h4{margin:0 0 8px;font-size:14.5px}
+.tf3-setup p{margin:6px 0;font-size:13px;line-height:1.8;color:var(--tf-muted,#9aaccb)}
+.tf3-setup ol{margin:10px 0 12px;padding-left:20px;font-size:13px;line-height:1.9}
+.tf3-sqlbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;
+  font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+.tf3-code{margin-top:8px;padding:12px 14px;border-radius:var(--tf-r-sm,12px);
+  background:rgba(4,10,22,.55);border:1px solid var(--tf-line,rgba(130,170,255,.18));
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.7;
+  color:#cfe6ff;white-space:pre-wrap;overflow-wrap:anywhere;overflow-y:auto;max-height:240px}
+body.light .tf3-code{background:rgba(232,240,255,.9);color:#0f2a48}
+.tf3-copy{min-height:30px;padding:0 10px;cursor:pointer;border-radius:8px;
+  border:1px solid var(--tf-line,rgba(130,170,255,.18));background:rgba(255,255,255,.08);
+  color:inherit;font:inherit;font-size:11.5px}
+.tf3-copy:hover{background:rgba(255,255,255,.16)}
+
+/* ---------------- 官方会话与站内保障 ---------------- */
+.tf3-safety{display:flex;gap:8px;align-items:flex-start;margin:0 0 10px;padding:10px 12px;
+  border:1px solid rgba(100,232,255,.28);border-radius:12px;background:rgba(100,232,255,.05);
+  color:var(--tf-muted,#9aaccb);font-size:12px;line-height:1.7}
+.tf3-safety b{flex:0 0 auto;color:var(--tf-cyan,#64e8ff);font-weight:600}
+.tf3-thread.is-official{border-color:rgba(100,232,255,.34);background:rgba(100,232,255,.055)}
+.tf3-thread.is-official .tf3-avatar{background:linear-gradient(135deg,#3b8fff,#846bff);color:#fff}
+.tf3-official-tag{font-size:10px;font-weight:500;color:var(--tf-cyan,#64e8ff);
+  border:1px solid rgba(100,232,255,.35);border-radius:20px;padding:0 6px;line-height:1.6}
+.tf3-msg.tf3-official-msg{max-width:92%;align-self:flex-start;border-color:rgba(100,232,255,.34);
+  background:rgba(100,232,255,.07);color:var(--tf-text,#eef4ff)}
+.tf3-msg.tf3-official-msg time{color:var(--tf-cyan,#64e8ff);opacity:.85}
+
+/* ---------------- 导航未读红点 ---------------- */
+.tf3-navdot{display:inline-block;width:6px;height:6px;margin-left:4px;vertical-align:super;
+  border-radius:50%;background:var(--tf-cyan,#64e8ff);box-shadow:0 0 8px rgba(100,232,255,.7)}
+
+/* ---------------- 无障碍 / 打印 ---------------- */
+@media (prefers-reduced-motion:reduce){
+  .tf3-row,.tf3-thread,.tf3-send,.tf3-newbtn{transition:none!important;transform:none!important}
+}
+@media print{.tf3-bar,.tf3-readall,.tf3-newbtn,.tf3-composer,.tf3-back{display:none!important}}
+
+@media (max-width:560px){
+  .tf3-bar{flex-wrap:wrap;row-gap:8px}
+  .tf3-tabs{flex:1 0 100%;gap:4px}
+  .tf3-tab{flex:1 1 0;min-width:0;justify-content:center;padding:0 8px;font-size:13px;gap:5px}
+  .tf3-readall{order:2;margin-left:auto}
+  .tf3-msgs{max-height:min(46vh,380px)}
+}

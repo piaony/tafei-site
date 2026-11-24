@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#080d1b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'/%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<meta name="description" content="挞飞 TAFEI：临沂站长直营的手机技术服务。手机急救室 2 分钟自助判断，Root、解 BL、救砖、性能优化先检测再报价；421 台机型档案、玩机社区与高中资料一站式。">
+<meta name="og:type" content="website">
+<meta name="og:title" content="挞飞 TAFEI · 临沂手机技术服务与玩机社区">
+<meta name="og:description" content="手机出问题，先来挞飞自检。站长直营的手机技术服务、机型档案、玩机社区与高中资料。">
+<meta name="og:url" content="https://piaony.github.io/tafei-site/">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/">
+<title>挞飞 TAFEI · 临沂手机技术服务与玩机社区</title>
+<link rel="stylesheet" href="css/home.css?v=14">
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/tafei-features.css">
+<link rel="stylesheet" href="css/tafei-inbox.css?v=4">
+<link rel="stylesheet" href="css/articles.css?v=2">
+<link rel="stylesheet" href="css/community.css?v=3">
+<link rel="stylesheet" href="css/spirit-profile.css?v=2">
+<link rel="stylesheet" href="css/partner-panel.css?v=4">
+<link rel="stylesheet" href="css/spirit-chat.css?v=2">
+</head>
+<body class="page-home">
+<svg class="tf-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+ <defs><linearGradient id="tfIcoGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#64e8ff"/><stop offset=".55" stop-color="#7297ff"/><stop offset="1" stop-color="#bd8cff"/></linearGradient></defs>
+ <symbol id="ico-home" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></symbol>
+ <symbol id="ico-community" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h5A2.5 2.5 0 0 1 14 6.5v3A2.5 2.5 0 0 1 11.5 12H9l-5 4v-4A2.5 2.5 0 0 1 4 9.5z"/><path d="M14 9.5h3.5A2.5 2.5 0 0 1 20 12v3.5A2.5 2.5 0 0 1 17.5 18H16v3l-3.5-3H15"/></symbol>
+ <symbol id="ico-shop" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l1 12H4.5z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/><path d="M9 12v1.5a3 3 0 0 0 6 0V12"/></symbol>
+ <symbol id="ico-service" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 5.3a4.2 4.2 0 0 0-5.4 5.4L4 16l4 4 5.3-5.3a4.2 4.2 0 0 0 5.4-5.4l-3 3-2.4-2.4z"/></symbol>
+ <symbol id="ico-device" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 18.5h4"/></symbol>
+ <symbol id="ico-search" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+ <symbol id="ico-system" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0v4l2 2v2H4v-2l2-2z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+ <symbol id="ico-notice" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4l3 1 10 4V5L7 9z"/><path d="M7 15v4"/><path d="M19 9v6"/></symbol>
+ <symbol id="ico-dm" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+ <symbol id="ico-user" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+ <symbol id="ico-plus" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+ <symbol id="ico-coin" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linejoin="round"><path d="m12 3 8 5-8 5-8-5z"/><path d="M4 13l8 5 8-5"/><path d="M4 17l8 5 8-5"/></symbol>
+ <symbol id="ico-wand" viewBox="0 0 24 24" fill="none" stroke="url(#tfIcoGrad)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 15 9"/><path d="m15 4 1.2 3.1L19 8.3l-2.8 1.2L15 12.5l-1.2-3L11 8.3l2.8-1.2z"/><path d="m19 14 .7 1.8L22 16.5l-2.3.7L19 19l-.7-1.8-2.3-.7 2.3-.7z"/></symbol>
+</svg>
+
+<canvas id="stars"></canvas>
+<header><div class="wrap nav">
+<a class="brand" href="#home">TAFEI<span>.</span></a>
+<nav class="navlinks" id="navlinks">
+<a href="#home" data-view="home">首页</a>
+<a href="#articles" data-view="articles">文章</a>
+<a href="fix.html">急救室</a>
+<a href="search.html">搜索</a>
+<a href="naiwa.html">奶娃</a>
+<a href="device.html">机型库</a>
+<a href="service.html">技术服务</a>
+<a href="#community" data-view="community">社区</a>
+<a href="#shop" data-view="shop">商城</a>
+</nav>
+<div class="navright"><button class="iconbtn" id="themeBtn" aria-label="切换主题">☼</button><button class="menuBtn" id="menuBtn" aria-label="打开菜单">☰</button></div>
+</div></header>
+<main class="wrap">
+<section class="hero" id="home">
+<div><div class="status"><i class="dot"></i> SERVICE STATION · 23.0</div><div class="eyebrow" style="margin-top:22px">临沂 · 手机技术服务 / 玩机社区</div>
+<h1 style="font-size:clamp(36px,5.2vw,66px)">手机出问题，<br><span class="gradient">先来挞飞自检。</span></h1>
+<p>先判断、再报价、后动手。手机急救室用 2 分钟帮你缩小故障范围；解 BL、Root、救砖、性能优化由站长本人接单，全程录屏，7 天售后。机型档案和玩机资料继续免费看。</p>
+<div class="actions">
+ <a class="btn primary" href="fix.html">手机急救室 ↗</a>
+ <a class="btn" href="service.html">技术服务</a>
+ <a class="btn" href="device.html">查机型档案</a>
+</div>
+<div class="stats-row"><div class="stat-chip"><strong>2 分钟</strong>自助判断</div><div class="stat-chip"><strong>0</strong>设备数据上传</div><div class="stat-chip"><strong>7 天</strong>站内售后</div></div>
+<p class="note" style="margin-top:18px">LOCAL TIME · <span id="clock">正在读取时间…</span></p></div>
+<div class="orb-wrap"><div class="orb" aria-label="科技感发光球体"></div></div>
+</section>
+
+<section id="care-entry" class="reveal">
+ <div class="panel service-strip">
+  <div>
+   <div class="kicker">TAFEI CARE · 新功能</div>
+   <h3>黑屏、卡顿、耗电、刷机失败？先做一次 5 步自检</h3>
+   <p>不收集设备数据 · 给出可以先做 / 先别做 / 可能原因 / 参考区间，并可一键复制摘要给站长。</p>
+  </div>
+  <div class="ss-actions">
+   <a class="btn primary" href="fix.html">进入手机急救室 →</a>
+   <a class="btn" href="service.html#book">直接报修</a>
+  </div>
+ </div>
+</section>
+
+<section id="service-entry" class="reveal">
+ <div class="panel service-strip">
+  <div>
+   <div class="kicker">TECH SERVICE</div>
+   <h3>刷机、Root、模块、救砖，远程帮你弄好</h3>
+   <p>先检测机型再报价 · 解 BL / Root ¥30 起 · 救砖 ¥40 起 · 全程录屏，7 天售后</p>
+  </div>
+  <div class="ss-actions">
+   <a class="btn primary" href="service.html">技术服务 ↗</a>
+   <a class="btn" href="device.html">查机型档案</a>
+  </div>
+ </div>
+</section>
+
+<section id="shop-entry" class="reveal">
+ <div class="panel service-strip shop-strip">
+  <div>
+   <div class="kicker">TAFEI SHOP / 独立模块</div>
+   <h3>商城独立入口：资料包、工具包与站长服务</h3>
+   <p>数码资源、学习资料、定制服务统一放在商城；额度兑换、站内交付、全程留痕。</p>
+  </div>
+  <div class="ss-actions">
+   <a class="btn primary" href="#shop" data-view="shop">进入商城 ↗</a>
+   <a class="btn" href="service.html">先看服务</a>
+  </div>
+ </div>
+</section>
+
+<section id="shop" class="reveal" aria-label="挞飞商城">
+ <div class="shop-view">
+  <div class="sv-head">
+   <div>
+    <div class="kicker">TAFEI SHOP · 站内直通</div>
+    <h2>商城</h2>
+    <p>技术服务、资料包与折腾工具。看中后直接联系站长确认，站内下单、站内交付、全程留痕；不跳转、不经过第三方购物车。</p>
+   </div>
+   <div class="sv-head-actions"><button class="btn" type="button" id="svRefresh">刷新商品</button></div>
+  </div>
+  <div class="sv-toolbar">
+   <input class="sv-search" id="svSearch" placeholder="搜索：机型、模块、资料包…" aria-label="搜索商城项目">
+   <div class="sv-cats" id="svCats" aria-label="商品分类"></div>
+  </div>
+  <div class="sv-count" id="svCount">加载中…</div>
+  <div class="sv-grid" id="svProducts"></div>
+  <div class="sv-contact panel">
+   <div class="sv-contact-head"><div><div class="kicker">CONTACT</div><h3>联系站长</h3></div><p>把商品名和需求发过来，确认方案后再付款。</p></div>
+   <div class="sv-contact-grid">
+    <div><b>QQ</b><span>2026759743</span></div>
+    <div><b>Telegram</b><span>@piaopiaony</span></div>
+    <div><b>邮箱</b><span>piaop443@gmail.com</span></div>
+   </div>
+   <div class="sv-contact-actions">
+    <a class="btn primary" href="https://wpa.qq.com/msgrd?v=3&amp;uin=2026759743&amp;site=qq&amp;menu=yes" target="_blank" rel="noopener">通过 QQ 联系 ↗</a>
+    <a class="btn" href="https://t.me/piaopiaony" target="_blank" rel="noopener">通过 Telegram 联系 ↗</a>
+    <button class="btn" type="button" data-copy="piaop443@gmail.com">复制邮箱</button>
+   </div>
+   <div class="sv-risk">不提供游戏外挂、破解付费软件、代实名等违规内容；发现此类需求一律不接并保留记录。官方服务只由站长本人对接，请勿私下转账。</div>
+  </div>
+ </div>
+</section>
+
+<section id="device-entry" class="reveal">
+ <div class="panel service-strip">
+  <div>
+   <div class="kicker">DEVICE LIBRARY</div>
+   <h3>机型库：425 台，4 台深度档案 + 421 台公开规格</h3>
+   <p>苹果 · 三星 · 华为 · 荣耀 · 小米 · OPPO · vivo · 一加等 24 个品牌 · 支持品牌筛选、关键词搜索和 3 台对比，参数可回溯到公开规格来源页</p>
+  </div>
+  <div class="ss-actions">
+   <a class="btn primary" href="device.html">查机型档案 ↗</a>
+   <a class="btn" href="device.html?cmp=redmi-k40,redmi-note-12-turbo">看看对比</a>
+  </div>
+ </div>
+</section>
+
+<section id="naiwa-entry" class="reveal">
+ <div class="panel service-strip">
+  <div>
+   <div class="kicker">NAIWA ARCADE</div>
+   <h3>奶娃小游戏：27 个网页小游戏，点开就玩</h3>
+   <p>奶蛙系列 · 不用下载 · 手机浏览器直接玩，玩完关掉不占内存</p>
+  </div>
+  <div class="ss-actions">
+   <a class="btn primary" href="naiwa.html">去玩 ↗</a>
+   <a class="btn" href="https://milkyfrog.com/games" target="_blank" rel="noopener noreferrer">官方合集</a>
+  </div>
+ </div>
+</section>
+
+<section id="articles" class="reveal" aria-label="文章内容"></section>
+
+<section id="changelog" class="reveal">
+ <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
+ <div class="panel" style="padding:24px;display:grid;gap:18px">
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v23.1</span><span class="af-date">2026-11-24</span></div><p>精灵小屋为瑶新增「时之祈愿 · 原画」皮肤：直接使用高精度原画立绘，在伙伴坞的皮肤条里点选即可换上，图鉴、头像、全站挂件会一起切换。原画皮肤是静态立绘，只有心情、粒子与台词反馈，不跟随 Q 版动作帧。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v23.0</span><span class="af-date">2026-11-22</span></div><p>「挞飞原创伙伴」小挞飞正式升级为官方形象：棕发小女孩、金色挞壳帽、奶油白裙、青绿围巾和星星糖挎包；全站挂件、个人中心、伙伴坞、小挞工坊和精灵小屋统一使用新资产。Lv.10 永久纪念卡改为空白星空卡面 + Canvas 动态文字，可按当前精灵名、等级、称号、亲密度和日期生成并下载。魔法伙伴面板和全站挂件改为跟随精灵小屋里选中的当前伙伴，可在图鉴里自由切换，不再固定小挞飞。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v22.2</span><span class="af-date">2026-11-22</span></div><p>精灵十级权益全部落地：Lv.4 专属互动台词、Lv.6 私信签名、Lv.7 限定卡面边框、Lv.8 个人主页展示位、Lv.9 专属称号、Lv.10 永久纪念卡；新增个人主页伙伴卡与可下载纪念卡，权益不再只是文字。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v22.1</span><span class="af-date">2026-11-22</span></div><p>精灵亲密度升级为 10 级成长：每级有称号和权益，Lv.2 挂件铭牌、Lv.3 头像光环、Lv.5 预约优先标注；精灵小屋新增成长进度面板，后台可逐级改门槛、称号和权益说明。所有权益由站长在预约中手动核销。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v22.0</span><span class="af-date">2026-11-22</span></div><p>上线「手机急救室」：5 步互动自检，按设备、现象、系统状态、最近操作和优先目标生成先做 / 别做 / 可能原因 / 参考区间，支持一键复制诊断摘要；首页改为服务优先入口，移动端导航同步加入急救室。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.10</span><span class="af-date">2026-11-22</span></div><p>精灵商城改为逐款获取：默认后台发放，前台只显示「联系站长获取」；后台可切回额度购买或免费，并给指定账号手动发放精灵，不扣额度。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.9</span><span class="af-date">2026-11-22</span></div><p>新增「精灵小屋」：首批 8 个热门游戏同人 Q 版角色（王者荣耀：西施、安琪拉、瑶；第五人格：园丁、医生、机械师、调香师；纸嫁衣9：昙露凝），支持摸摸、喂星糖、陪玩和本地亲密度；精灵小屋页脚改为“有喜欢的形象，可以联系站长上架”。角色图为同人重绘，不是官方原画，不收费。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.8</span><span class="af-date">2026-11-22</span></div><p>新增「魔法伙伴」：社区个人栏加入主站原创小挞，支持摸摸、喂星糖、陪玩和本地养成；同时上线独立原创页「小挞工坊」，可换装、玩糖霜小游戏，形象和主站保持同一套设计。宠物数据只保存在浏览器，不消耗额度、不写后台。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.7</span><span class="af-date">2026-11-22</span></div><p>社区新增「签到与任务」：每日签到得 1 额度，连续 3 / 7 / 30 天额外奖励；逛 3 台机型、发布求助、回复他人求助、完善头像昵称都能领额度。所有奖励只进站内额度账户，支持额度流水，不能提现或转让。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.6</span><span class="af-date">2026-11-22</span></div><p>站长后台与站点彻底打通：后台改用站点顶栏和手机底部导航，共用站长账号登录态；概览数字可点击直达预约、账号、商品、举报和私信模块，待处理数量和未读私信直接标在标签上；个人中心新增站长专属后台入口，普通账号看不到。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.5</span><span class="af-date">2026-11-22</span></div><p>机型库从 145 台扩到 425 台：新增苹果、三星、vivo、iQOO、一加、摩托罗拉、中兴、努比亚、红魔、魅族、索尼、华硕、谷歌、Nothing、联想、Infinix、TECNO 等品牌，覆盖 24 个品牌 2024–2026 主流机型；规格目录统一标注公开规格库来源与“未实测”，品牌筛选随数据自动扩展。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.4</span><span class="af-date">2026-11-22</span></div><p>手机端内页补上底部五栏导航：进入技术服务、机型库、商城、搜索、奶娃和 404 页后仍能直接切回首页、社区、商城、服务和机型；从内页点社区或商城，会在首页内对应的社区/商城视图打开。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.3</span><span class="af-date">2026-11-22</span></div><p>商城改为站内直通：点导航“商城”直接在当前页面展示商品、分类和站长联系方式，不再跳到独立商城页；原栏目更名为“手机权限”。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.2</span><span class="af-date">2026-11-21</span></div><p>社区升级为消息枢纽：进入社区先看到个人状态、系统通知、公告和私信，个人中心收进社区抽屉；发布求助收成右下角加号弹层；首页新增独立商城入口；导航图标换成统一线性渐变图标，并上线头像更换。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.1</span><span class="af-date">2026-11-21</span></div><p>从社区转向服务站：每位登录用户默认拥有与站长的官方直连会话；个人中心新增额度展示与充值说明；全站补上站内交易保障提示，并对私信、评论中的手机号、邮箱、微信/QQ 等站外联系方式做拦截，避免私下交易后无人兜底。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v21.0</span><span class="af-date">2026-11-21</span></div><p>机型库扩容到 145 台：保留 4 台深度档案，新增 141 台官方规格目录，覆盖小米、Redmi、POCO、OPPO、华为、荣耀、realme；支持按品牌筛选，规格目录与实测档案分开标记，详情页附厂商官网原始参数链接。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.9</span><span class="af-date">2026-11-21</span></div><p>个人中心新增“修改昵称”：登录后随时可改，保存后会同步到社区动态、评论和机型求助；社区里的个人资料面板改名也会同步账户昵称。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.8</span><span class="af-date">2026-11-21</span></div><p>私信还没就绪时不再把建表教程给所有人看：只有站长账号能看到配置步骤，普通用户只会看到“私信正在开通中”；同时修正未登录用户也先弹建表卡的问题。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.7</span><span class="af-date">2026-11-21</span></div><p>机型库扩到 4 台（新增 Redmi Note 12 Turbo / POCO F5、OPPO Reno11 Pro、vivo X50）；机型页支持关键词筛选，还能勾选最多 3 台并列对比；新增选购对照文章，并补上自定义 404 页。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.6</span><span class="af-date">2026-11-21</span></div><p>内页顶栏统一：机型库、技术服务、商城、搜索页都能直接进「搜索」和「奶娃」；手机上导航字距收窄，七项一屏放下不用左右滑。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.5</span><span class="af-date">2026-11-21</span></div><p>新增「奶娃」小游戏模块：27 个奶蛙系列网页小游戏集中一页，支持站内筛选，首页首屏下方和顶部导航都能进。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.4</span><span class="af-date">2026-11-21</span></div><p>新站内搜索：文章、机型档案和社区求助一次搜完；文章正文里的机型名可以直接点进档案，机型档案页也会列出这台机器的求助。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.3</span><span class="af-date">2026-11-21</span></div><p>社区改为「求助工单池」：发帖必须写清机型、系统版本与问题，按机型号归档聚合，没人回答的贴在前面，一条求助可一键转站长服务预约。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.2</span><span class="af-date">2026-11-21</span></div><p>技术服务入口上提：底部导航「商城」换成「服务」，首页首屏下加一条服务说明，手机上不用先点商城才能找到服务。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.1</span><span class="af-date">2026-11-21</span></div><p>上线技术服务页（解 BL、Root、模块、内核、救砖，含预约表单）与机型档案库；商城改为「联系站长确认」模式，去掉无法结算的购物车。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.0</span><span class="af-date">2026-11-21</span></div><p>首页改为内容优先：新增文章系统，上线手机权限与高中资料两个栏目，首批 6 篇范文；补齐 SEO 基础（sitemap、robots、社交卡片）。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v19.0</span><span class="af-date">2026-11-20</span></div><p>上线信息中心：系统通知、公告与私信；站长审查后台支持账号列表、私信核查、封禁与解封；注册需同意社区规范。</p></div>
+  <div class="log-item"><div class="af-card-meta"><span class="af-col">v18.0</span><span class="af-date">2026-11 上旬</span></div><p>页面拆分重构，新增站内指令面板、快捷键与搜索视图记忆；留言墙、社区、项目展示整合到统一界面。</p></div>
+ </div>
+</section>
+
+<section id="home-tools" class="reveal">
+ <div class="panel" style="padding:24px">
+  <h3>留言墙</h3>
+  <p>想说些什么？也可以看看大家留下的留言。</p>
+  <button class="btn primary" type="button" data-open-view="guestbook">打开留言墙 ↗</button>
+ </div>
+</section>
+
+<section id="community" class="reveal">
+ <div class="community-hub" id="communityHub">
+  <div class="community-me" id="communityMe">
+   <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
+    <span id="communityAvatarFallback">访</span>
+    <img id="communityAvatarImg" alt="" hidden>
+   </button>
+   <div class="community-me-main">
+    <h3 id="communityNickname">未登录</h3>
+    <p id="communityMeta">登录后可发帖、私信站长、查看额度</p>
+   </div>
+   <div class="community-credit">
+    <span>可用额度</span>
+    <strong id="communityBalance">—</strong>
+   </div>
+   <div class="community-me-actions">
+    <button class="community-pet-btn" id="communityPetBtn" type="button" aria-expanded="false" aria-controls="petPanel">
+     <svg class="tf-ico" aria-hidden="true"><use href="#ico-wand"></use></svg><span>伙伴</span><b class="pet-badge" id="petBadge" hidden>1</b>
+    </button>
+    <button class="community-task-btn" id="communityTaskBtn" type="button" aria-expanded="false" aria-controls="taskCenter">
+     <svg class="tf-ico" aria-hidden="true"><use href="#ico-coin"></use></svg><span>任务</span><b class="task-badge" id="taskBadge" hidden>0</b>
+    </button>
+    <button class="community-profile-btn" id="communityProfileToggle" type="button" aria-expanded="false" aria-controls="communityProfileWrap">个人中心</button>
+   </div>
+  </div>
+
+  <div class="community-msg-rail" aria-label="消息入口">
+   <button type="button" class="community-msg-card" data-community-pane="system">
+    <span class="cm-ico"><svg class="tf-ico" aria-hidden="true"><use href="#ico-system"></use></svg></span>
+    <span class="cm-main"><b>系统通知</b><span>版本更新与账号提醒</span></span>
+    <span class="cm-badge" data-hub-badge="system" hidden>0</span>
+   </button>
+   <button type="button" class="community-msg-card" data-community-pane="notice">
+    <span class="cm-ico"><svg class="tf-ico" aria-hidden="true"><use href="#ico-notice"></use></svg></span>
+    <span class="cm-main"><b>站内公告</b><span>规则、活动与上线说明</span></span>
+    <span class="cm-badge" data-hub-badge="notice" hidden>0</span>
+   </button>
+   <button type="button" class="community-msg-card" data-community-pane="dm">
+    <span class="cm-ico"><svg class="tf-ico" aria-hidden="true"><use href="#ico-dm"></use></svg></span>
+    <span class="cm-main"><b>我的私信</b><span>站长官方会话默认置顶</span></span>
+    <span class="cm-badge" data-hub-badge="dm" hidden>0</span>
+   </button>
+  </div>
+ </div>
+
+ <section class="task-center" id="taskCenter" hidden aria-labelledby="taskCenterTitle">
+  <div class="task-center-head">
+   <div>
+    <p class="task-kicker">DAILY REWARDS</p>
+    <h3 id="taskCenterTitle">签到与任务</h3>
+    <p>每天签到、逛机型、发求助、回帖，都能拿站内额度。额度只能站内消费，不能提现或转给其他人。</p>
+   </div>
+   <button class="task-center-close" id="taskCenterClose" type="button">收起 ↑</button>
+  </div>
+
+  <div class="task-checkin">
+   <div class="task-checkin-copy">
+    <span>连续签到</span>
+    <div class="task-streak"><b id="taskStreak">0</b><i>天</i></div>
+    <p id="taskCheckinHint">登录后开始签到</p>
+   </div>
+   <div class="task-checkin-side">
+    <button class="btn primary" id="taskCheckinBtn" type="button" disabled>签到 +1</button>
+    <button class="btn" id="taskLoginBtn" type="button" hidden>去登录</button>
+   </div>
+  </div>
+
+  <div class="task-week" id="taskWeek" aria-label="最近七天签到"></div>
+
+  <div class="task-balance-line"><span>当前额度</span><b id="taskBalance">—</b></div>
+
+  <div class="task-list" id="taskList">
+   <p class="task-empty">登录后查看今天的任务。</p>
+  </div>
+  <p class="task-msg" id="taskMsg" role="status"></p>
+ </section>
+
+ <section class="pet-panel" id="petPanel" hidden aria-labelledby="petPanelTitle">
+  <div class="pet-panel-head">
+   <div>
+    <p class="pet-kicker">MAGIC COMPANION</p>
+    <h3 id="petPanelTitle">魔法伙伴 · 小挞飞</h3>
+    <p id="petPanelCopy">当前展示伙伴会跟着你去全站角落。食物和玩具来自精灵小屋补给站，价格和状态都由精灵小屋统一管理。</p>
+   </div>
+   <div class="pet-panel-nav"><button class="pet-widget-toggle" id="petWidgetToggle" type="button" aria-pressed="false">放出全站挂件</button><a class="pet-switch" href="jingling.html?from=tafei" target="_blank" rel="noopener">更换伙伴 ↗</a><button class="pet-panel-close" id="petPanelClose" type="button">收起 ↑</button></div>
+  </div>
+
+  <div class="pet-panel-body">
+   <div class="pet-mini-stage" id="petMiniStage">
+    <div class="mini-pet" id="miniPet" data-mood="happy" aria-label="挞飞原创伙伴小挞飞">
+    <img class="pet-mini-photo" id="petMiniPhoto" src="assets/spirits/xiaota-v23/main.png" alt="挞飞原创伙伴小挞飞">
+    </div>
+
+    <div class="pet-mini-speech" id="petMiniSpeech" aria-live="polite">今天也来看看小挞飞吗？</div>
+    <div class="pet-mini-sparkles" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>
+   </div>
+
+   <div class="pet-panel-side">
+    <div class="pet-identity">
+     <div>
+      <p class="pet-mini-label" id="petPartnerKicker">ORIGINAL PARTNER</p>
+      <h4 id="petPartnerName">小挞飞</h4>
+      <p id="petPartnerDesc">挞飞原创挞壳精灵，金色挞壳帽和青绿围巾是她的工牌。</p>
+     </div>
+     <span class="pet-level" id="petLevel">Lv.1</span>
+    </div>
+    <div class="pet-bond-card">
+     <div><b id="petBond">0</b><small>亲密度</small></div>
+     <p id="petBondHint">再互动 5 次升级</p>
+    </div>
+    <div class="pet-meters">
+     <div><span>心情 <b id="petMoodVal">80</b></span><i><em id="petMoodBar"></em></i></div>
+     <div><span>饱食 <b id="petHungerVal">70</b></span><i><em id="petHungerBar"></em></i></div>
+     <div><span>困意 <b id="petEnergyVal">20</b></span><i><em id="petEnergyBar"></em></i></div>
+    </div>
+    <div class="pet-actions">
+     <button class="pet-action" id="petPetBtn" type="button"><span>✦</span><b>摸摸</b></button>
+     <button class="pet-action" id="petFeedBtn" type="button"><span>食</span><b>喂食</b></button>
+     <button class="pet-action" id="petPlayBtn" type="button"><span>玩</span><b>玩玩具</b></button>
+    </div>
+    <p class="pet-fx-hint">点 1 下摸头，连点 2 下换开心表情，连点 3 下会惊讶；瑶停 10 秒会坐下、20 秒会犯困。拖到边缘会撞墙，快速晃动会眩晕，长按 2 秒会害羞。</p>
+    <a class="pet-link" href="jingling.html?from=tafei" target="_blank" rel="noopener">
+     <span><b>去精灵小屋 ↗</b><small>9 个伙伴 · 选一个带到全站</small></span><i>打开</i>
+    </a>
+    <p class="pet-status" id="petStatus" role="status"></p>
+   </div>
+  </div>
+ </section>
+
+ <section id="info" class="community-block">
+ <div class="section-head">
+  <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
+  <p>系统通知、公告和私信都在这里；站长官方会话默认置顶。</p>
+ </div>
+
+ <div class="tf3" id="tf3Inbox">
+  <div class="tf3-bar">
+   <div class="tf3-tabs" role="tablist" aria-label="信息中心分类">
+    <button type="button" class="tf3-tab is-active" role="tab" aria-selected="true" data-pane="system">
+     系统通知<span class="tf3-badge" data-badge="system" hidden>0</span>
+    </button>
+    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="notice">
+     公告通知<span class="tf3-badge" data-badge="notice" hidden>0</span>
+    </button>
+    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="dm">
+     私信<span class="tf3-badge" data-badge="dm" hidden>0</span>
+    </button>
+   </div>
+   <button type="button" class="tf3-readall" id="tf3ReadAll">全部标为已读</button>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="system" role="tabpanel">
+   <div class="tf3-list" id="tf3SystemList">
+    <div class="tf3-hint">正在读取系统通知…</div>
+   </div>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="notice" role="tabpanel" hidden>
+   <div class="tf3-list" id="tf3NoticeList">
+    <div class="tf3-hint">正在读取公告…</div>
+   </div>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="dm" role="tabpanel" hidden>
+   <div class="tf3-list" id="tf3DmWrap">
+    <div class="tf3-hint">正在检查私信状态…</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+
+
+
+ <div class="community-profile-wrap" id="communityProfileWrap" hidden>
+  <div class="community-profile-top">
+   <span>账户与个人资料</span>
+   <button type="button" id="communityProfileClose">收起 ↑</button>
+  </div>
+  <a class="community-admin-entry" id="adminEntry" href="admin-center.html" rel="nofollow" hidden>
+   <span><b>站长后台</b><small>预约、私信、商品、公告和举报集中处理</small></span><i>进入 ↗</i>
+  </a>
+  <a class="community-admin-entry pet-entry" href="jingling.html?from=tafei" target="_blank" rel="noopener">
+   <span><b>魔法伙伴 · 精灵小屋</b><small>9 个 Q 版伙伴，独立存档，不接账号和额度</small></span><i>打开 ↗</i>
+  </a>
+  <section id="profile" class="community-block community-profile-panel">
+ <div class="section-head">
+  <div><div class="kicker">TAFEI PERSONAL CENTER</div><h2>账户与个人资料</h2></div>
+  <p>注册、登录并管理你的挞飞账户。</p>
+ </div>
+ <div class="profile-spirit-card" id="profileSpiritCard" hidden>
+  <div class="ps-head"><span>PARTNER DISPLAY · 个人主页展示位</span><a href="jingling.html" target="_blank" rel="noopener">去精灵小屋 ↗</a></div>
+  <div class="ps-body" id="profileSpiritBody"></div>
+ </div>
+<div class="panel article-form" id="tafeiAuthPanel">
+ <h3>♙ 挞飞社区账户</h3>
+
+ <div id="tafeiAuthLoggedOut">
+  <form id="tafeiGuestForm">
+   <h4>创建挞飞账户</h4>
+
+   <label class="article-field">
+    <span>社区用户名（3–20位，英文字母、数字或下划线）</span>
+    <input id="tafeiSignupUsername" minlength="3" maxlength="20"
+     pattern="[A-Za-z0-9_]{3,20}" required
+     autocomplete="username" placeholder="例如：Piaoyi_01">
+   </label>
+
+   <label class="article-field">
+    <span>社区昵称（最多30字）</span>
+    <input id="tafeiSignupNickname" maxlength="30"
+     required placeholder="例如：热爱生活的小飞">
+   </label>
+
+   <label class="article-field">
+    <span>邮箱</span>
+    <input id="tafeiSignupEmail" type="email"
+     required autocomplete="email" placeholder="你的邮箱地址">
+   </label>
+
+   <label class="article-field">
+    <span>密码（至少8位）</span>
+    <input id="tafeiSignupPassword" type="password"
+     minlength="8" required autocomplete="new-password"
+     placeholder="设置登录密码">
+   </label>
+
+   <label class="article-field">
+    <span>确认密码</span>
+    <input id="tafeiSignupPasswordConfirm" type="password"
+     minlength="8" required autocomplete="new-password"
+     placeholder="再次输入登录密码">
+   </label>
+
+   <label class="article-field consent">
+    <input type="checkbox" id="tafeiSignupConsent">
+    <span>我已阅读并同意<a href="#info" data-view="info">《社区规范与信息中心使用公告》</a>，承诺遵守站内规则。</span>
+   </label>
+
+   <button class="btn primary" type="submit">注册挞飞账户 ↗</button>
+  </form>
+
+  <hr>
+
+  <form id="tafeiLoginForm">
+   <h4>已有账户？登录</h4>
+
+   <label class="article-field">
+    <span>邮箱</span>
+    <input id="tafeiLoginEmail" type="email"
+     required autocomplete="email" placeholder="注册时使用的邮箱">
+   </label>
+
+   <label class="article-field">
+    <span>密码</span>
+    <input id="tafeiLoginPassword" type="password"
+     required autocomplete="current-password" placeholder="账户密码">
+   </label>
+
+   <button class="btn primary" type="submit">登录挞飞 ↗</button>
+  </form>
+ </div>
+
+ <div id="tafeiAuthLoggedIn" hidden>
+  <div class="avatar-editor">
+   <button class="avatar-preview" id="tafeiAvatarBtn" type="button" aria-label="更换头像">
+    <span id="tafeiAvatarFallback">我</span>
+    <img id="tafeiAvatarImg" alt="" hidden>
+   </button>
+   <div class="avatar-copy">
+    <h4>我的头像</h4>
+    <p>点击头像选择图片，自动裁成 1:1 并压缩。支持 JPG / PNG，单张不超过 8MB。</p>
+    <p id="tafeiAvatarStatus" role="status"></p>
+   </div>
+   <input id="tafeiAvatarInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+  </div>
+
+  <p>欢迎回来，<strong id="tafeiCurrentNickname"></strong>！</p>
+  <p>你已经登录挞飞。遇到问题可以直接在「社区 → 消息中心 → 私信」里找站长，官方会话已经默认置顶。</p>
+
+  <div class="balance-card" id="tafeiBalanceCard">
+   <div class="balance-head">
+    <div>
+     <p class="balance-kicker">TAFEI CREDIT</p>
+     <h4>我的额度</h4>
+    </div>
+    <span class="balance-badge" id="tafeiBalanceUpdated">读取中</span>
+   </div>
+   <div class="balance-main">
+    <strong id="tafeiBalanceValue">—</strong>
+    <span>额度</span>
+   </div>
+   <p class="balance-copy">1 元 = 10 额度。额度用于站内咨询、资料与远程服务，不支持提现，也不能转给其他人。</p>
+   <div class="balance-actions">
+    <a class="btn primary" href="service.html">查看技术服务 ↗</a>
+    <button class="btn" id="tafeiBalanceRefresh" type="button">刷新额度</button>
+   </div>
+   <p class="balance-hint">充值方式：联系站长并说明你的注册邮箱，站长核对后在后台手动入账。到账前不会产生扣款，站外转账不视为本站充值。</p>
+   <p class="balance-status" id="tafeiBalanceStatus" role="status"></p>
+  </div>
+
+  <div class="nick-editor">
+   <h4>修改昵称</h4>
+   <p>昵称会同步到社区动态、评论和机型求助，随时都能改。</p>
+   <form id="tafeiNickForm">
+    <label class="article-field">
+     <span>新昵称（最多30字）</span>
+     <input id="tafeiNickInput" maxlength="30" required placeholder="输入新昵称">
+    </label>
+    <button class="btn primary" type="submit">保存昵称 ↗</button>
+   </form>
+   <p id="tafeiNickStatus" role="status"></p>
+  </div>
+
+  <button class="btn" id="tafeiLogoutBtn" type="button">退出登录</button>
+
+  <form id="tafeiUpgradeForm">
+   <h4>完善账户：绑定邮箱和密码</h4>
+
+   <label class="article-field">
+    <span>社区用户名（3–20位，英文字母、数字或下划线）</span>
+    <input id="tafeiUpgradeUsername" minlength="3" maxlength="20"
+     pattern="[A-Za-z0-9_]{3,20}" required
+     autocomplete="username" placeholder="例如：Piaoyi_01">
+   </label>
+
+   <label class="article-field">
+    <span>社区昵称（最多30字）</span>
+    <input id="tafeiUpgradeNickname" maxlength="30"
+     required placeholder="你的社区昵称">
+   </label>
+
+   <label class="article-field">
+    <span>邮箱</span>
+    <input id="tafeiUpgradeEmail" type="email"
+     required autocomplete="email" placeholder="你的邮箱地址">
+   </label>
+
+   <label class="article-field">
+    <span>设置密码（至少8位）</span>
+    <input id="tafeiUpgradePassword" type="password"
+     minlength="8" required autocomplete="new-password"
+     placeholder="设置登录密码">
+   </label>
+
+   <button class="btn primary" type="submit">完善账户 ↗</button>
+  </form>
+ </div>
+
+ <p id="tafeiAuthStatus" role="status">
+  未登录也可以浏览社区，登录后即可发布动态。
+ </p>
+</div>
+</section>
+
+
+ </div>
+
+ <div class="section-head community-feed-head">
+  <div><div class="kicker">COMMUNITY / HELP</div><h2>遇到问题，发出来一起看。</h2></div>
+  <p>按机型归档的求助区。写明机型和系统版本；需要远程处理的，直接转站长服务。发布入口收进右下角的加号。</p>
+ </div>
+
+ <div class="help-tools">
+  <input id="helpSearch" type="search" placeholder="搜机型或关键词，如「掉帧」「卡 logo」" aria-label="搜索求助">
+  <select id="helpSort" aria-label="排序方式">
+   <option value="newest">最新发布</option>
+   <option value="active">回答最多</option>
+   <option value="open">只看没解决的</option>
+  </select>
+ </div>
+
+ <div class="help-board" id="helpBoard" aria-live="polite">
+  <div class="feed-empty">正在加载求助……</div>
+ </div>
+
+ <button class="help-fab" id="helpFab" type="button" aria-controls="helpCompose" aria-expanded="false" aria-label="发布求助">
+  <svg class="tf-ico" aria-hidden="true"><use href="#ico-plus"></use></svg>
+  <span>发布</span>
+ </button>
+
+ <div class="help-compose" id="helpCompose" hidden>
+  <div class="help-compose-mask" data-help-close></div>
+  <div class="help-compose-card" role="dialog" aria-modal="true" aria-labelledby="helpComposeTitle">
+   <div class="help-compose-head">
+    <h3 id="helpComposeTitle">发布求助</h3>
+    <button type="button" id="helpComposeClose" aria-label="关闭">✕</button>
+   </div>
+   <form class="help-form" id="helpForm" novalidate>
+ <div class="help-row">
+  <div class="field">
+   <label for="helpDevice">机型 <span class="req">*</span></label>
+   <input id="helpDevice" required maxlength="30" placeholder="例如 Redmi K40 / OPPO Reno11 Pro" list="helpDeviceList" autocomplete="off">
+   <datalist id="helpDeviceList"></datalist>
+  </div>
+  <div class="field">
+   <label for="helpOs">系统版本</label>
+   <input id="helpOs" maxlength="40" placeholder="例如 HyperOS 2.0 / ColorOS 15" autocomplete="off">
+  </div>
+ </div>
+ <div class="field">
+  <label for="helpProblem">问题描述 <span class="req">*</span></label>
+  <textarea id="helpProblem" required maxlength="600" placeholder="什么现象、什么时候开始、系统有没有提示。越具体越好判断。"></textarea>
+ </div>
+ <div class="field">
+  <label for="helpTried">已经试过什么</label>
+  <input id="helpTried" maxlength="120" placeholder="例如：清过缓存、重启过、刷过一次模块" autocomplete="off">
+ </div>
+ <div class="help-actions">
+  <button class="btn primary" type="submit" id="helpSubmit">发布求助</button>
+  <span class="form-status" id="helpStatus" role="status" aria-live="polite">登录后可发布，访客也能看全部求助。</span>
+ </div>
+</form>
+  </div>
+ </div>
+</section>
+
+<section id="projects" class="reveal">
+<div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
+<div class="grid">
+<article class="panel project"><div class="symbol">✦</div><h3>挞飞个人网站</h3><p>从零开始制作并部署的个人网站，记录这段学习与创作过程。</p><div class="bottom"><span class="tag">HTML · CSS · JS</span><a class="textbtn" href="https://piaony.github.io/tafei-site/" target="_blank" rel="noopener">访问网站 ↗</a></div></article>
+<article class="panel project"><div class="symbol">⌘</div><h3>下一个作品</h3><p>这里预留给你的下一个网页、小工具或编程练习。完成后再替换这段文字。</p><div class="bottom"><span class="tag">待添加</span><button class="textbtn detailBtn" data-title="下一个作品" data-desc="把你真正完成的项目名称、用途和访问链接添加到这里。">编辑提示 ↗</button></div></article>
+<article class="panel project"><div class="symbol">◇</div><h3>实验与练习</h3><p>收集学习过程中做过的小实验，展示从尝试到掌握的过程。</p><div class="bottom"><span class="tag">持续更新</span><button class="textbtn detailBtn" data-title="实验与练习" data-desc="可以放置 JavaScript 小练习、网页交互实验或自己编写的演示程序。">查看说明 ↗</button></div></article>
+</div></section>
+<section id="about" class="reveal">
+<div class="section-head"><div><div class="kicker">03 / OUR MISSION</div><h2>挞飞的初心</h2></div><p>让每个人都能平等、自由、友善地享受互联网带来的便利。</p></div>
+<div class="about-grid">
+<div class="panel about-card">
+<h3>让互联网温暖每一个人。</h3>
+<p>挞飞是一个面向所有普通人的免费、友善、开放的互联网社区。</p>
+<p>我们希望每个人都能在这里分享知识、交流经验、寻找帮助，也能把自己的经验分享给别人。</p>
+<p>无论身处哪里，无论是否懂技术，每个人都值得平等地享受互联网带来的便利。</p>
+<span class="tag">FREE · FRIENDLY · OPEN</span>
+</div>
+<div class="panel about-card"><h3>学习路线</h3>
+<div class="skill"><div class="skill-top"><span>HTML · 网页结构</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:42%"></div></div></div>
+<div class="skill"><div class="skill-top"><span>CSS · 页面样式</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:32%"></div></div></div>
+<div class="skill"><div class="skill-top"><span>JavaScript · 交互逻辑</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:18%"></div></div></div>
+<p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
+</div></div></section>
+<section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">04 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
+<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！
+输入 help 查看可用命令。
+</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
+
+<section id="studio" class="reveal">
+ <div class="section-head"><div><div class="kicker">05 / CREATOR STUDIO</div><h2>我的项目管理台</h2></div><p>把完成的小作品添加到展厅，整理名称、介绍和访问地址。</p></div>
+ <div class="feature-grid">
+  <div class="panel form-panel">
+   <h3>添加一个作品</h3>
+   <input id="projectName" maxlength="40" placeholder="作品名称，例如：我的计算器">
+   <textarea id="projectDesc" maxlength="220" placeholder="简单介绍它能做什么"></textarea>
+   <input id="projectUrl" type="url" placeholder="作品网址（可选，需以 https:// 开头）">
+   <button class="action-btn primary" id="addProject">＋ 添加到我的展厅</button>
+   <p class="local-note">说明：目前作品数据保存在当前浏览器中。清除浏览器数据或换设备后不会自动同步。</p>
+  </div>
+  <div class="panel">
+   <h3>我的新增作品</h3>
+   <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
+  </div>
+ </div>
+ <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>23.0</strong>当前网站版本</div></div>
+</section>
+<section id="guestbook" class="reveal">
+ <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
+ <div class="feature-grid">
+  <div class="panel form-panel">
+   <h3>写一条留言</h3>
+   <input id="messageName" maxlength="24" placeholder="怎么称呼你（可选）">
+   <textarea id="messageText" maxlength="240" placeholder="写下你的留言，最多 240 字"></textarea>
+   <button class="action-btn primary" id="sendMessage">发布留言</button>
+   <p class="local-note">留言保存在云端，所有访客都可以查看。</p>
+  </div>
+  <div class="panel"><h3>最近的留言</h3><div id="messages" class="messages"><div class="empty-state">还没有留言。欢迎写下第一条。</div></div></div>
+ </div>
+</section>
+
+<section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
+
+</main>
+<footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界 · <a href="fix.html">手机急救室</a> · <a href="jingling.html?from=tafei" target="_blank" rel="noopener">精灵小屋</a><div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
+<script src="js/home-core.js?v=7"></script>
+<script src="js/spirit-core.js?v=14"></script>
+<script src="js/profile-spirit.js?v=2" defer></script>
+<script src="js/task-center.js?v=1"></script>
+<script src="js/pet-hub.js?v=7"></script>
+
+<nav class="mobile-bottom-nav" aria-label="手机底部导航">
+ <a href="#home" data-view="home" class="active"><svg class="tf-ico" aria-hidden="true"><use href="#ico-home"></use></svg><span>首页</span></a>
+ <a href="#community" data-view="community"><svg class="tf-ico" aria-hidden="true"><use href="#ico-community"></use></svg><span>社区</span></a>
+ <a href="#shop" data-view="shop"><svg class="tf-ico" aria-hidden="true"><use href="#ico-shop"></use></svg><span>商城</span></a>
+ <a href="service.html"><svg class="tf-ico" aria-hidden="true"><use href="#ico-service"></use></svg><span>服务</span></a>
+ <a href="device.html"><svg class="tf-ico" aria-hidden="true"><use href="#ico-device"></use></svg><span>机型</span></a>
+</nav>
+
+
+<script src="js/home-views.js?v=7"></script>
+<script src="js/community-hub.js?v=2"></script>
+<script src="js/shop-view.js?v=2"></script>
+<script src="js/articles.js?v=2"></script>
+<script src="js/community-help.js?v=4"></script>
+
+<script src="announcement.js?v=2"></script>
+<script src="js/tafei-ui.js?v=8" defer></script>
+<script src="js/tafei-features.js?v=5" defer></script>
+<script src="js/tafei-inbox.js?v=7" defer></script>
+<script src="js/spirit-chat.js?v=2" defer></script>
+<script src="js/spirit-widget.js?v=21" defer></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1020">
+<title>飘飘的故事｜挞飞</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:#0b1020;color:#e8efff;
+  font-family:system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+  line-height:1.8;overflow-x:hidden
+}
+canvas{position:fixed;inset:0;z-index:-1;pointer-events:none}
+nav{
+  position:sticky;top:0;z-index:5;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:15px 7%;background:#0b1020dd;
+  backdrop-filter:blur(14px);border-bottom:1px solid #ffffff12
+}
+.logo{font-size:23px;font-weight:800;color:#8ab4ff;letter-spacing:2px}
+nav a{color:#c6d7f7;text-decoration:none;font-size:14px}
+main{max-width:900px;margin:auto;padding:0 22px}
+.hero{
+  min-height:78vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:flex-start;
+  padding:70px 0
+}
+.tag{color:#83b3ff;letter-spacing:4px;font-size:12px}
+h1{font-size:clamp(48px,12vw,86px);line-height:1.2;margin:18px 0}
+h1 span{color:#83b3ff}
+.subtitle{font-size:clamp(19px,4vw,27px);color:#c5d7f7}
+.intro{max-width:650px;color:#9eacc7;margin-top:22px}
+.button{
+  display:inline-block;margin-top:30px;padding:11px 24px;
+  border:1px solid #679fff;border-radius:30px;
+  color:#b9d3ff;text-decoration:none;transition:.3s
+}
+.button:hover{background:#679fff;color:#071020}
+section{padding:65px 0;border-top:1px solid #ffffff14}
+.section-tag{color:#79aaff;font-size:12px;letter-spacing:3px}
+h2{font-size:29px;margin:10px 0 22px}
+p{color:#b5c2dc;margin:12px 0}
+.quote{
+  margin:25px 0;padding:22px;
+  border-left:3px solid #75aaff;
+  background:#ffffff08;border-radius:0 12px 12px 0;
+  color:#e1eaff;font-size:19px
+}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.card{
+  padding:20px;border:1px solid #ffffff16;
+  border-radius:15px;background:#ffffff08
+}
+.card h3{color:#a9caff;margin-bottom:8px}
+.card p{font-size:14px;margin:0}
+footer{text-align:center;padding:45px 15px;color:#8291ad;font-size:13px}
+footer strong{color:#9fc2ff}
+@media(max-width:600px){
+ nav{padding:13px 18px}
+ .hero{min-height:70vh}
+ section{padding:48px 0}
+}
+</style>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/tafei-features.css">
+</head>
+<body class="page-about">
+<canvas id="stars"></canvas>
+<nav>
+  <div class="logo">挞飞 TAFEI</div>
+  <a href="index.html">返回首页 ↗</a>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="tag">TAFEI · THE STORY BEHIND THE DREAM</div>
+  <h1>你好，我是<br><span>飘飘。</span></h1>
+  <div class="subtitle">一个高中生的互联网梦想</div>
+  <p class="intro">
+    我相信，互联网不应该只是少数人的舞台，
+    它也应该成为每一个普通人获取知识、寻找帮助、
+    分享生活和感受温暖的地方。
+  </p>
+  <a class="button" href="#story">了解我的故事 ↓</a>
+</header>
+
+<section id="story">
+  <div class="section-tag">01 · MY STORY</div>
+  <h2>一个普通学生，也可以有一个不普通的梦想。</h2>
+  <p>
+    我是一名正在读高中的学生，也是一个对互联网充满热情的探索者。
+    我喜欢研究技术，也喜欢思考：互联网究竟能为普通人的生活带来什么？
+  </p>
+  <p>
+    在我看来，互联网最珍贵的价值，不只是技术有多先进，
+    而是它能不能真正帮助到人。
+  </p>
+  <p>
+    我还在学习，还有很多东西需要慢慢掌握。
+    但我愿意从一个小小的网站开始，亲手建设、不断改进，
+    让心中的想法一点一点成为现实。
+  </p>
+</section>
+
+<section>
+  <div class="section-tag">02 · MY BELIEF</div>
+  <h2>我想让互联网离每个人更近一点。</h2>
+  <div class="quote">
+    不应该因为一个人的经济条件、生活环境或技术水平，
+    就让他失去享受互联网便利的机会。
+  </div>
+  <p>
+    无论生活在城市还是乡村，无论是否精通技术，
+    每一个普通人都值得拥有平等、友善的网络体验。
+  </p>
+  <p>
+    这就是我建设挞飞的初心：
+    尽可能降低门槛，让更多人能够免费分享知识、交流经验、互相帮助。
+  </p>
+</section>
+
+<section>
+  <div class="section-tag">03 · MY VISION</div>
+  <h2>我希望挞飞成为这样的地方。</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>知识分享</h3>
+      <p>让有价值的知识自由流动，让每个人都有学习和表达的机会。</p>
+    </div>
+    <div class="card">
+      <h3>互相帮助</h3>
+      <p>遇到困难时可以求助，看到别人的问题时也可以伸出援手。</p>
+    </div>
+    <div class="card">
+      <h3>温暖交流</h3>
+      <p>尊重不同的人，让善意成为网络交流的一部分。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">04 · MY PROMISE</div>
+  <h2>理想需要温度，也需要责任。</h2>
+  <p>我希望挞飞坚持这些方向：</p>
+  <div class="cards">
+    <div class="card">
+      <h3>基本服务免费</h3>
+      <p>不让付费成为普通人使用基本服务的门槛。</p>
+    </div>
+    <div class="card">
+      <h3>尊重每一个人</h3>
+      <p>友善交流，反对骚扰、欺凌和恶意攻击。</p>
+    </div>
+    <div class="card">
+      <h3>重视隐私</h3>
+      <p>珍惜用户信任，不出售个人信息。</p>
+    </div>
+    <div class="card">
+      <h3>脚踏实地</h3>
+      <p>不夸大成果，认真学习技术，一步一步改善网站。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">05 · THE DREAM GOES ON</div>
+  <h2>我不敢说自己能够改变世界。</h2>
+  <p>
+    但我愿意成为那个愿意为梦想付诸行动的人。
+    作为一名高中生，我的力量也许有限，
+    但我相信，一件有意义的事情，可以从一个人的认真开始。
+  </p>
+  <div class="quote">
+    让互联网不只是连接世界，<br>
+    更要温暖每一个普通人。
+  </div>
+  <p style="text-align:right;color:#a9caff">
+    —— 飘飘<br>
+    挞飞发起人
+  </p>
+</section>
+</main>
+
+<footer>
+  <strong>挞飞 TAFEI</strong>
+  <p>心怀理想，脚踏实地。</p>
+  <p>© 2026 飘飘 · 让善意在互联网中传递</p>
+  <p style="max-width:760px;margin:12px auto 0;padding-top:12px;border-top:1px solid #ffffff1c;font-size:12px;line-height:1.8;color:#9fb2d4">官方服务只由站长本人对接。请勿私下转账或把设备交给站外认识的人；站外交易产生的纠纷与损失，本站不承担责任。</p>
+</footer>
+
+<script>
+const canvas=document.getElementById('stars');
+const ctx=canvas.getContext('2d');
+let stars=[];
+function resize(){
+  canvas.width=innerWidth;
+  canvas.height=innerHeight;
+  stars=Array.from({length:Math.min(120,Math.floor(innerWidth/5))},()=>({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.3,
+      a: Math.random() * 0.6 + 0.2,
+      s: Math.random() * 0.25 + 0.05
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(function(st){
+      st.y += st.s;
+      if(st.y > canvas.height){ st.y = 0; st.x = Math.random() * canvas.width; }
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(150,200,255,' + st.a + ')';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    requestAnimationFrame(draw);
+  }
+</script>
+
+<script src="js/tafei-ui.js?v=8" defer></script>
+<script src="js/tafei-features.js" defer></script>
+</body>
+</html>

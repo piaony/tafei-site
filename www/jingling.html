@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="viewport-fit=cover,width=device-width,initial-scale=1">
+<title>精灵小屋 · 挞飞 Q 版伙伴</title>
+<meta name="description" content="挞飞精灵小屋：9 个热门游戏同人 Q 版伙伴，加上挞飞原创小挞飞。亲密度升级、专属称号、全站伙伴和成长权益，按款设置获取方式。">
+<meta name="robots" content="noindex,follow">
+<link rel="stylesheet" href="css/angela.css?v=4">
+<link rel="stylesheet" href="css/jingling.css?v=2">
+<link rel="stylesheet" href="css/spirit-house.css?v=13">
+</head>
+<body class="jingling-page">
+
+<header class="ang-top">
+ <div class="ang-top-inner">
+  <a class="ang-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav aria-label="页面导航">
+   <a href="index.html#community">社区</a>
+   <a href="service.html">技术服务</a>
+   <a class="ang-back" href="index.html">← 回挞飞</a>
+  </nav>
+ </div>
+</header>
+
+<main class="ang-wrap">
+ <section class="spirit-hero">
+  <div class="spirit-hero-copy">
+   <p class="ang-kicker">SPIRIT HOUSE · 同人Q版 + 原创伙伴</p>
+   <h1>精灵小屋</h1>
+   <p class="spirit-lead">9 个伙伴住在小屋里：8 个来自热门游戏，1 个是挞飞原创的小挞飞。亲密度会升级，解锁伙伴铭牌、头像光环、专属称号和预约优先标注；获取方式可由站长逐款设置，皮肤在伙伴坞直接切换，后续新皮肤会自动加入。</p>
+   <div class="ang-badges">
+    <span class="ang-badge">原创 <b>1</b></span>
+    <span class="ang-badge">同人 <b>8</b></span>
+    <span class="ang-badge">按款上架</span>
+    <span class="ang-badge" id="modeBadge" hidden>本地原型</span>
+   </div>
+   <div class="spirit-hero-actions">
+    <a class="ang-btn primary" href="#spiritShop">去补给站 ↗</a>
+    <a class="ang-btn" href="index.html#info">去聊天页看彩蛋</a>
+   </div>
+  </div>
+  <aside class="spirit-side">
+   <b>9</b>
+   <span>位伙伴</span>
+   <span class="side-line">王者 3 · 第五 4 · 纸嫁衣 1 · 挞飞 1</span>
+  </aside>
+ </section>
+
+ <section class="partner-dock" aria-label="当前展示伙伴">
+  <div class="partner-main">
+   <div class="partner-avatar" id="partnerAvatarBox">
+    <img id="partnerDockImg" src="assets/spirits/xiaota-v23/avatar.webp" alt="当前伙伴" decoding="async" fetchpriority="high">
+    <span class="partner-tag" id="partnerDockTag">挞飞原创</span>
+   </div>
+   <div class="partner-copy">
+    <p class="sp-kicker">CURRENT PARTNER</p>
+    <h2 id="partnerDockName">小挞飞</h2>
+    <p class="partner-line" id="partnerDockLine">挞壳是帽子，奶油是身体，围巾是青绿色的风。</p>
+    <div class="partner-actions">
+     <a href="#bondPanel">成长与权益</a>
+     <a href="#spiritGrid">更换全站伙伴</a>
+     <a class="ghost" href="xiaota.html">去看看小挞飞</a>
+     <span class="partner-wallet demo" id="partnerWallet" hidden>演示额度 120</span>
+    </div>
+    <div class="widget-switch-card" id="widgetSwitchCard">
+     <div class="widget-switch-copy">
+      <b id="widgetSwitchLabel">全站挂件</b>
+      <span id="widgetStateText">未放出</span>
+      <small>打开后她会出现在页面右下角，电脑端也可以拖动。</small>
+     </div>
+     <button type="button" class="widget-switch" id="widgetToggle" role="switch" aria-checked="false" aria-labelledby="widgetSwitchLabel">
+      <i aria-hidden="true"></i>
+     </button>
+    </div>
+    <button type="button" class="widget-settings-toggle" id="widgetSettingsToggle" aria-expanded="false" aria-controls="widgetSettings">调整挂件</button>
+    <div class="widget-settings" id="widgetSettings" hidden>
+     <div class="ws-head"><b>挂件设置</b><span>自动记住</span></div>
+     <div class="ws-modes" role="group" aria-label="挂件模式">
+      <button type="button" data-ws-mode="lively">活泼</button>
+      <button type="button" data-ws-mode="quiet">安静</button>
+     </div>
+     <label class="ws-range">大小 <input type="range" id="wsSize" min="75" max="120" step="5" value="100"><em id="wsSizeVal">100%</em></label>
+     <label class="ws-range">透明度 <input type="range" id="wsOpacity" min="50" max="100" step="5" value="100"><em id="wsOpacityVal">100%</em></label>
+     <div class="ws-toggles">
+      <label><input type="checkbox" id="wsAutoWalk"> 自动走动</label>
+      <label><input type="checkbox" id="wsParticles"> 粒子特效</label>
+      <label><input type="checkbox" id="wsSpeech"> 台词气泡</label>
+      <label><input type="checkbox" id="wsSound"> 轻音效</label>
+      <label><input type="checkbox" id="wsEdgeHide"> 贴边收起</label>
+     </div>
+     <p class="ws-note">拖动位置和这些设置会保存在本机；安静模式会关闭粒子和台词。</p>
+    </div>
+
+    <div class="partner-skins" id="partnerSkins" aria-label="皮肤选择">
+     <div class="partner-skins-head"><span>皮肤</span><em id="partnerSkinMeta">1 款</em></div>
+     <div class="partner-skin-list" id="partnerSkinList"></div>
+     <p class="partner-fx-hint">点 1 下摸头，点身体会害羞，连点 2 下换开心表情，连点 3 下会惊讶；瑶停 10 秒会坐下、20 秒会犯困。拖到边缘会撞墙，快速晃动会眩晕，长按 2 秒会害羞。</p>
+    </div>
+   </div>
+  </div>
+  <div class="partner-status">
+   <div class="status-head"><h3>她现在怎么样</h3><span id="partnerCondition">安静待着</span></div>
+   <div class="sp-meter satiety"><b>饱腹</b><i><span id="dockSatietyBar"></span></i><em id="dockSatietyVal">72</em></div>
+   <div class="sp-meter mood"><b>心情</b><i><span id="dockMoodBar"></span></i><em id="dockMoodVal">76</em></div>
+   <div class="sp-meter anger"><b>怒气</b><i><span id="dockAngerBar"></span></i><em id="dockAngerVal">8</em></div>
+   <div class="sp-meter sleep"><b>困意</b><i><span id="dockSleepBar"></span></i><em id="dockSleepVal">20</em></div>
+   <div class="partner-bond"><span>亲密度</span><b id="partnerBond">0</b><em id="partnerBondLevel">Lv.1 初见</em></div>
+  </div>
+  <div class="bond-overview" id="bondPanel" aria-labelledby="bondPanelTitle">
+   <div class="bond-top">
+    <div class="bond-heading">
+     <p class="sp-kicker">BOND LEVEL</p>
+     <h3 id="bondPanelTitle"><b id="bondLevelBadge">Lv.1</b><span id="bondLevelTitle">初见</span></h3>
+     <p id="bondNextText">再互动 5 点亲密度，升到 Lv.2</p>
+    </div>
+    <div class="bond-total"><b id="bondTotal">0</b><span>亲密度</span></div>
+   </div>
+   <div class="bond-track" aria-hidden="true"><i><span id="bondProgressBar"></span></i></div>
+   <div class="bond-unlocks">
+    <div><span>当前权益</span><b id="bondCurrentReward">伙伴档案已建立</b></div>
+    <div><span>下一级</span><b id="bondNextReward">全站伙伴成长铭牌</b></div>
+   </div>
+   <div class="bond-signature" id="bondSignatureWrap" hidden>
+    <div><span>私信专属签名</span><b id="bondSignatureText"></b></div>
+    <button type="button" id="bondSignatureCopy">复制签名</button>
+   </div>
+   <div class="bond-levels" id="bondLevels" aria-label="亲密度等级与权益"></div>
+   <div class="bond-actions">
+    <a class="ang-btn primary" id="bondBooking" href="service.html">带着权益去预约</a>
+    <button class="ang-btn" type="button" id="bondMemorialBtn" hidden>查看永久纪念卡</button>
+    <span>优先排期等权益在预约备注中标注，由站长手动核销。</span>
+   </div>
+   <div class="companion-stats" id="companionStats">
+    <div class="cs-head"><h3>陪伴足迹</h3><span id="companionDays">陪伴 0 天</span></div>
+    <div class="cs-grid">
+     <div><b id="statInteractions">0</b><span>互动次数</span></div>
+     <div><b id="statDays">0</b><span>陪伴天数</span></div>
+     <div><b id="statBumps">0</b><span>撞墙次数</span></div>
+     <div><b id="statDrags">0</b><span>搬家次数</span></div>
+    </div>
+    <div class="cs-badges" id="companionBadges" aria-label="陪伴成就"></div>
+   </div>
+  </div>
+ </section>
+
+ <section class="spirit-section" aria-labelledby="spiritGridTitle">
+  <div class="section-heading">
+   <div><h2 id="spiritGridTitle">伙伴图鉴</h2><p>9 款伙伴都会展示；点「设为全站伙伴」后，首页魔法伙伴和全站伙伴会同步切换。</p></div>
+   <div class="heading-tools">
+    <span class="wallet-pill demo" id="gridWallet" hidden>演示额度 120</span>
+    <button type="button" class="mini-btn" id="demoTopup" hidden>补充测试额度 +100</button>
+   </div>
+  </div>
+  <div class="spirit-grid" id="spiritGrid" aria-label="精灵小屋角色列表"></div>
+ </section>
+
+ <section class="spirit-shop" id="spiritShop" aria-labelledby="shopTitle">
+  <div class="shop-head">
+   <div><h2 id="shopTitle">小屋补给</h2><p>食物是消耗品，玩具是永久道具；玩具每天有使用次数。所有标价都由后台配置。</p></div>
+   <div class="shop-wallet"><span>可用额度</span><strong id="shopWallet">120</strong><button type="button" id="shopTopup" hidden>补 100</button></div>
+  </div>
+  <div class="shop-group"><h3>零食铺 <span>6 种 · 吃了会恢复饱腹和心情</span></h3><div class="shop-grid" id="foodGrid"></div></div>
+  <div class="shop-group"><h3>玩具架 <span>6 种 · 买了就能反复玩，每天有次数</span></h3><div class="shop-grid" id="toyGrid"></div></div>
+ </section>
+
+ <section class="spirit-cta">
+  <div>
+   <h2>想把谁请进小屋？</h2>
+   <p>亲密度等级与伙伴权益已启用；额度购买走站内额度，私人款由站长后台发放。角色图为同人重绘，不接账号交易。</p>
+  </div>
+  <div class="cta-actions">
+   <a class="ang-btn" href="index.html#info">去聊天页</a>
+   <a class="ang-btn primary" href="index.html#community">联系站长 ↗</a>
+  </div>
+ </section>
+</main>
+
+<footer class="ang-footer">
+ <strong>挞飞 · 精灵小屋</strong>
+ <div>9 个伙伴：8 个同人 Q 版重绘 + 1 个挞飞原创。页面不收费、不充值、不接账号交易；角色图为同人重绘，不是官方原画。</div>
+ <div class="risk">有喜欢的形象，可以联系站长上架。</div>
+ <div style="margin-top:10px"><a href="index.html#community">回挞飞社区</a> · <a href="service.html">看看技术服务</a> · <a href="index.html">回首页</a></div>
+</footer>
+
+<div class="spirit-modal" id="spiritModal" hidden>
+ <div class="spirit-modal-card" role="dialog" aria-modal="true" aria-labelledby="spiritModalName">
+  <div class="spirit-modal-head"><span>SPIRIT HOUSE</span><button class="spirit-modal-close" id="spiritModalClose" type="button" aria-label="关闭">×</button></div>
+  <img class="spirit-modal-img" id="spiritModalImg" src="assets/spirits/xiaota-v23/main.png" alt="">
+  <div class="spirit-forms" id="spiritForms"></div>
+  <div class="spirit-modal-body">
+   <div class="spirit-modal-meta"><span class="game" id="spiritModalGame">挞飞原创 · 挞壳精灵</span><span class="spirit-modal-tag" id="spiritModalTag">挞飞原创</span></div>
+   <h2 id="spiritModalName">小挞飞</h2>
+   <div class="spirit-modal-status" aria-label="伙伴状态">
+    <div class="sp-meter satiety"><b>饱腹</b><i><span id="modalSatietyBar"></span></i><em id="modalSatietyVal">72</em></div>
+    <div class="sp-meter mood"><b>心情</b><i><span id="modalMoodBar"></span></i><em id="modalMoodVal">76</em></div>
+    <div class="sp-meter anger"><b>怒气</b><i><span id="modalAngerBar"></span></i><em id="modalAngerVal">8</em></div>
+    <div class="sp-meter sleep"><b>困意</b><i><span id="modalSleepBar"></span></i><em id="modalSleepVal">20</em></div>
+   </div>
+   <div class="spirit-bond-line"><span>亲密度</span><b id="spiritBond">0</b><em id="spiritBondHint" style="font-style:normal;font-size:11px;color:var(--ang-muted)">先摸摸她，认识一下</em></div>
+   <div class="spirit-modal-speech" id="spiritModalLine" aria-live="polite">你回来啦。今天也要一起收集糖霜吗？</div>
+   <div class="spirit-modal-actions">
+    <button class="ang-btn primary" id="spiritPet" type="button">摸摸她 +1</button>
+    <button class="ang-btn gold" id="spiritFeed" type="button">喂点东西</button>
+    <button class="ang-btn" id="spiritPlay" type="button">玩玩具</button>
+   </div>
+   <button class="spirit-modal-unlock" id="spiritUnlock" type="button">联系站长获取</button>
+   <button class="spirit-modal-set" id="spiritSet" type="button">设为全站伙伴</button>
+   <p class="spirit-modal-note" id="spiritModalNote">同人 Q 版展示，非官方原画；本地原型使用演示额度，云端表启用后自动切换为站内额度。</p>
+  </div>
+ </div>
+</div>
+
+<div class="spirit-memorial" id="memorialModal" hidden>
+ <div class="spirit-memorial-card" role="dialog" aria-modal="true" aria-labelledby="memorialTitle">
+  <div class="spirit-modal-head"><span>PERMANENT MEMORY · Lv.10</span><button class="spirit-modal-close" id="memorialClose" type="button" aria-label="关闭">×</button></div>
+  <h2 id="memorialTitle">永远的伙伴</h2>
+  <p>把这张卡留作纪念。它只属于你和当前伙伴，也记录着你们一起走过的亲密度。</p>
+  <div class="memorial-canvas-wrap"><canvas id="memorialCanvas" width="750" height="1000" aria-label="精灵永久纪念卡"></canvas></div>
+  <div class="memorial-actions">
+   <a class="ang-btn primary" id="memorialDownload" download="tafei-spirit-memory.png" href="#">下载纪念卡 ↘</a>
+   <button class="ang-btn" type="button" id="memorialCloseBottom">收起来</button>
+  </div>
+ </div>
+</div>
+
+<div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+
+<script src="js/spirit-core.js?v=14"></script>
+<script src="js/jingling.js?v=21"></script>
+</body>
+</html>

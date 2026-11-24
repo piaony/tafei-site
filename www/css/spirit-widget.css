@@ -1,0 +1,165 @@
+/* TAFEI SPIRIT WIDGET v2 — 活态伙伴，无框架 */
+.spirit-widget{
+  position:fixed;z-index:8800;width:108px;width:calc(clamp(98px,7.4vw,128px) * var(--sw-scale,1));padding:0;border:0;border-radius:0;background:none;
+  box-shadow:none;backdrop-filter:none;color:var(--ang-text,#f2f6ff);
+  font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  opacity:0;pointer-events:none;
+  transition:opacity .24s ease,scale .2s ease;
+  will-change:left,top;
+}
+.spirit-widget[hidden]{display:none!important}
+.spirit-widget.show{opacity:var(--sw-opacity,1);pointer-events:none}
+.spirit-widget.edge-peek{opacity:calc(var(--sw-opacity,1) * .55);scale:calc(var(--sw-scale,1) * .72);transform-origin:bottom center}
+.spirit-widget.settings-open{opacity:calc(var(--sw-opacity,1) * .22)!important;pointer-events:none}
+.spirit-widget .sw-body{
+  display:block;position:relative;width:100%;margin:0;padding:0;border:0;background:transparent;
+  cursor:grab;pointer-events:auto;outline:none;z-index:1;
+  filter:drop-shadow(0 10px 14px rgba(1,7,18,.28));
+}
+.spirit-widget .sw-aura{
+  position:absolute;left:12%;bottom:2%;width:76%;height:22%;z-index:0;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(184,199,255,.30),rgba(255,214,153,.18) 42%,transparent 72%);
+  filter:blur(5px);opacity:.55;animation:swAura 4.8s ease-in-out infinite;
+}
+.spirit-widget.is-photo .sw-aura{display:none}
+.spirit-widget .sw-fx{position:absolute;inset:0;z-index:3;overflow:visible;pointer-events:none}
+.spirit-widget .sw-body:focus-visible{outline:2px solid rgba(110,231,255,.7);outline-offset:4px;border-radius:12px}
+.spirit-widget .sw-art{
+  display:block;width:100%;height:auto;max-height:128px;object-fit:contain;
+  transform-origin:50% 88%;pointer-events:none;
+  animation:swBreathe 4.6s ease-in-out infinite;
+  transition:filter .25s ease,opacity .2s ease;
+}
+.spirit-widget.is-photo .sw-art{
+  height:108px;object-fit:cover;border-radius:50%;
+  -webkit-mask-image:radial-gradient(circle at 50% 47%,#000 56%,rgba(0,0,0,.82) 66%,transparent 76%);
+  mask-image:radial-gradient(circle at 50% 47%,#000 56%,rgba(0,0,0,.82) 66%,transparent 76%);
+  animation:swBreathePhoto 4.6s ease-in-out infinite;
+}
+.spirit-widget .sw-shadow{
+  position:absolute;left:22%;bottom:2px;width:56%;height:9px;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.42),transparent 72%);
+  filter:blur(3px);opacity:.48;pointer-events:none;transition:opacity .4s ease,transform .4s ease;
+}
+.spirit-widget.walking .sw-shadow{opacity:.28;transform:scaleX(.78)}
+.spirit-widget .sw-zzz{
+  position:absolute;right:12%;top:13%;color:#bdefff;font-size:15px;letter-spacing:2px;
+  opacity:0;transform:translateY(2px);transition:opacity .25s ease;pointer-events:none;
+  text-shadow:0 0 10px rgba(110,231,255,.5);
+}
+.spirit-widget.act-sleepy .sw-zzz{opacity:1;animation:swZ 2.4s ease-in-out infinite}
+
+/* 拖拽时禁止选中页面文字 */
+body.sw-dragging,body.sw-dragging *{user-select:none!important;-webkit-user-select:none!important;cursor:grabbing!important}
+
+/* 轻气泡：无框、无面板，只是一句飘出来的话 */
+.spirit-widget .sw-speech{
+  position:absolute;left:50%;bottom:calc(100% - 2px);z-index:2;
+  max-width:190px;padding:7px 11px;border:0;border-radius:12px;
+  background:rgba(9,15,30,.78);backdrop-filter:blur(10px);
+  box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.06) inset;
+  color:#eaf3ff;font-size:11px;line-height:1.45;white-space:nowrap;text-align:center;
+  opacity:0;transform:translate(-50%,7px) scale(.96);transition:opacity .2s ease,transform .2s ease;
+  pointer-events:none;
+}
+.spirit-widget .sw-speech.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.spirit-widget.speech-right .sw-speech{left:auto;right:0;transform-origin:100% 100%}
+.spirit-widget.speech-right .sw-speech.show{transform:translate(0,0) scale(1)}
+.spirit-widget.speech-below .sw-speech{bottom:auto;top:calc(100% + 2px);transform:translate(-50%,-7px) scale(.96)}
+.spirit-widget.speech-below .sw-speech.show{transform:translate(-50%,0) scale(1)}
+.spirit-widget.speech-right.speech-below .sw-speech{left:auto;right:0;transform:translate(0,-7px) scale(.96)}
+.spirit-widget.speech-right.speech-below .sw-speech.show{transform:translate(0,0) scale(1)}
+
+.spirit-widget.flip .sw-art{transform:scaleX(-1)}
+.spirit-widget.flip .sw-art.act-looking{transform:scaleX(-1) rotate(-3deg)}
+
+/* 拖拽：不吸附四角，松手留在当前位置 */
+.spirit-widget.dragging{cursor:grabbing}
+.spirit-widget.dragging .sw-body{cursor:grabbing}
+.spirit-widget.dragging .sw-art{filter:drop-shadow(0 16px 22px rgba(0,0,0,.35)) brightness(1.04);animation:none;translate:0 -3px;rotate:var(--sw-tilt,0deg);scale:1.015}
+.spirit-widget.dragging .sw-shadow{opacity:.24;transform:scaleX(.7)}
+.spirit-widget.dragging .sw-speech{opacity:0;transform:translate(-50%,4px) scale(.94)}
+.spirit-widget.dragging.sw-alert .sw-speech{opacity:1;transform:translate(-50%,0) scale(1)}
+.spirit-widget.dragging.sw-alert.speech-right .sw-speech{transform:translate(0,0) scale(1)}
+.spirit-widget.dragging.sw-alert.speech-below .sw-speech{transform:translate(-50%,0) scale(1)}
+.spirit-widget.dragging.sw-alert.speech-right.speech-below .sw-speech{transform:translate(0,0) scale(1)}
+
+/* 自主闲逛：慢一点，像在走路，不像组件飞来飞去 */
+.spirit-widget.walking{transition:left .96s cubic-bezier(.25,.75,.3,1),top .96s cubic-bezier(.25,.75,.3,1),opacity .24s ease}
+.spirit-widget.walking .sw-art{animation:swWalk .46s ease-in-out infinite alternate}
+.spirit-widget.walking .sw-speech{opacity:0}
+
+/* 动作状态 */
+.spirit-widget.act-happy .sw-art{animation:swBounce .5s ease 2}
+.spirit-widget.act-pet .sw-art{animation:swPet .46s ease 2}
+.spirit-widget.act-jump .sw-art{animation:swJump .6s ease 2}
+.spirit-widget.act-hit .sw-art{animation:swHit .58s ease 1}
+.spirit-widget.act-dizzy .sw-art{animation:swDizzy .9s ease-in-out infinite;transform-origin:50% 70%}
+.spirit-widget.act-sit .sw-art{animation:swSit 2.8s ease-in-out infinite}
+.spirit-widget.act-sleepy .sw-art{animation:swSleep 3.6s ease-in-out infinite;filter:brightness(.82) saturate(.72)}
+.spirit-widget.act-angry .sw-art{animation:swAngry .34s ease-in-out infinite alternate}
+.spirit-widget.act-sad .sw-art{animation:swSad 2.8s ease-in-out infinite;filter:brightness(.88) saturate(.72)}
+.spirit-widget.act-shy .sw-art{animation:swShy 2.8s ease-in-out infinite}
+.spirit-widget.act-surprised .sw-art{animation:swSurprise .55s ease 1}
+.spirit-widget.act-look .sw-art{animation:swLook 2.4s ease-in-out infinite}
+.spirit-widget.mood-low .sw-art{filter:brightness(.9) saturate(.78)}
+.spirit-widget.mood-angry .sw-art{filter:brightness(.92) saturate(.9)}
+.spirit-widget.sw-land .sw-art{animation:swLand .55s ease}
+.spirit-widget.sw-changing .sw-art{opacity:.62;transition:opacity .12s ease}
+
+@keyframes swBreathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.012)}}
+@keyframes swBreathePhoto{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes swWalk{0%{transform:translateY(0) rotate(-2deg)}100%{transform:translateY(-4px) rotate(2deg)}}
+@keyframes swBounce{0%,100%{transform:translateY(0) scale(1)}36%{transform:translateY(-9px) scale(1.03)}68%{transform:translateY(1px) scale(.99)}}
+@keyframes swPet{0%,100%{transform:translateY(0) rotate(0)}40%{transform:translateY(-5px) rotate(-2deg)}70%{transform:translateY(0) rotate(2deg)}}
+@keyframes swJump{0%,100%{transform:translateY(0) scale(1)}32%{transform:translateY(-18px) scale(1.04)}62%{transform:translateY(-8px) scale(.98)}}
+@keyframes swHit{0%{transform:translate(0,0) rotate(0)}18%{transform:translate(-5px,-3px) rotate(-5deg)}38%{transform:translate(5px,1px) rotate(5deg)}62%{transform:translate(-3px,0) rotate(-3deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes swDizzy{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-3px)}}
+@keyframes swLand{0%{transform:translateY(-8px) scale(1.03)}55%{transform:translateY(2px) scale(.99)}100%{transform:translateY(0) scale(1)}}
+@keyframes swAura{0%,100%{opacity:.36;transform:scale(.94)}50%{opacity:.7;transform:scale(1.06)}}
+@keyframes swSit{0%,100%{transform:translateY(0)}50%{transform:translateY(1px) scale(1.006)}}
+@keyframes swSleep{0%,100%{transform:translateY(1px) scale(1.005)}50%{transform:translateY(3px) scale(1.015)}}
+@keyframes swAngry{0%{transform:translateX(-2px) rotate(-1deg)}100%{transform:translateX(2px) rotate(1deg)}}
+@keyframes swSad{0%,100%{transform:translateY(0)}50%{transform:translateY(3px) scale(.99)}}
+@keyframes swShy{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(-2deg)}}
+@keyframes swSurprise{0%,100%{transform:scale(1)}42%{transform:scale(1.06) translateY(-3px)}}
+@keyframes swLook{0%,100%{transform:rotate(0)}28%{transform:rotate(-4deg)}62%{transform:rotate(4deg)}}
+@keyframes swZ{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-5px)}}
+
+/* 轻量互动特效：全部是固定定位的临时粒子，不占用布局 */
+.sw-effect{
+  position:fixed;z-index:9001;pointer-events:none;font-size:16px;line-height:1;
+  color:#f3dd9c;text-shadow:0 0 8px rgba(255,226,150,.7),0 2px 4px rgba(0,0,0,.25);
+  transform:translate(-50%,-50%);animation:swEffect .9s cubic-bezier(.2,.7,.35,1) forwards;
+}
+.sw-effect.sw-fx-heart{color:#ffb7d5;text-shadow:0 0 12px rgba(255,150,190,.9),0 2px 4px rgba(0,0,0,.2);font-size:19px}
+.sw-effect.sw-fx-drop{color:#bbd9ff;font-size:10px;text-shadow:0 0 8px rgba(160,210,255,.75)}
+.sw-effect.sw-fx-cloud{color:#d3bdff;font-size:14px;text-shadow:0 0 10px rgba(180,150,255,.7)}
+.sw-effect.sw-fx-z{color:#c9f0ff;font-size:13px;font-weight:700;letter-spacing:1px}
+.sw-effect.sw-fx-trail{color:#d7c4ff;font-size:10px;opacity:.8;animation-duration:.7s;text-shadow:0 0 8px rgba(200,170,255,.8)}
+.sw-effect.sw-fx-step{color:#ffe5a3;font-size:10px;animation-duration:.65s}
+.sw-effect.sw-fx-idle{color:#ffe9b8;font-size:13px;animation-duration:1.1s}
+.sw-effect.sw-fx-dizzy{color:#ffe7a8;font-size:16px;text-shadow:0 0 12px rgba(255,226,150,.9),0 2px 4px rgba(0,0,0,.25)}
+.sw-effect.sw-fx-bump,.sw-effect.sw-fx-land{
+  width:28px;height:28px;border:2px solid rgba(212,208,255,.85);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%);
+  box-shadow:0 0 18px rgba(184,199,255,.65);font-size:0;
+  animation:swImpact .56s ease-out forwards;
+}
+.sw-effect.sw-fx-land{border-color:rgba(255,225,166,.9);box-shadow:0 0 20px rgba(255,214,153,.6)}
+@keyframes swEffect{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(0)}18%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.05) rotate(var(--rot))}}
+@keyframes swImpact{0%{opacity:.9;transform:translate(-50%,-50%) scale(.45)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.1)}}
+
+@media(max-width:620px){
+  .spirit-widget{width:98px}
+  .spirit-widget .sw-art{max-height:112px}
+  .spirit-widget .sw-speech{max-width:154px;font-size:10px;padding:6px 9px}
+  .spirit-widget .sw-zzz{font-size:12px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .spirit-widget{transition:none}
+  .spirit-widget .sw-art,.spirit-widget .sw-shadow,.spirit-widget .sw-speech{animation:none!important;transition:none!important}
+}

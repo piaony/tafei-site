@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#080d1b">
+<meta name="description" content="页面不存在。回到挞飞首页，或从搜索、机型库、奶娃小游戏继续。">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<title>页面不存在 · 404 · 挞飞 TAFEI</title>
+<script>
+(function () {
+  var rawPath;
+  try { rawPath = decodeURIComponent(location.pathname || '/'); } catch (e) { rawPath = location.pathname || '/'; }
+  var clean = rawPath.replace(/\/+$/, '');
+  window.__nfPath = clean;
+  var marker = '/tafei-site/';
+  var base = clean.indexOf(marker) === 0 ? marker : clean.replace(/[^/]*$/, '');
+  // 让 404 页面在深层路径下也能正确加载站内 CSS 和导航
+  if (clean.indexOf(marker) === 0) document.write('<base href="' + marker + '">');
+  var last = (clean.split('/').pop() || '').toLowerCase().replace(/\.html?$/, '');
+  var MAP = {
+    index: 'index.html', home: 'index.html', tafei: 'index.html', main: 'index.html', start: 'index.html',
+    jingling: 'jingling.html', spirit: 'jingling.html', spirits: 'jingling.html', 'spirit-house': 'jingling.html',
+    shop: 'shop.html', store: 'shop.html', mall: 'shop.html',
+    service: 'service.html', services: 'service.html', tech: 'service.html',
+    device: 'device.html', devices: 'device.html', models: 'device.html', phone: 'device.html',
+    search: 'search.html', find: 'search.html',
+    naiwa: 'naiwa.html', game: 'naiwa.html', games: 'naiwa.html',
+    about: 'about.html', intro: 'about.html',
+    angela: 'angela.html', xiaota: 'xiaota.html', fix: 'fix.html', care: 'fix.html', emergency: 'fix.html',
+    community: 'index.html#community', shequ: 'index.html#community', hub: 'index.html#community', 'community-hub': 'index.html#community',
+    articles: 'index.html#articles', article: 'index.html#articles',
+    help: 'index.html#community', guestbook: 'index.html#community',
+    messages: 'index.html#community', inbox: 'index.html#community'
+  };
+  var target = MAP[last];
+  if (!target) return;
+  var parts = target.split('#');
+  var dest = base + parts[0] + location.search + (parts[1] ? '#' + parts[1] : '');
+  if (dest !== rawPath + location.search && dest !== rawPath + location.search + (location.hash || '')) location.replace(dest);
+})();
+</script>
+
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/pages.css?v=6">
+<style>
+  .nf-wrap { display: grid; gap: 18px; max-width: 760px; }
+  .nf-code { font-size: clamp(64px, 16vw, 118px); line-height: 1; font-weight: 800; letter-spacing: -.02em;
+    background: linear-gradient(100deg, var(--tf-cyan), #9b9cff 55%, #bd8cff);
+    -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0; }
+  .nf-title { font-size: clamp(22px, 3.6vw, 30px); margin: 0; }
+  .nf-text { color: var(--tf-muted); font-size: 14.5px; margin: 0; }
+  .nf-path { color: #7f95b2; font-size: 12.5px; margin: 0; word-break: break-all; }
+  .nf-search { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .nf-search input {
+    flex: 1 1 260px; min-height: 46px; padding: 0 15px; border-radius: var(--tf-r-sm);
+    border: 1px solid var(--tf-line); background: rgba(12, 20, 38, .86); color: var(--tf-text); font: inherit;
+  }
+  body.light .nf-search input { background: #fff; color: #15213b; }
+  .nf-search input:focus { outline: none; border-color: rgba(100, 232, 255, .58); box-shadow: var(--tf-e-focus); }
+  .nf-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 6px; }
+  .nf-links .pg-card { display: grid; gap: 6px; }
+  .nf-links strong { font-size: 15px; }
+  .nf-links span { font-size: 12.5px; color: var(--tf-muted); line-height: 1.6; }
+  @media (max-width: 700px) { .nf-links { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="page-inner">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#articles">文章</a>
+    <a href="device.html">机型库</a>
+    <a href="fix.html">急救室</a>
+    <a href="service.html">技术服务</a>
+    <a href="search.html">搜索</a>
+    <a href="naiwa.html">奶娃</a>
+    <a href="index.html#shop">商城</a>
+  </nav>
+</div></header>
+
+<main class="pw">
+  <section class="pg-hero" style="padding-bottom:10px">
+    <div class="nf-wrap">
+      <p class="pg-eyebrow">LOST PAGE</p>
+      <p class="nf-code">404</p>
+      <h1 class="nf-title">这个页面不存在</h1>
+      <p class="nf-text">链接可能是旧地址、大小写不一致、路径层级不对，或者内容已经移走。下面几条路都能回去。</p>
+      <p class="nf-path" id="nfPath"></p>
+      <form class="nf-search" id="nfForm">
+        <input id="nfQ" type="search" placeholder="搜文章、机型或求助，如「Magisk」「K40」" aria-label="站内搜索">
+        <button class="btn primary" type="submit">去搜索 ↗</button>
+      </form>
+      <div class="nf-links">
+        <a class="pg-card" href="fix.html"><strong>手机急救室 ↗</strong><span>5 步判断黑屏、卡顿、耗电和刷机失败，先做再报价。</span></a>
+        <a class="pg-card" href="jingling.html"><strong>精灵小屋 ↗</strong><span>9 款伙伴、免费领取小挞飞，其余款联系站长获取。</span></a>
+        <a class="pg-card" href="shop.html"><strong>商城 ↗</strong><span>资料包、工具包和站长服务，统一在这里。</span></a>
+        <a class="pg-card" href="index.html#community"><strong>社区 ↗</strong><span>发帖、求助、私信和个人中心入口。</span></a>
+        <a class="pg-card" href="index.html"><strong>首页 ↗</strong><span>文章、更新日志和全站入口。</span></a>
+        <a class="pg-card" href="device.html"><strong>机型库 ↗</strong><span>按机型查解锁、Root 与故障处置。</span></a>
+        <a class="pg-card" href="naiwa.html"><strong>奶娃 ↗</strong><span>27 个网页小游戏，点开就能玩。</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · <a href="index.html">返回首页</a></div></footer>
+
+<script>
+(() => {
+  const form = document.getElementById('nfForm');
+  const input = document.getElementById('nfQ');
+  const pathEl = document.getElementById('nfPath');
+  if (pathEl && window.__nfPath) pathEl.textContent = '你访问的是：' + window.__nfPath;
+  if (input) {
+    const last = decodeURIComponent(location.pathname || '').replace(/\/+$/, '').split('/').pop().toLowerCase().replace(/\.html?$/, '');
+    if (last && last !== '404' && last.length <= 40) input.value = last;
+  }
+  if (!form || !input) return;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = (input.value || '').trim();
+    location.href = q ? ('search.html?q=' + encodeURIComponent(q)) : 'search.html';
+  });
+})();
+</script>
+<script src="js/mobile-nav.js?v=1" defer></script>
+<script src="js/tafei-ui.js?v=8" defer></script>
+</body>
+</html>

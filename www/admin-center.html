@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>挞飞 · 站长后台</title>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/pages.css?v=6">
+<style>
+  :root{color-scheme:dark light}
+  body{margin:0;padding:20px 14px 70px;color:var(--tf-text,#eef4ff);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1100px 520px at 12% -6%,rgba(70,120,255,.16),transparent 62%),radial-gradient(900px 480px at 92% 4%,rgba(132,107,255,.14),transparent 60%) fixed,var(--tf-bg,#0b1220)}
+  body.light{background:#eef4ff;color:#15213b}
+  main{max-width:960px;margin:0 auto}
+  .kicker{color:var(--tf-cyan,#64e8ff);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  h1{margin:8px 0 6px;font-size:27px;letter-spacing:-.01em}
+  .lead{color:var(--tf-muted,#9aaccb);font-size:13.5px;line-height:1.7;margin:0 0 16px}
+  .card{background:var(--tf-panel,rgba(16,25,48,.78));border:1px solid var(--tf-line,rgba(130,170,255,.18));border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 12px 32px rgba(4,10,25,.28)}
+  body.light .card{background:#fff;border-color:#d7e3f7;box-shadow:0 10px 24px rgba(29,58,110,.08)}
+  h2{margin:0 0 12px;font-size:16px}
+  label{display:block;margin:10px 0 5px;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  input,select,textarea{width:100%;box-sizing:border-box;min-height:42px;padding:0 12px;border-radius:12px;font:inherit;font-size:14px;
+    border:1px solid var(--tf-line,rgba(130,170,255,.18));background:var(--tf-panel2,#111d37);color:inherit;outline:none}
+  textarea{min-height:88px;padding:10px 12px;line-height:1.65;resize:vertical}
+  body.light input,body.light select,body.light textarea{background:#f6f9ff;color:#15213b;border-color:#cfdff5}
+  input:focus,select:focus,textarea:focus{border-color:var(--tf-cyan,#64e8ff);box-shadow:0 0 0 3px rgba(100,232,255,.22)}
+  button{min-height:42px;padding:0 16px;margin-top:10px;cursor:pointer;border:0;border-radius:12px;font:inherit;font-size:14px;font-weight:600;color:#fff;
+    background:linear-gradient(110deg,#3b8fff,#846bff)}
+  button.ghost{background:transparent;color:var(--tf-muted,#9aaccb);border:1px solid var(--tf-line,rgba(130,170,255,.18));font-weight:500}
+  button.mini{min-height:32px;padding:0 11px;font-size:12.5px;margin:0}
+  button.danger{background:transparent;color:#ff9d9d;border:1px solid rgba(255,120,120,.35);font-weight:500}
+  body.light button.ghost{color:#5d729a;border-color:#cfdff5}
+  button:disabled{opacity:.5;cursor:default}
+  .msg{margin:10px 0 0;font-size:13px;color:var(--tf-muted,#9aaccb);min-height:18px}
+  .msg.err{color:#ff8f8f}.msg.ok{color:#4ee6a1}
+  .tabs{position:sticky;top:0;z-index:9;display:flex;gap:6px;overflow-x:auto;padding:8px 2px;margin:6px 0 10px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:0 0 auto;margin:0;min-height:38px;padding:0 14px;font-size:13px;font-weight:500;border-radius:999px;
+    background:transparent;border:1px solid var(--tf-line,rgba(130,170,255,.18));color:var(--tf-muted,#9aaccb)}
+  .tabs button.on{background:rgba(100,232,255,.14);border-color:rgba(100,232,255,.5);color:var(--tf-cyan,#64e8ff);font-weight:600}
+  body.light .tabs button{background:#fff;color:#5d729a;border-color:#cfdff5}
+  body.light .tabs button.on{background:#e6f4ff;color:#1b74d8;border-color:#8fc4ff}
+  .pane{display:none}.pane.on{display:block}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat{background:rgba(100,232,255,.05);border:1px solid var(--tf-line,rgba(130,170,255,.18));border-radius:16px;padding:14px 16px}
+  body.light .stat{background:#f8fbff;border-color:#dce9fa}
+  .stat span{display:block;font-size:12px;color:var(--tf-muted,#9aaccb);margin-bottom:6px}
+  .stat b{font-size:23px;font-weight:650;letter-spacing:-.02em}
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .toolbar input{flex:1 1 190px}
+  .toolbar select{flex:0 0 auto;width:auto;min-width:126px}
+  .toolbar button{margin:0}
+  .req{border:1px solid var(--tf-line,rgba(130,170,255,.18));border-radius:16px;padding:14px 16px;margin:12px 0;background:rgba(100,232,255,.03)}
+  body.light .req{background:#f8fbff;border-color:#dce9fa}
+  .req-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+  .req-title{font-size:15.5px;font-weight:650;line-height:1.4}
+  .req-sub{margin-top:3px;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  .pill{font-size:11.5px;padding:3px 9px;border-radius:999px;background:rgba(100,232,255,.14);color:#64e8ff;white-space:nowrap}
+  .pill.new{background:rgba(255,170,80,.16);color:#ffc07a}
+  .pill.contacted{background:rgba(100,232,255,.14);color:#64e8ff}
+  .pill.quoted{background:rgba(140,120,255,.18);color:#b0a4ff}
+  .pill.done{background:rgba(80,230,160,.16);color:#4ee6a1}
+  .pill.closed{background:rgba(150,160,180,.16);color:#98a6bd}
+  .pill.ban{background:rgba(255,120,120,.16);color:#ff9d9d}
+  .meta{margin:9px 0 0;font-size:12.5px;color:var(--tf-muted,#9aaccb);display:flex;flex-wrap:wrap;gap:6px 14px}
+  .note{margin:9px 0 0;font-size:13.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+  .req-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .req-foot select{flex:0 0 auto;width:auto;min-width:118px;min-height:34px;padding:0 8px;font-size:12.5px;border-radius:10px}
+  .dm{border:1px solid var(--tf-line,rgba(130,170,255,.18));border-radius:14px;padding:12px 14px;margin:10px 0;background:rgba(100,232,255,.03)}
+  .dm-top{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  .dm-top b{color:inherit;font-size:13px}
+  .dm-body{margin:8px 0 0;font-size:14px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+  .dm-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--tf-muted,#9aaccb);flex-wrap:wrap}
+  .empty{text-align:center;padding:30px 10px;color:var(--tf-muted,#9aaccb);font-size:13.5px}
+  .hidden{display:none}
+  .hint{font-size:12.5px;color:var(--tf-muted,#9aaccb);margin:8px 0 0;line-height:1.7}
+  @media (max-width:600px){
+    .stats{grid-template-columns:1fr;gap:8px}
+    .stat{display:flex;align-items:baseline;justify-content:space-between;padding:12px 14px}
+    .stat span{margin:0}.stat b{font-size:19px}
+    .toolbar select{flex:1 1 100%}
+    .req-foot select{flex:1 1 100%}
+  }
+
+/* TAFEI 21.6：站长后台与站点外壳融合 */
+body.admin-page{padding:0;min-height:100vh;background:radial-gradient(ellipse at 12% -6%,rgba(58,100,200,.28),transparent 46%),radial-gradient(ellipse at 92% 4%,rgba(120,90,220,.18),transparent 42%),var(--tf-bg)}
+.admin-main{max-width:1040px;margin:0 auto;padding:0 0 28px}
+.admin-hero{padding-top:clamp(28px,5vw,48px);padding-bottom:8px}
+.admin-hero .pg-title em{font-style:normal;background:var(--tf-grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+.admin-hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.admin-hero-badge{box-sizing:border-box;flex:0 0 auto;min-width:126px;padding:12px 16px;border:1px solid rgba(100,232,255,.28);border-radius:16px;background:rgba(100,232,255,.07);text-align:center}
+.admin-hero-badge span{display:block;font-size:11px;letter-spacing:.08em;color:var(--tf-muted);margin-bottom:2px}
+.admin-hero-badge b{font-size:28px;line-height:1.1;color:var(--tf-cyan)}
+.admin-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.admin-chips span{padding:5px 10px;border:1px solid var(--tf-line);border-radius:999px;background:rgba(100,232,255,.05);font-size:11.5px;color:var(--tf-muted)}
+.admin-chips span:first-child{color:var(--tf-cyan);border-color:rgba(100,232,255,.32)}
+.admin-login{max-width:620px;margin:18px auto 0}
+.admin-login #loginBtn{width:100%;margin-top:18px}
+.admin-login-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-login-head h2{margin:0}
+.admin-version{font-size:11px;letter-spacing:.08em;color:var(--tf-muted);border:1px solid var(--tf-line);border-radius:999px;padding:3px 9px}
+.admin-console{margin-top:20px}
+.admin-console-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.admin-live{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tf-muted)}
+.admin-live .dot{width:7px;height:7px;border-radius:50%;background:var(--tf-green);display:inline-block}
+.admin-console-bar .ghost{min-height:34px;padding:0 12px;margin:0;font-size:12.5px}
+.admin-tabs{top:62px;background:color-mix(in srgb,var(--tf-bg) 88%,transparent);border-bottom:1px solid var(--tf-line);padding:9px 2px;margin:0 0 14px;backdrop-filter:blur(16px)}
+.admin-tabs button{position:relative}
+.tab-count{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;margin-left:5px;border-radius:999px;background:#ff8b64;color:#1a0d08;font-size:10px;font-weight:800;vertical-align:1px}
+.tab-count:empty{display:none}
+.admin-stats .stat{box-sizing:border-box;position:relative;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.admin-stats .stat:hover{transform:translateY(-2px);border-color:rgba(100,232,255,.48);background:rgba(100,232,255,.09)}
+.admin-stats .stat i{display:block;margin-top:5px;font-style:normal;font-size:11.5px;color:var(--tf-cyan)}
+.admin-stats .stat span{margin-bottom:5px}
+.admin-sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.admin-sec-head h2{margin:0}
+.admin-page .card:hover,.admin-page .req:hover{transform:none;border-color:var(--tf-line)}
+.admin-page .msg{min-height:16px}
+.spirit-config-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.spirit-config-group{margin-top:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tf-cyan)}
+.spirit-config-row{display:grid;grid-template-columns:minmax(120px,1fr) 120px 82px;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--tf-line);border-radius:11px;background:rgba(100,232,255,.035)}
+.spirit-config-row.has-mode{grid-template-columns:minmax(110px,1fr) 82px 66px 62px}
+.spirit-config-row strong{font-size:13px;font-weight:600}
+.spirit-config-row small{display:block;margin-top:2px;color:var(--tf-muted);font-size:10.5px}
+.spirit-config-row input[type=number]{margin:0;text-align:right}
+.spirit-config-row input[type=checkbox]{width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:#64e8ff;flex:0 0 auto}
+.spirit-config-row label{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin:0;font-size:11px;color:var(--tf-muted);white-space:nowrap}
+.spirit-config-row select{margin:0;min-height:38px;padding:0 5px;font-size:11px;border-radius:8px;background:rgba(8,16,30,.8);color:var(--tf-text);border:1px solid var(--tf-line)}
+.spirit-bond-row{display:grid;grid-template-columns:50px 92px minmax(120px,1fr) minmax(160px,1.5fr);gap:8px;align-items:center;padding:8px 9px;border:1px solid rgba(100,232,255,.08);border-radius:10px;background:rgba(100,232,255,.025)}
+.spirit-bond-row strong{font-size:12px;color:var(--tf-cyan);font-weight:600}
+.spirit-bond-row label{display:grid;gap:3px;margin:0;font-size:9.5px;color:var(--tf-muted)}
+.spirit-bond-row input{width:100%;min-height:36px;margin:0;padding:0 7px;font-size:11px;border-radius:7px;border:1px solid var(--tf-line);background:rgba(8,16,30,.8);color:var(--tf-text)}
+.spirit-grant-card{margin-top:12px}
+.spirit-grant-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spirit-grant-grid label{display:grid;gap:5px;margin:0;font-size:11px;color:var(--tf-muted)}
+.spirit-grant-grid select{width:100%;margin:0;min-height:40px;padding:0 8px;border-radius:8px;border:1px solid var(--tf-line);background:rgba(8,16,30,.8);color:var(--tf-text)}
+.spirit-grant-card button{margin-top:10px}
+@media(max-width:620px){.spirit-config-row{grid-template-columns:1fr 92px 64px;gap:6px}.spirit-config-row.has-mode{grid-template-columns:1fr 76px 52px 54px;gap:5px}.spirit-config-row strong{font-size:12px}.spirit-bond-row{grid-template-columns:1fr 1fr;gap:5px}.spirit-bond-row strong{grid-column:1/-1}.spirit-bond-row label:nth-of-type(3){grid-column:1/-1}.spirit-grant-grid{grid-template-columns:1fr}}
+.tk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--tf-line);font-size:12.5px}
+.tk-row:last-child{border-bottom:0}
+.tk-row span{color:var(--tf-muted);min-width:70px}
+.tk-row b{font-size:13.5px}
+.tk-row i{font-style:normal;color:var(--tf-muted);text-align:right;margin-left:auto}
+@media (max-width:760px){
+  body.admin-page{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  .admin-main{padding-bottom:10px}
+  .admin-hero{padding-top:26px}
+  .admin-hero-row{align-items:flex-start}
+  .admin-hero-badge{width:100%;display:flex;align-items:baseline;justify-content:space-between;padding:10px 14px;text-align:left}
+  .admin-hero-badge span{margin:0}
+  .admin-hero-badge b{font-size:22px}
+  .admin-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;position:static;margin-top:2px;overflow:visible}
+  .admin-tabs button{min-width:0;padding:0 4px;font-size:12px}
+  .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .admin-stats .stat{display:block;padding:12px 13px}
+  .admin-stats .stat b{font-size:21px}
+  .admin-console-bar .ghost{flex:1 1 auto}
+  .admin-chips{margin-top:14px}
+  .admin-login{margin-top:14px}
+}
+</style>
+</head>
+<body class="page-inner admin-page">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#community">社区</a>
+    <a href="device.html">机型库</a>
+    <a href="service.html">技术服务</a>
+    <a href="index.html#shop">商城</a>
+    <a href="admin-center.html" aria-current="page">站长后台</a>
+  </nav>
+</div></header>
+
+<main class="pw admin-main">
+  <section class="pg-hero admin-hero">
+    <p class="pg-eyebrow">ADMIN CONSOLE · 站长专属</p>
+    <div class="admin-hero-row">
+      <div>
+        <h1 class="pg-title">站长<em>工作台</em></h1>
+        <p class="pg-lead">预约、账号、私信、商品、公告、举报集中处理。后台沿用站点登录状态与手机底部导航，不用再单独记一套入口。</p>
+      </div>
+      <div class="admin-hero-badge"><span>今日待办</span><b id="heroTodo">—</b></div>
+    </div>
+    <div class="admin-chips" aria-label="后台特性">
+      <span>站长邮箱专属</span><span>共用站点登录</span><span>操作即时写库</span>
+    </div>
+  </section>
+
+  <section class="card admin-login" id="login">
+    <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.10</span></div>
+    <p class="hint">已用站长账号登录站点的，打开本页会自动进入；没有站点登录态时，用站长邮箱登录一次即可。</p>
+    <label for="email">邮箱</label>
+    <input id="email" type="email" inputmode="email" placeholder="3659229103@qq.com" autocomplete="username">
+    <label for="password">密码</label>
+    <input id="password" type="password" placeholder="账号密码" autocomplete="current-password">
+    <button id="loginBtn">登录</button>
+    <p class="msg" id="loginMsg"></p>
+  </section>
+
+  <section class="hidden admin-console" id="console">
+    <div class="admin-console-bar">
+      <div class="admin-live"><i class="dot"></i><span id="adminWho">站长后台</span></div>
+      <button class="ghost" type="button" id="refreshAll">刷新全部</button>
+    </div>
+    <nav class="tabs admin-tabs" id="tabs" aria-label="后台模块">
+      <button type="button" data-tab="overview" class="on">概览</button>
+      <button type="button" data-tab="booking">预约<b class="tab-count" id="tabBooking"></b></button>
+      <button type="button" data-tab="tasks">任务<b class="tab-count" id="tabTasks"></b></button>
+      <button type="button" data-tab="accounts">账号</button>
+      <button type="button" data-tab="messages">私信<b class="tab-count" id="tabMessages"></b></button>
+      <button type="button" data-tab="products">商城</button>
+      <button type="button" data-tab="spirits">精灵</button>
+      <button type="button" data-tab="notices">公告</button>
+      <button type="button" data-tab="reports">举报<b class="tab-count" id="tabReports"></b></button>
+      <button type="button" id="logoutBtn" style="margin-left:auto">退出</button>
+    </nav>
+
+    <div class="pane on" id="pane-overview">
+      <div class="card">
+        <div class="stats admin-stats">
+          <button class="stat" type="button" data-jump="booking" data-status="new"><span>待处理预约</span><b id="oNew">—</b><i>去处理 →</i></button>
+          <button class="stat" type="button" data-jump="booking"><span>今日预约</span><b id="oToday">—</b><i>看今天 →</i></button>
+          <button class="stat" type="button" data-jump="accounts"><span>注册账号</span><b id="oAcc">—</b><i>账号管理 →</i></button>
+          <button class="stat" type="button" data-jump="products"><span>在售商品</span><b id="oProd">—</b><i>商品维护 →</i></button>
+          <button class="stat" type="button" data-jump="reports"><span>待处理举报</span><b id="oRep">—</b><i>举报处理 →</i></button>
+          <button class="stat" type="button" data-jump="messages"><span>最近私信</span><b id="oDm">—</b><i>私信审查 →</i></button>
+        </div>
+        <p class="hint">数字在打开页面时拉取一次，点各标签会重新读取对应模块。</p>
+        <button class="ghost" id="refreshOverview">刷新概览</button>
+        <p class="msg" id="overviewMsg"></p>
+      </div>
+      <div class="card">
+        <div class="admin-sec-head"><h2>最近 5 条预约</h2><button class="ghost mini" type="button" data-jump="booking">全部预约 →</button></div>
+        <div id="overviewBookings" class="empty">正在读取……</div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-booking">
+      <div class="card">
+        <h2>服务预约</h2>
+        <div class="toolbar">
+          <input id="bkQ" placeholder="搜机型 / 联系方式 / 备注">
+          <select id="bkSt">
+            <option value="all">全部状态</option>
+            <option value="new">新提交</option>
+            <option value="contacted">已联系</option>
+            <option value="quoted">已报价</option>
+            <option value="done">已完成</option>
+            <option value="closed">已关闭</option>
+          </select>
+          <button class="ghost" id="bkRefresh">刷新</button>
+        </div>
+        <p class="msg" id="bkMsg"></p>
+        <div id="bkList"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-tasks">
+      <div class="card">
+        <div class="admin-sec-head"><div><h2>签到与任务</h2><p class="hint" style="margin:4px 0 0">只看统计，不直接改用户额度；发放与领取都走站内函数。</p></div><button class="ghost mini" id="tkRefresh" type="button">刷新</button></div>
+        <div class="stats admin-stats">
+          <div class="stat"><span>今日签到</span><b id="tkCheckins">—</b></div>
+          <div class="stat"><span>近 7 日签到用户</span><b id="tkUsers">—</b></div>
+          <div class="stat"><span>今日领取任务</span><b id="tkClaims">—</b></div>
+          <div class="stat"><span>今日发放额度</span><b id="tkCredits">—</b></div>
+          <div class="stat"><span>当前额度总余额</span><b id="tkBalance">—</b></div>
+        </div>
+        <p class="msg" id="tkMsg"></p>
+      </div>
+      <div class="card">
+        <h2>最近 14 天</h2>
+        <div id="tkDays" class="empty">正在读取……</div>
+      </div>
+      <div class="card">
+        <h2>今日任务领取分布</h2>
+        <div id="tkTaskList" class="empty">正在读取……</div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-accounts">
+      <div class="card">
+        <h2>注册账号</h2>
+        <div class="toolbar">
+          <input id="accQ" placeholder="邮箱或昵称">
+          <select id="banDays">
+            <option value="7">封禁 7 天</option>
+            <option value="30" selected>封禁 30 天</option>
+            <option value="365">封禁 1 年</option>
+            <option value="36500">永久封禁</option>
+          </select>
+          <button class="ghost" id="accRefresh">刷新</button>
+        </div>
+        <p class="msg" id="accMsg"></p>
+        <div id="accList"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-messages">
+      <div class="card">
+        <h2>私信审查</h2>
+        <div class="toolbar">
+          <input id="dmQ" placeholder="关键词 / 邮箱 / 昵称">
+          <select id="dmLimit">
+            <option value="50">最近 50 条</option>
+            <option value="100" selected>最近 100 条</option>
+            <option value="300">最近 300 条</option>
+          </select>
+          <button class="ghost" id="dmRefresh">查询</button>
+        </div>
+        <p class="msg" id="dmMsg"></p>
+        <div id="dmList"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-products">
+      <div class="card">
+        <h2>商品维护</h2>
+        <p class="hint">下架不会删除记录，改 <b>is_active</b> 即可；外挂类商品建议直接下架。</p>
+        <label for="pName">名称</label>
+        <input id="pName" placeholder="例如 解 BL 与 Root 部署">
+        <div class="toolbar" style="margin-top:10px">
+          <input id="pCat" placeholder="分类，例如 技术服务">
+          <input id="pPrice" type="number" min="0" step="0.01" placeholder="价格">
+        </div>
+        <label for="pDesc">介绍</label>
+        <textarea id="pDesc" placeholder="一句话说明交付内容和边界"></textarea>
+        <label for="pImg">图片链接（可留空）</label>
+        <input id="pImg" placeholder="https://...">
+        <button id="pSave">添加商品</button>
+        <button class="ghost" id="pCancel" hidden>取消编辑</button>
+        <p class="msg" id="pMsg"></p>
+      </div>
+      <div class="card">
+        <h2>在售与下架</h2>
+        <button class="ghost" id="pRefresh">刷新商品</button>
+        <div id="pList"></div>
+      </div>
+    </div>
+
+
+    <div class="pane" id="pane-spirits">
+      <div class="card">
+        <div class="admin-sec-head"><div><h2>精灵获取设置</h2><p class="hint" style="margin:4px 0 0">逐款设置「免费领取 / 额度购买 / 后台发放」。后台发放款前台不显示购买按钮，只显示联系站长；价格只在额度购买时扣。</p></div><button class="ghost mini" id="spiritConfigReload" type="button">重读云端</button></div>
+        <div id="spiritConfigRows" class="spirit-config-list"><p class="hint">正在读取……</p></div>
+        <button id="spiritConfigSave" type="button">保存精灵配置</button>
+        <p class="msg" id="spiritConfigMsg"></p>
+      </div>
+      <div class="card spirit-grant-card">
+        <h2>手动发放精灵</h2>
+        <p class="hint">给指定账号私下上架，不扣额度，也不要求对方走购买流程。发放后对方刷新精灵小屋即可看到。</p>
+        <div class="spirit-grant-grid">
+          <label>发给账户<select id="spiritGrantAccount"></select></label>
+          <label>发哪一款<select id="spiritGrantSpirit"></select></label>
+        </div>
+        <button id="spiritGrantBtn" type="button">添加到这个账户</button>
+        <p class="msg" id="spiritGrantMsg"></p>
+      </div>
+      <div class="card">
+        <h2>规则提醒</h2>
+        <p class="hint">额度购买款走 <b>tafei_spirit_buy</b>，扣 <b>tafei_balance</b> 并写流水；后台发放款走 <b>tafei_admin_spirit_grant</b>，只加 <b>owned_spirits</b>，不扣额度。</p>
+        <p class="hint">聊天双人彩蛋只读取双方的伙伴、皮肤、状态和亲密度，不读取私信正文。</p>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-notices">
+      <div class="card">
+        <h2>发布公告</h2>
+        <label for="nTitle">标题</label>
+        <input id="nTitle" placeholder="公告标题">
+        <label for="nContent">内容</label>
+        <textarea id="nContent" rows="6" placeholder="公告正文，支持换行"></textarea>
+        <button id="nPublish">发布新公告</button>
+        <p class="msg" id="nMsg"></p>
+      </div>
+      <div class="card">
+        <h2>历史公告</h2>
+        <button class="ghost" id="nRefresh">刷新公告</button>
+        <div id="nList"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-reports">
+      <div class="card">
+        <h2>举报处理</h2>
+        <button class="ghost" id="rRefresh">刷新举报</button>
+        <p class="msg" id="rMsg">还没读取。</p>
+        <div id="rList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · 站长后台 · <a href="index.html">返回站点</a><div class="pg-risk">后台只处理站内数据；封禁、删除私信、下架商品等操作会立即生效。离开设备前请点“退出”。</div></div></footer>
+<script src="js/mobile-nav.js"></script>
+<script>
+const URL = 'https://kwkewmhmxyjmzdjyutwa.supabase.co';
+const KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
+const ADMIN_EMAIL = '3659229103@qq.com';
+const TOKEN_KEY = 'tafei-console-token';
+const SITE_AUTH_KEY = 'tafei-auth-session';
+const BOOKINGS = URL + '/rest/v1/tafei_service_requests';
+const PRODUCTS = URL + '/rest/v1/tafei_products';
+const REPORTS = URL + '/rest/v1/tafei_reports';
+const NOTICES = URL + '/rest/v1/tafei_announcements';
+
+const ST = { new: '新提交', contacted: '已联系', quoted: '已报价', done: '已完成', closed: '已关闭' };
+
+let token = sessionStorage.getItem(TOKEN_KEY) || '';
+let siteSession = readSiteSession();
+let bookingRows = [];
+let accounts = [];
+let editingProduct = null;
+let currentTab = 'overview';
+const loaded = {};
+
+const SPIRIT_ADMIN = {
+  spirits: [
+    { id: 'xiaota', name: '小挞飞', note: '挞飞原创 · 建议 0', price: 0, mode: 'free' },
+    { id: 'xi-shi', name: '西施', note: '王者荣耀', price: 20, mode: 'request' },
+    { id: 'angela', name: '安琪拉', note: '王者荣耀', price: 24, mode: 'request' },
+    { id: 'yao', name: '瑶', note: '王者荣耀', price: 28, mode: 'request' },
+    { id: 'gardener', name: '园丁', note: '第五人格', price: 32, mode: 'request' },
+    { id: 'doctor', name: '医生', note: '第五人格', price: 36, mode: 'request' },
+    { id: 'mechanic', name: '机械师', note: '第五人格', price: 40, mode: 'request' },
+    { id: 'perfumer', name: '调香师', note: '第五人格', price: 44, mode: 'request' },
+    { id: 'tanluning', name: '昙露凝', note: '纸嫁衣9 · 资源重心', price: 52, mode: 'request' }
+  ],
+  skins: [
+    { id: 'xiaota-default', spirit: 'xiaota', name: '挞壳精灵', price: 0 },
+    { id: 'xi-shi-default', spirit: 'xi-shi', name: '幻纱之灵', price: 0 },
+    { id: 'angela-default', spirit: 'angela', name: '暗夜萝莉', price: 0 },
+    { id: 'yao-default', spirit: 'yao', name: '鹿灵守心', price: 0 },
+    { id: 'yao-art', spirit: 'yao', name: '时之祈愿 · 原画', price: 0 },
+    { id: 'gardener-default', spirit: 'gardener', name: '园丁日常', price: 0 },
+    { id: 'doctor-default', spirit: 'doctor', name: '医生日常', price: 0 },
+    { id: 'mechanic-default', spirit: 'mechanic', name: '机械师日常', price: 0 },
+    { id: 'perfumer-default', spirit: 'perfumer', name: '调香师日常', price: 0 },
+    { id: 'tanluning-daily', spirit: 'tanluning', name: '日常绿开衫', price: 0 },
+    { id: 'tanluning-bridal', spirit: 'tanluning', name: '红嫁衣', price: 0 },
+    { id: 'tanluning-uniform', spirit: 'tanluning', name: '民国学生装', price: 18 }
+  ],
+  items: [
+    { id: 'sugar-cake', kind: 'food', name: '白糖糕', price: 2 },
+    { id: 'tea', kind: 'food', name: '清茶', price: 3 },
+    { id: 'osmanthus', kind: 'food', name: '桂花酥', price: 5 },
+    { id: 'sweet-soup', kind: 'food', name: '甜汤', price: 8 },
+    { id: 'tanhua-cake', kind: 'food', name: '昙花糕', price: 12 },
+    { id: 'anshen-soup', kind: 'food', name: '安神羹', price: 15 },
+    { id: 'kite', kind: 'toy', name: '纸鸢', price: 5 },
+    { id: 'rattle', kind: 'toy', name: '拨浪鼓', price: 8 },
+    { id: 'sandbag', kind: 'toy', name: '沙包', price: 10 },
+    { id: 'mirror', kind: 'toy', name: '琉璃手镜', price: 18 },
+    { id: 'lantern', kind: 'toy', name: '昙花灯', price: 20 },
+    { id: 'album', kind: 'toy', name: '旧相册', price: 25 }
+  ],
+  rules: {
+    satietyDecayPerHour: 1.2,
+    moodDecayPerHour: 0.8,
+    sleepinessGainPerHour: 1.5,
+    angerGainPerHour: 0.6,
+    sleepRecoverPerHour: 4,
+    idleSleepMinutes: 10,
+    autoSleepAt: 85,
+    idleSleepAt: 65,
+    angerHigh: 75,
+    hungerLow: 25,
+    moodHigh: 75,
+    fightBondPenalty: 2,
+    tickMinutes: 1
+  },
+  bondLevels: [
+    { level: 1, need: 0, title: '初见', reward: '伙伴档案已建立' },
+    { level: 2, need: 5, title: '眼熟', reward: '全站挂件等级铭牌' },
+    { level: 3, need: 12, title: '常来', reward: '专属头像光环' },
+    { level: 4, need: 22, title: '有默契', reward: '专属互动台词' },
+    { level: 5, need: 35, title: '老朋友', reward: '服务预约优先排期' },
+    { level: 6, need: 50, title: '重要的人', reward: '私信专属签名' },
+    { level: 7, need: 70, title: '形影不离', reward: '限定卡面边框' },
+    { level: 8, need: 95, title: '灵魂搭档', reward: '个人主页展示位' },
+    { level: 9, need: 125, title: '命定伙伴', reward: '专属称号' },
+    { level: 10, need: 160, title: '永远的伙伴', reward: '永久纪念卡' }
+  ]
+};
+
+function spiritDefaultCatalog() {
+  const spirits = {};
+  const skins = {};
+  const items = {};
+  SPIRIT_ADMIN.spirits.forEach((x) => { spirits[x.id] = { price: x.price, enabled: true, mode: x.mode || (x.id === 'xiaota' ? 'free' : 'request') }; });
+  SPIRIT_ADMIN.skins.forEach((x) => { skins[x.id] = { price: x.price, enabled: true, spirit: x.spirit }; });
+  SPIRIT_ADMIN.items.forEach((x) => { items[x.id] = { price: x.price, enabled: true }; });
+  return { version: 1, spirits, skins, items, bondLevels: SPIRIT_ADMIN.bondLevels, rules: SPIRIT_ADMIN.rules };
+}
+
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const when = (v) => {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (isNaN(d)) return '—';
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+};
+
+function say(id, text, kind) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+async function req(path, options) {
+  const opt = options || {};
+  const res = await fetch(path, {
+    method: opt.method || 'GET',
+    headers: {
+      apikey: KEY,
+      Authorization: 'Bearer ' + (token || KEY),
+      'Content-Type': 'application/json',
+      ...(opt.headers || {})
+    },
+    body: opt.body ? JSON.stringify(opt.body) : undefined
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
+  if (!res.ok) {
+    const err = new Error((data && (data.message || data.hint)) || ('请求失败 ' + res.status));
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+const rpc = (name, body) => req(URL + '/rest/v1/rpc/' + name, { method: 'POST', body: body || {} });
+
+function emailOf(jwt) {
+  try {
+    const part = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(atob(part).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    return JSON.parse(json).email || '';
+  } catch (e) { return ''; }
+}
+
+function readSiteSession() {
+  try {
+    const data = JSON.parse(localStorage.getItem(SITE_AUTH_KEY) || 'null');
+    return data && data.access_token ? data : null;
+  } catch (e) { return null; }
+}
+
+function isAdminSession(data) {
+  const email = ((data && data.user && data.user.email) || '').toLowerCase();
+  const notExpired = !data.expires_at || data.expires_at * 1000 > Date.now() + 30000;
+  return email === ADMIN_EMAIL && !!data.access_token && notExpired;
+}
+
+function syncSiteSession(data) {
+  if (!isAdminSession(data)) return;
+  localStorage.setItem(SITE_AUTH_KEY, JSON.stringify(data));
+}
+
+function authFail(message) {
+  token = '';
+  sessionStorage.removeItem(TOKEN_KEY);
+  if (siteSession && isAdminSession(siteSession)) localStorage.removeItem(SITE_AUTH_KEY);
+  siteSession = null;
+  $('console').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  say('loginMsg', message || '登录已失效，请重新用站长邮箱登录。', 'err');
+}
+
+async function login() {
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if (!email || !password) { say('loginMsg', '请填写邮箱和密码。'); return; }
+  $('loginBtn').disabled = true;
+  say('loginMsg', '正在验证……');
+  try {
+    const res = await fetch(URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.msg || data.error_description || data.message || '登录失败');
+    if (data.user && data.user.email !== ADMIN_EMAIL) throw new Error('这个账号不是站长邮箱，进不了后台。');
+    token = data.access_token;
+    sessionStorage.setItem(TOKEN_KEY, token);
+    if (data.user && data.user.email === ADMIN_EMAIL) syncSiteSession(data);
+    boot();
+  } catch (e) {
+    token = '';
+    sessionStorage.removeItem(TOKEN_KEY);
+    $('console').classList.add('hidden');
+    $('login').classList.remove('hidden');
+    say('loginMsg', '登录失败：' + e.message, 'err');
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+}
+
+function boot() {
+  $('login').classList.add('hidden');
+  $('console').classList.remove('hidden');
+  const who = emailOf(token);
+  if (who && who !== ADMIN_EMAIL) { authFail('这个账号不是站长邮箱，进不了后台。'); return; }
+  $('adminWho').textContent = '已登录 · ' + (who || ADMIN_EMAIL);
+  const initial = (location.hash || '').replace('#', '');
+  switchTab(['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'spirits', 'notices', 'reports'].includes(initial) ? initial : 'overview');
+}
+
+function logout() {
+  token = '';
+  sessionStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SITE_AUTH_KEY);
+  siteSession = null;
+  $('console').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('password').value = '';
+  say('loginMsg', '已退出后台，同时清除了本站的站长登录状态。');
+}
+
+async function refreshAll() {
+  Object.keys(loaded).forEach((k) => { delete loaded[k]; });
+  await loadOverview();
+  if (currentTab !== 'overview') switchTab(currentTab);
+}
+
+/* ---------- 概览 ---------- */
+async function loadOverview() {
+  say('overviewMsg', '正在读取……');
+  try {
+    const settled = await Promise.allSettled([
+      req(BOOKINGS + '?select=id,created_at,status&limit=300'),
+      rpc('tafei_admin_accounts'),
+      req(PRODUCTS + '?select=id,is_active'),
+      req(NOTICES + '?select=id'),
+      req(REPORTS + '?select=id,status'),
+      rpc('tafei_admin_messages', { p_query: '', p_limit: 200 })
+    ]);
+    const bad = settled.find((x) => x.status === 'rejected' && x.reason && (x.reason.status === 401 || x.reason.status === 403));
+    if (bad) { authFail('登录已失效，请重新用站长邮箱登录。'); return; }
+    const val = (i) => (settled[i].status === 'fulfilled' && settled[i].value) || [];
+    const b = val(0), a = val(1), p = val(2), n = val(3), r = val(4), d = val(5);
+    const bookings = Array.isArray(b) ? b : [];
+    const today = new Date();
+    const isToday = (iso) => {
+      const x = new Date(iso);
+      return x.getFullYear() === today.getFullYear() && x.getMonth() === today.getMonth() && x.getDate() === today.getDate();
+    };
+    const pendingBookings = bookings.filter((x) => (x.status || 'new') === 'new').length;
+    const pendingReports = (Array.isArray(r) ? r.filter((x) => x.status !== 'handled').length : 0);
+    const unreadMessages = (Array.isArray(d) ? d.filter((x) => !x.read_at).length : 0);
+    $('oNew').textContent = pendingBookings;
+    $('oToday').textContent = bookings.filter((x) => isToday(x.created_at)).length;
+    $('oAcc').textContent = (Array.isArray(a) ? a.length : 0);
+    $('oProd').textContent = (Array.isArray(p) ? p.filter((x) => x.is_active).length : 0);
+    $('oRep').textContent = pendingReports;
+    $('oDm').textContent = (Array.isArray(d) ? d.length : 0);
+    $('heroTodo').textContent = pendingBookings + pendingReports;
+    setTabCount('tabBooking', pendingBookings);
+    setTabCount('tabReports', pendingReports);
+    setTabCount('tabMessages', unreadMessages);
+    say('overviewMsg', (Array.isArray(n) ? ('公告共 ' + n.length + ' 条。') : '') + ' 上次读取：' + when(new Date().toISOString()), '');
+    renderOverviewBookings(bookings.slice(0, 5));
+  } catch (e) {
+    if (e.status === 401 || e.status === 403) { authFail(); return; }
+    say('overviewMsg', '读取失败：' + e.message, 'err');
+  }
+}
+
+function setTabCount(id, count) {
+  const el = $(id);
+  if (el) el.textContent = count > 0 ? String(count) : '';
+}
+
+function renderOverviewBookings(rows) {
+  const box = $('overviewBookings');
+  if (!rows.length) { box.className = 'empty'; box.innerHTML = '还没有预约。'; return; }
+  box.className = '';
+  $('overviewBookings').innerHTML = rows.map((row) => {
+    const st = row.status || 'new';
+    return '<div class="req"><div class="req-top"><div><div class="req-title">' + esc(row.device || '未填机型') + '</div>'
+      + '<div class="req-sub">' + esc(row.service || '') + '</div></div>'
+      + '<span class="pill ' + esc(st) + '">' + esc(ST[st] || st) + '</span></div>'
+      + '<div class="meta"><span>' + esc(when(row.created_at)) + '</span></div></div>';
+  }).join('');
+}
+
+/* ---------- 预约 ---------- */
+async function loadBookings(force) {
+  if (loaded.booking && !force) return;
+  say('bkMsg', '正在读取……');
+  try {
+    bookingRows = await req(BOOKINGS + '?select=*&order=created_at.desc&limit=300') || [];
+    loaded.booking = true;
+    say('bkMsg', '');
+    setTabCount('tabBooking', bookingRows.filter((x) => (x.status || 'new') === 'new').length);
+    renderBookings();
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501/.test(e.message)) { authFail('没有读取预约的权限。'); return; }
+    say('bkMsg', '读取失败：' + e.message + '（若是表没建，先跑 supabase/service_requests.sql）', 'err');
+  }
+}
+
+function renderBookings() {
+  const q = ($('bkQ').value || '').trim().toLowerCase();
+  const st = $('bkSt').value;
+  const rows = bookingRows.filter((row) => {
+    if (st !== 'all' && (row.status || 'new') !== st) return false;
+    if (!q) return true;
+    return [row.device, row.os_version, row.service, row.contact, row.note].join(' ').toLowerCase().includes(q);
+  });
+  if (!rows.length) { $('bkList').innerHTML = '<p class="empty">' + (bookingRows.length ? '这个筛选下没有记录。' : '还没有人提交预约。') + '</p>'; return; }
+  $('bkList').innerHTML = rows.map((row) => {
+    const s = row.status || 'new';
+    const contact = (row.contact_type || 'QQ') + ' ' + (row.contact || '');
+    return '<article class="req">'
+      + '<div class="req-top"><div><div class="req-title">' + esc(row.device) + '</div>'
+      + '<div class="req-sub">' + esc(row.service) + '</div></div>'
+      + '<span class="pill ' + esc(s) + '">' + esc(ST[s] || s) + '</span></div>'
+      + '<div class="meta"><span>' + esc(when(row.created_at)) + '</span><span>' + esc(contact) + '</span>'
+      + (row.os_version ? '<span>系统 ' + esc(row.os_version) + '</span>' : '')
+      + (row.source === 'service-page' ? '<span>来自服务页</span>' : '') + '</div>'
+      + (row.note ? '<p class="note">' + esc(row.note) + '</p>' : '')
+      + '<div class="req-foot">'
+      + '<button class="ghost mini" type="button" data-copy="' + esc(contact) + '">复制联系方式</button>'
+      + '<button class="ghost mini" type="button" data-copyall="' + row.id + '">复制整条</button>'
+      + '<select data-bkst="' + row.id + '">'
+      + Object.keys(ST).map((k) => '<option value="' + k + '"' + (k === s ? ' selected' : '') + '>' + ST[k] + '</option>').join('')
+      + '</select></div></article>';
+  }).join('');
+  bindBookings();
+}
+
+function bindBookings() {
+  $('bkList').querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        btn.textContent = '已复制';
+        setTimeout(() => { btn.textContent = '复制联系方式'; }, 1500);
+      } catch (e) { window.prompt('手动复制', btn.dataset.copy); }
+    });
+  });
+  $('bkList').querySelectorAll('[data-copyall]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const row = bookingRows.find((r) => String(r.id) === btn.dataset.copyall);
+      if (!row) return;
+      const text = '【挞飞预约 #' + row.id + '】\n机型：' + row.device + '\n系统：' + (row.os_version || '未填')
+        + '\n服务：' + row.service + '\n联系：' + (row.contact_type || 'QQ') + ' ' + row.contact
+        + '\n说明：' + (row.note || '无') + '\n时间：' + when(row.created_at);
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '已复制';
+        setTimeout(() => { btn.textContent = '复制整条'; }, 1500);
+      } catch (e) { window.prompt('手动复制', text); }
+    });
+  });
+  $('bkList').querySelectorAll('[data-bkst]').forEach((sel) => {
+    sel.addEventListener('change', async () => {
+      const id = sel.dataset.bkst;
+      sel.disabled = true;
+      try {
+        await req(BOOKINGS + '?id=eq.' + encodeURIComponent(id), { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: { status: sel.value } });
+        const row = bookingRows.find((r) => String(r.id) === String(id));
+        if (row) row.status = sel.value;
+        say('bkMsg', '已更新状态。', 'ok');
+        renderBookings();
+      } catch (e) {
+        sel.disabled = false;
+        say('bkMsg', '改状态失败：' + e.message, 'err');
+      }
+    });
+  });
+}
+
+/* ---------- 账号 ---------- */
+async function loadAccounts(force) {
+  if (loaded.accounts && !force) return;
+  say('accMsg', '正在读取……');
+  try {
+    const rows = await rpc('tafei_admin_accounts');
+    accounts = Array.isArray(rows) ? rows : [];
+    loaded.accounts = true;
+    say('accMsg', '共 ' + accounts.length + ' 个注册账号。');
+    renderAccounts();
+    renderSpiritGrant();
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501|只有站长/.test(e.message)) { authFail('这个账号不是站长，读不到账号数据。'); return; }
+    say('accMsg', '读取失败：' + e.message + '（若接口没部署，先跑 supabase/admin_audit.sql）', 'err');
+  }
+}
+
+function renderAccounts() {
+  const q = ($('accQ').value || '').trim().toLowerCase();
+  const rows = accounts.filter((a) => !q || (a.email || '').toLowerCase().includes(q) || (a.nickname || '').toLowerCase().includes(q));
+  if (!rows.length) { $('accList').innerHTML = '<p class="empty">没有匹配的账号。</p>'; return; }
+  $('accList').innerHTML = rows.map((a) => {
+    const banned = a.banned_until && new Date(a.banned_until) > new Date();
+    return '<article class="req"><div class="req-top"><div><div class="req-title">' + esc(a.email || a.uid) + '</div>'
+      + '<div class="req-sub">' + esc(a.nickname || '未设置昵称') + '</div></div>'
+      + (banned ? '<span class="pill ban">已封禁至 ' + esc(when(a.banned_until)) + '</span>' : '<span class="pill done">正常</span>')
+      + '</div><div class="meta"><span>注册 ' + esc(when(a.created_at)) + '</span><span>最后登录 ' + esc(when(a.last_sign_in_at)) + '</span>'
+      + '<span>私信 ' + esc(a.msg_count) + ' 条</span></div>'
+      + '<div class="req-foot">'
+      + (banned
+        ? '<button class="ghost mini" type="button" data-unban="' + esc(a.uid) + '">解封</button>'
+        : '<button class="danger mini" type="button" data-ban="' + esc(a.uid) + '">封禁</button>')
+      + '</div></article>';
+  }).join('');
+}
+
+async function banUser(uid) {
+  const acc = accounts.find((a) => a.uid === uid) || {};
+  const days = parseInt($('banDays').value, 10) || 30;
+  const label = days >= 36500 ? '永久' : days + ' 天';
+  if (!confirm('确认封禁 ' + (acc.email || uid) + ' ？封禁 ' + label + '。')) return;
+  try {
+    await rpc('tafei_admin_ban', { p_uid: uid, p_days: days });
+    say('accMsg', '已封禁 ' + (acc.email || uid) + '（' + label + '）。', 'ok');
+    loadAccounts(true);
+  } catch (e) { say('accMsg', '封禁失败：' + e.message, 'err'); }
+}
+
+async function unbanUser(uid) {
+  const acc = accounts.find((a) => a.uid === uid) || {};
+  if (!confirm('确认解封 ' + (acc.email || uid) + ' ？')) return;
+  try {
+    await rpc('tafei_admin_unban', { p_uid: uid });
+    say('accMsg', '已解封 ' + (acc.email || uid) + '。', 'ok');
+    loadAccounts(true);
+  } catch (e) { say('accMsg', '解封失败：' + e.message, 'err'); }
+}
+
+/* ---------- 私信 ---------- */
+async function loadMessages(force) {
+  if (loaded.messages && !force) return;
+  say('dmMsg', '正在读取……');
+  try {
+    const rows = await rpc('tafei_admin_messages', { p_query: ($('dmQ').value || '').trim(), p_limit: parseInt($('dmLimit').value, 10) || 100 });
+    const list = Array.isArray(rows) ? rows : [];
+    loaded.messages = true;
+    say('dmMsg', '读到 ' + list.length + ' 条私信。');
+    if (!list.length) { $('dmList').innerHTML = '<p class="empty">没有匹配的私信。</p>'; return; }
+    $('dmList').innerHTML = list.map((m) => '<article class="dm">'
+      + '<div class="dm-top"><b>' + esc(m.sender_name) + '</b><span>→</span><b>' + esc(m.recipient_name) + '</b>'
+      + '<span>· ' + esc(when(m.created_at)) + (m.read_at ? ' · 已读' : ' · 未读') + '</span></div>'
+      + '<p class="dm-body">' + esc(m.body) + '</p>'
+      + '<div class="dm-foot"><span>' + esc(m.sender_email) + ' → ' + esc(m.recipient_email) + '</span>'
+      + '<button class="danger mini" type="button" data-del="' + esc(m.id) + '">删除这条</button></div></article>').join('');
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501|只有站长/.test(e.message)) { authFail('这个账号不是站长，读不到私信。'); return; }
+    say('dmMsg', '读取失败：' + e.message, 'err');
+  }
+}
+
+async function removeMessage(id) {
+  if (!confirm('确认删除这条私信？删除后双方都看不到了。')) return;
+  try {
+    await rpc('tafei_admin_delete_message', { p_id: parseInt(id, 10) });
+    say('dmMsg', '已删除第 ' + id + ' 条私信。', 'ok');
+    loadMessages(true);
+  } catch (e) { say('dmMsg', '删除失败：' + e.message, 'err'); }
+}
+
+/* ---------- 商品 ---------- */
+async function loadProducts(force) {
+  if (loaded.products && !force) return;
+  $('pList').innerHTML = '<p class="empty">正在读取……</p>';
+  try {
+    const rows = await req(PRODUCTS + '?select=*&order=id.desc');
+    const list = Array.isArray(rows) ? rows : [];
+    loaded.products = true;
+    if (!list.length) { $('pList').innerHTML = '<p class="empty">还没有商品。</p>'; return; }
+    $('pList').innerHTML = list.map((item) => '<article class="req">'
+      + '<div class="req-top"><div><div class="req-title">' + esc(item.name) + '</div>'
+      + '<div class="req-sub">' + esc(item.category || '未分类') + '</div></div>'
+      + '<span class="pill ' + (item.is_active ? 'done' : 'closed') + '">' + (item.is_active ? '已上架' : '已下架') + '</span></div>'
+      + '<div class="meta"><span>¥' + esc(item.price) + '</span></div>'
+      + (item.description ? '<p class="note">' + esc(item.description) + '</p>' : '')
+      + '<div class="req-foot">'
+      + '<button class="ghost mini" type="button" data-pedit="' + item.id + '">编辑</button>'
+      + '<button class="' + (item.is_active ? 'danger' : 'ghost') + ' mini" type="button" data-ptoggle="' + item.id + '">' + (item.is_active ? '下架' : '上架') + '</button>'
+      + '</div></article>').join('');
+  } catch (e) { $('pList').innerHTML = '<p class="empty">读取失败：' + esc(e.message) + '</p>'; }
+}
+
+function fillProductForm(item) {
+  editingProduct = item;
+  $('pName').value = item.name || '';
+  $('pCat').value = item.category || '';
+  $('pPrice').value = item.price == null ? '' : item.price;
+  $('pDesc').value = item.description || '';
+  $('pImg').value = item.image_url || '';
+  $('pSave').textContent = '保存修改';
+  $('pCancel').hidden = false;
+  say('pMsg', '正在编辑：' + item.name);
+  window.scrollTo({ top: $('pane-products').offsetTop - 60, behavior: 'smooth' });
+}
+
+function resetProductForm() {
+  editingProduct = null;
+  ['pName', 'pCat', 'pPrice', 'pDesc', 'pImg'].forEach((id) => { $(id).value = ''; });
+  $('pSave').textContent = '添加商品';
+  $('pCancel').hidden = true;
+  say('pMsg', '');
+}
+
+async function saveProduct() {
+  const name = $('pName').value.trim();
+  const priceRaw = $('pPrice').value.trim();
+  const price = priceRaw === '' ? null : Number(priceRaw);
+  if (!name) { say('pMsg', '商品名称必填。', 'err'); return; }
+  if (price != null && (!isFinite(price) || price < 0)) { say('pMsg', '价格要填非负数字。', 'err'); return; }
+  const body = {
+    name,
+    category: $('pCat').value.trim() || '其他',
+    price,
+    description: $('pDesc').value.trim(),
+    image_url: $('pImg').value.trim() || null,
+    is_active: true
+  };
+  $('pSave').disabled = true;
+  try {
+    if (editingProduct) {
+      await req(PRODUCTS + '?id=eq.' + encodeURIComponent(editingProduct.id), { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body });
+      say('pMsg', '已保存修改。', 'ok');
+    } else {
+      await req(PRODUCTS, { method: 'POST', headers: { Prefer: 'return=minimal' }, body });
+      say('pMsg', '已添加商品。', 'ok');
+    }
+    resetProductForm();
+    loadProducts(true);
+  } catch (e) { say('pMsg', '保存失败：' + e.message, 'err'); }
+  finally { $('pSave').disabled = false; }
+}
+
+async function toggleProduct(id) {
+  let active = true;
+  try {
+    const rows = await req(PRODUCTS + '?id=eq.' + encodeURIComponent(id) + '&select=id,is_active');
+    if (Array.isArray(rows) && rows[0]) active = !!rows[0].is_active;
+  } catch (e) {
+    say('pMsg', '读取商品状态失败：' + e.message, 'err');
+    return;
+  }
+  if (!confirm(active ? '确认下架这件商品？' : '确认重新上架这件商品？')) return;
+  try {
+    await req(PRODUCTS + '?id=eq.' + encodeURIComponent(id), { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: { is_active: !active } });
+    say('pMsg', active ? '已下架。' : '已上架。', 'ok');
+    loadProducts(true);
+  } catch (e) { say('pMsg', '操作失败：' + e.message, 'err'); }
+}
+
+/* ---------- 公告 ---------- */
+async function loadNotices(force) {
+  if (loaded.notices && !force) return;
+  $('nList').innerHTML = '<p class="empty">正在读取……</p>';
+  try {
+    const rows = await req(NOTICES + '?select=id,title,content,version,is_active,created_at&order=version.desc');
+    const list = Array.isArray(rows) ? rows : [];
+    loaded.notices = true;
+    if (!list.length) { $('nList').innerHTML = '<p class="empty">还没有公告。</p>'; return; }
+    $('nList').innerHTML = list.map((n) => '<article class="req">'
+      + '<div class="req-top"><div class="req-title">V' + esc(n.version) + ' · ' + esc(n.title) + '</div>'
+      + (n.is_active ? '<span class="pill done">生效中</span>' : '<span class="pill closed">历史</span>') + '</div>'
+      + '<div class="meta"><span>' + esc(when(n.created_at)) + '</span></div>'
+      + '<p class="note">' + esc(n.content) + '</p></article>').join('');
+  } catch (e) { $('nList').innerHTML = '<p class="empty">读取失败：' + esc(e.message) + '</p>'; }
+}
+
+async function publishNotice() {
+  const title = $('nTitle').value.trim();
+  const content = $('nContent').value.trim();
+  if (!title || !content) { say('nMsg', '标题和内容都要填。', 'err'); return; }
+  if (!confirm('发布后所有访客都会重新看到公告，确认发布？')) return;
+  $('nPublish').disabled = true;
+  say('nMsg', '正在发布……');
+  try {
+    const v = await rpc('publish_tafei_announcement', { p_title: title, p_content: content });
+    $('nTitle').value = '';
+    $('nContent').value = '';
+    say('nMsg', '发布成功，公告编号 ' + v + '。', 'ok');
+    loadNotices(true);
+  } catch (e) { say('nMsg', '发布失败：' + e.message + '（若接口没部署，先跑 supabase 里的公告 SQL）', 'err'); }
+  finally { $('nPublish').disabled = false; }
+}
+
+/* ---------- 举报 ---------- */
+async function loadReports(force) {
+  if (loaded.reports && !force) return;
+  say('rMsg', '正在读取……');
+  try {
+    const rows = await req(REPORTS + '?select=id,article_id,reason,description,created_at,status,admin_note,handled_at&order=created_at.desc');
+    const list = Array.isArray(rows) ? rows : [];
+    loaded.reports = true;
+    say('rMsg', '共 ' + list.length + ' 条举报。');
+    if (!list.length) { $('rList').innerHTML = '<p class="empty">没有举报记录。</p>'; return; }
+    $('rList').innerHTML = list.map((r) => '<article class="req">'
+      + '<div class="req-top"><div class="req-title">文章 #' + esc(r.article_id) + '</div>'
+      + (r.status === 'handled' ? '<span class="pill done">已处理</span>' : '<span class="pill new">待处理</span>') + '</div>'
+      + '<div class="meta"><span>' + esc(when(r.created_at)) + '</span><span>' + esc(r.reason) + '</span></div>'
+      + (r.description ? '<p class="note">' + esc(r.description) + '</p>' : '')
+      + (r.status === 'handled'
+        ? '<p class="note" style="color:var(--tf-muted,#9aaccb)">处理备注：' + esc(r.admin_note || '无') + '</p>'
+        : '<div class="req-foot"><input placeholder="处理备注（可留空）" data-note="' + r.id + '">'
+          + '<button class="ghost mini" type="button" data-handle="' + r.id + '">标记已处理</button></div>')
+      + '</article>').join('');
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501/.test(e.message)) { say('rMsg', '举报表没有开放给当前账号读取（42501）。', 'err'); return; }
+    say('rMsg', '读取失败：' + e.message, 'err');
+  }
+}
+
+async function handleReport(id) {
+  const input = $('rList').querySelector('[data-note="' + id + '"]');
+  const note = input ? input.value.trim().slice(0, 500) : '';
+  if (!confirm('标记为已处理？')) return;
+  try {
+    await req(REPORTS + '?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: { status: 'handled', admin_note: note, handled_at: new Date().toISOString() }
+    });
+    say('rMsg', '已标记处理。', 'ok');
+    loadReports(true);
+  } catch (e) { say('rMsg', '保存失败：' + e.message, 'err'); }
+}
+
+/* ---------- 签到与任务 ---------- */
+async function loadTaskStats(force) {
+  if (loaded.tasks && !force) return;
+  say('tkMsg', '正在读取……');
+  try {
+    const data = await rpc('tafei_admin_task_stats', { p_days: 14 });
+    loaded.tasks = true;
+    say('tkMsg', '统计截至 ' + when(new Date().toISOString()) + '。', 'ok');
+    $('tkCheckins').textContent = data.checkins_today ?? 0;
+    $('tkUsers').textContent = data.checkin_users_7d ?? 0;
+    $('tkClaims').textContent = data.claims_today ?? 0;
+    $('tkCredits').textContent = data.credits_today ?? 0;
+    $('tkBalance').textContent = data.total_balance ?? 0;
+    setTabCount('tabTasks', Number(data.claims_today || 0));
+    const days = Array.isArray(data.days) ? data.days : [];
+    $('tkDays').className = days.length ? '' : 'empty';
+    $('tkDays').innerHTML = days.length
+      ? days.map((row) => '<div class="tk-row"><span>' + esc(String(row.date || '').slice(5).replace('-', '/')) + '</span><b>签到 ' + Number(row.checkins || 0) + '</b><i>领取 ' + Number(row.claims || 0) + ' · 发放 ' + Number(row.credits || 0) + '</i></div>').join('')
+      : '还没有任务数据。';
+    const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+    $('tkTaskList').className = tasks.length ? '' : 'empty';
+    $('tkTaskList').innerHTML = tasks.length
+      ? tasks.map((row) => '<div class="tk-row"><span>' + esc(row.title || row.key || '') + '</span><b>' + Number(row.claims || 0) + ' 人领取</b><i>每人 +' + Number(row.reward || 0) + '</i></div>').join('')
+      : '任务配置为空。';
+  } catch (e) {
+    if (e.status === 401 || e.status === 403 || /42501/.test(e.message)) { authFail('没有读取任务统计的权限。'); return; }
+    if (e.status === 404 || /PGRST202|Could not find|function/i.test(e.message)) {
+      say('tkMsg', '任务库还没启用。请先在 Supabase 执行 supabase/daily_tasks.sql。', 'err');
+    } else {
+      say('tkMsg', '读取失败：' + e.message, 'err');
+    }
+  }
+}
+
+
+/* ---------- 精灵配置 ---------- */
+let spiritCatalog = null;
+
+function spiritConfigGroup(label, list, kind) {
+  const rows = list.map((x) => {
+    const entry = (spiritCatalog && spiritCatalog[kind + 's'] && spiritCatalog[kind + 's'][x.id]) || { price: x.price, enabled: true, mode: x.mode };
+    const mode = entry.mode || (x.id === 'xiaota' ? 'free' : 'request');
+    const modeSelect = kind === 'spirit'
+      ? '<select class="sp-mode" aria-label="' + esc(x.name) + '获取方式">'
+        + '<option value="free"' + (mode === 'free' ? ' selected' : '') + '>免费</option>'
+        + '<option value="purchase"' + (mode === 'purchase' ? ' selected' : '') + '>额度购买</option>'
+        + '<option value="request"' + (mode === 'request' ? ' selected' : '') + '>后台发放</option>'
+        + '</select>'
+      : '';
+    return '<div class="spirit-config-row' + (kind === 'spirit' ? ' has-mode' : '') + '" data-spirit-row data-kind="' + kind + '" data-id="' + esc(x.id) + '">'
+      + '<div><strong>' + esc(x.name) + '</strong><small>' + esc(x.id) + (x.note ? ' · ' + esc(x.note) : (x.spirit ? ' · ' + esc(x.spirit) : '')) + '</small></div>'
+      + modeSelect
+      + '<input class="sp-price" type="number" min="0" step="1" value="' + Number(entry.price || 0) + '" aria-label="' + esc(x.name) + '额度价格">'
+      + '<label><input class="sp-enabled" type="checkbox"' + (entry.enabled !== false ? ' checked' : '') + '> 上架</label>'
+      + '</div>';
+  }).join('');
+  return '<div class="spirit-config-group">' + esc(label) + '</div>' + rows;
+}
+
+function bondLevelConfigGroup() {
+  const levels = (spiritCatalog && Array.isArray(spiritCatalog.bondLevels) && spiritCatalog.bondLevels.length >= 2)
+    ? spiritCatalog.bondLevels
+    : SPIRIT_ADMIN.bondLevels;
+  return '<div class="spirit-config-group">亲密度等级与权益</div>'
+    + '<p class="hint" style="margin:0 0 8px">每一级需要达到的亲密度、称号和权益。Lv.1 固定从 0 开始；权益只做备注，实际由站长在预约中手动核销。</p>'
+    + levels.map((row, index) => '<div class="spirit-bond-row" data-bond-row>'
+      + '<strong>Lv.' + (index + 1) + '</strong>'
+      + '<label><span>亲密度门槛</span><input class="bond-need" type="number" min="0" step="1" value="' + Number(row.need || 0) + '"></label>'
+      + '<label><span>称号</span><input class="bond-title" type="text" maxlength="16" value="' + esc(row.title || '') + '"></label>'
+      + '<label><span>权益说明</span><input class="bond-reward" type="text" maxlength="60" value="' + esc(row.reward || '') + '"></label>'
+      + '</div>').join('');
+}
+
+function renderSpiritConfig() {
+  const box = $('spiritConfigRows');
+  if (!box) return;
+  if (!spiritCatalog) spiritCatalog = spiritDefaultCatalog();
+  box.innerHTML = spiritConfigGroup('角色价格', SPIRIT_ADMIN.spirits, 'spirit')
+    + spiritConfigGroup('皮肤价格', SPIRIT_ADMIN.skins, 'skin')
+    + spiritConfigGroup('食物 / 玩具价格', SPIRIT_ADMIN.items, 'item')
+    + bondLevelConfigGroup();
+}
+
+function readSpiritConfigRows() {
+  const next = spiritDefaultCatalog();
+  document.querySelectorAll('[data-spirit-row]').forEach((row) => {
+    const kind = row.dataset.kind;
+    const id = row.dataset.id;
+    const price = Number(row.querySelector('.sp-price').value) || 0;
+    const enabled = !!row.querySelector('.sp-enabled').checked;
+    if (!next[kind + 's'][id]) next[kind + 's'][id] = { price, enabled };
+    next[kind + 's'][id].price = Math.max(0, price);
+    next[kind + 's'][id].enabled = enabled;
+    const modeEl = row.querySelector('.sp-mode');
+    if (modeEl) next[kind + 's'][id].mode = ['free', 'purchase', 'request'].includes(modeEl.value) ? modeEl.value : 'request';
+  });
+  const bondRows = Array.from(document.querySelectorAll('[data-bond-row]'));
+  if (bondRows.length >= 2) {
+    next.bondLevels = bondRows.map((row, index) => ({
+      level: index + 1,
+      need: Math.max(0, Number(row.querySelector('.bond-need')?.value) || 0),
+      title: String(row.querySelector('.bond-title')?.value || '').trim() || ('等级 ' + (index + 1)),
+      reward: String(row.querySelector('.bond-reward')?.value || '').trim() || '待配置权益'
+    }));
+    next.bondLevels[0].need = 0;
+  }
+  return next;
+}
+
+function renderSpiritGrant() {
+  const acc = $('spiritGrantAccount');
+  const spirit = $('spiritGrantSpirit');
+  if (acc) {
+    const old = acc.value;
+    acc.innerHTML = accounts.length
+      ? accounts.map((a) => '<option value="' + esc(a.uid) + '">' + esc(a.nickname || '未设置昵称') + ' · ' + esc(a.email || a.uid) + '</option>').join('')
+      : '<option value="">先读取账号…</option>';
+    if (old && Array.from(acc.options).some((o) => o.value === old)) acc.value = old;
+  }
+  if (spirit && !spirit.options.length) {
+    spirit.innerHTML = SPIRIT_ADMIN.spirits.map((x) => '<option value="' + esc(x.id) + '">' + esc(x.name) + '</option>').join('');
+  }
+}
+
+async function grantSpirit() {
+  const btn = $('spiritGrantBtn');
+  const acc = $('spiritGrantAccount');
+  const spirit = $('spiritGrantSpirit');
+  if (!acc || !acc.value) { say('spiritGrantMsg', '先读取账号列表，再选择要发放的账户。', 'err'); return; }
+  if (!spirit || !spirit.value) { say('spiritGrantMsg', '先选择要发放的精灵。', 'err'); return; }
+  const account = accounts.find((a) => a.uid === acc.value);
+  if (btn) btn.disabled = true;
+  say('spiritGrantMsg', '正在发放……');
+  try {
+    const result = await rpc('tafei_admin_spirit_grant', { p_uid: acc.value, p_spirit_id: spirit.value });
+    const name = SPIRIT_ADMIN.spirits.find((x) => x.id === spirit.value)?.name || spirit.value;
+    if (result && result.already) say('spiritGrantMsg', '这个账号已经拥有「' + name + '」，没有重复添加。', 'ok');
+    else say('spiritGrantMsg', '已给 ' + (account ? account.email : acc.value) + ' 发放「' + name + '」，未扣额度。', 'ok');
+  } catch (e) {
+    if (e.status === 404 || /PGRST202|Could not find|function/i.test(e.message)) {
+      say('spiritGrantMsg', '发放接口还没建。先在 Supabase 执行 supabase/spirit_house.sql。', 'err');
+    } else if (e.status === 401 || e.status === 403) {
+      say('spiritGrantMsg', '没有发放权限：请确认登录的是站长邮箱，并已执行 SQL。', 'err');
+    } else {
+      say('spiritGrantMsg', '发放失败：' + e.message, 'err');
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadSpiritConfig(force) {
+  if (loaded.spirits && !force) return;
+  loaded.spirits = true;
+  try {
+    const rows = await req(URL + '/rest/v1/tafei_spirit_config?select=key,value,updated_at&key=eq.catalog&limit=1');
+    spiritCatalog = rows && rows[0] && rows[0].value ? rows[0].value : spiritDefaultCatalog();
+    renderSpiritConfig();
+    say('spiritConfigMsg', rows && rows[0] ? '已读取云端配置。' : '云端还没有目录，先显示默认价；保存后写入。');
+  } catch (e) {
+    spiritCatalog = spiritDefaultCatalog();
+    renderSpiritConfig();
+    if (e.status === 404 || /PGRST205|Could not find|relation/i.test(e.message)) {
+      say('spiritConfigMsg', '精灵配置表还没建。先在 Supabase 执行 supabase/spirit_house.sql，再回来保存。', 'err');
+    } else {
+      say('spiritConfigMsg', '读取失败：' + e.message, 'err');
+    }
+  }
+  renderSpiritGrant();
+  if (!loaded.accounts) loadAccounts();
+}
+
+async function saveSpiritConfig() {
+  const btn = $('spiritConfigSave');
+  const value = readSpiritConfigRows();
+  if (btn) btn.disabled = true;
+  say('spiritConfigMsg', '正在保存……');
+  try {
+    await req(URL + '/rest/v1/tafei_spirit_config?on_conflict=key', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: [{ key: 'catalog', value, updated_at: new Date().toISOString() }]
+    });
+    spiritCatalog = value;
+    say('spiritConfigMsg', '已保存。前台刷新精灵小屋后生效。');
+  } catch (e) {
+    if (e.status === 404 || /PGRST205|Could not find|relation/i.test(e.message)) {
+      say('spiritConfigMsg', '保存失败：表还没建。先执行 supabase/spirit_house.sql。', 'err');
+    } else if (e.status === 401 || e.status === 403) {
+      say('spiritConfigMsg', '保存失败：当前登录不是站长账号，或写入权限未配置。', 'err');
+    } else {
+      say('spiritConfigMsg', '保存失败：' + e.message, 'err');
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* ---------- tab 切换 ---------- */
+function switchTab(name) {
+  const tabs = ['overview', 'booking', 'tasks', 'accounts', 'messages', 'products', 'spirits', 'notices', 'reports'];
+  if (!tabs.includes(name)) name = 'overview';
+  currentTab = name;
+  $('tabs').querySelectorAll('[data-tab]').forEach((b) => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  tabs.forEach((k) => {
+    $('pane-' + k).classList.toggle('on', k === name);
+  });
+  try {
+    const next = location.pathname + location.search + (name === 'overview' ? '' : '#' + name);
+    history.replaceState(null, '', next);
+  } catch (e) {}
+  if (name === 'overview') loadOverview();
+  if (name === 'booking') loadBookings();
+  if (name === 'tasks') loadTaskStats();
+  if (name === 'accounts') loadAccounts();
+  if (name === 'messages') loadMessages();
+  if (name === 'products') loadProducts();
+  if (name === 'spirits') loadSpiritConfig();
+  if (name === 'notices') loadNotices();
+  if (name === 'reports') loadReports();
+}
+
+/* ---------- 事件 ---------- */
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { switchTab(tab.dataset.tab); return; }
+  const jump = e.target.closest('[data-jump]');
+  if (jump) {
+    if ($('bkSt')) $('bkSt').value = jump.dataset.status || 'all';
+    switchTab(jump.dataset.jump || 'overview');
+    const target = $('console');
+    if (target) window.scrollTo({ top: Math.max(0, target.offsetTop - 10), behavior: 'smooth' });
+    return;
+  }
+  const ban = e.target.closest('[data-ban]');
+  if (ban) { banUser(ban.dataset.ban); return; }
+  const unb = e.target.closest('[data-unban]');
+  if (unb) { unbanUser(unb.dataset.unban); return; }
+  const del = e.target.closest('[data-del]');
+  if (del) { removeMessage(del.dataset.del); return; }
+  const handle = e.target.closest('[data-handle]');
+  if (handle) { handleReport(handle.dataset.handle); return; }
+  const ptoggle = e.target.closest('[data-ptoggle]');
+  if (ptoggle) { toggleProduct(ptoggle.dataset.ptoggle); }
+});
+
+$('loginBtn').addEventListener('click', login);
+$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+$('logoutBtn').addEventListener('click', logout);
+$('refreshOverview').addEventListener('click', loadOverview);
+$('refreshAll').addEventListener('click', refreshAll);
+$('tkRefresh').addEventListener('click', () => loadTaskStats(true));
+$('bkQ').addEventListener('input', renderBookings);
+$('bkSt').addEventListener('change', renderBookings);
+$('bkRefresh').addEventListener('click', () => loadBookings(true));
+$('accQ').addEventListener('input', renderAccounts);
+$('accRefresh').addEventListener('click', () => loadAccounts(true));
+$('dmRefresh').addEventListener('click', () => loadMessages(true));
+$('dmLimit').addEventListener('change', () => loadMessages(true));
+$('pSave').addEventListener('click', saveProduct);
+$('pCancel').addEventListener('click', resetProductForm);
+$('pRefresh').addEventListener('click', () => loadProducts(true));
+$('spiritConfigSave').addEventListener('click', saveSpiritConfig);
+$('spiritGrantBtn')?.addEventListener('click', grantSpirit);
+$('spiritConfigReload').addEventListener('click', () => loadSpiritConfig(true));
+$('nPublish').addEventListener('click', publishNotice);
+$('nRefresh').addEventListener('click', () => loadNotices(true));
+$('rRefresh').addEventListener('click', () => loadReports(true));
+
+// 编辑商品：从列表按钮回填表单（需要完整数据，单独拉一次）
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-pedit]');
+  if (!btn) return;
+  const id = btn.dataset.pedit;
+  try {
+    const rows = await req(PRODUCTS + '?id=eq.' + encodeURIComponent(id) + '&select=*');
+    if (Array.isArray(rows) && rows[0]) fillProductForm(rows[0]);
+  } catch (err) { say('pMsg', '读取商品失败：' + err.message, 'err'); }
+});
+
+if (!token && siteSession && isAdminSession(siteSession)) {
+  token = siteSession.access_token;
+  sessionStorage.setItem(TOKEN_KEY, token);
+}
+if (token) {
+  boot();
+} else {
+  $('login').classList.remove('hidden');
+  if (siteSession && siteSession.user && siteSession.user.email) {
+    say('loginMsg', '当前站点登录的是 ' + siteSession.user.email + '，不是站长邮箱。', 'err');
+  }
+}
+</script>
+</body>
+</html>

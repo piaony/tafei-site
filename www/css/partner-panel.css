@@ -1,0 +1,30 @@
+/* TAFEI CURRENT PARTNER PANEL BRIDGE · v23 */
+.mini-pet .pet-mini-photo{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:20px;border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 38px rgba(0,0,0,.34);background:#0b1224;transition:filter .25s ease}
+.mini-pet .pet-mini-photo[hidden]{display:none!important}
+.mini-pet .pet-mini-photo.is-alpha{aspect-ratio:auto;height:auto;max-height:270px;object-fit:contain;border:0;border-radius:0;background:transparent;box-shadow:none;filter:drop-shadow(0 18px 28px rgba(0,0,0,.28))}
+.mini-pet.is-photo{width:min(205px,82%)}
+.mini-pet.has-alpha{width:min(218px,78%)}
+.mini-pet.is-photo .ang-pet-svg{display:none}
+.mini-pet[data-action="pet"] .pet-mini-photo{animation:partnerPat .55s ease}
+.mini-pet[data-action="feed"] .pet-mini-photo{animation:partnerFeed .55s ease}
+.mini-pet[data-action="play"] .pet-mini-photo{animation:partnerPlay .62s ease}
+.mini-pet[data-mood="sleepy"] .pet-mini-photo{filter:brightness(.78) saturate(.78);transform:translateY(3px)}
+.mini-pet[data-mood="angry"] .pet-mini-photo{filter:saturate(1.15) contrast(1.04);animation:partnerAngry .26s ease-in-out infinite alternate}
+.mini-pet[data-mood="hungry"] .pet-mini-photo{animation:partnerHungry 1.8s ease-in-out infinite}
+.mini-pet[data-mood="sad"] .pet-mini-photo{filter:brightness(.86) saturate(.7)}
+@keyframes partnerPat{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-8px) scale(1.02)}}
+@keyframes partnerFeed{0%,100%{transform:translateY(0) rotate(0)}35%{transform:translateY(-4px) rotate(-1.5deg)}70%{transform:translateY(0) rotate(1.5deg)}}
+@keyframes partnerPlay{0%,100%{transform:translateY(0) rotate(0)}32%{transform:translateY(-12px) rotate(2deg)}64%{transform:translateY(1px) rotate(-1deg)}}
+@keyframes partnerAngry{0%{transform:translateX(-2px) rotate(-.5deg)}100%{transform:translateX(2px) rotate(.5deg)}}
+@keyframes partnerHungry{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.pet-mini-stage .pet-mini-photo + .pet-mini-speech{z-index:4}
+.pet-identity .pet-mini-label{letter-spacing:.14em}
+.pet-actions .pet-action span{font-size:14px}
+.pet-fx-hint{margin:7px 0 0;color:rgba(234,243,255,.42);font-size:10px;line-height:1.5}
+.pet-panel-nav{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.pet-widget-toggle{min-height:32px;padding:0 11px;border:1px solid rgba(255,211,110,.5);border-radius:9px;background:rgba(255,211,110,.1);color:var(--gold,#ffd36e);font:inherit;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}
+.pet-widget-toggle:hover{background:rgba(255,211,110,.18);border-color:rgba(255,211,110,.8)}
+.pet-widget-toggle.on{background:rgba(100,232,255,.12);border-color:rgba(100,232,255,.5);color:#8bd5ff}
+.pet-switch{display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border:1px solid rgba(255,211,110,.36);border-radius:9px;color:var(--gold,#ffd36e);font-size:12px;text-decoration:none;white-space:nowrap}
+.pet-switch:hover{border-color:rgba(255,211,110,.72);background:rgba(255,211,110,.08)}
+@media(max-width:620px){.mini-pet.is-photo{width:min(188px,78%)}.mini-pet.has-alpha{width:min(190px,70%)}.pet-panel-nav{gap:6px}.pet-switch{display:none}.pet-widget-toggle{min-height:32px;padding:0 9px;font-size:11.5px}}

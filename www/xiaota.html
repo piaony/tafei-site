@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="viewport-fit=cover,width=device-width,initial-scale=1">
+<title>小挞工坊 · 挞飞官方原创伙伴</title>
+<meta name="description" content="挞飞官方原创伙伴小挞的独立互动页：摸摸挞壳精灵、喂星糖、换装、玩糖霜收集小游戏。原创角色，不接付费和账号交易。">
+<meta name="robots" content="noindex,follow">
+<link rel="preload" as="image" href="assets/spirits/xiaota-v23/main.png">
+<link rel="stylesheet" href="css/xiaota.css?v=3">
+</head>
+<body>
+<div class="ang-starfield" id="angStarField" aria-hidden="true"></div>
+
+<header class="ang-top">
+ <div class="ang-top-inner">
+  <a class="ang-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav aria-label="页面导航">
+   <a href="index.html#community">社区</a>
+   <a href="service.html">技术服务</a>
+   <a class="ang-back" href="index.html">← 回挞飞</a>
+  </nav>
+ </div>
+</header>
+
+<main class="ang-wrap">
+ <section class="ang-hero">
+  <div class="ang-copy">
+   <p class="ang-kicker">ORIGINAL PARTNER · 挞飞原创</p>
+   <h1>小挞工坊</h1>
+   <p>一位在挞飞服务器里醒来的挞壳精灵女孩。摸摸头、喂星糖、换装扮、接糖霜，所有进度只保存在你自己的浏览器里。</p>
+   <div class="ang-badges">
+    <span class="ang-badge">本地存档 · 不上传</span>
+    <span class="ang-badge">不消耗额度</span>
+    <span class="ang-badge"><b>原创角色</b> 无外部IP</span>
+    <span class="ang-badge" id="fromTafei" hidden>从挞飞跳转而来</span>
+   </div>
+   <div class="ang-copy-actions">
+    <button class="ang-btn primary" id="angMainPetBtn" type="button">摸摸她 +1 亲密度</button>
+    <button class="ang-btn" id="angSoundToggle" type="button" aria-pressed="true">音效：开</button>
+    <a class="ang-btn ang-mobile-hide" href="index.html#community">回挞飞社区 ↗</a>
+   </div>
+   <p class="ang-fx-hint">点 1 下摸头，连点 2 下换开心表情，连点 3 下会惊讶；瑶停 10 秒会坐下、20 秒会犯困。拖到边缘会撞墙，快速晃动会眩晕，长按 2 秒会害羞。</p>
+  </div>
+
+  <div class="ang-stage" id="angStage">
+   <span class="stage-glow" aria-hidden="true"></span>
+   <div class="ang-pet" id="angPet" data-mood="happy" data-outfit="starlight" data-action="">
+<img class="ang-pet-img" id="angPetImg" src="assets/spirits/xiaota-v23/main.png" alt="挞飞官方原创伙伴小挞飞：金色挞壳帽、奶油白裙和青绿色围巾">
+<svg class="ang-pet-svg" viewBox="0 0 360 470" aria-hidden="true" hidden>
+ <defs>
+  <radialGradient id="xtGlow" cx="50%" cy="50%" r="50%">
+   <stop offset="0" stop-color="#ffd36e" stop-opacity=".55"/><stop offset="1" stop-color="#37d6e0" stop-opacity="0"/>
+  </radialGradient>
+ </defs>
+ <ellipse class="xt-shadow" cx="180" cy="438" rx="104" ry="16"/>
+ <circle cx="180" cy="238" r="150" fill="url(#xtGlow)" opacity=".24"/>
+ <g class="xt-holo" aria-hidden="true">
+  <ellipse cx="180" cy="232" rx="132" ry="154" fill="none" stroke="#37d6e0" stroke-width="1.4" opacity=".18" stroke-dasharray="7 12"/>
+  <rect x="32" y="182" width="7" height="7" rx="1" fill="#37d6e0" opacity=".55"/>
+  <rect x="320" y="206" width="6" height="6" rx="1" fill="#ffd36e" opacity=".55"/>
+  <rect x="46" y="312" width="5" height="5" rx="1" fill="#ffd36e" opacity=".5"/>
+  <rect x="312" y="338" width="7" height="7" rx="1" fill="#37d6e0" opacity=".45"/>
+ </g>
+ <g class="xt-body">
+  <path class="xt-shell" d="M92 276 C90 336 78 396 62 428 C110 444 250 444 298 428 C282 396 270 336 268 276 Z"/>
+  <path class="xt-shell-2" d="M92 276 C116 292 244 292 268 276 L264 296 C238 310 122 310 96 296 Z"/>
+  <path class="xt-shell-ridge" d="M110 300 C104 354 94 404 80 424 M142 300 C138 354 134 406 126 434 M180 300 L180 438 M218 300 C222 354 226 406 234 434 M250 300 C256 354 266 404 280 424" fill="none" stroke="#d68a2e" stroke-width="3" opacity=".38" stroke-linecap="round"/>
+  <path class="xt-shell-rim" d="M92 276 C116 292 244 292 268 276" fill="none" stroke="#ffe2a6" stroke-width="6" opacity=".7" stroke-linecap="round"/>
+  <path class="xt-custard" d="M100 240 C100 198 260 198 260 240 L274 300 C242 318 118 318 86 300 Z"/>
+  <path class="xt-custard-2" d="M112 250 C130 272 230 272 248 250 L252 290 C232 306 128 306 108 290 Z" opacity=".6"/>
+  <path class="xt-scarf" d="M146 236 Q180 256 214 236 L222 250 Q180 274 138 250 Z"/>
+  <path class="xt-scarf-2" d="M208 246 C236 250 252 264 258 286 C244 292 232 280 222 264 Z"/>
+  <path d="M220 249 C240 252 250 266 252 282" stroke="#1a8f9e" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
+  <rect x="167" y="278" width="26" height="24" rx="7" fill="#37d6e0"/>
+  <path d="M174 283 h12 M180 283 v13" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M112 264 C94 280 84 296 82 312" stroke="#37d6e0" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <path d="M248 264 C266 280 276 296 278 312" stroke="#37d6e0" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <path d="M92 300 C86 308 84 314 83 320 M268 300 C274 308 276 314 277 320" stroke="#37d6e0" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <circle cx="80" cy="317" r="10" class="xt-custard"/>
+  <circle cx="280" cy="317" r="10" class="xt-custard"/>
+  <rect x="152" y="424" width="22" height="30" rx="10" class="xt-navy"/>
+  <rect x="186" y="424" width="22" height="30" rx="10" class="xt-navy"/>
+  <path d="M156 428 L170 428 M190 428 L204 428" stroke="#37d6e0" stroke-width="2" opacity=".8"/>
+  <ellipse cx="163" cy="452" rx="17" ry="8" class="xt-navy"/>
+  <ellipse cx="197" cy="452" rx="17" ry="8" class="xt-navy"/>
+ </g>
+ <g class="xt-head">
+  <ellipse class="xt-custard" cx="180" cy="170" rx="98" ry="88"/>
+  <path class="xt-shell-hat" d="M70 126 C70 62 118 32 180 32 C242 32 290 62 290 126 C272 110 252 102 232 98 C214 78 146 78 128 98 C108 102 90 110 70 126 Z"/>
+  <path class="xt-shell-edge" d="M74 124 Q86 136 98 124 Q110 136 122 124 Q134 136 146 124 Q158 136 170 124 Q182 136 194 124 Q206 136 218 124 Q230 136 242 124 Q254 136 266 124 Q278 136 288 126" fill="none" stroke="#d68a2e" stroke-width="7" stroke-linecap="round"/>
+  <path d="M108 110 C112 84 130 62 152 50 M136 114 C142 88 158 68 176 58 M180 114 L180 50 M224 110 C220 84 202 62 180 50" fill="none" stroke="#d68a2e" stroke-width="4" opacity=".3" stroke-linecap="round"/>
+  <path class="xt-custard-2" d="M158 132 C170 120 190 120 202 132 C190 127 170 127 158 132 Z" opacity=".7"/>
+  <rect x="169" y="78" width="22" height="22" rx="6" fill="#37d6e0"/>
+  <path d="M174 83 h12 M180 83 v12" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M244 46 L248 24" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M248 18 L251 26 L259 27 L253 33 L255 41 L248 37 L241 41 L243 33 L237 27 L245 26 Z" fill="#37d6e0"/>
+  <g class="xt-eyes-open">
+   <ellipse cx="143" cy="178" rx="19" ry="23" fill="#fffdf8"/>
+   <ellipse cx="217" cy="178" rx="19" ry="23" fill="#fffdf8"/>
+   <circle cx="145" cy="180" r="12" class="xt-caramel"/>
+   <circle cx="219" cy="180" r="12" class="xt-caramel"/>
+   <circle cx="145" cy="180" r="7.5" fill="#4a2418"/>
+   <circle cx="219" cy="180" r="7.5" fill="#4a2418"/>
+   <circle cx="140" cy="174" r="4.1" fill="#fff"/>
+   <circle cx="214" cy="174" r="4.1" fill="#fff"/>
+   <circle cx="150" cy="186" r="2" fill="#ffe1a8"/>
+   <circle cx="224" cy="186" r="2" fill="#ffe1a8"/>
+   <ellipse cx="130" cy="164" rx="9" ry="5" fill="#fff" opacity=".2"/>
+   <ellipse cx="204" cy="164" rx="9" ry="5" fill="#fff" opacity=".2"/>
+  </g>
+  <g class="xt-eyes-sleep">
+   <path d="M127 178 Q143 190 159 178" stroke="#6b3a33" stroke-width="3" fill="none" stroke-linecap="round"/>
+   <path d="M201 178 Q217 190 233 178" stroke="#6b3a33" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  <path d="M128 154 Q143 148 158 154" stroke="#a95645" stroke-width="2.3" fill="none" stroke-linecap="round" opacity=".7"/>
+  <path d="M202 154 Q217 148 232 154" stroke="#a95645" stroke-width="2.3" fill="none" stroke-linecap="round" opacity=".7"/>
+  <ellipse cx="126" cy="204" rx="15" ry="7" fill="#ff9a8a" opacity=".38"/>
+  <ellipse cx="234" cy="204" rx="15" ry="7" fill="#ff9a8a" opacity=".38"/>
+  <g class="xt-mouth-happy"><path d="M169 207 Q180 216 191 207" stroke="#8d4b48" stroke-width="2.1" stroke-linecap="round" fill="none"/><path d="M176 208 L179 214 L182 208 Z" fill="#fff" opacity=".9"/></g>
+  <g class="xt-mouth-hungry"><ellipse cx="180" cy="211" rx="9" ry="7" fill="#8d4b48"/><ellipse cx="180" cy="214" rx="4" ry="3" fill="#ff9aa4"/></g>
+  <g class="xt-mouth-sleepy"><path d="M172 211 Q180 207 188 211" stroke="#8d4b48" stroke-width="2.1" fill="none" stroke-linecap="round"/></g>
+  <g class="xt-mouth-love"><path d="M165 204 Q180 223 195 204 Q180 216 165 204 Z" fill="#ff6e96"/></g>
+ </g>
+ <g class="xt-wand" transform="translate(292 300) rotate(14)">
+  <path d="M0 0 L14 34" stroke="#ffd36e" stroke-width="5" stroke-linecap="round"/>
+  <path d="M14 34 L18 46" stroke="#fff1b8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M0 -8 L6 6 L20 8 L10 18 L12 32 L0 25 L-12 32 L-10 18 L-20 8 L-6 6 Z" fill="#37d6e0"/>
+  <circle cx="0" cy="12" r="3" fill="#fff6d1"/>
+ </g>
+
+ <g class="xt-sparkles" opacity=".9">
+  <path d="M306 178 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#ffd36e"/>
+  <path d="M52 188 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5 Z" fill="#37d6e0"/>
+  <circle cx="310" cy="238" r="3.5" fill="#ff9a8a"/>
+  <circle cx="46" cy="270" r="3" fill="#cbb7ff"/>
+ </g>
+</svg>
+   </div>
+   <div class="ang-speech" id="angSpeech" aria-live="polite">今天也要一起收集糖霜吗？</div>
+   <button class="ang-tap-hint" id="angTapHint" type="button">摸摸她</button>
+  </div>
+ </section>
+
+ <section class="ang-grid">
+  <aside class="ang-card ang-panel" aria-labelledby="angStatusTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">STATUS</p><h2 id="angStatusTitle">今天的状态</h2><p>互动会改变心情、饱食度和体力。</p></div>
+    <span class="ang-badge"><b id="angCoins">0</b> 星币</span>
+   </div>
+   <div class="ang-bond">
+    <div><b id="angBond">0</b><small>亲密度</small></div>
+    <div class="ang-bond-level">当前等级<strong id="angBondLevel">Lv.1</strong><span id="angBondNext">再互动 5 次升级</span></div>
+   </div>
+   <div class="ang-meters">
+    <div>
+     <div class="ang-meter-head"><span>心情</span><b id="angMoodVal">80</b></div>
+     <div class="ang-meter mood"><i id="angMoodBar"></i></div>
+    </div>
+    <div>
+     <div class="ang-meter-head"><span>饱食度</span><b id="angHungerVal">70</b></div>
+     <div class="ang-meter hunger"><i id="angHungerBar"></i></div>
+    </div>
+    <div>
+     <div class="ang-meter-head"><span>体力</span><b id="angEnergyVal">80</b></div>
+     <div class="ang-meter energy"><i id="angEnergyBar"></i></div>
+    </div>
+   </div>
+   <div class="ang-daily">
+    <div class="ang-daily-head"><b>今日互动</b><span><i id="angDailyDone">0</i>/3</span></div>
+    <div class="ang-daily-list">
+     <div class="ang-daily-item" data-daily="pet"><span class="tick">○</span><span>摸摸她一次</span></div>
+     <div class="ang-daily-item" data-daily="feed"><span class="tick">○</span><span>喂一颗星糖</span></div>
+     <div class="ang-daily-item" data-daily="play"><span class="tick">○</span><span>陪她玩一次</span></div>
+    </div>
+   </div>
+  </aside>
+
+  <section class="ang-card ang-panel" aria-labelledby="angActionTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">INTERACT</p><h2 id="angActionTitle">和她做点什么</h2><p>每次互动都会保存在本地；明天会自动刷新每日互动。</p></div>
+   </div>
+   <div class="ang-actions">
+    <button class="ang-action" type="button" data-act="pet"><span class="act-ico">✦</span><strong>摸摸头</strong><span>亲密度 +1，心情 +4</span></button>
+    <button class="ang-action" type="button" data-act="feed"><span class="act-ico">🍬</span><strong>喂星糖</strong><span>饱食度 +16，亲密度 +1</span></button>
+    <button class="ang-action" type="button" data-act="play"><span class="act-ico">★</span><strong>陪她玩</strong><span>心情 +8，体力 -8，亲密度 +2</span></button>
+    <button class="ang-action" type="button" data-act="sleep"><span class="act-ico">☾</span><strong>哄她睡</strong><span>体力 +28，心情 +4</span></button>
+    <button class="ang-action game" type="button" data-act="game"><span class="act-ico">✧</span><span class="act-copy"><strong>糖霜小游戏</strong><span>20 秒内点中糖霜星屑，结算成星币</span></span></button>
+   </div>
+   <div class="ang-notes" style="margin-top:16px">
+    <div class="ang-note"><span class="note-ico">◈</span><span><b>所有数据只在本机。</b>换浏览器、清缓存会回到初始状态，不会影响挞飞账号和额度。</span></div>
+    <div class="ang-note"><span class="note-ico">◇</span><span><b>不接入付费。</b>这里没有充值、交易或账号买卖，纯粹是站内娱乐小工具。</span></div>
+   </div>
+  </section>
+ </section>
+
+ <section class="ang-card ang-panel" style="margin-top:20px" aria-labelledby="angGameTitle">
+  <div class="ang-panel-head">
+   <div><p class="ang-mini-label">MINI GAME</p><h2 id="angGameTitle">糖霜收集</h2><p>20 秒内点中飘动的糖霜星屑，每颗 1 星币。星币只用于本页展示，不兑换额度。</p></div>
+   <span class="ang-badge"><b id="angGameScore">0</b> 分</span>
+  </div>
+  <div class="ang-game-box" id="angGameBox">
+   <div class="ang-game-field" id="angGameField"></div>
+   <div class="ang-game-hud"><span>得分 <b id="angGameScoreHud">0</b></span><span>剩余 <b id="angGameTime">20</b>s</span></div>
+   <div class="ang-game-start" id="angGameStart">
+    <strong>准备好了吗？</strong>
+    <p>糖霜星屑会随机出现，点得越快分越高。结束后星币自动存入工坊。</p>
+    <button class="ang-btn gold" id="angGameStartBtn" type="button">开始收集</button>
+   </div>
+  </div>
+ </section>
+
+ <section class="ang-lower">
+  <section class="ang-card ang-panel" aria-labelledby="angWardrobeTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">WARDROBE</p><h2 id="angWardrobeTitle">换装间</h2><p>亲密度到 3 和 6 时自动解锁新配色。</p></div>
+    <span class="ang-badge">亲密度 <b id="angBondSmall">0</b></span>
+   </div>
+   <div class="ang-wardrobe">
+    <button class="ang-outfit active" type="button" data-outfit="starlight" data-need="0" style="--sw1:#f2b24a;--sw2:#37d6e0"><span class="swatch"></span><strong>奶油原色</strong><small>默认装扮 · 挞壳配色</small></button>
+    <button class="ang-outfit locked" type="button" data-outfit="sakura" data-need="3" style="--sw1:#e9a05d;--sw2:#ff9a7a"><span class="swatch"></span><strong>焦糖暖阳</strong><small>亲密度 3 解锁</small><span class="lock">🔒</span></button>
+    <button class="ang-outfit locked" type="button" data-outfit="moon" data-need="6" style="--sw1:#ffe3a8;--sw2:#8ce8ff"><span class="swatch"></span><strong>薄荷电波</strong><small>亲密度 6 解锁</small><span class="lock">🔒</span></button>
+   </div>
+   <p class="ang-wardrobe-hint" id="angWardrobeHint">先摸摸她，把亲密度养到 3 就能换焦糖暖阳。</p>
+  </section>
+
+  <section class="ang-card ang-panel" aria-labelledby="angAboutTitle">
+   <div class="ang-panel-head">
+    <div><p class="ang-mini-label">ABOUT</p><h2 id="angAboutTitle">工坊说明</h2><p>为什么小挞有自己的独立页，而不是只塞进主站首页。</p></div>
+   </div>
+   <div class="ang-notes">
+    <div class="ang-note"><span class="note-ico">01</span><span><b>原创角色，独立页面。</b>小挞是挞飞自己设计的挞壳精灵，不接入付费服务、额度账户或站长后台。</span></div>
+    <div class="ang-note"><span class="note-ico">02</span><span><b>和主站同一形象。</b>主站社区里的「伙伴」也是小挞；这里是独立完整版，两边存档分开。</span></div>
+    <div class="ang-note"><span class="note-ico">03</span><span><b>可以随时调整。</b>角色、配色和玩法都能继续迭代，不影响机型库、商城、预约和后台。</span></div>
+   </div>
+  </section>
+ </section>
+</main>
+
+<footer class="ang-footer">
+ <strong>挞飞 · 小挞工坊</strong>
+ <div>小挞是挞飞官方原创的挞壳精灵：金色挞壳帽、奶油白裙、青绿色围巾和星星糖挎包。没有使用任何现有游戏、动漫或第三方IP素材。页面不提供付费、充值、账号交易或站外引流。</div>
+ <div class="risk">原创说明：小挞的图形、名字和页面文案由挞飞自行设计；如需对外商用或注册商标，建议再做一次图形检索，确认没有近似冲突。</div>
+ <div style="margin-top:10px"><a href="index.html#community">回挞飞社区</a> · <a href="service.html">看看技术服务</a> · <a href="index.html">回首页</a></div>
+</footer>
+
+<div class="ang-toast" id="angToast" role="status"></div>
+<div id="angParticles" aria-hidden="true"></div>
+
+<script src="js/xiaota-pet.js?v=2"></script>
+<script src="js/spirit-core.js?v=14"></script>
+<script src="js/spirit-widget.js?v=21"></script>
+</body>
+</html>

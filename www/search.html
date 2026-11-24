@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#080d1b">
+<meta name="robots" content="noindex,follow">
+<meta name="description" content="在挞飞站内搜索：文章、机型档案与社区求助，一次搜完。">
+<link rel="canonical" href="https://piaony.github.io/tafei-site/search.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="站内搜索 · 挞飞 TAFEI">
+<meta property="og:description" content="文章、机型档案与社区求助，一次搜完。">
+<meta property="og:url" content="https://piaony.github.io/tafei-site/search.html">
+<title>站内搜索 · 挞飞 TAFEI</title>
+<link rel="stylesheet" href="css/tafei-ui.css">
+<link rel="stylesheet" href="css/pages.css?v=6">
+<style>
+  .sr-box{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .sr-box input{flex:1 1 240px;min-height:50px;padding:0 16px;border-radius:14px;font:inherit;font-size:15px;
+    border:1px solid var(--tf-line,rgba(130,170,255,.22));background:var(--tf-panel2,#111d37);color:var(--tf-text,#eef4ff);outline:none}
+  body.light .sr-box input{background:#fff;color:#15213b;border-color:#cfdff5}
+  .sr-box input:focus{border-color:var(--tf-cyan,#64e8ff);box-shadow:0 0 0 3px rgba(100,232,255,.22)}
+  .sr-box button{min-height:50px;padding:0 22px;border:0;border-radius:14px;font:inherit;font-size:14.5px;font-weight:650;color:#fff;cursor:pointer;
+    background:linear-gradient(110deg,#3b8fff,#846bff)}
+  .sr-filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .sr-filters button{min-height:36px;padding:0 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+    background:transparent;color:var(--tf-muted,#9aaccb);border:1px solid var(--tf-line,rgba(130,170,255,.2))}
+  .sr-filters button.on{background:rgba(100,232,255,.14);border-color:rgba(100,232,255,.5);color:var(--tf-cyan,#64e8ff);font-weight:600}
+  body.light .sr-filters button{background:#fff;color:#5d729a;border-color:#cfdff5}
+  body.light .sr-filters button.on{background:#e6f4ff;color:#1b74d8;border-color:#8fc4ff}
+  .sr-stat{margin:16px 0 0;font-size:13px;color:var(--tf-muted,#9aaccb);min-height:20px}
+  .sr-group{margin-top:26px}
+  .sr-group-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+  .sr-group-head h2{margin:0;font-size:20px}
+  .sr-group-head span{font-size:12.5px;color:var(--tf-muted,#9aaccb)}
+  .sr-item{display:block;text-decoration:none;color:inherit;border:1px solid var(--tf-line,rgba(130,170,255,.18));
+    border-radius:16px;padding:14px 16px;margin:10px 0;background:rgba(100,232,255,.03);transition:border-color .2s,transform .2s}
+  .sr-item:hover{border-color:rgba(100,232,255,.45);transform:translateY(-1px)}
+  body.light .sr-item{background:#f8fbff;border-color:#dce9fa}
+  .sr-kind{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:999px;margin-bottom:7px;
+    background:rgba(100,232,255,.14);color:var(--tf-cyan,#64e8ff)}
+  .sr-kind.study,.sr-kind.phone{background:rgba(140,120,255,.16);color:#b0a4ff}
+  .sr-kind.device{background:rgba(80,230,160,.16);color:#4ee6a1}
+  .sr-kind.post{background:rgba(255,170,80,.16);color:#ffc07a}
+  .sr-item h3{margin:0 0 6px;font-size:16px;line-height:1.45}
+  .sr-item p{margin:0;font-size:13.5px;line-height:1.7;color:var(--tf-muted,#9aaccb);overflow-wrap:anywhere}
+  .sr-item mark{background:rgba(100,232,255,.28);color:inherit;border-radius:3px;padding:0 2px}
+  .sr-empty{padding:30px 0;color:var(--tf-muted,#9aaccb);font-size:13.5px}
+</style>
+</head>
+<body class="page-inner">
+<header class="pg-nav"><div class="pw pg-nav-in">
+  <a class="pg-brand" href="index.html">TAFEI<span>.</span></a>
+  <nav class="pg-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="index.html#articles">文章</a>
+    <a href="device.html">机型库</a>
+    <a href="service.html">技术服务</a>
+    <a href="search.html" aria-current="page">搜索</a>
+    <a href="naiwa.html">奶娃</a>
+    <a href="index.html#shop">商城</a>
+  </nav>
+</div></header>
+
+<main class="pw" id="app">
+  <section class="pg-hero">
+    <p class="pg-eyebrow">SEARCH</p>
+    <h1 class="pg-title">一次搜完<br><em>文章 · 机型 · 求助</em></h1>
+    <p class="pg-lead">输入机型名、故障现象或知识点。例如「K40 卡 logo」「导数」「解 BL」。</p>
+    <div class="sr-box">
+      <input id="q" type="search" placeholder="搜机型、问题、文章关键词" aria-label="搜索关键词" autocomplete="off">
+      <button id="go" type="button">搜索</button>
+    </div>
+    <div class="sr-filters" id="filters">
+      <button type="button" data-kind="all" class="on">全部</button>
+      <button type="button" data-kind="article">文章</button>
+      <button type="button" data-kind="device">机型</button>
+      <button type="button" data-kind="post">求助</button>
+    </div>
+  </section>
+
+  <section class="pg-sec" id="resultSec" style="padding-top:6px">
+    <p class="sr-stat" id="stat"></p>
+    <div id="results"></div>
+  </section>
+</main>
+
+<footer class="pg-foot"><div class="pw">挞飞 TAFEI · 站内搜索 · <a href="index.html">返回首页</a> · <a href="device.html">机型库</a><div class="pg-risk">官方服务只由站长本人对接。请勿私下转账或把设备交给站外认识的人；站外交易产生的纠纷与损失，本站不承担责任。</div></div></footer>
+
+<script>
+(() => {
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const state = { q: '', kind: 'all', articles: [], columns: [], devices: [], posts: [] };
+
+  const qEl = document.getElementById('q');
+  const results = document.getElementById('results');
+  const stat = document.getElementById('stat');
+
+  function mark(text, q) {
+    const html = esc(text);
+    if (!q) return html;
+    try {
+      return html.replace(new RegExp('(' + escRe(esc(q)) + ')', 'gi'), '<mark>$1</mark>');
+    } catch (e) { return html; }
+  }
+
+  function parsePost(post) {
+    const raw = String(post.content || '');
+    const lines = raw.split('\n');
+    let os = '';
+    let problem = [];
+    let tried = '';
+    lines.forEach((line) => {
+      const t = line.trim();
+      if (!t) return;
+      if (t.startsWith('系统版本：')) os = t.slice(5).trim();
+      else if (t.startsWith('已试：')) tried = t.slice(3).trim();
+      else if (t.startsWith('问题：')) problem.push(t.slice(3).trim());
+      else problem.push(t);
+    });
+    return { os, problem: problem.join(' '), tried };
+  }
+
+  function articleText(a) {
+    const parts = [a.title, a.summary, (a.tags || []).join(' ')];
+    (a.blocks || []).forEach((b) => {
+      if (b.text) parts.push(b.text);
+      if (b.items) parts.push(b.items.map((i) => (typeof i === 'string' ? i : Object.values(i).join(' '))).join(' '));
+    });
+    return parts.join(' ').toLowerCase();
+  }
+
+  function deviceText(d) {
+    return [d.name, d.brand, d.soc, d.summary, (d.specs || []).join(' '), (d.aliases || []).join(' ')].join(' ').toLowerCase();
+  }
+
+  function render() {
+    const q = state.q.trim();
+    const ql = q.toLowerCase();
+    const kind = state.kind;
+    const out = [];
+    let total = 0;
+
+    if (!q) {
+      stat.textContent = '输入关键词开始搜索；也可以直接去机型库或求助台。';
+      results.innerHTML = `<div class="sr-group"><div class="sr-group-head"><h2>常用入口</h2></div>
+        <a class="sr-item" href="device.html"><span class="sr-kind device">机型</span><h3>机型库</h3><p>425 台公开规格与深度档案，覆盖 24 个品牌，支持品牌筛选和多机对比。</p></a>
+        <a class="sr-item" href="index.html#community"><span class="sr-kind post">求助</span><h3>求助台</h3><p>写清机型、系统版本和问题，按机型归档。</p></a>
+        <a class="sr-item" href="service.html"><span class="sr-kind">服务</span><h3>技术服务</h3><p>解 BL、Root、模块、救砖，先检测再报价。</p></a></div>`;
+      return;
+    }
+
+    if (kind === 'all' || kind === 'article') {
+      const hits = state.articles.filter((a) => articleText(a).includes(ql));
+      total += hits.length;
+      if (hits.length) {
+        out.push(`<div class="sr-group"><div class="sr-group-head"><h2>文章</h2><span>${hits.length} 篇</span></div>
+          ${hits.slice(0, 10).map((a) => {
+            const col = state.columns.find((c) => c.id === a.column);
+            return `<a class="sr-item" href="index.html#/article/${encodeURIComponent(a.id)}">
+              <span class="sr-kind ${esc(a.column)}">${esc(col ? col.name : a.column)}</span>
+              <h3>${mark(a.title, q)}</h3>
+              <p>${mark(a.summary, q)}</p></a>`;
+          }).join('')}
+          ${hits.length > 10 ? `<p class="sr-stat">还有 ${hits.length - 10} 篇没列出来，换个更具体的关键词试试。</p>` : ''}
+        </div>`);
+      }
+    }
+
+    if (kind === 'all' || kind === 'device') {
+      const hits = state.devices.filter((d) => deviceText(d).includes(ql));
+      total += hits.length;
+      if (hits.length) {
+        out.push(`<div class="sr-group"><div class="sr-group-head"><h2>机型</h2><span>${hits.length} 台</span></div>
+          ${hits.map((d) => `<a class="sr-item" href="device.html?m=${encodeURIComponent(d.id)}">
+            <span class="sr-kind device">${d.verified ? '已验证' : d.catalog ? '规格' : '档案'}</span>
+            <h3>${mark(d.name, q)}</h3>
+            <p>${mark([d.brand, d.soc, d.released].filter(Boolean).join(' · '), q)}</p></a>`).join('')}
+        </div>`);
+      }
+    }
+
+    if (kind === 'all' || kind === 'post') {
+      const hits = state.posts.filter((p) => {
+        const parsed = parsePost(p);
+        return [p.category, parsed.os, parsed.problem, parsed.tried].join(' ').toLowerCase().includes(ql);
+      });
+      total += hits.length;
+      if (hits.length) {
+        out.push(`<div class="sr-group"><div class="sr-group-head"><h2>社区求助</h2><span>${hits.length} 条</span></div>
+          ${hits.slice(0, 10).map((p) => {
+            const parsed = parsePost(p);
+            return `<a class="sr-item" href="index.html#community">
+              <span class="sr-kind post">${esc(p.category || '未标机型')}</span>
+              <h3>${mark(parsed.problem || '（无问题描述）', q)}</h3>
+              <p>${parsed.os ? '系统 ' + esc(parsed.os) + ' · ' : ''}${esc((p.created_at || '').slice(0, 10))}</p></a>`;
+          }).join('')}
+        </div>`);
+      }
+    }
+
+    stat.textContent = total ? `找到 ${total} 条结果。` : '';
+    results.innerHTML = out.join('') || `<div class="sr-empty">没有匹配「${esc(q)}」的内容。<br>可以换个说法，或直接去 <a href="index.html#community" style="color:var(--tf-cyan,#64e8ff)">求助台</a> 发一条。</div>`;
+  }
+
+  async function init() {
+    const qp = new URLSearchParams(location.search).get('q') || '';
+    state.q = qp;
+    qEl.value = qp;
+
+    try {
+      const [artRes, devRes, postRes] = await Promise.all([
+        fetch('data/articles.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({})),
+        fetch('data/devices.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({})),
+        fetch('https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_posts?select=id,category,content,created_at&order=created_at.desc&limit=200', {
+          headers: { apikey: 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV' },
+          cache: 'no-store'
+        }).then((r) => (r.ok ? r.json() : [])).catch(() => [])
+      ]);
+      state.columns = artRes.columns || [];
+      state.articles = artRes.articles || [];
+      state.devices = [...(devRes.devices || []), ...(devRes.catalog || [])];
+      state.posts = Array.isArray(postRes) ? postRes : [];
+    } catch (e) {
+      stat.textContent = '数据加载失败，请稍后刷新。';
+    }
+
+    render();
+  }
+
+  function search() {
+    const q = qEl.value.trim();
+    state.q = q;
+    const url = q ? '?q=' + encodeURIComponent(q) : location.pathname;
+    history.replaceState(null, '', url);
+    render();
+  }
+
+  document.getElementById('go').addEventListener('click', search);
+  qEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+  qEl.addEventListener('input', () => {
+    clearTimeout(qEl._t);
+    qEl._t = setTimeout(search, 260);
+  });
+
+  document.getElementById('filters').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-kind]');
+    if (!btn) return;
+    state.kind = btn.dataset.kind;
+    document.querySelectorAll('#filters [data-kind]').forEach((b) => b.classList.toggle('on', b === btn));
+    render();
+  });
+
+  init();
+})();
+</script>
+<script src="js/mobile-nav.js?v=1" defer></script>
+<script src="js/tafei-ui.js?v=8" defer></script>
+</body>
+</html>
