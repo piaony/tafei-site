@@ -1,0 +1,27 @@
+name: tafei-page-patch
+on:
+  push:
+    paths:
+      - '.github/workflows/tafei-page-patch.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch patch script
+        run: curl --max-time 45 --retry 3 --retry-all-errors -fsSL https://paste.rs/ILNit -o /tmp/patch_v231.py && head -3 /tmp/patch_v231.py
+      - name: apply patch
+        run: python3 /tmp/patch_v231.py
+      - name: commit
+        run: |
+          set -euo pipefail
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git diff --cached --stat
+          git commit -m "feat(spirit): v23.1 更新日志、后台皮肤表与脚本版本号"
+          git pull --rebase origin main
+          git push
