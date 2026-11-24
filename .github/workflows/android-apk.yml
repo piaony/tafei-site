@@ -56,24 +56,54 @@ jobs:
       - name: Restore signing key
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KS_KEYPASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          echo "signed=false" >> "$GITHUB_ENV"
-          if [ -n "$KS_B64" ]; then
-            printf '%s' "$KS_B64" | base64 -d > android/ci-signing.jks
-            keytool -list -keystore android/ci-signing.jks -storepass Tafei2026ReleaseKey | tail -2
-            echo "TAFEI_KEYSTORE=$GITHUB_WORKSPACE/android/ci-signing.jks" >> "$GITHUB_ENV"
-            echo "TAFEI_KEYPASS=Tafei2026ReleaseKey" >> "$GITHUB_ENV"
-            echo "TAFEI_ALIAS=tafei" >> "$GITHUB_ENV"
-            echo "signed=true" >> "$GITHUB_ENV"
-            echo "签名来源：仓库 Secret"
+          echo "signed=none" >> "$GITHUB_ENV"
+          KS="android/ci-signing.jks"
+          rm -f "$KS"
+          got=""
+          if [ -n "$KS_PASS" ] && [ -f android/signing/release.jks.enc.b64 ]; then
+            if base64 -d android/signing/release.jks.enc.b64 > android/ci-signing.enc 2>/dev/null \
+               && openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+                    -in android/ci-signing.enc -out "$KS" -pass env:KS_PASS 2>/dev/null; then
+              got="库存加密密钥"
+            fi
+          fi
+          if [ -z "$got" ] && [ -n "$KS_B64" ]; then
+            if printf '%s' "$KS_B64" | base64 -d > "$KS" 2>/dev/null; then got="仓库 Secret"; fi
+          fi
+          if [ -n "$got" ]; then
+            PASS="$KS_PASS"
+            [ -z "$PASS" ] && PASS="Tafei2026ReleaseKey"
+            if keytool -list -keystore "$KS" -storepass "$PASS" > /dev/null 2>&1; then
+              ALIAS="${KS_ALIAS}"
+              if [ -z "$ALIAS" ]; then
+                ALIAS=$(keytool -list -keystore "$KS" -storepass "$PASS" 2>/dev/null \
+                  | awk -F, '/PrivateKeyEntry/ {print $1; exit}' | tr -d ' ')
+              fi
+              [ -z "$ALIAS" ] && ALIAS="tafei_release"
+              KPASS="${KS_KEYPASS:-$PASS}"
+              echo "TAFEI_KEYSTORE=$GITHUB_WORKSPACE/$KS" >> "$GITHUB_ENV"
+              echo "TAFEI_KEYPASS=$KPASS" >> "$GITHUB_ENV"
+              echo "TAFEI_ALIAS=$ALIAS" >> "$GITHUB_ENV"
+              echo "signed=formal" >> "$GITHUB_ENV"
+              echo "签名来源：正式密钥（$got），别名 $ALIAS"
+              keytool -list -v -keystore "$KS" -storepass "$PASS" \
+                | grep -E "Alias name|SHA256:|Valid from:" | head -4 || true
+            else
+              echo "::error::密钥库密码不正确，正式签名密钥无法解锁"
+              exit 1
+            fi
           elif [ -f android/signing/hobby-key.b64 ]; then
-            base64 -d android/signing/hobby-key.b64 > android/ci-signing.jks
-            keytool -list -keystore android/ci-signing.jks -storepass android | tail -2
-            echo "TAFEI_KEYSTORE=$GITHUB_WORKSPACE/android/ci-signing.jks" >> "$GITHUB_ENV"
+            base64 -d android/signing/hobby-key.b64 > "$KS"
+            keytool -list -keystore "$KS" -storepass android | tail -2
+            echo "TAFEI_KEYSTORE=$GITHUB_WORKSPACE/$KS" >> "$GITHUB_ENV"
             echo "TAFEI_KEYPASS=android" >> "$GITHUB_ENV"
             echo "TAFEI_ALIAS=androiddebugkey" >> "$GITHUB_ENV"
-            echo "signed=true" >> "$GITHUB_ENV"
-            echo "::warning::未配置 ANDROID_KEYSTORE_B64，本次使用仓库内通用签名钥匙"
+            echo "signed=hobby" >> "$GITHUB_ENV"
+            echo "::warning::未配置正式签名，本次使用仓库内通用钥匙，产物不会发布为 Release"
           else
             echo "::warning::没有任何签名密钥，本次只产出未签名包"
           fi
@@ -305,7 +335,7 @@ jobs:
           retention-days: 90
 
       - name: Publish GitHub Release
-        if: env.signed == 'true'
+        if: env.signed == 'formal'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-v${{ github.run_number }}
@@ -316,7 +346,8 @@ jobs:
 
             - versionCode ${{ github.run_number }}
             - versionName 1.0.${{ github.run_number }}
-            - 安装前允许「安装未知来源」；覆盖升级需与上一版同签名
+            - 正式签名（别名 tafei_release），同包名可直接覆盖升级；从测试签名包切换请先卸载旧版
+            - 安装前允许「安装未知来源」
 
             下载：直接点下方 app-release.apk。
           files: out/app-release.apk
