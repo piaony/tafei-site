@@ -1,1 +1,1 @@
-build trigger: 2026-11-25T04:10Z formal-signing run
+recheck 2026-11-25T04:20Z after user re-paste
