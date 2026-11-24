@@ -3,6 +3,19 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.piaony.tafei"
     compileSdk = rootProject.ext.compileSdkVersion
+
+    signingConfigs {
+        release {
+            def ksPath = System.getenv("TAFEI_KEYSTORE")
+            if (ksPath) {
+                storeFile file(ksPath)
+                storePassword System.getenv("TAFEI_KEYPASS")
+                keyAlias System.getenv("TAFEI_ALIAS")
+                keyPassword System.getenv("TAFEI_KEYPASS")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "com.piaony.tafei"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -10,6 +23,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -20,6 +36,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            def ksPath = System.getenv("TAFEI_KEYSTORE")
+            if (ksPath) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

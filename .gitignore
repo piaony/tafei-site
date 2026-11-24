@@ -4,3 +4,4 @@ android/build/
 android/app/build/
 .DS_Store
 android/app/src/main/assets/public/
+android/tafei-release.jks

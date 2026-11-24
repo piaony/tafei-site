@@ -34,17 +34,10 @@ jobs:
           mkdir -p ci-logs
           SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
           {
-            echo "ANDROID_HOME=${ANDROID_HOME:-<unset>}"
-            echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-<unset>}"
             echo "SDK=$SDK"
             ls -1 "$SDK" || true
             echo "--- cmdline-tools"
             ls -1 "$SDK/cmdline-tools" || true
-            echo "--- platforms"
-            ls -1 "$SDK/platforms" 2>/dev/null || true
-            echo "--- build-tools"
-            ls -1 "$SDK/build-tools" 2>/dev/null || true
-            java -version 2>&1 || true
           } 2>&1 | tee ci-logs/probe.log
           echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
@@ -60,30 +53,71 @@ jobs:
             sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
           } 2>&1 | tee ci-logs/sdkmanager.log
 
-      - name: Install npm dependencies
+      - name: Restore signing key
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
-          mkdir -p ci-logs
-          npm ci 2>&1 | tee ci-logs/npm.log
+          echo "signed=false" >> "$GITHUB_ENV"
+          if [ -n "$KS_B64" ]; then
+            printf '%s' "$KS_B64" | base64 -d > android/tafei-release.jks
+            echo "TAFEI_KEYSTORE=$GITHUB_WORKSPACE/android/tafei-release.jks" >> "$GITHUB_ENV"
+            echo "TAFEI_KEYPASS=Tafei2026ReleaseKey" >> "$GITHUB_ENV"
+            echo "TAFEI_ALIAS=tafei" >> "$GITHUB_ENV"
+            echo "signed=true" >> "$GITHUB_ENV"
+            keytool -list -keystore android/tafei-release.jks -storepass Tafei2026ReleaseKey | tail -3 || exit 1
+          else
+            echo "::warning::缺少 ANDROID_KEYSTORE_B64，本次只产出未签名包"
+          fi
+
+      - name: Install npm dependencies
+        run: npm ci
 
       - name: Sync Capacitor
-        run: |
-          mkdir -p ci-logs
-          npx cap sync android 2>&1 | tee ci-logs/cap-sync.log
+        run: npx cap sync android
 
-      - name: Build Debug APK
+      - name: Bump version
+        run: |
+          sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          grep -nE "versionCode|versionName" android/app/build.gradle | head -4
+
+      - name: Build Release APK
         working-directory: android
         run: |
-          mkdir -p ../ci-logs
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee ../ci-logs/gradle.log
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Collect APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/*.apk out/
+          ls -lh out
+          sha256sum out/*.apk | tee ci-logs/apk-sha256.txt
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: tafei-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: tafei-release-apk
+          path: out/*.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 90
+
+      - name: Publish GitHub Release
+        if: env.signed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ github.run_number }}
+          name: TAFEI 安卓包 v${{ github.run_number }}
+          make_latest: true
+          body: |
+            挞飞 TAFEI 安卓客户端（Capacitor 封装，站点离线快照）。
+
+            - versionCode ${{ github.run_number }}
+            - versionName 1.0.${{ github.run_number }}
+            - SHA-256 见 ci-logs/apk-sha256.txt 或下载页
+
+            安装前允许「安装未知来源」，覆盖升级需与上一版同签名。
+          files: out/*.apk
 
       - name: Commit build logs on failure
         if: failure()
