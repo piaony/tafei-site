@@ -1,7 +1,8 @@
-/* TAFEI APP SHELL · 手机 App 专用外壳
-   1) 统一底部导航：首页 / 机型 / 精灵 / 更多（4 项，全站一致）
+/* TAFEI APP SHELL · 手机 App 专用外壳（v3）
+   1) 统一底部导航：首页 / 社区 / 精灵 / 工具 / 我的（5 项，全站一致）
    2) 默认深色主题，和启动图、状态栏一致（用户手动切过主题则尊重其选择）
-   3) 返回键协同：先关弹层，再退回上一页，最后双击退出（在 App 内由原生调用） */
+   3) 返回键协同：先关弹层，再退回上一页，最后双击退出（在 App 内由原生调用）
+   4) 社区 / 首页 复用站点内的视图切换（index.html#community），点 Tab 不跳错地方 */
 (function () {
   'use strict';
   if (window.__tafeiShell) return;
@@ -23,7 +24,7 @@
   var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase() || 'index.html';
   var isIndex = file === 'index.html';
 
-  /* —— 底部导航 —— */
+  /* —— 图标 —— */
   var GRAD = '<defs><linearGradient id="tfAppGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="24" y2="24">'
     + '<stop offset="0" stop-color="#64e8ff"/><stop offset=".55" stop-color="#7297ff"/><stop offset="1" stop-color="#bd8cff"/>'
     + '</linearGradient></defs>';
@@ -35,38 +36,61 @@
   var SPRITE = '<svg class="tf-app-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">'
     + GRAD
     + symbol('app-home', '<path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/>')
-    + symbol('app-device', '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 18.5h4"/>')
+    + symbol('app-community', '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h5A2.5 2.5 0 0 1 14 6.5v3A2.5 2.5 0 0 1 11.5 12H9l-5 4v-4A2.5 2.5 0 0 1 4 9.5z"/><path d="M14 9.5h3.5A2.5 2.5 0 0 1 20 12v3.5A2.5 2.5 0 0 1 17.5 18H16v3l-3.5-3H15"/>')
     + symbol('app-spirit', '<path d="M12 3.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7-4.2-2.2-4.2 2.2.8-4.7L4.2 8.5l4.7-.7z"/>')
-    + symbol('app-more', '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v.01M12 11v6"/>')
+    + symbol('app-tools', '<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><path d="M17 13.5v7M13.5 17h7"/>')
+    + symbol('app-my', '<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c0-3.6 3.4-5.8 7.5-5.8s7.5 2.2 7.5 5.8"/>')
     + '</svg>';
 
   var TABS = [
-    { key: 'home', label: '首页', icon: 'app-home', href: isIndex ? '#home' : 'index.html' },
-    { key: 'device', label: '机型', icon: 'app-device', href: 'device.html' },
+    { key: 'home', label: '首页', icon: 'app-home', href: 'index.html' },
+    { key: 'community', label: '社区', icon: 'app-community', href: 'index.html#community' },
     { key: 'spirit', label: '精灵', icon: 'app-spirit', href: 'jingling.html' },
-    { key: 'more', label: '更多', icon: 'app-more', href: 'app-more.html' }
+    { key: 'tools', label: '工具', icon: 'app-tools', href: 'app-more.html' },
+    { key: 'my', label: '我的', icon: 'app-my', href: 'my.html' }
   ];
 
   function activeKey() {
     if (/admin/.test(file)) return '';
-    if (file === 'device.html' || file === 'search.html') return 'device';
+    var hash = (location.hash || '').replace('#', '').toLowerCase();
+    if (isIndex) {
+      if (hash === 'community' || hash === 'info' || hash === 'profile') return 'community';
+      if (hash === 'shop') return 'tools';
+      return 'home';
+    }
+    if (file === 'my.html') return 'my';
+    if (file === 'app-more.html') return 'tools';
+    if (file === 'device.html' || file === 'search.html' || file === 'fix.html' || file === 'service.html' || file === 'shop.html') return 'tools';
     if (file === 'jingling.html' || file === 'angela.html' || file === 'xiaota.html' || file === 'naiwa.html') return 'spirit';
-    if (isIndex) return 'home';
-    return 'more'; /* 服务、急救室、商城、关于等内页统一高亮「更多」 */
+    if (file === 'about.html') return 'my';
+    return 'tools'; /* 其余内页统一高亮「工具」 */
   }
+
+  var navEl = null;
 
   function buildNav() {
     var nav = document.createElement('nav');
     nav.className = 'mobile-bottom-nav';
     nav.setAttribute('aria-label', '手机底部导航');
     var act = activeKey();
-    var items = TABS.map(function (t) {
-      return '<a href="' + t.href + '"' + (t.key === act ? ' class="active"' : '') + '>'
+    nav.innerHTML = TABS.map(function (t) {
+      return '<a href="' + t.href + '" data-key="' + t.key + '"' + (t.key === act ? ' class="active" aria-current="page"' : '') + '>'
         + '<svg class="tf-ico" aria-hidden="true"><use href="#' + t.icon + '"></use></svg>'
         + '<span>' + t.label + '</span></a>';
     }).join('');
-    nav.innerHTML = items;
     return nav;
+  }
+
+  function refreshActive() {
+    if (!navEl) return;
+    var act = activeKey();
+    var links = navEl.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++) {
+      var on = links[i].getAttribute('data-key') === act;
+      links[i].classList.toggle('active', on);
+      if (on) links[i].setAttribute('aria-current', 'page');
+      else links[i].removeAttribute('aria-current');
+    }
   }
 
   function mountNav() {
@@ -76,13 +100,29 @@
       document.body.insertAdjacentHTML('afterbegin', SPRITE);
     }
     var old = document.querySelector('.mobile-bottom-nav');
-    var nav = buildNav();
-    if (old && old.parentNode) old.parentNode.replaceChild(nav, old);
-    else document.body.appendChild(nav);
+    navEl = buildNav();
+    if (old && old.parentNode) old.parentNode.replaceChild(navEl, old);
+    else document.body.appendChild(navEl);
+
+    /* 点当前 Tab：回顶部，不重复跳转 */
+    navEl.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('a') : null;
+      if (!a || !a.classList.contains('active')) return;
+      var want = a.getAttribute('href');
+      var here = (location.pathname.split('/').pop() || 'index.html') + (location.hash || '');
+      if (want === here || (want === 'index.html' && isIndex && !location.hash)) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
   }
 
   if (document.body) mountNav();
   else document.addEventListener('DOMContentLoaded', mountNav, { once: true });
+
+  window.addEventListener('hashchange', function () {
+    refreshActive();
+  });
 
   /* —— 返回键协同：由 MainActivity 调用，返回 '1' 表示已消费 —— */
   var OPEN_CLASSES = ['spirit-modal-open', 'spirit-memorial-open', 'pet-panel-open'];
@@ -127,5 +167,5 @@
     return 'pass';
   };
 
-  window.__tafeiAppInfo = { ready: true, navHeight: 62 };
+  window.__tafeiAppInfo = { ready: true, navHeight: 62, tabs: 5 };
 })();

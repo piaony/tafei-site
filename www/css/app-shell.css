@@ -1,5 +1,5 @@
 /* TAFEI APP SHELL · 仅供安卓 App 内的页面使用
-   作用：统一底部导航（4 项）、给内容区留出导航高度、避免底部元素被导航压住 */
+   作用：统一底部导航（5 项：首页/社区/精灵/工具/我的）、给内容区留出导航高度、避免底部元素被导航压住 */
 
 html.in-app{background:#080d1b}
 
@@ -15,10 +15,10 @@ body.in-app{
   left:0!important;right:0!important;bottom:0!important;top:auto!important;
   z-index:99999!important;
   display:grid!important;
-  grid-template-columns:repeat(4,1fr)!important;
+  grid-template-columns:repeat(5,1fr)!important;
   gap:2px;
   margin:0!important;
-  padding:8px 6px calc(8px + env(safe-area-inset-bottom))!important;
+  padding:8px 4px calc(8px + env(safe-area-inset-bottom))!important;
   background:rgba(11,18,34,.97)!important;
   border:0!important;border-top:1px solid rgba(122,170,255,.16)!important;
   border-radius:0!important;
@@ -35,20 +35,20 @@ body.in-app{
 .in-app .mobile-bottom-nav a{
   display:flex!important;flex-direction:column!important;
   align-items:center!important;justify-content:center!important;
-  gap:3px;
-  min-height:46px;
+  gap:2px;
+  min-height:44px;
   padding:0!important;margin:0!important;
   border:0!important;border-radius:12px!important;
   background:transparent!important;
   color:#9db0cc!important;
-  font-size:11.5px!important;font-weight:500!important;line-height:1.35!important;
+  font-size:11px!important;font-weight:500!important;line-height:1.3!important;
   letter-spacing:.02em;
   transition:color .2s ease,background-color .2s ease,transform .12s ease;
 }
 
 .in-app .mobile-bottom-nav a .tf-ico,
 .in-app .mobile-bottom-nav a svg{
-  width:22px!important;height:22px!important;display:block;
+  width:21px!important;height:21px!important;display:block;
   flex:0 0 auto;
 }
 
