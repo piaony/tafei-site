@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 
 /**
  * 版本更新检查：
- * 1) 主数据源：站点上的 version.json（Pages，不消耗 GitHub 接口配额）
- * 2) 备用：raw.githubusercontent 上的 version.json
+ * 1) 主数据源：raw.githubusercontent 上的 version.json（无 CDN 缓存、不消耗接口配额）
+ * 2) 备用：站点上的 version.json（Pages）
  * 3) 兜底：GitHub 最新 Release（tag android-vN，N 即 versionCode）
  * 12 小时内最多检查一次；用户可以「忽略此版本」。
  */
@@ -62,15 +62,15 @@ public class UpdateChecker {
                 Remote remote = null;
 
                 try {
-                    remote = fetchFromVersionJson(PAGES_URL + "?t=" + System.currentTimeMillis());
+                    remote = fetchFromVersionJson(RAW_URL + "?t=" + System.currentTimeMillis());
                 } catch (Throwable t) {
-                    Log.w(TAG, "pages json failed: " + t);
+                    Log.w(TAG, "raw json failed: " + t);
                 }
                 if (remote == null) {
                     try {
-                        remote = fetchFromVersionJson(RAW_URL + "?t=" + System.currentTimeMillis());
+                        remote = fetchFromVersionJson(PAGES_URL + "?t=" + System.currentTimeMillis());
                     } catch (Throwable t) {
-                        Log.w(TAG, "raw json failed: " + t);
+                        Log.w(TAG, "pages json failed: " + t);
                     }
                 }
                 if (remote == null) {
@@ -196,6 +196,7 @@ public class UpdateChecker {
             conn.setReadTimeout(8000);
             conn.setRequestProperty("User-Agent", "TAFEI-App");
             conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Cache-Control", "no-cache");
             conn.setInstanceFollowRedirects(true);
             int code = conn.getResponseCode();
             if (code < 200 || code >= 300) {
