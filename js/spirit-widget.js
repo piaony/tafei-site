@@ -245,7 +245,8 @@
     var skin = core.skin();
     if (!skin) return;
     happyPreloaded = true;
-    var dir = skin.actionDir || 'assets/spirits/yao-v23/';
+    var dir = skin.actionDir === undefined ? 'assets/spirits/yao-v23/' : (skin.actionDir || '');
+    if (!dir) return;
     HAPPY_FILES.yao.forEach(function (file) {
       var img = new Image();
       img.src = dir + file;
@@ -530,7 +531,7 @@
     var file = ART_FILES[action];
     if (action === 'happy' && opts && opts.file) file = opts.file;
     var src = baseArt;
-    var actionDir = (skin && skin.actionDir) || (spirit && spirit.actionDir) || '';
+    var actionDir = skin && skin.actionDir !== undefined ? (skin.actionDir || '') : ((spirit && spirit.actionDir) || '');
     if (actionDir && file) src = actionDir + file;
     if (art.getAttribute('src') !== src) {
       art.dataset.fallback = '0';
