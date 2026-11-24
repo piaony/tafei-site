@@ -84,20 +84,51 @@ jobs:
           set -o pipefail
           npm ci 2>&1 | tee ci-logs/npm.log
 
-      - name: Apply source patch
+      - name: Fetch UI assets (v34 home + icon system)
         run: |
-          if [ -f patches/v26-app.patch ]; then
-            if git apply --check -p1 patches/v26-app.patch; then
-              git apply -p1 patches/v26-app.patch
-              echo "patch applied"
-              git config user.name "tafei-bot"
-              git config user.email "bot@users.noreply.github.com"
-              git add -A www android patches
-              git commit -m "chore(ci): apply v26 source patch [skip ci]" || true
-              git push origin HEAD:app/capacitor-setup || true
+          set -e
+          get() { curl -fsSL --retry 3 --retry-delay 2 "$1" -o "$2"; echo "fetched $2 ($(wc -c < "$2") bytes)"; }
+          need() {
+            if [ -s "$1" ] && grep -q -- "$2" "$1"; then
+              echo "keep  $1"
             else
-              echo "patch already applied, skip"
+              get "$3" "$1"
             fi
+          }
+          need www/index.html "hv-grid" "https://aka.doubaocdn.com/s/jokMfuHTGY"
+          need www/my.html "tafei-ico.css" "https://aka.doubaocdn.com/s/Da4Nn0ykcX"
+          need www/app-more.html 'data-ti="fix"' "https://aka.doubaocdn.com/s/JNoelDqQMU"
+          need www/css/tafei-ico.css "TAFEI ICON SYSTEM" "https://aka.doubaocdn.com/s/AdC27wTarP"
+          need www/css/home-v2.css ".hv-acc" "https://aka.doubaocdn.com/s/As9UMPaQzm"
+          need www/js/tafei-icons.js "TafeiIcons" "https://aka.doubaocdn.com/s/JZgj6jaUdC"
+          need www/js/home-v2.js "TafeiHome" "https://aka.doubaocdn.com/s/gxIg2pljH1"
+          need www/js/my-account.js 'data-ti="feedback"' "https://aka.doubaocdn.com/s/s3G3rVGqNv"
+          grep -q "hv-grid" www/index.html
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A www
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(ci): sync v34 ui assets [skip ci]"
+            git push origin HEAD:app/capacitor-setup || true
+          fi
+
+      - name: Apply source patches
+        run: |
+          shopt -s nullglob
+          applied=0
+          for p in patches/*.patch; do
+            if git apply --check -p1 "$p" 2>/dev/null; then
+              git apply -p1 "$p" && echo "applied $p" && applied=1
+            else
+              echo "skip $p (already applied or not applicable)"
+            fi
+          done
+          if [ "$applied" = "1" ]; then
+            git config user.name "tafei-bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add -A www android patches
+            git commit -m "chore(ci): apply source patches [skip ci]" || true
+            git push origin HEAD:app/capacitor-setup || true
           fi
 
       - name: Bump app shell asset version
@@ -106,17 +137,17 @@ jobs:
           python3 - "$SHELL_VER" <<'PY'
           import glob, sys
           ver = sys.argv[1]
+          import re
+          PAT = re.compile(r"((?:css|js)/(?:app-shell\.css|app-shell\.js|tafei-ico\.css|tafei-icons\.js|home-v2\.css|home-v2\.js)\?v=)[0-9A-Za-z.]+")
           for f in glob.glob("www/*.html"):
               s = open(f, encoding="utf-8").read()
-              for pref in ("css/app-shell.css?v=", "js/app-shell.js?v="):
-                  for old in ("2", "3"):
-                      s = s.replace(pref + old, pref + ver)
+              s = PAT.sub(lambda m: m.group(1) + ver, s)
               open(f, "w", encoding="utf-8").write(s)
           print("shell asset version ->", ver)
           PY
-          sed -i -E "s#(spirit-widget-menu\\.js\\?v=)[0-9A-Za-z]+#\\1${SHELL_VER}#g" www/js/app-shell.js
-          sed -i -E "s#(spirit-widget\\.js\\?v=)[0-9]+#\\1${SHELL_VER}#g" www/js/app-shell.js
-          grep -o "spirit-widget[a-z-]*\\.js?v=[0-9A-Za-z]*" www/js/app-shell.js | sort -u
+          sed -i -E "s#(spirit-widget-menu\.js\?v=)[0-9A-Za-z]+#\1${SHELL_VER}#g" www/js/app-shell.js
+          sed -i -E "s#(spirit-widget\.js\?v=)[0-9]+#\1${SHELL_VER}#g" www/js/app-shell.js
+          grep -o "spirit-widget[a-z-]*\.js?v=[0-9A-Za-z]*" www/js/app-shell.js | sort -u
 
       - name: Convert app images to WebP
         continue-on-error: true
@@ -202,7 +233,7 @@ jobs:
                       rewritten += 1
                   texts.append(ns)
 
-          blob = "\n".join(texts)
+                  blob = "\n".join(texts)
 
           fixed = 0
           for dp, _, fs in os.walk(ROOT):
