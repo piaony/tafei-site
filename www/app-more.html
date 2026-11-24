@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#080d1b">
-<title>更多功能 · 挞飞 TAFEI</title>
-<meta name="description" content="挞飞 App 更多功能入口：手机急救室、上门服务预约、机型库、社区、商城、搜索、精灵小屋。">
+<title>工具 · 挞飞 TAFEI</title>
+<meta name="description" content="挞飞 App 工具箱：手机急救室、上门服务预约、机型库、服务商城、搜索与安琪拉小屋。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080d1b'/%3E%3Ctext x='32' y='43' font-size='34' font-family='Arial' font-weight='bold' fill='%2368dfff' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
 <style>
 :root{
  --bg:#080d1b;--panel:rgba(17,29,55,.78);--line:rgba(130,170,255,.18);--line2:rgba(130,170,255,.34);
- --txt:#eef4ff;--muted:#9aaccb;--cyan:#64e8ff;--blue:#7297ff;--violet:#bd8cff;--gold:#ffd36e;
+ --txt:#eef4ff;--muted:#9aaccb;--cyan:#64e8ff;--blue:#7297ff;--violet:#bd8cff;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -25,78 +25,72 @@ body{
 }
 a{color:inherit;text-decoration:none}
 .wrap{width:min(720px,calc(100% - 32px));margin:0 auto}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 6px;border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 10px}
 .brand{font-weight:900;letter-spacing:.13em;font-size:17px}
 .brand span{color:var(--cyan)}
 .top .hint{font-size:11.5px;color:var(--muted);letter-spacing:.04em}
-.hero{padding:22px 0 10px}
-h1{margin:0 0 8px;font-size:26px;line-height:1.2;letter-spacing:-.02em;font-weight:800}
-.sub{margin:0;color:var(--muted);font-size:13.5px}
+.hero{padding:4px 0 2px}
+h1{margin:0 0 6px;font-size:24px;line-height:1.2;letter-spacing:-.02em;font-weight:800}
+.sub{margin:0;color:var(--muted);font-size:13px}
 
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0 10px}
+.h2{margin:22px 0 10px;font-size:11.5px;letter-spacing:.18em;font-weight:800;color:var(--cyan)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .card{
- display:flex;flex-direction:column;gap:6px;
- padding:16px 14px;border-radius:16px;
+ position:relative;display:flex;flex-direction:column;gap:6px;
+ padding:15px 14px 14px;border-radius:16px;
  background:var(--panel);border:1px solid var(--line);
  box-shadow:0 10px 26px rgba(3,9,22,.32);
- transition:transform .16s ease,border-color .16s ease,background .16s ease;
+ transition:transform .16s ease,border-color .16s ease;
 }
-.card:active{transform:scale(.97)}
-.card .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;font-weight:800;color:#06101f;background:linear-gradient(120deg,#53ddff,#728cff 60%,#b28cff)}
-.card b{font-size:14.5px;font-weight:800;letter-spacing:.01em}
-.card p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.card:active{transform:scale(.975);border-color:var(--line2)}
+.card .ico{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:15px;font-weight:800;color:#06101f;background:linear-gradient(120deg,#53ddff,#728cff 60%,#b28cff)}
+.card b{font-size:14px;font-weight:800;letter-spacing:.01em}
+.card p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
 
-.section-title{margin:24px 0 10px;font-size:12px;letter-spacing:.18em;font-weight:800;color:var(--cyan)}
-.list{display:grid;gap:8px}
-.row{
- display:flex;align-items:center;justify-content:space-between;gap:10px;
- padding:13px 14px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--line);
- font-size:13.5px;color:#d6e2f6;
-}
-.row span.arrow{color:var(--muted);font-size:12px}
-
-.foot{padding:22px 0 6px;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.7}
-.version{display:inline-block;margin-top:6px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--cyan);font-size:11px;letter-spacing:.06em}
+.foot{padding:26px 0 8px;color:var(--muted);font-size:11px;text-align:center;line-height:1.7}
 @media (min-width:560px){.grid{grid-template-columns:repeat(3,1fr)}}
 </style>
-<link rel="stylesheet" href="css/app-shell.css?v=2">
-<script src="js/app-shell.js?v=2" defer></script>
+<link rel="stylesheet" href="css/app-shell.css?v=3">
+<script src="js/app-shell.js?v=3" defer></script>
 </head>
 <body class="page-inner">
 
 <header class="wrap top">
   <div class="brand">TAFEI<span>·挞飞</span></div>
-  <div class="hint">App 版</div>
+  <div class="hint">工具箱</div>
 </header>
 
 <main class="wrap">
   <section class="hero">
-    <h1>更多功能</h1>
-    <p class="sub">急救室、上门服务、机型库、社区与商城，都在这里。</p>
+    <h1>工具</h1>
+    <p class="sub">修手机、查机型、下单服务，都在这一页。</p>
   </section>
 
+  <div class="h2">维修与机型</div>
   <div class="grid">
-    <a class="card" href="fix.html"><div class="ico">急</div><b>手机急救室</b><p>5 个问题判断开不了机、卡顿、耗电、刷机失败</p></a>
-    <a class="card" href="service.html"><div class="ico">服</div><b>服务预约</b><p>刷机 / 解锁 / 换电池，线上登记上门时间</p></a>
-    <a class="card" href="device.html"><div class="ico">机</div><b>机型库</b><p>参数、对比、二手避坑，选机不再踩雷</p></a>
-    <a class="card" href="jingling.html"><div class="ico">灵</div><b>精灵小屋</b><p>收养伙伴、换皮肤、养成与动作彩蛋</p></a>
-    <a class="card" href="index.html#community"><div class="ico">社</div><b>社区</b><p>求助、经验、私信箱，和其他机友交流</p></a>
-    <a class="card" href="shop.html"><div class="ico">店</div><b>服务商城</b><p>服务包与配件，按需求直接下单</p></a>
-    <a class="card" href="search.html"><div class="ico">搜</div><b>搜索</b><p>按机型、故障、关键词找内容</p></a>
-    <a class="card" href="angela.html"><div class="ico">安</div><b>安琪拉小屋</b><p>互动小房间，放松一下</p></a>
-    <a class="card" href="about.html"><div class="ico">关</div><b>关于挞飞</b><p>站长、联系方式与站点说明</p></a>
+    <a class="card" href="fix.html"><div class="ico">急</div><b>手机急救室</b><p>5 个问题判断开不了机 / 卡顿 / 刷机失败</p></a>
+    <a class="card" href="service.html"><div class="ico">服</div><b>服务预约</b><p>刷机、解锁、换电池，线上登记上门时间</p></a>
+    <a class="card" href="device.html"><div class="ico">机</div><b>机型库</b><p>参数对比、二手避坑，选机不踩雷</p></a>
+    <a class="card" href="search.html"><div class="ico">搜</div><b>站内搜索</b><p>按机型、故障、关键词找内容</p></a>
   </div>
 
-  <div class="section-title">常用直达</div>
-  <div class="list">
-    <a class="row" href="index.html"><span>返回首页</span><span class="arrow">首页 →</span></a>
-    <a class="row" href="index.html#info"><span>资讯中心</span><span class="arrow">查看 →</span></a>
-    <a class="row" href="index.html#articles"><span>文章 / 攻略</span><span class="arrow">查看 →</span></a>
+  <div class="h2">服务与内容</div>
+  <div class="grid">
+    <a class="card" href="shop.html"><div class="ico">店</div><b>服务商城</b><p>服务包与配件，按需求直接下单</p></a>
+    <a class="card" href="index.html#articles"><div class="ico">文</div><b>文章攻略</b><p>刷机、Root、日常维护的实测记录</p></a>
+    <a class="card" href="jingling.html"><div class="ico">灵</div><b>精灵小屋</b><p>收养伙伴、换皮肤、养成与动作彩蛋</p></a>
+    <a class="card" href="angela.html"><div class="ico">安</div><b>安琪拉小屋</b><p>互动小房间，修完手机放松一下</p></a>
+  </div>
+
+  <div class="h2">关于</div>
+  <div class="grid">
+    <a class="card" href="about.html"><div class="ico">关</div><b>关于挞飞</b><p>站长、联系方式与站点说明</p></a>
+    <a class="card" href="my.html"><div class="ico">我</div><b>我的</b><p>账号、主题、检查更新</p></a>
   </div>
 
   <div class="foot">
     挞飞 TAFEI · 手机技术支持<br>
-    <span class="version">App 版</span>
+    社区 / 精灵 / 我的 在底部导航
   </div>
 </main>
 
