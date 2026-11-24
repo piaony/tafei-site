@@ -10,21 +10,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: fetch files
+      - name: fetch main.svg
         run: |
-          set -euo pipefail
           mkdir -p assets/spirits/yao-art
-          curl -fsSL "https://aka.doubaocdn.com/s/bzU3Sp8n5l" -o assets/spirits/yao-art/main.svg
-          curl -fsSL "https://aka.doubaocdn.com/s/3ueqR8Srpf" -o assets/spirits/yao-art/avatar.svg
-          curl -fsSL "https://aka.doubaocdn.com/s/6ARrAVqUBE" -o assets/spirits/yao-art/widget-128.svg
-          curl -fsSL "https://aka.doubaocdn.com/s/qfsBJqGjwN" -o js/spirit-core.js
-          curl -fsSL "https://aka.doubaocdn.com/s/n1Oj2BnEJ9" -o js/spirit-widget.js
+          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
+            "https://aka.doubaocdn.com/s/bzU3Sp8n5l" -o assets/spirits/yao-art/main.svg
+          ls -l assets/spirits/yao-art/main.svg
+      - name: fetch avatar.svg
+        run: |
+          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
+            "https://aka.doubaocdn.com/s/3ueqR8Srpf" -o assets/spirits/yao-art/avatar.svg
+          ls -l assets/spirits/yao-art/avatar.svg
+      - name: fetch widget-128.svg
+        run: |
+          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
+            "https://aka.doubaocdn.com/s/6ARrAVqUBE" -o assets/spirits/yao-art/widget-128.svg
+          ls -l assets/spirits/yao-art/widget-128.svg
+      - name: fetch spirit-core.js
+        run: |
+          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
+            "https://aka.doubaocdn.com/s/qfsBJqGjwN" -o js/spirit-core.js
+          grep -c "yao-art" js/spirit-core.js
+      - name: fetch spirit-widget.js
+        run: |
+          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
+            "https://aka.doubaocdn.com/s/n1Oj2BnEJ9" -o js/spirit-widget.js
+          grep -c "skin.actionDir !== undefined" js/spirit-widget.js
       - name: verify
         run: |
           set -euo pipefail
-          ls -la assets/spirits/yao-art
-          grep -c "yao-art" js/spirit-core.js
-          grep -c "skin.actionDir !== undefined" js/spirit-widget.js
+          head -c 120 assets/spirits/yao-art/main.svg; echo
+          head -c 120 js/spirit-core.js; echo
           git status --short
       - name: commit
         run: |
