@@ -70,3 +70,12 @@ body.in-app{
 
 /* —— 更顺滑的滚动 —— */
 .in-app{-webkit-overflow-scrolling:touch}
+
+/* —— 若用户手动切到浅色主题，导航跟随变浅 —— */
+body.in-app.light .mobile-bottom-nav{
+  background:rgba(255,255,255,.95)!important;
+  border-top:1px solid rgba(55,91,160,.18)!important;
+  box-shadow:0 -8px 28px rgba(48,74,130,.14)!important;
+}
+body.in-app.light .mobile-bottom-nav a{color:#5f7291!important}
+body.in-app.light .mobile-bottom-nav a.active{color:#0f9ec4!important;background:rgba(15,158,196,.1)!important}

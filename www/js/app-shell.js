@@ -1,6 +1,7 @@
 /* TAFEI APP SHELL · 手机 App 专用外壳
    1) 统一底部导航：首页 / 机型 / 精灵 / 更多（4 项，全站一致）
-   2) 返回键协同：先关弹层，再退回上一页，最后双击退出（在 App 内由原生调用） */
+   2) 默认深色主题，和启动图、状态栏一致（用户手动切过主题则尊重其选择）
+   3) 返回键协同：先关弹层，再退回上一页，最后双击退出（在 App 内由原生调用） */
 (function () {
   'use strict';
   if (window.__tafeiShell) return;
@@ -8,6 +9,16 @@
 
   var html = document.documentElement;
   html.classList.add('in-app');
+
+  /* —— 主题：App 内默认深色 —— */
+  var themeDefaulted = false;
+  try {
+    if (!localStorage.getItem('tafei-theme')) {
+      localStorage.setItem('tafei-theme', 'dark');
+      themeDefaulted = true;
+    }
+    if (themeDefaulted) html.style.colorScheme = 'dark';
+  } catch (e) {}
 
   var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase() || 'index.html';
   var isIndex = file === 'index.html';
@@ -60,6 +71,7 @@
 
   function mountNav() {
     if (!document.body) return;
+    if (themeDefaulted) document.body.classList.remove('light');
     if (!document.querySelector('.tf-app-sprite')) {
       document.body.insertAdjacentHTML('afterbegin', SPRITE);
     }
