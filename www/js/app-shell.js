@@ -1,8 +1,8 @@
 /* TAFEI APP SHELL · 手机 App 专用外壳（v3）
    1) 统一底部导航：首页 / 社区 / 精灵 / 工具 / 我的（5 项，全站一致）
-   2) 默认深色主题，和启动图、状态栏一致（用户手动切过主题则尊重其选择）
+   2) 默认跟随系统主题（用户手动选过则尊重其选择）
    3) 返回键协同：先关弹层，再退回上一页，最后双击退出（在 App 内由原生调用）
-   4) 社区 / 首页 复用站点内的视图切换（index.html#community），点 Tab 不跳错地方 */
+   4) 图片懒加载 + 挂件长按菜单自动注入 */
 (function () {
   'use strict';
   if (window.__tafeiShell) return;
@@ -11,14 +11,22 @@
   var html = document.documentElement;
   html.classList.add('in-app');
 
-  /* —— 主题：App 内默认深色 —— */
-  var themeDefaulted = false;
+  /* —— 主题：默认跟随系统（用户手动选过则尊重其选择） —— */
+  var wantLight = false;
   try {
-    if (!localStorage.getItem('tafei-theme')) {
-      localStorage.setItem('tafei-theme', 'dark');
-      themeDefaulted = true;
+    var saved = localStorage.getItem('tafei-theme');
+    var sysLight = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+    wantLight = (saved === 'light') || (!saved && sysLight);
+    html.style.colorScheme = wantLight ? 'light' : 'dark';
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (ev) {
+        try {
+          if (localStorage.getItem('tafei-theme')) return;
+          document.body.classList.toggle('light', !!ev.matches);
+          html.style.colorScheme = ev.matches ? 'light' : 'dark';
+        } catch (e2) {}
+      });
     }
-    if (themeDefaulted) html.style.colorScheme = 'dark';
   } catch (e) {}
 
   var file = (location.pathname.split('/').pop() || 'index.html').toLowerCase() || 'index.html';
@@ -93,12 +101,33 @@
     }
   }
 
+
+  /* —— 图片懒加载：全站图片滚到可视区再请求 —— */
+  function lazyImages(scope) {
+    var imgs = (scope || document).querySelectorAll('img:not([data-tf-lazy])');
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (img.closest && img.closest('.spirit-widget,#spiritWidget')) continue;
+      img.setAttribute('data-tf-lazy', '1');
+      try {
+        if (!img.getAttribute('loading')) img.setAttribute('loading', 'lazy');
+        if (!img.getAttribute('decoding')) img.setAttribute('decoding', 'async');
+      } catch (e) {}
+    }
+  }
+
   function mountNav() {
     if (!document.body) return;
-    if (themeDefaulted) document.body.classList.remove('light');
+    document.body.classList.toggle('light', wantLight);
     if (!document.querySelector('.tf-app-sprite')) {
       document.body.insertAdjacentHTML('afterbegin', SPRITE);
     }
+    lazyImages(document);
+    if (window.MutationObserver) {
+      new MutationObserver(function () { lazyImages(document); })
+        .observe(document.body, { childList: true, subtree: true });
+    }
+
     var old = document.querySelector('.mobile-bottom-nav');
     navEl = buildNav();
     if (old && old.parentNode) old.parentNode.replaceChild(navEl, old);
@@ -166,6 +195,17 @@
     } catch (e) {}
     return 'pass';
   };
+
+  /* —— 载入挂件长按菜单（脚本自带等待，没有挂件的页面不会做事） —— */
+  try {
+    if (!document.querySelector('script[data-sw-menu]')) {
+      var sm = document.createElement('script');
+      sm.src = 'js/spirit-widget-menu.js?v=1';
+      sm.setAttribute('data-sw-menu', '1');
+      sm.defer = true;
+      document.head.appendChild(sm);
+    }
+  } catch (e) {}
 
   window.__tafeiAppInfo = { ready: true, navHeight: 62, tabs: 5 };
 })();
