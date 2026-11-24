@@ -10,37 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: fetch main.svg
+      - name: fetch files
         run: |
+          set -euo pipefail
           mkdir -p assets/spirits/yao-art
-          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
-            "https://aka.doubaocdn.com/s/bzU3Sp8n5l" -o assets/spirits/yao-art/main.svg
-          ls -l assets/spirits/yao-art/main.svg
-      - name: fetch avatar.svg
-        run: |
-          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
-            "https://aka.doubaocdn.com/s/3ueqR8Srpf" -o assets/spirits/yao-art/avatar.svg
-          ls -l assets/spirits/yao-art/avatar.svg
-      - name: fetch widget-128.svg
-        run: |
-          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
-            "https://aka.doubaocdn.com/s/6ARrAVqUBE" -o assets/spirits/yao-art/widget-128.svg
-          ls -l assets/spirits/yao-art/widget-128.svg
-      - name: fetch spirit-core.js
-        run: |
-          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
-            "https://aka.doubaocdn.com/s/qfsBJqGjwN" -o js/spirit-core.js
-          grep -c "yao-art" js/spirit-core.js
-      - name: fetch spirit-widget.js
-        run: |
-          curl --http1.1 --retry 5 --retry-all-errors -fsSL -w "code=%{http_code} size=%{size_download}\n" \
-            "https://aka.doubaocdn.com/s/n1Oj2BnEJ9" -o js/spirit-widget.js
-          grep -c "skin.actionDir !== undefined" js/spirit-widget.js
+          C="curl --max-time 45 --retry 3 --retry-all-errors -fsSL"
+          $C "https://paste.rs/bzU" -o /dev/null || true
+          $C "https://paste.rs/vZwNk" -o assets/spirits/yao-art/main.svg
+          $C "https://paste.rs/XaF6b" -o assets/spirits/yao-art/avatar.svg
+          $C "https://paste.rs/t0sTw" -o assets/spirits/yao-art/widget-128.svg
+          $C "https://paste.rs/s0bzb" -o js/spirit-core.js
+          $C "https://paste.rs/9q31P" -o js/spirit-widget.js
+          wc -c assets/spirits/yao-art/*.svg js/spirit-core.js js/spirit-widget.js
       - name: verify
         run: |
           set -euo pipefail
-          head -c 120 assets/spirits/yao-art/main.svg; echo
-          head -c 120 js/spirit-core.js; echo
+          grep -c "yao-art" js/spirit-core.js
+          grep -c "skin.actionDir !== undefined" js/spirit-widget.js
+          grep -c "<svg" assets/spirits/yao-art/main.svg
+          test "$(wc -c < assets/spirits/yao-art/main.svg)" -gt 30000
+          test "$(wc -c < assets/spirits/yao-art/avatar.svg)" -gt 20000
+          test "$(wc -c < assets/spirits/yao-art/widget-128.svg)" -gt 4000
+          test "$(wc -c < js/spirit-widget.js)" -gt 30000
           git status --short
       - name: commit
         run: |
@@ -49,5 +40,6 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git add -A
           git diff --cached --quiet && exit 0
-          git commit -m "feat(spirit): 瑶·时之祈愿 原画皮肤（SVG 立绘 + 头像 + 挂件）v23.1"
+          git commit -m "feat(spirit): 瑶·时之祈愿 原画皮肤（SVG 立绘 + 头像 + 扳件）v23.1"
+          git pull --rebase origin main
           git push
