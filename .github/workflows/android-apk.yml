@@ -73,13 +73,16 @@ jobs:
             echo "TAFEI_KEYPASS=android" >> "$GITHUB_ENV"
             echo "TAFEI_ALIAS=androiddebugkey" >> "$GITHUB_ENV"
             echo "signed=true" >> "$GITHUB_ENV"
-            echo "::warning::未配置 ANDROID_KEYSTORE_B64，本次使用仓库内通用签名钥匙（可覆盖升级，但同签名可被伪造）"
+            echo "::warning::未配置 ANDROID_KEYSTORE_B64，本次使用仓库内通用签名钥匙"
           else
             echo "::warning::没有任何签名密钥，本次只产出未签名包"
           fi
 
       - name: Install npm dependencies
-        run: npm ci
+        run: |
+          mkdir -p ci-logs
+          set -o pipefail
+          npm ci 2>&1 | tee ci-logs/npm.log
 
       - name: Apply source patch
         run: |
@@ -113,6 +116,7 @@ jobs:
           PY
 
       - name: Convert app images to WebP
+        continue-on-error: true
         run: |
           python3 - <<'PY'
           import os, re
@@ -163,7 +167,10 @@ jobs:
           PY
 
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: |
+          mkdir -p ci-logs
+          set -o pipefail
+          npx cap sync android 2>&1 | tee ci-logs/cap-sync.log
 
       - name: Bump version
         run: |
@@ -175,7 +182,8 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --stacktrace
+          set -o pipefail
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee ../ci-logs/gradle-build.log
 
       - name: Collect APK
         run: |
@@ -206,7 +214,7 @@ jobs:
 
             - versionCode ${{ github.run_number }}
             - versionName 1.0.${{ github.run_number }}
-            - 应用内更新：我的页「检查更新」直接后台下载并拉起安装
+            - 应用内更新：我的页「检查更新」后台下载并拉起安装
             - 图片已转 WebP，安装包更小
 
             下载：直接点下方 app-release.apk。
@@ -215,12 +223,21 @@ jobs:
       - name: Commit build logs on failure
         if: failure()
         run: |
-          set -x
+          mkdir -p ci-logs
+          {
+            echo "run=${{ github.run_number }} sha=${{ github.sha }}"
+            echo "--- git status"
+            git status --short | head -50
+            echo "--- java"; java -version 2>&1 | head -3
+            echo "--- node"; node -v 2>/dev/null
+            echo "--- sdk"; ls -1 "$ANDROID_HOME/platforms" 2>/dev/null; ls -1 "$ANDROID_HOME/build-tools" 2>/dev/null
+          } 2>&1 | tee ci-logs/env.log || true
+          if [ -d android/app/build/reports ]; then cp -r android/app/build/reports/* ci-logs/ 2>/dev/null || true; fi
           ls -la ci-logs || true
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git switch -c ci-log
-          git add -A ci-logs
+          (git switch -c ci-log 2>/dev/null || git switch -C ci-log 2>/dev/null || true)
+          git add -f -A ci-logs
           git commit -m "ci: android build logs" || true
           git push -f origin ci-log || true
           echo "push-done"
