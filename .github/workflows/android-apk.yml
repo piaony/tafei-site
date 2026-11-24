@@ -7,12 +7,11 @@ on:
       - app/capacitor-setup
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -24,28 +23,59 @@ jobs:
           cache: npm
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
+          cache: gradle
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Probe Android SDK
+        run: |
+          mkdir -p ci-logs
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          {
+            echo "ANDROID_HOME=${ANDROID_HOME:-<unset>}"
+            echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-<unset>}"
+            echo "SDK=$SDK"
+            ls -1 "$SDK" || true
+            echo "--- cmdline-tools"
+            ls -1 "$SDK/cmdline-tools" || true
+            echo "--- platforms"
+            ls -1 "$SDK/platforms" 2>/dev/null || true
+            echo "--- build-tools"
+            ls -1 "$SDK/build-tools" 2>/dev/null || true
+            java -version 2>&1 || true
+          } 2>&1 | tee ci-logs/probe.log
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
 
       - name: Install Android SDK 36
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: |
+          mkdir -p ci-logs
+          command -v sdkmanager || { echo "sdkmanager NOT FOUND"; exit 1; }
+          {
+            yes | sdkmanager --licenses || true
+            sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          } 2>&1 | tee ci-logs/sdkmanager.log
 
       - name: Install npm dependencies
-        run: npm ci
+        run: |
+          mkdir -p ci-logs
+          npm ci 2>&1 | tee ci-logs/npm.log
 
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: |
+          mkdir -p ci-logs
+          npx cap sync android 2>&1 | tee ci-logs/cap-sync.log
 
       - name: Build Debug APK
         working-directory: android
         run: |
+          mkdir -p ../ci-logs
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee ../ci-logs/gradle.log
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -54,3 +84,16 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Commit build logs on failure
+        if: failure()
+        run: |
+          set -x
+          ls -la ci-logs || true
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git switch -c ci-log
+          git add -A ci-logs
+          git commit -m "ci: android build logs" || true
+          git push -f origin ci-log || true
+          echo "push-done"
