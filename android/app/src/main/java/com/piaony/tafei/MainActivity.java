@@ -63,7 +63,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         /* 切回前台时再检查一次（内部有 12 小时节流，不会频繁请求） */
         if (firstCheckDone) UpdateChecker.maybeCheck(this);
