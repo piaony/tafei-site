@@ -119,6 +119,8 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p ci-logs
+          : > ci-logs/webp.log
+          python3 -c "import PIL; print('PIL ready', PIL.__version__)" >> ci-logs/webp.log 2>&1 || python3 -m pip install --quiet pillow >> ci-logs/webp.log 2>&1 || echo "PIL INSTALL FAILED" | tee -a ci-logs/webp.log
           cat > /tmp/tafei_webp.py <<'PYFILE'
           import sys, os
           from PIL import Image
@@ -137,7 +139,7 @@ jobs:
           PYFILE
 
           find www -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) | sort > /tmp/imgs.txt
-          : > ci-logs/webp.log
+          echo "candidates: $(wc -l < /tmp/imgs.txt)" | tee -a ci-logs/webp.log
           ok=0; fail=0
           while IFS= read -r f; do
             if python3 /tmp/tafei_webp.py "$f" >> ci-logs/webp.log 2>&1; then
@@ -148,6 +150,10 @@ jobs:
             fi
           done < /tmp/imgs.txt
           echo "webp convert ok=$ok fail=$fail" | tee -a ci-logs/webp.log
+          if [ "$ok" -lt 1 ]; then
+            echo "no image converted, skip link rewrite to avoid broken refs" | tee -a ci-logs/webp.log
+            exit 1
+          fi
 
           python3 - <<'PYLINK'
           import os, re
@@ -281,8 +287,8 @@ jobs:
             下载：直接点下方 app-release.apk。
           files: out/app-release.apk
 
-      - name: Commit build logs on failure
-        if: failure()
+      - name: Publish build logs
+        if: always()
         run: |
           mkdir -p ci-logs
           {
@@ -291,10 +297,7 @@ jobs:
             git status --short | head -50
             echo "--- java"; java -version 2>&1 | head -3
             echo "--- node"; node -v 2>/dev/null
-            echo "--- sdk"; ls -1 "$ANDROID_HOME/platforms" 2>/dev/null; ls -1 "$ANDROID_HOME/build-tools" 2>/dev/null
-            echo "--- reports"; ls -1 android/app/build/reports 2>/dev/null
           } 2>&1 | tee ci-logs/env.log || true
-          if [ -d android/app/build/reports ]; then cp -r android/app/build/reports/* ci-logs/ 2>/dev/null || true; fi
           ls -la ci-logs || true
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
