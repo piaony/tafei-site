@@ -1,0 +1,31 @@
+name: tafei-res-branding
+on:
+  push:
+    paths:
+      - '.github/workflows/res-branding.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch branding zip
+        run: |
+          curl --max-time 60 --retry 3 --retry-all-errors -fsSL https://paste.rs/vc4kV -o /tmp/res.zip
+          ls -l /tmp/res.zip
+          unzip -l /tmp/res.zip | tail -4
+      - name: apply branding
+        run: |
+          cd android/app/src/main/res
+          rm -rf drawable-port-* drawable-land-*
+          unzip -o /tmp/res.zip
+          find . -name '*.png' | sort | head -30
+      - name: commit
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A android/app/src/main/res
+          git diff --cached --stat
+          git commit -m "feat(android): 挞飞品牌图标、启动图与深色状态栏"
+          git push
