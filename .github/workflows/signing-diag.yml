@@ -34,8 +34,7 @@ jobs:
             KM=$(printf '%s' "$KS_B64" | tr -cd 'A-Za-z0-9+/=')
             echo "clean_len=${#KM}"
             echo "clean_mod4=$(( ${#KM} % 4 ))"
-            junk=$(( ${#KS_B64} - ${#KM} ))
-            echo "anna_removed=$junk"
+            echo "junk_removed=$(( ${#KS_B64} - ${#KM} ))"
             R=$(( ${#KM} % 4 ))
             if [ "$R" -ne 0 ]; then
               KM="$KM$(printf '=%.0s' $(seq 1 $((4-R))))"
@@ -66,5 +65,5 @@ jobs:
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
           git add -f diag.txt
-          git commit -m "diag: signing secret probe v2 [skip ci]" || true
+          git commit -m "diag: signing secret probe v3 [skip ci]" || true
           git push -f origin HEAD:diag || true
