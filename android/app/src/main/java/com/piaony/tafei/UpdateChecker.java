@@ -22,8 +22,9 @@ import java.util.regex.Pattern;
 
 /**
  * 版本更新检查：
- * 1) 主数据源：raw.githubusercontent 上的 version.json（无 CDN 缓存、不消耗接口配额）
+ * 1) 主数据源：raw.githubusercontent 上的 version.json
  * 2) 备用：站点上的 version.json（Pages）
+ *    raw 与 Pages 都有 CDN 缓存，可能短暂返回旧版本号，因此两源都请求、取 code 较大的那个
  * 3) 兜底：GitHub 最新 Release（tag android-vN，N 即 versionCode）
  * 12 小时内最多检查一次；用户可以「忽略此版本」。
  */
@@ -61,17 +62,18 @@ public class UpdateChecker {
             public void run() {
                 Remote remote = null;
 
+                /* raw 与 Pages 各有一层 CDN 缓存，可能短暂返回旧版本号，
+                   因此两源都取，取 code 更大的那个；两源都失败才走 API 兜底 */
                 try {
                     remote = fetchFromVersionJson(RAW_URL + "?t=" + System.currentTimeMillis());
                 } catch (Throwable t) {
                     Log.w(TAG, "raw json failed: " + t);
                 }
-                if (remote == null) {
-                    try {
-                        remote = fetchFromVersionJson(PAGES_URL + "?t=" + System.currentTimeMillis());
-                    } catch (Throwable t) {
-                        Log.w(TAG, "pages json failed: " + t);
-                    }
+                try {
+                    Remote pages = fetchFromVersionJson(PAGES_URL + "?t=" + System.currentTimeMillis());
+                    if (pages != null && (remote == null || pages.code > remote.code)) remote = pages;
+                } catch (Throwable t) {
+                    Log.w(TAG, "pages json failed: " + t);
                 }
                 if (remote == null) {
                     try {
