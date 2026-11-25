@@ -2,11 +2,14 @@ package com.piaony.tafei;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -73,9 +76,16 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        SpiritOverlayService.onAppState(this, true);
         /* 切回前台时再检查一次（内部有 12 小时节流，不会频繁请求） */
         if (firstCheckDone) UpdateChecker.maybeCheck(this);
         openPendingPage();
+    }
+
+    @Override
+    public void onPause() {
+        SpiritOverlayService.onAppState(this, false);
+        super.onPause();
     }
 
     @Override
@@ -193,6 +203,89 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public String notificationsAllowed() {
             return NotificationHelper.hasPermission(act) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String overlaySupported() {
+            return Build.VERSION.SDK_INT >= 23 ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String overlayStatus() {
+            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) return "denied";
+            boolean on = act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("overlay_enabled", false);
+            return on ? "on" : "off";
+        }
+
+        @JavascriptInterface
+        public void requestOverlayPermission() {
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + act.getPackageName()));
+                        act.startActivity(intent);
+                    } catch (Exception e) {
+                        try {
+                            act.startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public String startOverlay() {
+            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) return "denied";
+            act.getSharedPreferences("tafei_app", 0).edit().putBoolean("overlay_enabled", true).apply();
+            try {
+                SpiritOverlayService.start(act);
+                return "on";
+            } catch (Exception e) {
+                return "off";
+            }
+        }
+
+        @JavascriptInterface
+        public String stopOverlay() {
+            act.getSharedPreferences("tafei_app", 0).edit().putBoolean("overlay_enabled", false).apply();
+            SpiritOverlayService.stop(act);
+            return "off";
+        }
+
+        @JavascriptInterface
+        public int overlaySize() {
+            return act.getSharedPreferences("tafei_app", 0).getInt("overlay_size", 100);
+        }
+
+        @JavascriptInterface
+        public int overlayOpacity() {
+            return act.getSharedPreferences("tafei_app", 0).getInt("overlay_opacity", 100);
+        }
+
+        @JavascriptInterface
+        public void setOverlaySize(int percent) {
+            int value = Math.max(70, Math.min(130, percent));
+            act.getSharedPreferences("tafei_app", 0).edit().putInt("overlay_size", value).apply();
+            SpiritOverlayService.updatePrefs(act);
+        }
+
+        @JavascriptInterface
+        public void setOverlayOpacity(int percent) {
+            int value = Math.max(40, Math.min(100, percent));
+            act.getSharedPreferences("tafei_app", 0).edit().putInt("overlay_opacity", value).apply();
+            SpiritOverlayService.updatePrefs(act);
+        }
+
+        @JavascriptInterface
+        public void setOverlaySpirit(String id) {
+            String safe = (id == null) ? "xiaota" : id.replaceAll("[^a-zA-Z0-9_-]", "");
+            if (safe.isEmpty()) safe = "xiaota";
+            act.getSharedPreferences("tafei_app", 0).edit().putString("overlay_spirit", safe).apply();
+            SpiritOverlayService.updateSpirit(act);
         }
 
         @JavascriptInterface

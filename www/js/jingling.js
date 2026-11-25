@@ -19,6 +19,7 @@
   var gridSig = '';
   var shopSig = '';
   var widgetLoader = null;
+  var overlayPending = false;
 
   function loadWidgetScript() {
     if (window.TafeiSpiritWidgetLoaded) return Promise.resolve();
@@ -371,6 +372,11 @@
     if (faceNode && faceSpirit) {
       var faceSkin = core.skinsOf(faceSpirit.id)[0];
       if (faceSkin) faceNode.src = webpGrid(faceSkin.img);
+      try {
+        if (window.TafeiNative && typeof TafeiNative.setOverlaySpirit === 'function') {
+          TafeiNative.setOverlaySpirit(faceSpirit.id);
+        }
+      } catch (e) {}
     }
     Array.prototype.forEach.call(grid.querySelectorAll('img[data-fallback]'), function (img) {
       img.addEventListener('error', function () {
@@ -1001,6 +1007,103 @@
     });
   });
 
+  /* 桌面精灵：只在 App 内出现，调用 TafeiNative 原生悬浮窗 */
+  function nativeOverlayCall(name, fallback) {
+    try {
+      if (!window.TafeiNative || typeof TafeiNative[name] !== 'function') return fallback;
+      var args = Array.prototype.slice.call(arguments, 2);
+      var value = TafeiNative[name].apply(TafeiNative, args);
+      return value == null ? fallback : value;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function refreshNativeOverlay() {
+    var card = $('nativeOverlayCard');
+    if (!card || card.hidden) return;
+    var status = String(nativeOverlayCall('overlayStatus', 'off'));
+    var isOn = status === 'on';
+    var toggle = $('nativeOverlayToggle');
+    var state = $('nativeOverlayState');
+    if (toggle) {
+      toggle.classList.toggle('on', isOn);
+      toggle.setAttribute('aria-checked', String(isOn));
+    }
+    if (state) state.textContent = status === 'denied' ? '需要悬浮窗权限' : (isOn ? '已开启 · 退出 App 后生效' : '未开启');
+    card.classList.toggle('on', isOn);
+  }
+
+  function initNativeOverlay() {
+    var card = $('nativeOverlayCard');
+    if (!card) return;
+    if (String(nativeOverlayCall('overlaySupported', '0')) !== '1') return;
+    card.hidden = false;
+    var settings = $('nativeOverlaySettings');
+    if (settings) settings.hidden = false;
+    var size = $('noSize');
+    var opacity = $('noOpacity');
+    if (size) {
+      size.value = String(nativeOverlayCall('overlaySize', 100));
+      var sizeVal = $('noSizeVal');
+      if (sizeVal) sizeVal.textContent = size.value + '%';
+    }
+    if (opacity) {
+      opacity.value = String(nativeOverlayCall('overlayOpacity', 100));
+      var opacityVal = $('noOpacityVal');
+      if (opacityVal) opacityVal.textContent = opacity.value + '%';
+    }
+    refreshNativeOverlay();
+  }
+
+  $('nativeOverlayToggle')?.addEventListener('click', function () {
+    var status = String(nativeOverlayCall('overlayStatus', 'off'));
+    if (status === 'on') {
+      nativeOverlayCall('stopOverlay', 'off');
+      refreshNativeOverlay();
+      toast('桌面精灵已收起。');
+      return;
+    }
+    if (status === 'denied') {
+      overlayPending = true;
+      nativeOverlayCall('requestOverlayPermission', null);
+      toast('请允许「显示在其他应用上层」，回来后会自动开启。');
+      return;
+    }
+    var result = String(nativeOverlayCall('startOverlay', 'off'));
+    refreshNativeOverlay();
+    if (result === 'on') toast('已开启，退出 App 后她会留在桌面上。');
+    else if (result === 'denied') toast('还没有悬浮窗权限，请先在系统设置里允许。', true);
+    else toast('开启失败，请稍后再试。', true);
+  });
+
+  [['noSize', 'setOverlaySize', 'noSizeVal'], ['noOpacity', 'setOverlayOpacity', 'noOpacityVal']].forEach(function (row) {
+    var input = $(row[0]);
+    if (!input) return;
+    input.addEventListener('input', function () {
+      var out = $(row[2]);
+      if (out) out.textContent = input.value + '%';
+    });
+    input.addEventListener('change', function () {
+      nativeOverlayCall(row[1], null, Number(input.value));
+    });
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    refreshNativeOverlay();
+    if (!overlayPending) return;
+    var status = String(nativeOverlayCall('overlayStatus', 'off'));
+    if (status === 'off') {
+      overlayPending = false;
+      var result = String(nativeOverlayCall('startOverlay', 'off'));
+      refreshNativeOverlay();
+      if (result === 'on') toast('权限拿到了，桌面精灵已开启。');
+    } else if (status === 'on') {
+      overlayPending = false;
+    }
+  });
+
   core.subscribe(function () {
     renderAll();
     primeWidget();
@@ -1010,4 +1113,5 @@
   // 初次渲染
   renderAll();
   primeWidget();
+  initNativeOverlay();
 })();
