@@ -1,0 +1,22 @@
+--- a/www/js/app-shell.js
++++ b/www/js/app-shell.js
+@@ -218,7 +218,7 @@
+     /* 「我的」页额外挂上账号同步与问题反馈 */
+     if (/my\.html($|[?#])/.test(location.pathname + location.search) && !document.querySelector('script[data-tf-account]')) {
+       var ac = document.createElement('script');
+-      ac.src = 'js/my-account.js?v=20261125a';
++      ac.src = 'js/my-account.js?v=20261125b';
+       ac.setAttribute('data-tf-account', '1');
+       document.head.appendChild(ac);
+     }
+--- a/www/my.html
++++ b/www/my.html
+@@ -79,7 +79,7 @@
+ <link rel="stylesheet" href="css/tafei-ico.css?v=34">
+ <link rel="stylesheet" href="css/tafei-auth.css?v=43">
+ <script src="js/tafei-icons.js?v=34" defer></script>
+-<script src="js/app-shell.js?v=4" defer></script>
++<script src="js/app-shell.js?v=5" defer></script>
+ <script src="js/tafei-auth.js?v=43" defer></script>
+ </head>
+ <body>
