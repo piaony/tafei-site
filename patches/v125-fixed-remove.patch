@@ -1,0 +1,16 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+index 2c3d884..69b8a06 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+@@ -167,8 +167,9 @@ public class SpiritAccessibilityService extends AccessibilityService {
+                 int[] point = findRemoveBounds(xml, "移除");
+                 if (point == null) point = findRemoveBounds(xml, "从桌面移除");
+                 if (point == null) {
+-                    toast("root 兜底没找到「移除」");
+-                    return;
++                    android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
++                    point = new int[]{(int) (dm.widthPixels * 0.72f), (int) (dm.heightPixels * 0.855f)};
++                    toast("没读到按钮，按固定位置点「移除」");
+                 }
+                 boolean ok = tap(point[0], point[1]);
+                 toast(ok ? "root 坐标已点「移除」" : "root 点击失败");
