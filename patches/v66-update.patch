@@ -1,6 +1,8 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java b/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java
+index 3339ffb..f58b74e 100644
 --- a/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java
 +++ b/android/app/src/main/java/com/piaony/tafei/UpdateChecker.java
-@@ -77,12 +77,12 @@
+@@ -77,12 +77,12 @@ public class UpdateChecker {
                  } catch (Throwable t) {
                      Log.w(TAG, "pages json failed: " + t);
                  }
