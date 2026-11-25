@@ -207,7 +207,9 @@
     var opacity = Number(widgetConf('opacity', 1));
     if (!Number.isFinite(opacity)) opacity = 1;
     root.style.setProperty('--sw-scale', String(Math.max(0.72, Math.min(1.25, size))));
-    root.style.setProperty('--sw-opacity', String(Math.max(0.45, Math.min(1, opacity))));
+    var bodyOpacity = Math.max(0.3, Math.min(1, opacity));
+    root.style.setProperty('--sw-opacity', String(bodyOpacity));
+    root.style.setProperty('--sw-body-opacity', String(bodyOpacity));
     root.classList.toggle('sw-quiet', quietMode());
     root.classList.toggle('sw-lite', LITE);
     if (!particlesEnabled()) {

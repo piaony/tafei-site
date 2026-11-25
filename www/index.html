@@ -25,6 +25,21 @@
 <link rel="stylesheet" href="css/tafei-ico.css?v=34">
 <link rel="stylesheet" href="css/home-v2.css?v=34">
 <script src="js/app-shell.js?v=2" defer></script>
+<style>
+/* 社区栏目切换 */
+.comm-tabs{display:flex;gap:8px;margin:0 0 14px;padding:4px;border-radius:14px;background:rgba(120,150,255,.07);border:1px solid rgba(130,170,255,.16)}
+.comm-tabs button{flex:1;min-width:0;padding:9px 6px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--tf-muted,#8fa2c6);font:inherit;font-size:12.5px;cursor:pointer}
+.comm-tabs button.on{background:linear-gradient(120deg,#53ddff,#728cff);color:#06101f;font-weight:800}
+body.light .comm-tabs{background:rgba(90,120,200,.08)}
+/* 更新日志合集 */
+.changelog-card{display:grid;gap:14px}
+.log-list{display:grid;gap:14px}
+.log-list .log-item:nth-child(n+4){display:none}
+.changelog-mod.open .log-list .log-item:nth-child(n+4){display:block}
+.cl-toggle{width:100%;padding:11px;border:1px dashed rgba(130,170,255,.25);border-radius:13px;background:transparent;color:var(--tf-muted,#8fa2c6);font:inherit;font-size:12px;cursor:pointer}
+.cl-toggle b{color:#64e8ff;font-weight:800}
+.changelog-mod.open .cl-toggle span{display:inline-block;transform:rotate(180deg)}
+</style>
 </head>
 <body class="page-home">
 <svg class="tf-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
@@ -115,7 +130,8 @@
 <div class="hv-list">
  <a class="hv-row" href="naiwa.html"><span class="hv-mini" data-ti="game"></span><b>奶娃小游戏</b><i>27 款 · 点开就玩</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
  <a class="hv-row" href="#articles"><span class="hv-mini" data-ti="book"></span><b>文章攻略</b><i>Root / 刷机 / 选购实测</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
- <a class="hv-row" href="#changelog"><span class="hv-mini" data-ti="update"></span><b>更新日志</b><i>每次改动都记录</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+ <a class="hv-row" href="#changelog"><span class="hv-mini" data-ti="update"></span><b>更新日志合集</b><i>最近 3 条 · 可展开</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+ <a class="hv-row" href="#guestbook"><span class="hv-mini" data-ti="chat"></span><b>留言板</b><i>随便聊聊 · 站长都会看</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
 </div>
 
 <div class="hv-intro">
@@ -163,9 +179,10 @@
 
 <section id="articles" class="reveal" aria-label="文章内容"></section>
 
-<section id="changelog" class="reveal">
- <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
- <div class="panel" style="padding:24px;display:grid;gap:18px">
+<section id="changelog" class="reveal changelog-mod">
+ <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志合集</h2></div><p>默认只显示最近 3 条，展开看全部。</p></div>
+ <div class="panel changelog-card">
+  <div class="log-list" id="logList">
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v23.1</span><span class="af-date">2026-11-24</span></div><p>精灵小屋为瑶新增「时之祈愿 · 原画」皮肤：直接使用高精度原画立绘，在伙伴坞的皮肤条里点选即可换上，图鉴、头像、全站挂件会一起切换。原画皮肤是静态立绘，只有心情、粒子与台词反馈，不跟随 Q 版动作帧。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v23.0</span><span class="af-date">2026-11-22</span></div><p>「挞飞原创伙伴」小挞飞正式升级为官方形象：棕发小女孩、金色挞壳帽、奶油白裙、青绿围巾和星星糖挎包；全站挂件、个人中心、伙伴坞、小挞工坊和精灵小屋统一使用新资产。Lv.10 永久纪念卡改为空白星空卡面 + Canvas 动态文字，可按当前精灵名、等级、称号、亲密度和日期生成并下载。魔法伙伴面板和全站挂件改为跟随精灵小屋里选中的当前伙伴，可在图鉴里自由切换，不再固定小挞飞。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v22.2</span><span class="af-date">2026-11-22</span></div><p>精灵十级权益全部落地：Lv.4 专属互动台词、Lv.6 私信签名、Lv.7 限定卡面边框、Lv.8 个人主页展示位、Lv.9 专属称号、Lv.10 永久纪念卡；新增个人主页伙伴卡与可下载纪念卡，权益不再只是文字。</p></div>
@@ -194,19 +211,20 @@
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.0</span><span class="af-date">2026-11-21</span></div><p>首页改为内容优先：新增文章系统，上线手机权限与高中资料两个栏目，首批 6 篇范文；补齐 SEO 基础（sitemap、robots、社交卡片）。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v19.0</span><span class="af-date">2026-11-20</span></div><p>上线信息中心：系统通知、公告与私信；站长审查后台支持账号列表、私信核查、封禁与解封；注册需同意社区规范。</p></div>
   <div class="log-item"><div class="af-card-meta"><span class="af-col">v18.0</span><span class="af-date">2026-11 上旬</span></div><p>页面拆分重构，新增站内指令面板、快捷键与搜索视图记忆；留言墙、社区、项目展示整合到统一界面。</p></div>
+  </div>
+  <button class="cl-toggle" id="logToggle" type="button" aria-expanded="false">展开全部 <b id="logCount">0</b> 条记录 <span>⌄</span></button>
  </div>
 </section>
 
-<section id="home-tools" class="reveal">
- <div class="panel" style="padding:24px">
-  <h3>留言墙</h3>
-  <p>想说些什么？也可以看看大家留下的留言。</p>
-  <button class="btn primary" type="button" data-open-view="guestbook">打开留言墙 ↗</button>
- </div>
-</section>
+
 
 <section id="community" class="reveal">
- <div class="community-hub" id="communityHub">
+ <div class="comm-tabs" id="commTabs" role="tablist" aria-label="社区栏目">
+ <button class="on" type="button" data-ctab="all" role="tab" aria-selected="true">综合</button>
+ <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
+ <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
+</div>
+<div class="community-hub" id="communityHub">
   <div class="community-me" id="communityMe">
    <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
     <span id="communityAvatarFallback">访</span>
@@ -622,13 +640,6 @@
  </div>
 </section>
 
-<section id="projects" class="reveal">
-<div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
-<div class="grid">
-<article class="panel project"><div class="symbol">✦</div><h3>挞飞个人网站</h3><p>从零开始制作并部署的个人网站，记录这段学习与创作过程。</p><div class="bottom"><span class="tag">HTML · CSS · JS</span><a class="textbtn" href="https://piaony.github.io/tafei-site/" target="_blank" rel="noopener">访问网站 ↗</a></div></article>
-<article class="panel project"><div class="symbol">⌘</div><h3>下一个作品</h3><p>这里预留给你的下一个网页、小工具或编程练习。完成后再替换这段文字。</p><div class="bottom"><span class="tag">待添加</span><button class="textbtn detailBtn" data-title="下一个作品" data-desc="把你真正完成的项目名称、用途和访问链接添加到这里。">编辑提示 ↗</button></div></article>
-<article class="panel project"><div class="symbol">◇</div><h3>实验与练习</h3><p>收集学习过程中做过的小实验，展示从尝试到掌握的过程。</p><div class="bottom"><span class="tag">持续更新</span><button class="textbtn detailBtn" data-title="实验与练习" data-desc="可以放置 JavaScript 小练习、网页交互实验或自己编写的演示程序。">查看说明 ↗</button></div></article>
-</div></section>
 <section id="about" class="reveal">
 <div class="section-head"><div><div class="kicker">03 / OUR MISSION</div><h2>挞飞的初心</h2></div><p>让每个人都能平等、自由、友善地享受互联网带来的便利。</p></div>
 <div class="about-grid">
@@ -639,35 +650,11 @@
 <p>无论身处哪里，无论是否懂技术，每个人都值得平等地享受互联网带来的便利。</p>
 <span class="tag">FREE · FRIENDLY · OPEN</span>
 </div>
-<div class="panel about-card"><h3>学习路线</h3>
-<div class="skill"><div class="skill-top"><span>HTML · 网页结构</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:42%"></div></div></div>
-<div class="skill"><div class="skill-top"><span>CSS · 页面样式</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:32%"></div></div></div>
-<div class="skill"><div class="skill-top"><span>JavaScript · 交互逻辑</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:18%"></div></div></div>
-<p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
+<div class="panel about-card"><h3>站长简介</h3>
+<p id="founderIntro">高二在读，临沂人。自己在折腾手机：解 BL、Root、刷机、救砖和性能调优都亲自上手，也在把踩过的坑整理成文章。</p>
+<p>挞飞由站长本人维护，站内服务、答疑和售后都由站长对接，没有中间商，也不做夸大承诺。</p>
+<span class="tag">临沂 · 站长本人接单</span>
 </div></div></section>
-<section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">04 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
-<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！
-输入 help 查看可用命令。
-</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
-
-<section id="studio" class="reveal">
- <div class="section-head"><div><div class="kicker">05 / CREATOR STUDIO</div><h2>我的项目管理台</h2></div><p>把完成的小作品添加到展厅，整理名称、介绍和访问地址。</p></div>
- <div class="feature-grid">
-  <div class="panel form-panel">
-   <h3>添加一个作品</h3>
-   <input id="projectName" maxlength="40" placeholder="作品名称，例如：我的计算器">
-   <textarea id="projectDesc" maxlength="220" placeholder="简单介绍它能做什么"></textarea>
-   <input id="projectUrl" type="url" placeholder="作品网址（可选，需以 https:// 开头）">
-   <button class="action-btn primary" id="addProject">＋ 添加到我的展厅</button>
-   <p class="local-note">说明：目前作品数据保存在当前浏览器中。清除浏览器数据或换设备后不会自动同步。</p>
-  </div>
-  <div class="panel">
-   <h3>我的新增作品</h3>
-   <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
-  </div>
- </div>
- <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>23.0</strong>当前网站版本</div></div>
-</section>
 <section id="guestbook" class="reveal">
  <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
  <div class="feature-grid">
@@ -681,8 +668,6 @@
   <div class="panel"><h3>最近的留言</h3><div id="messages" class="messages"><div class="empty-state">还没有留言。欢迎写下第一条。</div></div></div>
  </div>
 </section>
-
-<section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
 
 </main>
 <footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界 · <a href="fix.html">手机急救室</a> · <a href="jingling.html?from=tafei" target="_blank" rel="noopener">精灵小屋</a><div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
@@ -717,5 +702,41 @@
 <script src="js/spirit-chat.js?v=2" defer></script>
 <script src="js/spirit-widget.js?v=21" defer></script>
 <script src="js/spirit-extra.js?v=43"></script>
+<script>
+(function () {
+  var mod = document.getElementById('changelog');
+  var btn = document.getElementById('logToggle');
+  var list = document.getElementById('logList');
+  var cnt = document.getElementById('logCount');
+  if (mod && btn && list) {
+    if (cnt) cnt.textContent = String(list.querySelectorAll('.log-item').length);
+    btn.addEventListener('click', function () {
+      var open = mod.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.firstChild.textContent = open ? '收起全部 ' : '展开全部 ';
+    });
+  }
+  var tabs = document.getElementById('commTabs');
+  var hub = document.getElementById('communityHub');
+  if (tabs) {
+    tabs.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ctab]');
+      if (!b) return;
+      var key = b.getAttribute('data-ctab');
+      Array.prototype.forEach.call(tabs.querySelectorAll('button'), function (x) {
+        var on = x === b;
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (key === 'all') { if (hub) hub.hidden = false; return; }
+      if (hub) hub.hidden = true;
+      var art = window.TAFEIArticles;
+      if (art && art.openColumn) art.openColumn(key);
+      var sec = document.getElementById('articles');
+      if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+})();
+</script>
 </body>
 </html>

@@ -336,7 +336,7 @@
         next.widget.y = clamp(saved.widget.y, 0, 1);
         next.widget.corner = saved.widget.corner || 'free';
         next.widget.size = clamp(saved.widget.size == null ? 1 : saved.widget.size, 0.72, 1.25);
-        next.widget.opacity = clamp(saved.widget.opacity == null ? 1 : saved.widget.opacity, 0.45, 1);
+        next.widget.opacity = clamp(saved.widget.opacity == null ? 1 : saved.widget.opacity, 0.3, 1);
         next.widget.autoWalk = saved.widget.autoWalk !== false;
         next.widget.particles = saved.widget.particles !== false;
         next.widget.speech = saved.widget.speech !== false;
@@ -934,7 +934,7 @@
   function setWidgetOptions(patch) {
     patch = patch || {};
     if (patch.size != null) state.widget.size = clamp(patch.size, 0.72, 1.25);
-    if (patch.opacity != null) state.widget.opacity = clamp(patch.opacity, 0.45, 1);
+    if (patch.opacity != null) state.widget.opacity = clamp(patch.opacity, 0.3, 1);
     if (patch.autoWalk != null) state.widget.autoWalk = !!patch.autoWalk;
     if (patch.particles != null) state.widget.particles = !!patch.particles;
     if (patch.speech != null) state.widget.speech = !!patch.speech;
