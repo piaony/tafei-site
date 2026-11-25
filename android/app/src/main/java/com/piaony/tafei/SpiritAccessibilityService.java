@@ -8,7 +8,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.Toast;
+
+import java.util.List;
 
 /**
  * 桌面互动用的无障碍服务。
@@ -88,9 +91,9 @@ public class SpiritAccessibilityService extends AccessibilityService {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                clickRemove(label);
+                clickRemove(label, 0);
             }
-        }, 900L);
+        }, 1400L);
     }
 
     private boolean longPress(int x, int y) {
@@ -104,29 +107,69 @@ public class SpiritAccessibilityService extends AccessibilityService {
         return dispatchGesture(gesture, null, null);
     }
 
-    private void clickRemove(String label) {
-        AccessibilityNodeInfo root = getRootInActiveWindow();
-        if (root == null) {
-            toast("菜单没有出现");
-            return;
-        }
-        AccessibilityNodeInfo remove = findText(root, "移除", 0);
+    private void clickRemove(final String label, final int attempt) {
+        AccessibilityNodeInfo remove = findRemoveNode();
         if (remove == null) {
-            toast("没有找到「移除」菜单");
+            if (attempt < 3) {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        clickRemove(label, attempt + 1);
+                    }
+                }, 450L);
+            } else {
+                toast("菜单里没有找到「移除」，请手动点一下");
+            }
             return;
         }
-        AccessibilityNodeInfo clickable = remove;
-        for (int i = 0; i < 6 && clickable != null; i++) {
-            if (clickable.isClickable()) break;
-            clickable = clickable.getParent();
+        Rect bounds = new Rect();
+        remove.getBoundsInScreen(bounds);
+        if (bounds.width() < 10 || bounds.height() < 10) {
+            toast("「移除」按钮坐标无效");
+            return;
         }
-        boolean ok = clickable != null && clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+        boolean ok = tap(bounds.centerX(), bounds.centerY());
         if (!ok) {
-            Rect bounds = new Rect();
-            remove.getBoundsInScreen(bounds);
-            ok = longPress(bounds.centerX(), bounds.centerY());
+            AccessibilityNodeInfo clickable = remove;
+            for (int i = 0; i < 6 && clickable != null; i++) {
+                if (clickable.isClickable()) break;
+                clickable = clickable.getParent();
+            }
+            ok = clickable != null && clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         }
-        toast(ok ? "已移除「" + label + "」，应用还在抽屉里" : "移除失败，请重试");
+        toast(ok ? "正在自动点「移除」…" : "自动点击失败，请手动点一下");
+    }
+
+    private AccessibilityNodeInfo findRemoveNode() {
+        String[] labels = {"从桌面移除", "移除", "删除"};
+        List<AccessibilityWindowInfo> windows = getWindows();
+        for (AccessibilityWindowInfo window : windows) {
+            AccessibilityNodeInfo root = window.getRoot();
+            if (root == null) continue;
+            for (String label : labels) {
+                AccessibilityNodeInfo node = findText(root, label, 0);
+                if (node != null) return node;
+            }
+        }
+        AccessibilityNodeInfo active = getRootInActiveWindow();
+        if (active != null) {
+            for (String label : labels) {
+                AccessibilityNodeInfo node = findText(active, label, 0);
+                if (node != null) return node;
+            }
+        }
+        return null;
+    }
+
+    private boolean tap(int x, int y) {
+        Path path = new Path();
+        path.moveTo(x, y);
+        GestureDescription.StrokeDescription stroke =
+            new GestureDescription.StrokeDescription(path, 0L, 70L);
+        GestureDescription gesture = new GestureDescription.Builder()
+            .addStroke(stroke)
+            .build();
+        return dispatchGesture(gesture, null, null);
     }
 
     private AccessibilityNodeInfo findLabel(AccessibilityNodeInfo node, String label, int depth) {
