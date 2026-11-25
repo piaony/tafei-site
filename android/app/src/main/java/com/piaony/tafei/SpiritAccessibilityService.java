@@ -141,22 +141,34 @@ public class SpiritAccessibilityService extends AccessibilityService {
     }
 
     private AccessibilityNodeInfo findRemoveNode() {
-        String[] labels = {"从桌面移除", "移除", "删除"};
+        String[] labels = {"移除", "从桌面移除", "删除"};
         List<AccessibilityWindowInfo> windows = getWindows();
         for (AccessibilityWindowInfo window : windows) {
             AccessibilityNodeInfo root = window.getRoot();
             if (root == null) continue;
             for (String label : labels) {
-                AccessibilityNodeInfo node = findText(root, label, 0);
+                AccessibilityNodeInfo node = findTextExact(root, label, 0);
                 if (node != null) return node;
             }
         }
         AccessibilityNodeInfo active = getRootInActiveWindow();
         if (active != null) {
             for (String label : labels) {
-                AccessibilityNodeInfo node = findText(active, label, 0);
+                AccessibilityNodeInfo node = findTextExact(active, label, 0);
                 if (node != null) return node;
             }
+        }
+        return null;
+    }
+
+    private AccessibilityNodeInfo findTextExact(AccessibilityNodeInfo node, String needle, int depth) {
+        if (node == null || depth > 14) return null;
+        if (equalsLabel(node.getText(), needle) || equalsLabel(node.getContentDescription(), needle)) {
+            return node;
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            AccessibilityNodeInfo found = findTextExact(node.getChild(i), needle, depth + 1);
+            if (found != null) return found;
         }
         return null;
     }
