@@ -9,6 +9,8 @@
  <script>
  (function () {
    var mod = document.getElementById('changelog');
+--- a/www/js/spirit-extra.js
++++ b/www/js/spirit-extra.js
 @@ -51,7 +51,7 @@
        extra.id = 'swExtra';
        extra.setAttribute('aria-hidden', 'true');
