@@ -77,12 +77,12 @@ public class UpdateChecker {
                 } catch (Throwable t) {
                     Log.w(TAG, "pages json failed: " + t);
                 }
-                if (remote == null) {
-                    try {
-                        remote = fetchFromApi();
-                    } catch (Throwable t) {
-                        Log.w(TAG, "api failed: " + t);
-                    }
+                /* JSON 可能被 CDN 缓存成旧版本，因此 API 每次都查，取 code 最大的一份 */
+                try {
+                    Remote api = fetchFromApi();
+                    if (api != null && (remote == null || api.code > remote.code)) remote = api;
+                } catch (Throwable t) {
+                    Log.w(TAG, "api failed: " + t);
                 }
                 running = false;
 
