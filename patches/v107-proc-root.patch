@@ -12,3 +12,4 @@ index d2d8f4b..56caacc 100644
 +            diagCmd(diag, "launcher root files", "ls -la /proc/$(pidof com.android.launcher)/root/data/user_de/0/com.android.launcher/files", 600);
              diagCmd(diag, "launcher 打开的 db", "ls -l /proc/$(pidof com.android.launcher)/fd | grep -Ei 'db|launcher|favorite'", 820);
              diagCmd(diag, "launcher.db 全局查找", "find -L /data/user /data/user_de /data/data /data/system /data/oppo -maxdepth 5 -name launcher.db", 720);
+             diagCmd(diag, "boot 数据目录", "ls -la /data/user_de/0/com.android.launcher", 560);
