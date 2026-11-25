@@ -1,1131 +1,1127 @@
-diff --git a/android/app/src/main/java/com/piaony/tafei/AppIconUtil.java b/android/app/src/main/java/com/piaony/tafei/AppIconUtil.java
-new file mode 100644
-index 0000000..8712ec3
---- /dev/null
-+++ b/android/app/src/main/java/com/piaony/tafei/AppIconUtil.java
-@@ -0,0 +1,44 @@
-+package com.piaony.tafei;
-+
-+import android.content.Context;
-+import android.graphics.Bitmap;
-+import android.graphics.Canvas;
-+import android.graphics.drawable.Drawable;
-+import android.util.Base64;
-+
-+import java.io.ByteArrayOutputStream;
-+import java.util.HashMap;
-+import java.util.Map;
-+
-+/** 把应用图标转成 WebView 可直接用的 base64 PNG。 */
-+public final class AppIconUtil {
-+
-+    private static final Map<String, String> CACHE = new HashMap<>();
-+    private static final int MAX_SIZE = 240;
-+
-+    private AppIconUtil() {}
-+
-+    public static String data(Context context, String pkg) {
-+        if (pkg == null || pkg.trim().isEmpty()) return "";
-+        String key = pkg.trim();
-+        String cached = CACHE.get(key);
-+        if (cached != null) return cached;
-+        try {
-+            Drawable drawable = context.getPackageManager().getApplicationIcon(key);
-+            int size = Math.round(56 * context.getResources().getDisplayMetrics().density);
-+            Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-+            Canvas canvas = new Canvas(bitmap);
-+            drawable.setBounds(0, 0, size, size);
-+            drawable.draw(canvas);
-+            ByteArrayOutputStream out = new ByteArrayOutputStream();
-+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-+            bitmap.recycle();
-+            String data = Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
-+            if (CACHE.size() > MAX_SIZE) CACHE.clear();
-+            CACHE.put(key, data);
-+            return data;
-+        } catch (Throwable ignored) {
-+            return "";
-+        }
-+    }
-+}
 diff --git a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
-index 9b3f85e..f784166 100644
+index 9b3f85e..0ea9043 100644
 --- a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
 +++ b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
-@@ -33,9 +33,15 @@ import java.util.regex.Pattern;
+@@ -33,9 +33,19 @@ import java.util.regex.Pattern;
  public final class DesktopProbe {
  
      private static final Pattern COMPONENT = Pattern.compile("component=([^;]+)");
-+    private static volatile String lastLauncherDbPath = "";
++    private static volatile String lastDbPath = "";
++    private static volatile String lastTable = "singledesktopitems";
  
      private DesktopProbe() {}
  
-+    /** 最近一次读到的 launcher.db（可能是 /proc/<pid>/root/...）。 */
-+    public static String lastLauncherDbPath() {
-+        return lastLauncherDbPath;
++    public static String launcherDbPath() {
++        return lastDbPath;
++    }
++
++    public static String launcherTable() {
++        return lastTable;
 +    }
 +
      public static String probe(Context context) {
          JSONObject out = new JSONObject();
          JSONArray diag = new JSONArray();
-@@ -273,6 +279,7 @@ public final class DesktopProbe {
+@@ -95,6 +105,7 @@ public final class DesktopProbe {
+                 out.put("containers", new JSONObject());
+                 out.put("appShortcutCount", 0);
+                 out.put("totalRows", 0);
++                out.put("folders", new JSONArray());
+                 out.put("dbPath", "");
+                 out.put("dbFile", "");
+                 out.put("desktopMode", "unknown");
+@@ -176,6 +187,7 @@ public final class DesktopProbe {
+                 out.put("containers", new JSONObject());
+                 out.put("appShortcutCount", 0);
+                 out.put("totalRows", 0);
++                out.put("folders", new JSONArray());
+                 out.put("dbPath", "");
+                 out.put("dbFile", "");
+             } else {
+@@ -188,6 +200,7 @@ public final class DesktopProbe {
+                 out.put("appShortcutCount", selected.optInt("appShortcutCount"));
+                 out.put("totalRows", selected.optInt("totalRows"));
+                 out.put("samples", selected.optJSONArray("samples"));
++                out.put("folders", selected.optJSONArray("folders"));
+                 out.put("desktopMode", "unknown");
+             }
+         } catch (Throwable t) {
+@@ -273,6 +286,7 @@ public final class DesktopProbe {
  
                  JSONObject containers = new JSONObject();
                  JSONArray samples = new JSONArray();
-+                JSONArray slots = new JSONArray();
++                JSONArray folders = new JSONArray();
                  int appShortcutCount = 0;
                  int totalRows = 0;
  
-@@ -289,24 +296,39 @@ public final class DesktopProbe {
+@@ -289,13 +303,27 @@ public final class DesktopProbe {
                              int count = containers.optInt(container, 0) + 1;
                              containers.put(container, count);
                          }
 -                        if (itemType != 0) continue;
                          int containerValue = intValue(rows, "container", Integer.MIN_VALUE);
--                        if (containerValue != -100) continue;
+                         if (containerValue != -100) continue;
                          int screen = intValue(rows, "screen", -1);
                          int cellX = intValue(rows, "cellX", -1);
                          int cellY = intValue(rows, "cellY", -1);
--                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
--                        appShortcutCount++;
--                        if (samples.length() >= 200) continue;
-                         String intent = stringValue(rows, "intent");
-                         String component = componentOf(intent);
-                         String pkg = component == null ? "" : component.split("/")[0];
-                         String title = stringValue(rows, "title");
-+                        if (containerValue == -100 && screen >= 0 && cellX >= 0 && cellY >= 0) {
-+                            JSONObject slot = new JSONObject();
-+                            slot.put("id", intValue(rows, "_id", -1));
-+                            slot.put("title", title == null ? "" : title);
-+                            slot.put("package", pkg);
-+                            slot.put("itemType", itemType);
-+                            slot.put("container", containerValue);
-+                            slot.put("screen", screen);
-+                            slot.put("cellX", cellX);
-+                            slot.put("cellY", cellY);
-+                            slots.put(slot);
+                         if (screen < 0 || cellX < 0 || cellY < 0) continue;
++                        if (itemType == 2) {
++                            JSONObject folder = new JSONObject();
++                            folder.put("rowId", intValue(rows, "_id", -1));
++                            String folderTitle = stringValue(rows, "title");
++                            folder.put("label", folderTitle == null || folderTitle.isEmpty() ? "文件夹" : folderTitle);
++                            folder.put("package", "");
++                            folder.put("screen", screen);
++                            folder.put("cellX", cellX);
++                            folder.put("cellY", cellY);
++                            folder.put("itemType", 2);
++                            folder.put("container", containerValue);
++                            folders.put(folder);
++                            continue;
 +                        }
 +                        if (itemType != 0) continue;
-+                        if (containerValue != -100) continue;
-+                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
-+                        appShortcutCount++;
-+                        if (samples.length() >= 200) continue;
-                         String label = resolveLabel(context, pkg, title);
-                         JSONObject item = new JSONObject();
-+                        item.put("id", intValue(rows, "_id", -1));
+                         appShortcutCount++;
+                         if (samples.length() >= 200) continue;
+                         String intent = stringValue(rows, "intent");
+@@ -307,9 +335,12 @@ public final class DesktopProbe {
                          item.put("label", label == null ? "" : label);
                          item.put("package", pkg);
                          item.put("component", component == null ? "" : component);
-+                        item.put("itemType", itemType);
-+                        item.put("container", containerValue);
++                        item.put("rowId", intValue(rows, "_id", -1));
                          item.put("screen", screen);
                          item.put("cellX", cellX);
                          item.put("cellY", cellY);
-@@ -324,6 +346,10 @@ public final class DesktopProbe {
++                        item.put("itemType", itemType);
++                        item.put("container", containerValue);
+                         samples.put(item);
+                     }
+                 } finally {
+@@ -319,11 +350,14 @@ public final class DesktopProbe {
+                 result.put("path", remotePath);
+                 result.put("file", name);
+                 result.put("table", itemsTable);
++                lastDbPath = remotePath;
++                lastTable = itemsTable;
+                 result.put("columns", columnArray);
+                 result.put("containers", containers);
                  result.put("appShortcutCount", appShortcutCount);
                  result.put("totalRows", totalRows);
                  result.put("samples", samples);
-+                result.put("slots", slots);
-+                if (name.equals("launcher.db") && remotePath != null && remotePath.contains("user_de/0/")) {
-+                    lastLauncherDbPath = remotePath;
-+                }
++                result.put("folders", folders);
                  return result;
              } catch (Throwable t) {
                  addDiag(diag, name + "：打开失败 " + String.valueOf(t.getMessage()));
-diff --git a/android/app/src/main/java/com/piaony/tafei/LauncherDbEditor.java b/android/app/src/main/java/com/piaony/tafei/LauncherDbEditor.java
+diff --git a/android/app/src/main/java/com/piaony/tafei/EatEffectView.java b/android/app/src/main/java/com/piaony/tafei/EatEffectView.java
+index a37cd84..ad54307 100644
+--- a/android/app/src/main/java/com/piaony/tafei/EatEffectView.java
++++ b/android/app/src/main/java/com/piaony/tafei/EatEffectView.java
+@@ -22,6 +22,7 @@ public class EatEffectView extends View {
+     private static final int MODE_FOUND = 1;
+     private static final int MODE_SUCCESS = 2;
+     private static final int MODE_FAIL = 3;
++    private static final int MODE_ACTION = 4;
+     private static final int BIT_COUNT = 26;
+ 
+     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+@@ -38,6 +39,7 @@ public class EatEffectView extends View {
+     private float targetY;
+     private Bitmap icon;
+     private String label = "";
++    private String action = "";
+ 
+     private float[] bitAngles;
+     private float[] bitSpeeds;
+@@ -81,6 +83,19 @@ public class EatEffectView extends View {
+         invalidate();
+     }
+ 
++    public void playDesktopAction(float tx, float ty, String actionName, String name) {
++        mode = MODE_ACTION;
++        startedAt = SystemClock.uptimeMillis();
++        targetX = tx;
++        targetY = ty;
++        action = actionName == null ? "" : actionName;
++        label = name == null ? "" : name;
++        icon = null;
++        bitAngles = null;
++        makeBits();
++        invalidate();
++    }
++
+     public void playFailure(float tx, float ty, Bitmap appIcon) {
+         mode = MODE_FAIL;
+         startedAt = SystemClock.uptimeMillis();
+@@ -111,10 +126,14 @@ public class EatEffectView extends View {
+             drawSuccess(canvas, elapsed);
+             if (elapsed < 1.15f) postInvalidateDelayed(30);
+             else mode = MODE_NONE;
+-        } else {
++        } else if (mode == MODE_FAIL) {
+             drawFailure(canvas, elapsed);
+             if (elapsed < 0.95f) postInvalidateDelayed(30);
+             else mode = MODE_NONE;
++        } else {
++            drawDesktopAction(canvas, elapsed);
++            if (elapsed < 1.35f) postInvalidateDelayed(30);
++            else mode = MODE_NONE;
+         }
+     }
+ 
+@@ -206,6 +225,122 @@ public class EatEffectView extends View {
+         }
+     }
+ 
++    private void drawDesktopAction(Canvas canvas, float elapsed) {
++        float p = Math.min(1f, elapsed / 0.85f);
++        float ease = 1f - (float) Math.pow(1f - p, 3f);
++        boolean swap = action.contains("swap");
++        boolean folder = action.contains("folder");
++        int accent = swap ? Color.parseColor("#C7A6FF")
++            : (folder ? Color.parseColor("#FFD36E") : Color.parseColor("#8CE8FF"));
++
++        // 目标格的四角定位框。
++        float half = dp(26) + dp(8) * ease;
++        paint.setStyle(Paint.Style.STROKE);
++        paint.setStrokeWidth(dp(1.4f));
++        paint.setColor(accent);
++        paint.setAlpha((int) (190 * (1f - 0.25f * p)));
++        float gap = dp(7);
++        // 左上
++        canvas.drawLine(targetX - half, targetY - half, targetX - half + gap, targetY - half, paint);
++        canvas.drawLine(targetX - half, targetY - half, targetX - half, targetY - half + gap, paint);
++        // 右上
++        canvas.drawLine(targetX + half, targetY - half, targetX + half - gap, targetY - half, paint);
++        canvas.drawLine(targetX + half, targetY - half, targetX + half, targetY - half + gap, paint);
++        // 左下
++        canvas.drawLine(targetX - half, targetY + half, targetX - half + gap, targetY + half, paint);
++        canvas.drawLine(targetX - half, targetY + half, targetX - half, targetY + half - gap, paint);
++        // 右下
++        canvas.drawLine(targetX + half, targetY + half, targetX + half - gap, targetY + half, paint);
++        canvas.drawLine(targetX + half, targetY + half, targetX + half, targetY + half - gap, paint);
++
++        // 两道不同速度的扩散环。
++        paint.setStyle(Paint.Style.STROKE);
++        paint.setStrokeWidth(dp(1.6f));
++        paint.setColor(accent);
++        paint.setAlpha((int) (200 * (1f - p)));
++        canvas.drawCircle(targetX, targetY, dp(18) + dp(30) * ease, paint);
++        paint.setStrokeWidth(dp(1f));
++        paint.setAlpha((int) (120 * (1f - p)));
++        canvas.drawCircle(targetX, targetY, dp(28) + dp(52) * ease, paint);
++
++        // 交换：两个虚影小圆点对向滑过；文件夹：四颗星点收拢。
++        paint.setStyle(Paint.Style.FILL);
++        if (swap) {
++            float dx = dp(30) + dp(14) * ease;
++            float dy = dp(20) + dp(9) * ease;
++            paint.setColor(Color.parseColor("#C7A6FF"));
++            paint.setAlpha((int) (210 * (1f - p)));
++            canvas.drawCircle(targetX - dx, targetY - dy, dp(4.4f), paint);
++            paint.setColor(Color.parseColor("#8CE8FF"));
++            canvas.drawCircle(targetX + dx, targetY + dy, dp(4.4f), paint);
++            paint.setStyle(Paint.Style.STROKE);
++            paint.setStrokeWidth(dp(1.2f));
++            paint.setAlpha((int) (150 * (1f - p)));
++            canvas.drawArc(new RectF(targetX - dp(42), targetY - dp(42), targetX + dp(42), targetY + dp(42)),
++                -40f + 180f * ease, 120f, false, paint);
++        } else if (folder) {
++            for (int i = 0; i < 5; i++) {
++                float a = (float) (i * Math.PI * 2 / 5 + elapsed * 1.5f);
++                float radius = dp(34) * (1f - ease);
++                float sx = targetX + (float) Math.cos(a) * radius;
++                float sy = targetY + (float) Math.sin(a) * radius;
++                paint.setColor(i % 2 == 0 ? Color.parseColor("#FFD36E") : Color.parseColor("#FFF2BF"));
++                paint.setAlpha((int) (230 * (1f - p)));
++                drawStar(canvas, sx, sy, dp(2.6f + 1.4f * (1f - p)), accent, (int) (230 * (1f - p)));
++            }
++            // 文件夹底色小方框。
++            dst.set(targetX - dp(17), targetY - dp(14), targetX + dp(17), targetY + dp(14));
++            paint.setStyle(Paint.Style.STROKE);
++            paint.setStrokeWidth(dp(1.4f));
++            paint.setColor(Color.parseColor("#FFD36E"));
++            paint.setAlpha((int) (170 * (1f - p * 0.5f)));
++            canvas.drawRoundRect(dst, dp(5), dp(5), paint);
++            canvas.drawLine(dst.left + dp(5), dst.top + dp(7), dst.right - dp(5), dst.top + dp(7), paint);
++        } else {
++            // 移动：从中心向外的速度线。
++            paint.setStrokeWidth(dp(1.2f));
++            for (int i = 0; i < 6; i++) {
++                float a = (float) (i * Math.PI / 3 + 0.2);
++                float r1 = dp(18) + dp(16) * ease;
++                float r2 = r1 + dp(12) * (1f - p);
++                paint.setColor(Color.parseColor(i % 2 == 0 ? "#8CE8FF" : "#FFF2BF"));
++                paint.setAlpha((int) (180 * (1f - p)));
++                canvas.drawLine(targetX + (float) Math.cos(a) * r1, targetY + (float) Math.sin(a) * r1,
++                    targetX + (float) Math.cos(a) * r2, targetY + (float) Math.sin(a) * r2, paint);
++            }
++        }
++
++        // 星屑爆开。
++        float burst = Math.max(0f, (elapsed - 0.22f) / 0.7f);
++        if (burst > 0f && burst < 1f) {
++            paint.setStyle(Paint.Style.FILL);
++            for (int i = 0; i < BIT_COUNT; i++) {
++                float radius = dp(7) + dp(58) * bitSpeeds[i] * burst;
++                float bx = targetX + (float) Math.cos(bitAngles[i]) * radius;
++                float by = targetY + (float) Math.sin(bitAngles[i]) * radius + dp(8) * burst * burst;
++                paint.setColor(bitColors[i]);
++                paint.setAlpha((int) (220 * (1f - burst)));
++                if (i % 5 == 0) drawStar(canvas, bx, by, dp(2.2f + bitSpeeds[i] * 1.7f), bitColors[i], (int) (220 * (1f - burst)));
++                else canvas.drawCircle(bx, by, dp(1.1f + bitSpeeds[i] * 1.4f), paint);
++            }
++        }
++
++        // 目标下方的小标签。
++        if (label.length() > 0) {
++            String tag = (swap ? "交换 · " : (folder ? "文件夹 · " : "移动 · ")) + label;
++            paint.setStyle(Paint.Style.FILL);
++            paint.setTextSize(dp(10.5f));
++            paint.setColor(Color.parseColor("#0B1021"));
++            paint.setAlpha((int) (215 * (1f - Math.max(0f, (elapsed - 1.05f) / 0.3f))));
++            float tw = paint.measureText(tag);
++            dst.set(targetX - tw / 2 - dp(8), targetY + dp(34),
++                targetX + tw / 2 + dp(8), targetY + dp(52));
++            canvas.drawRoundRect(dst, dp(8), dp(8), paint);
++            paint.setColor(accent);
++            canvas.drawText(tag, targetX - tw / 2, targetY + dp(46), paint);
++        }
++    }
++
+     private void drawFailure(Canvas canvas, float elapsed) {
+         float p = Math.min(1f, elapsed / 0.7f);
+         float ease = 1f - (float) Math.pow(1f - p, 3f);
+diff --git a/android/app/src/main/java/com/piaony/tafei/LauncherDbOps.java b/android/app/src/main/java/com/piaony/tafei/LauncherDbOps.java
 new file mode 100644
-index 0000000..6d5b12f
+index 0000000..8970903
 --- /dev/null
-+++ b/android/app/src/main/java/com/piaony/tafei/LauncherDbEditor.java
-@@ -0,0 +1,88 @@
++++ b/android/app/src/main/java/com/piaony/tafei/LauncherDbOps.java
+@@ -0,0 +1,559 @@
 +package com.piaony.tafei;
 +
++import android.content.ContentValues;
 +import android.content.Context;
++import android.database.Cursor;
++import android.database.sqlite.SQLiteDatabase;
++import android.os.SystemClock;
++import android.util.DisplayMetrics;
 +
++import org.json.JSONArray;
++import org.json.JSONObject;
++
++import java.io.File;
++import java.util.ArrayList;
 +import java.util.List;
++import java.util.Set;
++import java.util.LinkedHashSet;
 +
 +/**
-+ * 实验性的 launcher.db 坐标写入。
-+ * 默认关闭；只有在用户手动打开、且无障碍拖动失败时才会被调用。
-+ * 写入前备份数据库，事务失败时尝试恢复。
++ * 实验性 launcher.db 写入。
++ * 默认关闭；每次写入前把 launcher.db / -wal / -shm 完整备份，
++ * 先改本地副本，再写回并重启桌面校验；失败自动回滚。
 + */
-+public final class LauncherDbEditor {
++public final class LauncherDbOps {
 +
-+    public static final class Update {
-+        public final int id;
-+        public final int screen;
-+        public final int cellX;
-+        public final int cellY;
++    private static final String PREF = "tafei_app";
++    private static final String KEY_DB_WRITE = "launcher_db_write";
++    private static final Object LOCK = new Object();
++    private static volatile boolean running = false;
++    private static String lastBackupDir = "";
 +
-+        public Update(int id, int screen, int cellX, int cellY) {
-+            this.id = id;
-+            this.screen = screen;
-+            this.cellX = cellX;
-+            this.cellY = cellY;
-+        }
++    private LauncherDbOps() {}
++
++    public static boolean isEnabled(Context context) {
++        return context.getSharedPreferences(PREF, 0).getBoolean(KEY_DB_WRITE, false);
 +    }
 +
-+    private LauncherDbEditor() {}
-+
-+    public static String dbPath(Context context) {
-+        String cached = DesktopProbe.lastLauncherDbPath();
-+        if (cached != null && !cached.isEmpty()) return cached;
-+        RootBridge.Result pid = RootBridge.run("pidof com.android.launcher");
-+        String value = pid.output == null ? "" : pid.output.trim();
-+        if (value.isEmpty()) return "";
-+        String first = value.split("\\s+")[0];
-+        if (!first.matches("\\d+")) return "";
-+        return "/proc/" + first + "/root/data/user_de/0/com.android.launcher/databases/launcher.db";
++    public static void setEnabled(Context context, boolean enabled) {
++        context.getSharedPreferences(PREF, 0).edit().putBoolean(KEY_DB_WRITE, enabled).apply();
 +    }
 +
-+    public static boolean available(Context context) {
-+        String db = dbPath(context);
-+        if (db.isEmpty()) return false;
-+        RootBridge.Result r = RootBridge.run(
-+            "test -f " + q(db) + " && (command -v sqlite3 >/dev/null 2>&1 || which sqlite3 >/dev/null 2>&1) && echo YES"
-+        );
-+        return r.output != null && r.output.contains("YES");
++    /**
++     * 开启写入前先做一次完整快照；快照失败就不允许开启。
++     */
++    public static String setEnabledWithBackup(Context context, boolean enabled) {
++        if (!enabled) {
++            setEnabled(context, false);
++            return "0";
++        }
++        if (!backupSnapshot(context)) return "backup-failed";
++        setEnabled(context, true);
++        return "1";
 +    }
 +
-+    public static boolean writePositions(Context context, List<Update> updates) {
-+        if (updates == null || updates.isEmpty()) return false;
-+        String db = dbPath(context);
-+        if (db.isEmpty()) return false;
-+        String backup = "/data/local/tmp/tafei_db_backup/launcher_" + System.currentTimeMillis() + ".db";
-+        RootBridge.Result backupResult = RootBridge.run(
-+            "mkdir -p /data/local/tmp/tafei_db_backup && cp -f " + q(db) + " " + q(backup)
-+                + " && (test -f " + q(db + "-wal") + " && cp -f " + q(db + "-wal") + " " + q(backup + "-wal") + " || true)"
-+                + " && (test -f " + q(db + "-shm") + " && cp -f " + q(db + "-shm") + " " + q(backup + "-shm") + " || true)"
-+        );
-+        if (!(backupResult.output != null && backupResult.exitCode == 0)) return false;
-+
-+        StringBuilder sql = new StringBuilder("BEGIN IMMEDIATE;");
-+        for (Update update : updates) {
-+            if (update == null || update.id <= 0) continue;
-+            sql.append("UPDATE singledesktopitems SET screen=")
-+                .append(update.screen).append(",cellX=").append(update.cellX)
-+                .append(",cellY=").append(update.cellY)
-+                .append(" WHERE _id=").append(update.id)
-+                .append(" AND container=-100 AND itemType=0;");
-+        }
-+        sql.append("COMMIT;");
-+        RootBridge.Result result = RootBridge.run(
-+            "sqlite3 " + q(db) + " " + q(sql.toString()), 15000L);
-+        boolean ok = result.output != null && result.exitCode == 0;
-+        if (!ok) {
-+            RootBridge.run("cp -f " + q(backup) + " " + q(db)
-+                + " && (test -f " + q(backup + "-wal") + " && cp -f " + q(backup + "-wal") + " " + q(db + "-wal") + " || true)"
-+                + " && (test -f " + q(backup + "-shm") + " && cp -f " + q(backup + "-shm") + " " + q(db + "-shm") + " || true)");
-+            return false;
-+        }
-+        RootBridge.run("am force-stop com.android.launcher; input keyevent 3", 8000L);
++    private static boolean backupSnapshot(Context context) {
++        String remote = currentDbPath();
++        if (remote == null || remote.isEmpty()) return false;
++        File backupDir = new File(context.getFilesDir(), "launcher_backup/"
++            + System.currentTimeMillis());
++        if (!backupDir.mkdirs() && !backupDir.exists()) return false;
++        File backupDb = new File(backupDir, "launcher.db");
++        if (!RootBridge.copyToFile(remote, backupDb)) return false;
++        RootBridge.copyToFile(remote + "-wal", new File(backupDb.getAbsolutePath() + "-wal"));
++        RootBridge.copyToFile(remote + "-shm", new File(backupDb.getAbsolutePath() + "-shm"));
++        lastBackupDir = backupDir.getAbsolutePath();
 +        return true;
 +    }
 +
-+    private static String q(String value) {
-+        return "'" + (value == null ? "" : value.replace("'", "'\\''")) + "'";
++    public static String start(Context context, String action, String payload) {
++        if (!isEnabled(context)) return "db-off";
++        if (!running) {
++            synchronized (LOCK) {
++                if (!running) running = true;
++            }
++        } else {
++            return "busy";
++        }
++        try {
++            final JSONObject json = new JSONObject(payload == null ? "{}" : payload);
++            final Context app = context.getApplicationContext();
++            final String act = action == null ? "move" : action;
++            new Thread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        execute(app, act, json);
++                    } catch (Throwable t) {
++                        SpiritAccessibilityService.publishAction("failed", "", "db-error:" + t.getMessage());
++                    } finally {
++                        running = false;
++                    }
++                }
++            }, "tafei-launcher-db").start();
++            return "started";
++        } catch (Exception e) {
++            running = false;
++            return "bad-payload";
++        }
++    }
++
++    private static void execute(Context context, String action, JSONObject payload) throws Exception {
++        String remote = currentDbPath();
++        if (remote == null || remote.isEmpty()) {
++            SpiritAccessibilityService.publishAction("failed", "", "db-no-path");
++            return;
++        }
++        JSONArray items = payload.optJSONArray("items");
++        JSONObject target = payload.optJSONObject("target");
++        if (items == null || items.length() == 0) {
++            SpiritAccessibilityService.publishAction("failed", "", "db-no-items");
++            return;
++        }
++        if (target == null && !"swap".equals(action)) {
++            SpiritAccessibilityService.publishAction("failed", "", "db-no-target");
++            return;
++        }
++        String label = items.optJSONObject(0).optString("label", "");
++        String firstPkg = items.optJSONObject(0).optString("package", "");
++        int[] pixel = targetPixel(context, action, items, target);
++        SpiritAccessibilityService.publishActionAt("running", label, "db-backup",
++            pixel[0], pixel[1], firstPkg);
++
++        File workDir = new File(context.getCacheDir(), "launcher_write");
++        deleteTree(workDir);
++        if (!workDir.mkdirs() && !workDir.exists()) {
++            SpiritAccessibilityService.publishAction("failed", label, "db-work-dir");
++            return;
++        }
++        File workDb = new File(workDir, "launcher.db");
++        File backupDir = new File(context.getFilesDir(), "launcher_backup/"
++            + System.currentTimeMillis());
++        if (!backupDir.mkdirs() && !backupDir.exists()) {
++            SpiritAccessibilityService.publishActionAt("failed", label, "db-backup-dir",
++                pixel[0], pixel[1], firstPkg);
++            return;
++        }
++        lastBackupDir = backupDir.getAbsolutePath();
++        if (!backupAll(remote, workDb, backupDir)) {
++            SpiritAccessibilityService.publishActionAt("failed", label, "db-backup-failed",
++                pixel[0], pixel[1], firstPkg);
++            return;
++        }
++
++        SQLiteDatabase db = null;
++        JSONObject expected = null;
++        try {
++            db = SQLiteDatabase.openDatabase(
++                workDb.getAbsolutePath(), null, SQLiteDatabase.OPEN_READWRITE);
++            try {
++                db.rawQuery("PRAGMA journal_mode=DELETE", null).close();
++            } catch (Exception ignored) {
++            }
++            db.beginTransaction();
++            if ("move".equals(action)) {
++                expected = applyMove(db, items, target);
++            } else if ("swap".equals(action)) {
++                expected = applySwap(db, items);
++            } else if ("folder".equals(action)) {
++                expected = applyFolder(db, items, target);
++            } else {
++                throw new IllegalArgumentException("unknown-action");
++            }
++            db.setTransactionSuccessful();
++            db.endTransaction();
++            db.close();
++            db = null;
++        } catch (Throwable t) {
++            if (db != null) {
++                try {
++                    if (db.inTransaction()) db.endTransaction();
++                } catch (Exception ignored) {
++                }
++                db.close();
++            }
++            deleteTree(workDir);
++            SpiritAccessibilityService.publishActionAt("failed", label, "db-edit-failed:" + t.getMessage(),
++                pixel[0], pixel[1], firstPkg);
++            return;
++        }
++
++        // 写回前保留原文件；写回后再重启桌面，让 Launcher 重新读取。
++        if (!writeBack(workDb, remote)) {
++            rollback(remote, backupDir, label, "db-write-failed");
++            return;
++        }
++        restartLauncher();
++        SystemClock.sleep(2500L);
++
++        if (expected == null || !verify(context, expected, label)) {
++            rollback(remote, backupDir, label, "db-verify-failed");
++            return;
++        }
++        SpiritAccessibilityService.publishActionAt("success", label, "db-" + action,
++            pixel[0], pixel[1], firstPkg);
++    }
++
++    private static boolean backupAll(String remote, File workDb, File backupDir) {
++        File backupDb = new File(backupDir, "launcher.db");
++        if (!RootBridge.copyToFile(remote, backupDb)) return false;
++        if (!RootBridge.copyToFile(remote, workDb)) return false;
++        RootBridge.copyToFile(remote + "-wal", new File(workDb.getAbsolutePath() + "-wal"));
++        RootBridge.copyToFile(remote + "-shm", new File(workDb.getAbsolutePath() + "-shm"));
++        RootBridge.copyToFile(remote + "-wal", new File(backupDb.getAbsolutePath() + "-wal"));
++        RootBridge.copyToFile(remote + "-shm", new File(backupDb.getAbsolutePath() + "-shm"));
++        return true;
++    }
++
++    private static JSONObject applyMove(SQLiteDatabase db, JSONArray items, JSONObject target)
++        throws Exception {
++        JSONObject item = items.getJSONObject(0);
++        long rowId = item.optLong("rowId", -1L);
++        if (rowId < 0) throw new IllegalArgumentException("row-id");
++        int screen = target.optInt("screen", -1);
++        int cellX = target.optInt("cellX", -1);
++        int cellY = target.optInt("cellY", -1);
++        if (screen < 0 || cellX < 0 || cellY < 0) throw new IllegalArgumentException("target-cell");
++        JSONObject occupied = findRowAt(db, screen, cellX, cellY);
++        if (occupied != null) throw new IllegalArgumentException("target-occupied");
++        ContentValues cv = new ContentValues();
++        cv.put("screen", screen);
++        cv.put("cellX", cellX);
++        cv.put("cellY", cellY);
++        cv.put("container", -100);
++        db.update(table(), cv, "_id=?", new String[]{String.valueOf(rowId)});
++        JSONObject exp = new JSONObject();
++        exp.put("kind", "move");
++        exp.put("rowId", rowId);
++        exp.put("screen", screen);
++        exp.put("cellX", cellX);
++        exp.put("cellY", cellY);
++        return exp;
++    }
++
++    private static JSONObject applySwap(SQLiteDatabase db, JSONArray items) throws Exception {
++        if (items.length() < 2) throw new IllegalArgumentException("swap-needs-two");
++        JSONObject a = items.getJSONObject(0);
++        JSONObject b = items.getJSONObject(1);
++        long idA = a.optLong("rowId", -1L);
++        long idB = b.optLong("rowId", -1L);
++        if (idA < 0 || idB < 0) throw new IllegalArgumentException("row-id");
++        int as = a.optInt("screen", -1);
++        int ax = a.optInt("cellX", -1);
++        int ay = a.optInt("cellY", -1);
++        int bs = b.optInt("screen", -1);
++        int bx = b.optInt("cellX", -1);
++        int by = b.optInt("cellY", -1);
++        ContentValues cv = new ContentValues();
++        cv.put("screen", bs);
++        cv.put("cellX", bx);
++        cv.put("cellY", by);
++        db.update(table(), cv, "_id=?", new String[]{String.valueOf(idA)});
++        cv.clear();
++        cv.put("screen", as);
++        cv.put("cellX", ax);
++        cv.put("cellY", ay);
++        db.update(table(), cv, "_id=?", new String[]{String.valueOf(idB)});
++        JSONObject exp = new JSONObject();
++        exp.put("kind", "swap");
++        JSONArray arr = new JSONArray();
++        arr.put(pos(idA, bs, bx, by));
++        arr.put(pos(idB, as, ax, ay));
++        exp.put("positions", arr);
++        return exp;
++    }
++
++    private static JSONObject applyFolder(SQLiteDatabase db, JSONArray items, JSONObject target)
++        throws Exception {
++        int screen = target.optInt("screen", -1);
++        int cellX = target.optInt("cellX", -1);
++        int cellY = target.optInt("cellY", -1);
++        if (screen < 0 || cellX < 0 || cellY < 0) throw new IllegalArgumentException("target-cell");
++
++        long folderId = target.optLong("folderId", -1L);
++        if (folderId > 0) {
++            if (!isFolder(db, folderId)) throw new IllegalArgumentException("not-folder");
++        } else {
++            JSONObject occupied = findRowAt(db, screen, cellX, cellY);
++            if (occupied != null) {
++                long id = occupied.optLong("_id", -1L);
++                int type = occupied.optInt("itemType", -1);
++                if (type == 2 && id > 0) {
++                    folderId = id;
++                } else {
++                    throw new IllegalArgumentException("target-occupied-app");
++                }
++            } else {
++                folderId = createFolder(db, screen, cellX, cellY, target.optString("name", ""));
++            }
++        }
++
++        int rank = maxRank(db, folderId) + 1;
++        JSONArray ids = new JSONArray();
++        for (int i = 0; i < items.length(); i++) {
++            JSONObject item = items.getJSONObject(i);
++            long rowId = item.optLong("rowId", -1L);
++            int type = item.optInt("itemType", 0);
++            if (rowId < 0) continue;
++            if (type != 0) throw new IllegalArgumentException("folder-item-is-folder");
++            ContentValues cv = new ContentValues();
++            cv.put("container", folderId);
++            cv.put("screen", 0);
++            cv.put("cellX", 0);
++            cv.put("cellY", 0);
++            cv.put("rank", rank++);
++            db.update(table(), cv, "_id=?", new String[]{String.valueOf(rowId)});
++            ids.put(rowId);
++        }
++        if (ids.length() == 0) throw new IllegalArgumentException("folder-empty");
++
++        JSONObject exp = new JSONObject();
++        exp.put("kind", "folder");
++        exp.put("folderId", folderId);
++        exp.put("screen", screen);
++        exp.put("cellX", cellX);
++        exp.put("cellY", cellY);
++        exp.put("rows", ids);
++        return exp;
++    }
++
++    private static long createFolder(SQLiteDatabase db, int screen, int cellX, int cellY, String name) {
++        Set<String> cols = columns(db, table());
++        ContentValues cv = new ContentValues();
++        put(cv, cols, "title", name == null || name.trim().isEmpty() ? "文件夹" : name.trim());
++        put(cv, cols, "container", -100);
++        put(cv, cols, "screen", screen);
++        put(cv, cols, "cellX", cellX);
++        put(cv, cols, "cellY", cellY);
++        put(cv, cols, "spanX", 1);
++        put(cv, cols, "spanY", 1);
++        put(cv, cols, "itemType", 2);
++        put(cv, cols, "rank", 0);
++        put(cv, cols, "profileId", 0);
++        put(cv, cols, "user_id", 0);
++        put(cv, cols, "modified", System.currentTimeMillis());
++        put(cv, cols, "restored", 0);
++        put(cv, cols, "iconType", 0);
++        put(cv, cols, "card_type", 0);
++        return db.insertOrThrow(table(), null, cv);
++    }
++
++    private static JSONObject findRowAt(SQLiteDatabase db, int screen, int cellX, int cellY)
++        throws Exception {
++        Cursor c = null;
++        try {
++            c = db.rawQuery("SELECT * FROM " + table()
++                + " WHERE container=-100 AND screen=? AND cellX=? AND cellY=?"
++                + " ORDER BY itemType DESC LIMIT 1",
++                new String[]{String.valueOf(screen), String.valueOf(cellX), String.valueOf(cellY)});
++            if (!c.moveToFirst()) return null;
++            JSONObject o = new JSONObject();
++            o.put("_id", c.getLong(c.getColumnIndex("_id")));
++            o.put("itemType", c.getInt(c.getColumnIndex("itemType")));
++            return o;
++        } finally {
++            if (c != null) c.close();
++        }
++    }
++
++    private static boolean isFolder(SQLiteDatabase db, long folderId) {
++        Cursor c = null;
++        try {
++            c = db.rawQuery("SELECT itemType FROM " + table() + " WHERE _id=?",
++                new String[]{String.valueOf(folderId)});
++            return c.moveToFirst() && c.getInt(0) == 2;
++        } finally {
++            if (c != null) c.close();
++        }
++    }
++
++    private static int maxRank(SQLiteDatabase db, long folderId) {
++        Cursor c = null;
++        try {
++            c = db.rawQuery("SELECT MAX(rank) FROM " + table() + " WHERE container=?",
++                new String[]{String.valueOf(folderId)});
++            return c.moveToFirst() ? c.getInt(0) : 0;
++        } finally {
++            if (c != null) c.close();
++        }
++    }
++
++    private static boolean verify(Context context, JSONObject expected, String label) {
++        File verifyDir = new File(context.getCacheDir(), "launcher_verify");
++        deleteTree(verifyDir);
++        if (!verifyDir.mkdirs() && !verifyDir.exists()) return false;
++        File local = new File(verifyDir, "launcher.db");
++        String remote = null;
++        for (int i = 0; i < 8; i++) {
++            remote = currentDbPath();
++            if (remote != null && !remote.isEmpty()) break;
++            SystemClock.sleep(400L);
++        }
++        if (remote == null || remote.isEmpty()) return false;
++        if (!RootBridge.copyToFile(remote, local)) return false;
++        SQLiteDatabase db = null;
++        try {
++            db = SQLiteDatabase.openDatabase(local.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
++            String kind = expected.optString("kind");
++            if ("folder".equals(kind)) {
++                long folderId = expected.optLong("folderId");
++                if (!isFolder(db, folderId)) return false;
++                JSONArray rows = expected.optJSONArray("rows");
++                for (int i = 0; i < rows.length(); i++) {
++                    if (!rowContainer(db, rows.optLong(i), folderId)) return false;
++                }
++                return true;
++            }
++            JSONArray positions = expected.optJSONArray("positions");
++            if (positions == null) {
++                positions = new JSONArray();
++                positions.put(pos(expected.optLong("rowId"),
++                    expected.optInt("screen"), expected.optInt("cellX"), expected.optInt("cellY")));
++            }
++            for (int i = 0; i < positions.length(); i++) {
++                JSONObject p = positions.getJSONObject(i);
++                if (!rowAt(db, p.optLong("rowId"), p.optInt("screen"),
++                    p.optInt("cellX"), p.optInt("cellY"))) return false;
++            }
++            return true;
++        } catch (Exception e) {
++            return false;
++        } finally {
++            if (db != null) db.close();
++            deleteTree(verifyDir);
++        }
++    }
++
++    private static boolean rowAt(SQLiteDatabase db, long rowId, int screen, int cellX, int cellY) {
++        Cursor c = null;
++        try {
++            c = db.rawQuery("SELECT screen,cellX,cellY FROM " + table() + " WHERE _id=?",
++                new String[]{String.valueOf(rowId)});
++            return c.moveToFirst()
++                && c.getInt(0) == screen && c.getInt(1) == cellX && c.getInt(2) == cellY;
++        } finally {
++            if (c != null) c.close();
++        }
++    }
++
++    private static boolean rowContainer(SQLiteDatabase db, long rowId, long folderId) {
++        Cursor c = null;
++        try {
++            c = db.rawQuery("SELECT container FROM " + table() + " WHERE _id=?",
++                new String[]{String.valueOf(rowId)});
++            return c.moveToFirst() && c.getLong(0) == folderId;
++        } finally {
++            if (c != null) c.close();
++        }
++    }
++
++    private static JSONObject pos(long rowId, int screen, int cellX, int cellY) throws Exception {
++        JSONObject p = new JSONObject();
++        p.put("rowId", rowId);
++        p.put("screen", screen);
++        p.put("cellX", cellX);
++        p.put("cellY", cellY);
++        return p;
++    }
++
++    private static void rollback(String remote, File backupDir, String label, String reason) {
++        File backupDb = new File(backupDir, "launcher.db");
++        if (backupDb.exists() && RootBridge.copyFromFile(backupDb, remote)) {
++            RootBridge.copyFromFile(new File(backupDb.getAbsolutePath() + "-wal"), remote + "-wal");
++            RootBridge.copyFromFile(new File(backupDb.getAbsolutePath() + "-shm"), remote + "-shm");
++            restartLauncher();
++            SpiritAccessibilityService.publishAction("failed", label, reason + "-rolled-back");
++        } else {
++            SpiritAccessibilityService.publishAction("failed", label, reason + "-rollback-failed");
++        }
++    }
++
++    private static boolean writeBack(File local, String remote) {
++        if (!RootBridge.copyFromFile(local, remote)) return false;
++        RootBridge.run("rm -f " + quote(remote + "-wal") + " " + quote(remote + "-shm"));
++        return true;
++    }
++
++    private static void restartLauncher() {
++        RootBridge.run("am force-stop com.android.launcher", 15000L);
++        SystemClock.sleep(450L);
++        RootBridge.run("am start -a android.intent.action.MAIN -c android.intent.category.HOME -f 0x10200000", 15000L);
++        SystemClock.sleep(1200L);
++    }
++
++    private static int[] targetPixel(Context context, String action, JSONArray items, JSONObject target) {
++        JSONObject where = target;
++        if ("swap".equals(action) && items != null && items.length() > 1) {
++            where = items.optJSONObject(1);
++        }
++        if (where == null) return new int[]{0, 0};
++        DisplayMetrics dm = context.getResources().getDisplayMetrics();
++        int w = Math.max(1, dm.widthPixels);
++        int h = Math.max(1, dm.heightPixels);
++        int cols = 4;
++        int rows = 6;
++        int cx = where.optInt("cellX", 0);
++        int cy = where.optInt("cellY", 0);
++        int x = (int) (w * ((Math.max(0, cx) + 0.5f) / cols));
++        int y = (int) (h * (0.19f + (Math.max(0, cy) + 0.5f) / rows * 0.70f));
++        return new int[]{Math.max(1, Math.min(w - 1, x)), Math.max(1, Math.min(h - 1, y))};
++    }
++
++    private static String currentDbPath() {
++        String old = DesktopProbe.launcherDbPath();
++        if (old == null || old.isEmpty()) return "";
++        String pid = firstToken(RootBridge.run("pidof com.android.launcher").output);
++        if (pid.isEmpty()) return old;
++        int slash = old.indexOf("/root/");
++        if (slash < 0) return old;
++        return "/proc/" + pid + old.substring(slash);
++    }
++
++    private static String firstToken(String text) {
++        if (text == null) return "";
++        String t = text.trim();
++        int i = t.indexOf(' ');
++        return i < 0 ? t : t.substring(0, i).trim();
++    }
++
++    private static String table() {
++        String t = DesktopProbe.launcherTable();
++        return t == null || t.isEmpty() ? "singledesktopitems" : t;
++    }
++
++    private static Set<String> columns(SQLiteDatabase db, String table) {
++        Set<String> set = new LinkedHashSet<>();
++        Cursor c = null;
++        try {
++            c = db.rawQuery("PRAGMA table_info(" + table + ")", null);
++            while (c.moveToNext()) {
++                String name = c.getString(c.getColumnIndex("name"));
++                if (name != null) set.add(name);
++            }
++        } finally {
++            if (c != null) c.close();
++        }
++        return set;
++    }
++
++    private static void put(ContentValues cv, Set<String> cols, String key, Object value) {
++        if (cols.contains(key)) cv.put(key, String.valueOf(value));
++    }
++
++    private static void put(ContentValues cv, Set<String> cols, String key, long value) {
++        if (cols.contains(key)) cv.put(key, value);
++    }
++
++    private static String quote(String s) {
++        return "'" + s.replace("'", "'\\''") + "'";
++    }
++
++    private static void deleteTree(File file) {
++        if (file == null || !file.exists()) return;
++        if (file.isDirectory()) {
++            File[] children = file.listFiles();
++            if (children != null) for (File child : children) deleteTree(child);
++        }
++        file.delete();
 +    }
 +}
 diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
-index d4353da..ebbe822 100644
+index d4353da..b83c77c 100644
 --- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
 +++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
-@@ -217,6 +217,28 @@ public class MainActivity extends BridgeActivity {
-             return DesktopProbe.probe(act);
-         }
+@@ -3,7 +3,11 @@ package com.piaony.tafei;
+ import android.Manifest;
+ import android.content.Intent;
+ import android.content.pm.PackageManager;
++import android.graphics.Bitmap;
++import android.graphics.Canvas;
+ import android.graphics.Color;
++import android.graphics.drawable.Drawable;
++import android.util.Base64;
+ import android.net.Uri;
+ import android.os.Build;
+ import android.graphics.drawable.ColorDrawable;
+@@ -17,6 +21,10 @@ import android.webkit.JavascriptInterface;
+ import android.webkit.WebView;
+ import android.widget.Toast;
  
-+        @JavascriptInterface
-+        public String appIconData(String pkg) {
-+            return AppIconUtil.data(act, pkg);
-+        }
++import java.io.ByteArrayOutputStream;
++import java.util.HashMap;
++import java.util.Map;
 +
-+        @JavascriptInterface
-+        public String desktopDbAvailable() {
-+            return LauncherDbEditor.available(act) ? "1" : "0";
-+        }
-+
-+        @JavascriptInterface
-+        public String desktopDbExperimental() {
-+            return act.getSharedPreferences("tafei_app", 0)
-+                .getBoolean("desktop_db_experiment", false) ? "1" : "0";
-+        }
-+
-+        @JavascriptInterface
-+        public void setDesktopDbExperimental(String enabled) {
-+            act.getSharedPreferences("tafei_app", 0).edit()
-+                .putBoolean("desktop_db_experiment", "1".equals(enabled)).apply();
-+        }
-+
-         @JavascriptInterface
-         public String accessibilityReady() {
-             return SpiritAccessibilityService.isReady() ? "1" : "0";
-@@ -245,6 +267,45 @@ public class MainActivity extends BridgeActivity {
+ import androidx.core.graphics.Insets;
+ import androidx.core.view.OnApplyWindowInsetsListener;
+ import androidx.core.view.ViewCompat;
+@@ -161,6 +169,7 @@ public class MainActivity extends BridgeActivity {
+     /* 供「我的」页调用：读版本号、手动检查更新 */
+     public static class NativeBridge {
+         private final MainActivity act;
++        private final Map<String, String> iconCache = new HashMap<>();
+ 
+         NativeBridge(MainActivity a) {
+             this.act = a;
+@@ -245,6 +254,53 @@ public class MainActivity extends BridgeActivity {
              return SpiritAccessibilityService.lastEvent();
          }
  
 +        @JavascriptInterface
-+        public String desktopActionResult() {
-+            return SpiritAccessibilityService.lastAction();
++        public String desktopActionStatus() {
++            return SpiritAccessibilityService.lastResult();
 +        }
 +
 +        @JavascriptInterface
-+        public String desktopActionEventId() {
-+            return String.valueOf(SpiritAccessibilityService.lastActionId());
++        public String desktopActionEvent() {
++            return SpiritAccessibilityService.lastEvent();
 +        }
 +
 +        @JavascriptInterface
-+        public String desktopAction(String type, String payload) {
-+            if (!SpiritAccessibilityService.isReady()) {
-+                openAccessibility();
-+                return "accessibility-off";
++        public String desktopAppIcon(String pkg) {
++            if (pkg == null || pkg.trim().isEmpty()) return "";
++            String cached = iconCache.get(pkg);
++            if (cached != null) return cached;
++            try {
++                Drawable drawable = act.getPackageManager().getApplicationIcon(pkg);
++                int size = Math.round(56 * act.getResources().getDisplayMetrics().density);
++                Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
++                Canvas canvas = new Canvas(bitmap);
++                drawable.setBounds(0, 0, size, size);
++                drawable.draw(canvas);
++                ByteArrayOutputStream out = new ByteArrayOutputStream();
++                bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
++                String data = Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
++                iconCache.put(pkg, data);
++                return data;
++            } catch (Exception e) {
++                return "";
 +            }
-+            if (!"move".equals(type) && !"swap".equals(type) && !"folder".equals(type)) {
-+                return "bad-type";
-+            }
-+            boolean db = act.getSharedPreferences("tafei_app", 0)
-+                .getBoolean("desktop_db_experiment", false);
-+            String result = SpiritAccessibilityService.startDesktopAction(type, payload, db);
-+            if ("started".equals(result)) {
-+                act.runOnUiThread(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        Intent home = new Intent(Intent.ACTION_MAIN);
-+                        home.addCategory(Intent.CATEGORY_HOME);
-+                        home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-+                        try {
-+                            act.startActivity(home);
-+                        } catch (Exception ignored) {
-+                        }
-+                    }
-+                });
-+            }
-+            return result;
++        }
++
++        @JavascriptInterface
++        public String launcherDbWriteEnabled() {
++            return LauncherDbOps.isEnabled(act) ? "1" : "0";
++        }
++
++        @JavascriptInterface
++        public String setLauncherDbWriteEnabled(String enabled) {
++            return LauncherDbOps.setEnabledWithBackup(act, "1".equals(enabled) || "true".equals(enabled));
++        }
++
++        @JavascriptInterface
++        public String desktopAction(String action, String payload) {
++            return LauncherDbOps.start(act, action, payload);
 +        }
 +
          @JavascriptInterface
          public String eatDesktopIcon(String label, String pkg, int screen, int cellX, int cellY) {
              if (!SpiritAccessibilityService.isReady()) {
+diff --git a/android/app/src/main/java/com/piaony/tafei/RootBridge.java b/android/app/src/main/java/com/piaony/tafei/RootBridge.java
+index ea23ebd..189ccc7 100644
+--- a/android/app/src/main/java/com/piaony/tafei/RootBridge.java
++++ b/android/app/src/main/java/com/piaony/tafei/RootBridge.java
+@@ -135,6 +135,26 @@ public final class RootBridge {
+         }
+     }
+ 
++    /** 把 App 私有文件写回 root 可见路径；尽量保留原文件的 uid/gid。 */
++    public static boolean copyFromFile(File localFile, String remotePath) {
++        if (localFile == null || !localFile.exists() || remotePath == null || remotePath.contains("\n")) {
++            return false;
++        }
++        String owner = "0:0";
++        Result stat = run("stat -c '%u:%g' " + quote(remotePath));
++        if (stat.exitCode == 0) {
++            String line = stat.output == null ? "" : stat.output.trim();
++            if (line.matches("^[0-9]+:[0-9]+$")) owner = line;
++        }
++        String temp = remotePath + ".tafei_tmp";
++        String cmd = "cp " + quote(localFile.getAbsolutePath()) + " " + quote(temp)
++            + " && chown " + owner + " " + quote(temp)
++            + " && chmod 600 " + quote(temp)
++            + " && mv -f " + quote(temp) + " " + quote(remotePath);
++        Result result = run(cmd, 20000L);
++        return result.exitCode == 0;
++    }
++
+     private static String findSu() {
+         for (String path : SU_CANDIDATES) {
+             if (path.equals("su") || new File(path).exists()) return path;
 diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
-index 1c06370..e9a4bab 100644
+index 1c06370..3d521b7 100644
 --- a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
 +++ b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
-@@ -11,6 +11,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
- import android.view.accessibility.AccessibilityWindowInfo;
- import android.widget.Toast;
- 
-+import org.json.JSONArray;
-+import org.json.JSONObject;
-+
-+import java.util.ArrayList;
- import java.util.List;
- import java.util.regex.Matcher;
- import java.util.regex.Pattern;
-@@ -31,6 +35,11 @@ public class SpiritAccessibilityService extends AccessibilityService {
-     private static volatile int lastEventX = 0;
-     private static volatile int lastEventY = 0;
-     private static volatile long lastEventId = 0L;
-+    private static volatile String lastActionState = "idle";
-+    private static volatile String lastActionType = "";
-+    private static volatile String lastActionDetail = "";
-+    private static volatile long lastActionId = 0L;
-+    private static volatile boolean actionRunning = false;
- 
-     public static String lastResult() {
-         return lastResult;
-@@ -46,6 +55,21 @@ public class SpiritAccessibilityService extends AccessibilityService {
-         return lastEventId;
+@@ -56,6 +56,18 @@ public class SpiritAccessibilityService extends AccessibilityService {
+         lastEventId++;
      }
  
-+    public static String lastAction() {
-+        return lastActionState + "|" + lastActionType + "|" + lastActionDetail + "|" + lastActionId;
++    public static void publishAction(String state, String label, String detail) {
++        report(state, label, detail);
 +    }
 +
-+    public static long lastActionId() {
-+        return lastActionId;
++    public static void publishActionAt(String state, String label, String detail,
++                                       int x, int y, String pkg) {
++        lastEventX = x;
++        lastEventY = y;
++        lastEventPackage = pkg == null ? "" : pkg.replace("|", " ");
++        report(state, label, detail);
 +    }
 +
-+    private static void reportAction(String state, String type, String detail) {
-+        lastActionState = state;
-+        lastActionType = type == null ? "" : type.replace("|", " ");
-+        lastActionDetail = detail == null ? "" : detail.replace("|", " ");
-+        lastActionId++;
-+    }
-+
-     private static void report(String state, String label, String detail) {
-         String safeLabel = label == null ? "" : label.replace("|", " ");
-         String safeDetail = detail == null ? "" : detail.replace("|", " ");
-@@ -72,6 +96,11 @@ public class SpiritAccessibilityService extends AccessibilityService {
-     private int scanLeft = 0;
-     private int scanRight = 0;
-     private int navOffset = 0;
-+    private int actionCols = 4;
-+    private int actionRows = 6;
-+    private int actionScanLimit = 6;
-+    private int actionScanLeft = 0;
-+    private int actionScanRight = 0;
- 
-     @Override
-     protected void onServiceConnected() {
-@@ -114,6 +143,671 @@ public class SpiritAccessibilityService extends AccessibilityService {
-         return "started";
+     private static String phaseOf(String state, String detail) {
+         if ("success".equals(state)) return "success";
+         if ("failed".equals(state)) return "failed";
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+index 8165a33..7c192ac 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -817,6 +817,16 @@ public class SpiritOverlayService extends Service {
+                 eatY = y;
+             }
+             eatFoundShown = false;
++            if (detail.startsWith("db-")) {
++                if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
++                    eatEffectView.setVisibility(View.VISIBLE);
++                    eatEffectView.playDesktopAction(eatX, eatY, detail, label);
++                }
++                showFrame("emotion-happy", 1200);
++                if (particleView != null) particleView.burst(10);
++                if (!appForeground) showBubble(actionLine(detail, label));
++                return;
++            }
+             if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
+                 eatEffectView.setVisibility(View.VISIBLE);
+                 eatEffectView.playSuccess(eatX, eatY, spiritCenterX(), spiritCenterY(), appIcon(eatPkg), eatLabel);
+@@ -840,11 +850,22 @@ public class SpiritOverlayService extends Service {
+         }
      }
  
-+    private static final class ActionItem {
-+        final int id;
-+        final String label;
-+        final String pkg;
-+        final int screen;
-+        final int cellX;
-+        final int cellY;
-+
-+        ActionItem(JSONObject json) {
-+            this(json.optInt("id", -1), json.optString("label", ""), json.optString("package", ""),
-+                json.optInt("screen", 0), json.optInt("cellX", 0), json.optInt("cellY", 0));
-+        }
-+
-+        ActionItem(int id, String label, String pkg, int screen, int cellX, int cellY) {
-+            this.id = id;
-+            this.label = label == null ? "" : label;
-+            this.pkg = pkg == null ? "" : pkg;
-+            this.screen = screen;
-+            this.cellX = cellX;
-+            this.cellY = cellY;
-+        }
++    private String actionLine(String detail, String label) {
++        if (detail.contains("swap")) return "换好了，「" + label + "」已经在新位置。";
++        if (detail.contains("folder")) return "收好了，「" + label + "」已经进文件夹。";
++        return "搬好了，「" + label + "」已经在新位置。";
 +    }
 +
-+    private static final class ActionTarget {
-+        int screen = 0;
-+        int row = 0;
-+        int col = 0;
-+        String folderTitle = "";
-+        String folderName = "";
-+        final List<int[]> emptyCells = new ArrayList<>();
-+    }
-+
-+    private interface ScanCallback {
-+        void found(Rect bounds);
-+        void failed(String detail);
-+    }
-+
-+    private interface DragCallback {
-+        void done(boolean ok);
-+    }
-+
-+    public static String startDesktopAction(String type, String payload, boolean dbEnabled) {
-+        SpiritAccessibilityService service = instance;
-+        if (service == null) return "no-service";
-+        if (actionRunning) return "busy";
-+        try {
-+            JSONObject root = new JSONObject(payload == null ? "{}" : payload);
-+            JSONArray array = root.optJSONArray("items");
-+            if (array == null || array.length() == 0) return "no-items";
-+            List<ActionItem> items = new ArrayList<>();
-+            for (int i = 0; i < array.length(); i++) items.add(new ActionItem(array.getJSONObject(i)));
-+            ActionTarget target = new ActionTarget();
-+            JSONObject targetJson = root.optJSONObject("target");
-+            if (targetJson != null) {
-+                target.screen = targetJson.optInt("screen", items.get(0).screen);
-+                target.row = targetJson.optInt("row", 0);
-+                target.col = targetJson.optInt("col", 0);
-+            }
-+            JSONObject folder = root.optJSONObject("targetFolder");
-+            if (folder != null) {
-+                target.folderTitle = folder.optString("title", "");
-+            }
-+            target.folderName = root.optString("folderName", "");
-+            JSONArray empties = root.optJSONArray("emptyCells");
-+            if (empties != null) {
-+                for (int i = 0; i < empties.length(); i++) {
-+                    JSONObject cell = empties.getJSONObject(i);
-+                    target.emptyCells.add(new int[]{cell.optInt("row", -1), cell.optInt("col", -1)});
-+                }
-+            }
-+            service.actionCols = Math.max(2, root.optInt("cols", 4));
-+            service.actionRows = Math.max(2, root.optInt("rows", 6));
-+            actionRunning = true;
-+            reportAction("running", type, "start");
-+            final String actionType = type;
-+            final List<ActionItem> actionItems = items;
-+            final ActionTarget actionTarget = target;
-+            final boolean database = dbEnabled;
-+            service.handler.postDelayed(new Runnable() {
-+                @Override
-+                public void run() {
-+                    try {
-+                        if ("move".equals(actionType)) service.runMove(actionItems, actionTarget, database);
-+                        else if ("swap".equals(actionType)) service.runSwap(actionItems, actionTarget, database);
-+                        else if ("folder".equals(actionType)) service.runFolder(actionItems, actionTarget, database);
-+                        else finishAction(false, actionType, "unknown-action");
-+                    } catch (Throwable t) {
-+                        finishAction(false, actionType, "exception:" + t.getMessage());
-+                    }
-+                }
-+            }, 800L);
-+            return "started";
-+        } catch (Throwable t) {
-+            actionRunning = false;
-+            reportAction("failed", type, "bad-payload");
-+            return "bad-payload";
-+        }
-+    }
-+
-+    private void finishAction(boolean success, String type, String detail) {
-+        actionRunning = false;
-+        reportAction(success ? "success" : "failed", type, detail);
-+        try {
-+            toast(success ? "桌面管家：完成" : "桌面管家：" + detail);
-+        } catch (Throwable ignored) {
-+        }
-+    }
-+
-+    private void runMove(List<ActionItem> items, ActionTarget target, boolean database) {
-+        if (items.size() != 1) {
-+            finishAction(false, "move", "need-one-item");
-+            return;
-+        }
-+        ActionItem item = items.get(0);
-+        if (item.screen == target.screen) {
-+            locateItem(item, new ScanCallback() {
-+                @Override
-+                public void found(Rect bounds) {
-+                    int[] to = cellCenter(target.row, target.col);
-+                    dragAsync(bounds.centerX(), bounds.centerY(), to[0], to[1], new DragCallback() {
-+                        @Override
-+                        public void done(boolean ok) {
-+                            if (!ok) {
-+                                if (database) dbMove(item, target, "move-db");
-+                                else finishAction(false, "move", "drag-failed");
-+                                return;
-+                            }
-+                            handler.postDelayed(new Runnable() {
-+                                @Override
-+                                public void run() {
-+                                    verifyMove(item, target);
-+                                }
-+                            }, 1100L);
-+                        }
-+                    });
-+                }
-+
-+                @Override
-+                public void failed(String detail) {
-+                    if (database) dbMove(item, target, "move-db");
-+                    else finishAction(false, "move", detail);
-+                }
-+            });
-+            return;
-+        }
-+        if (database) {
-+            dbMove(item, target, "move-db");
-+        } else {
-+            finishAction(false, "move", "cross-page-needs-db");
-+        }
-+    }
-+
-+    private void dbMove(ActionItem item, ActionTarget target, String detail) {
-+        if (item.id <= 0) {
-+            finishAction(false, "move", "missing-id");
-+            return;
-+        }
-+        List<LauncherDbEditor.Update> updates = new ArrayList<>();
-+        updates.add(new LauncherDbEditor.Update(item.id, target.screen, target.col, target.row));
-+        new Thread(new Runnable() {
-+            @Override
-+            public void run() {
-+                boolean ok = LauncherDbEditor.writePositions(getApplicationContext(), updates);
-+                handler.post(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        finishAction(ok, "move", ok ? detail : "db-write-failed");
-+                    }
-+                });
-+            }
-+        }).start();
-+    }
-+
-+    private void verifyMove(ActionItem item, ActionTarget target) {
-+        AccessibilityNodeInfo root = getRootInActiveWindow();
-+        AccessibilityNodeInfo node = findLabel(root, item.label, 0);
-+        if (node == null) {
-+            finishAction(false, "move", "move-not-visible");
-+            return;
-+        }
-+        Rect bounds = new Rect();
-+        node.getBoundsInScreen(bounds);
-+        int[] to = cellCenter(target.row, target.col);
-+        int dx = Math.abs(bounds.centerX() - to[0]);
-+        int dy = Math.abs(bounds.centerY() - to[1]);
-+        finishAction(dx < dp(90) && dy < dp(90), "move", dx < dp(90) && dy < dp(90) ? "done" : "wrong-cell");
-+    }
-+
-+    private void locateItem(ActionItem item, ScanCallback callback) {
-+        actionScanLeft = 0;
-+        actionScanRight = 0;
-+        actionScanLimit = Math.max(6, Math.min(9, item.screen + 2));
-+        scanLabel(item.label, callback);
-+    }
-+
-+    private void locateLabel(String label, int expectedScreen, ScanCallback callback) {
-+        actionScanLeft = 0;
-+        actionScanRight = 0;
-+        actionScanLimit = Math.max(6, Math.min(9, Math.max(0, expectedScreen) + 2));
-+        scanLabel(label, callback);
-+    }
-+
-+    private void scanLabel(String label, ScanCallback callback) {
-+        AccessibilityNodeInfo root = getRootInActiveWindow();
-+        if (root == null) {
-+            callback.failed("no-root");
-+            return;
-+        }
-+        CharSequence pkg = root.getPackageName();
-+        if (pkg == null || !"com.android.launcher".contentEquals(pkg)) {
-+            callback.failed("not-launcher");
-+            return;
-+        }
-+        AccessibilityNodeInfo target = findLabel(root, label, 0);
-+        if (target != null) {
-+            Rect bounds = new Rect();
-+            target.getBoundsInScreen(bounds);
-+            if (bounds.width() > 20 && bounds.height() > 20) {
-+                callback.found(bounds);
-+            } else {
-+                callback.failed("invalid-bounds");
-+            }
-+            return;
-+        }
-+        if (actionScanLeft < actionScanLimit) {
-+            if (swipeLeft()) {
-+                actionScanLeft++;
-+                handler.postDelayed(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        scanLabel(label, callback);
-+                    }
-+                }, 520L);
-+                return;
-+            }
-+        }
-+        if (actionScanRight < actionScanLimit * 2) {
-+            if (swipeRight()) {
-+                actionScanRight++;
-+                handler.postDelayed(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        scanLabel(label, callback);
-+                    }
-+                }, 520L);
-+                return;
-+            }
-+        }
-+        callback.failed("not-found");
-+    }
-+
-+    private int[] cellCenter(int row, int col) {
-+        int w = getResources().getDisplayMetrics().widthPixels;
-+        int h = getResources().getDisplayMetrics().heightPixels;
-+        int x = (int) ((col + 0.5f) * w / Math.max(1, actionCols));
-+        int y = (int) ((row + 0.5f) * h / Math.max(1, actionRows));
-+        return new int[]{Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))};
-+    }
-+
-+    private void dragAsync(int x1, int y1, int x2, int y2, DragCallback callback) {
-+        new Thread(new Runnable() {
-+            @Override
-+            public void run() {
-+                boolean ok = false;
-+                try {
-+                    RootBridge.Result result = RootBridge.run(
-+                        "input draganddrop " + x1 + " " + y1 + " " + x2 + " " + y2 + " 1200", 12000L);
-+                    String output = result.output == null ? "" : result.output.toLowerCase();
-+                    ok = result.exitCode == 0
-+                        && !output.contains("unknown")
-+                        && !output.contains("error")
-+                        && !output.contains("usage");
-+                } catch (Throwable ignored) {
-+                }
-+                final boolean rootOk = ok;
-+                handler.post(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        if (rootOk) {
-+                            handler.postDelayed(new Runnable() {
-+                                @Override
-+                                public void run() {
-+                                    callback.done(true);
-+                                }
-+                            }, 1100L);
-+                            return;
-+                        }
-+                        boolean queued = dispatchDrag(x1, y1, x2, y2);
-+                        handler.postDelayed(new Runnable() {
-+                            @Override
-+                            public void run() {
-+                                callback.done(queued);
-+                            }
-+                        }, 1350L);
-+                    }
-+                });
-+            }
-+        }).start();
-+    }
-+
-+    private boolean dispatchDrag(int x1, int y1, int x2, int y2) {
-+        Path path = new Path();
-+        path.moveTo(x1, y1);
-+        path.lineTo(x2, y2);
-+        GestureDescription.StrokeDescription stroke =
-+            new GestureDescription.StrokeDescription(path, 0L, 1200L);
-+        GestureDescription gesture = new GestureDescription.Builder()
-+            .addStroke(stroke)
-+            .build();
-+        return dispatchGesture(gesture, null, null);
-+    }
-+
-+    private void runSwap(List<ActionItem> items, ActionTarget target, boolean database) {
-+        if (items.size() != 2) {
-+            finishAction(false, "swap", "need-two-items");
-+            return;
-+        }
-+        ActionItem a = items.get(0);
-+        ActionItem b = items.get(1);
-+        if (a.screen != b.screen) {
-+            if (database) {
-+                dbSwap(a, b);
-+            } else {
-+                finishAction(false, "swap", "cross-page-needs-db");
-+            }
-+            return;
-+        }
-+        locateItem(a, new ScanCallback() {
-+            @Override
-+            public void found(Rect bounds) {
-+                AccessibilityNodeInfo root = getRootInActiveWindow();
-+                AccessibilityNodeInfo other = findLabel(root, b.label, 0);
-+                if (other == null) {
-+                    finishAction(false, "swap", "second-not-on-page");
-+                    return;
-+                }
-+                Rect otherBounds = new Rect();
-+                other.getBoundsInScreen(otherBounds);
-+                if (otherBounds.width() < 20 || otherBounds.height() < 20) {
-+                    finishAction(false, "swap", "second-bounds");
-+                    return;
-+                }
-+                int[] temp = emptyCell(a.cellX, a.cellY, b.cellX, b.cellY, target.emptyCells);
-+                if (temp == null) {
-+                    finishAction(false, "swap", "no-empty-cell");
-+                    return;
-+                }
-+                int[] tempPoint = cellCenter(temp[0], temp[1]);
-+                int ax = bounds.centerX();
-+                int ay = bounds.centerY();
-+                int bx = otherBounds.centerX();
-+                int by = otherBounds.centerY();
-+                dragAsync(ax, ay, tempPoint[0], tempPoint[1], new DragCallback() {
-+                    @Override
-+                    public void done(boolean ok) {
-+                        if (!ok) {
-+                            if (database) dbSwap(a, b);
-+                            else finishAction(false, "swap", "first-drag-failed");
-+                            return;
-+                        }
-+                        handler.postDelayed(new Runnable() {
-+                            @Override
-+                            public void run() {
-+                                dragSecondAndFinish(a, b, ax, ay, bx, by, target, database);
-+                            }
-+                        }, 1000L);
-+                    }
-+                });
-+            }
-+
-+            @Override
-+            public void failed(String detail) {
-+                if (database) dbSwap(a, b);
-+                else finishAction(false, "swap", detail);
-+            }
-+        });
-+    }
-+
-+    private void dragSecondAndFinish(ActionItem a, ActionItem b, int ax, int ay, int bx, int by, ActionTarget target, boolean database) {
-+        AccessibilityNodeInfo root = getRootInActiveWindow();
-+        AccessibilityNodeInfo nodeB = findLabel(root, b.label, 0);
-+        if (nodeB == null) {
-+            if (database) dbSwap(a, b);
-+            else finishAction(false, "swap", "second-disappeared");
-+            return;
-+        }
-+        Rect bBounds = new Rect();
-+        nodeB.getBoundsInScreen(bBounds);
-+        dragAsync(bBounds.centerX(), bBounds.centerY(), ax, ay, new DragCallback() {
-+            @Override
-+            public void done(boolean ok) {
-+                if (!ok) {
-+                    if (database) dbSwap(a, b);
-+                    else finishAction(false, "swap", "second-drag-failed");
-+                    return;
-+                }
-+                handler.postDelayed(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        AccessibilityNodeInfo root2 = getRootInActiveWindow();
-+                        AccessibilityNodeInfo nodeA = findLabel(root2, a.label, 0);
-+                        if (nodeA == null) {
-+                            if (database) dbSwap(a, b);
-+                            else finishAction(false, "swap", "first-disappeared");
-+                            return;
-+                        }
-+                        Rect aBounds = new Rect();
-+                        nodeA.getBoundsInScreen(aBounds);
-+                        dragAsync(aBounds.centerX(), aBounds.centerY(), bx, by, new DragCallback() {
-+                            @Override
-+                            public void done(boolean ok2) {
-+                                if (!ok2) {
-+                                    if (database) dbSwap(a, b);
-+                                    else finishAction(false, "swap", "third-drag-failed");
-+                                    return;
-+                                }
-+                                handler.postDelayed(new Runnable() {
-+                                    @Override
-+                                    public void run() {
-+                                        verifySwap(a, b, bx, by, ax, ay);
-+                                    }
-+                                }, 1100L);
-+                            }
-+                        });
-+                    }
-+                }, 1000L);
-+            }
-+        });
-+    }
-+
-+    private int[] emptyCell(int ax, int ay, int bx, int by, List<int[]> cells) {
-+        for (int[] cell : cells) {
-+            if (cell == null || cell.length < 2) continue;
-+            if (cell[1] == ax && cell[0] == ay) continue;
-+            if (cell[1] == bx && cell[0] == by) continue;
-+            return cell;
-+        }
-+        return null;
-+    }
-+
-+    private void verifySwap(ActionItem a, ActionItem b, int ax, int ay, int bx, int by) {
-+        AccessibilityNodeInfo root = getRootInActiveWindow();
-+        AccessibilityNodeInfo nodeA = findLabel(root, a.label, 0);
-+        AccessibilityNodeInfo nodeB = findLabel(root, b.label, 0);
-+        if (nodeA == null || nodeB == null) {
-+            finishAction(false, "swap", "verify-missing");
-+            return;
-+        }
-+        Rect ra = new Rect();
-+        Rect rb = new Rect();
-+        nodeA.getBoundsInScreen(ra);
-+        nodeB.getBoundsInScreen(rb);
-+        boolean ok = Math.abs(ra.centerX() - bx) < dp(90) && Math.abs(ra.centerY() - by) < dp(90)
-+            && Math.abs(rb.centerX() - ax) < dp(90) && Math.abs(rb.centerY() - ay) < dp(90);
-+        finishAction(ok, "swap", ok ? "done" : "wrong-cells");
-+    }
-+
-+    private void dbSwap(ActionItem a, ActionItem b) {
-+        if (a.id <= 0 || b.id <= 0) {
-+            finishAction(false, "swap", "missing-id");
-+            return;
-+        }
-+        List<LauncherDbEditor.Update> updates = new ArrayList<>();
-+        updates.add(new LauncherDbEditor.Update(a.id, b.screen, b.cellX, b.cellY));
-+        updates.add(new LauncherDbEditor.Update(b.id, a.screen, a.cellX, a.cellY));
-+        new Thread(new Runnable() {
-+            @Override
-+            public void run() {
-+                boolean ok = LauncherDbEditor.writePositions(getApplicationContext(), updates);
-+                handler.post(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        finishAction(ok, "swap", ok ? "db" : "db-write-failed");
-+                    }
-+                });
-+            }
-+        }).start();
-+    }
-+
-+    private void runFolder(List<ActionItem> items, ActionTarget target, boolean database) {
-+        if (items.size() < 2) {
-+            finishAction(false, "folder", "need-two-items");
-+            return;
-+        }
-+        boolean allSamePage = true;
-+        for (ActionItem item : items) if (item.screen != target.screen) allSamePage = false;
-+        if (!allSamePage && !database) {
-+            finishAction(false, "folder", "cross-page-needs-db");
-+            return;
-+        }
-+        if (allSamePage) {
-+            if (!target.folderTitle.isEmpty()) {
-+                locateLabel(target.folderTitle, target.screen, new ScanCallback() {
-+                    @Override
-+                    public void found(Rect bounds) {
-+                        dragItemsIntoFolder(items, 0, bounds.centerX(), bounds.centerY());
-+                    }
-+
-+                    @Override
-+                    public void failed(String detail) {
-+                        finishAction(false, "folder", "folder-not-found");
-+                    }
-+                });
-+                return;
-+            }
-+            locateItem(items.get(0), new ScanCallback() {
-+                @Override
-+                public void found(Rect bounds) {
-+                    int[] to = cellCenter(target.row, target.col);
-+                    dragAsync(bounds.centerX(), bounds.centerY(), to[0], to[1], new DragCallback() {
-+                        @Override
-+                        public void done(boolean ok) {
-+                            if (!ok) {
-+                                finishAction(false, "folder", "host-drag-failed");
-+                                return;
-+                            }
-+                            handler.postDelayed(new Runnable() {
-+                                @Override
-+                                public void run() {
-+                                    dragItemsIntoFolder(items, 1, to[0], to[1]);
-+                                }
-+                            }, 1100L);
-+                        }
-+                    });
-+                }
-+
-+                @Override
-+                public void failed(String detail) {
-+                    finishAction(false, "folder", detail);
-+                }
-+            });
-+            return;
-+        }
-+
-+        // 跨页文件夹：先把需要跨页的图标搬到目标页的空位，再在目标页做拖拽。
-+        List<LauncherDbEditor.Update> updates = new ArrayList<>();
-+        List<ActionItem> staged = new ArrayList<>();
-+        List<int[]> used = new ArrayList<>();
-+        for (int i = 0; i < items.size(); i++) {
-+            ActionItem item = items.get(i);
-+            boolean host = target.folderTitle.isEmpty() && i == 0;
-+            if (host) {
-+                if (item.id <= 0) {
-+                    finishAction(false, "folder", "missing-id");
-+                    return;
-+                }
-+                if (item.screen != target.screen || item.cellX != target.col || item.cellY != target.row) {
-+                    updates.add(new LauncherDbEditor.Update(item.id, target.screen, target.col, target.row));
-+                }
-+                staged.add(new ActionItem(item.id, item.label, item.pkg, target.screen, target.col, target.row));
-+                continue;
-+            }
-+            if (item.screen == target.screen) {
-+                staged.add(item);
-+                continue;
-+            }
-+            if (item.id <= 0) {
-+                finishAction(false, "folder", "missing-id");
-+                return;
-+            }
-+            int[] cell = nextEmptyCell(target, used);
-+            if (cell == null) {
-+                finishAction(false, "folder", "not-enough-empty-cells");
-+                return;
-+            }
-+            used.add(cell);
-+            updates.add(new LauncherDbEditor.Update(item.id, target.screen, cell[1], cell[0]));
-+            staged.add(new ActionItem(item.id, item.label, item.pkg, target.screen, cell[1], cell[0]));
-+        }
-+        if (updates.isEmpty()) {
-+            runFolder(staged, target, false);
-+            return;
-+        }
-+        new Thread(new Runnable() {
-+            @Override
-+            public void run() {
-+                boolean ok = LauncherDbEditor.writePositions(getApplicationContext(), updates);
-+                handler.postDelayed(new Runnable() {
-+                    @Override
-+                    public void run() {
-+                        if (!ok) {
-+                            finishAction(false, "folder", "db-write-failed");
-+                            return;
-+                        }
-+                        runFolderAfterDb(staged, target);
-+                    }
-+                }, 2400L);
-+            }
-+        }).start();
-+    }
-+
-+    private int[] nextEmptyCell(ActionTarget target, List<int[]> used) {
-+        for (int[] cell : target.emptyCells) {
-+            if (cell == null || cell.length < 2) continue;
-+            if (cell[0] == target.row && cell[1] == target.col) continue;
-+            boolean hit = false;
-+            for (int[] u : used) if (u[0] == cell[0] && u[1] == cell[1]) hit = true;
-+            if (!hit) return cell;
-+        }
-+        return null;
-+    }
-+
-+    private void runFolderAfterDb(List<ActionItem> items, ActionTarget target) {
-+        if (!target.folderTitle.isEmpty()) {
-+            locateLabel(target.folderTitle, target.screen, new ScanCallback() {
-+                @Override
-+                public void found(Rect bounds) {
-+                    dragItemsIntoFolder(items, 0, bounds.centerX(), bounds.centerY());
-+                }
-+
-+                @Override
-+                public void failed(String detail) {
-+                    finishAction(false, "folder", "folder-not-found-after-db");
-+                }
-+            });
-+            return;
-+        }
-+        locateItem(items.get(0), new ScanCallback() {
-+            @Override
-+            public void found(Rect bounds) {
-+                int[] to = cellCenter(target.row, target.col);
-+                // 宿主已经被数据库放到目标格；直接把其余应用拖到目标格。
-+                dragItemsIntoFolder(items, 1, to[0], to[1]);
-+            }
-+
-+            @Override
-+            public void failed(String detail) {
-+                finishAction(false, "folder", detail);
-+            }
-+        });
-+    }
-+
-+    private void dragItemsIntoFolder(List<ActionItem> items, int index, int tx, int ty) {
-+        if (index >= items.size()) {
-+            finishAction(true, "folder", "done");
-+            return;
-+        }
-+        ActionItem item = items.get(index);
-+        locateItem(item, new ScanCallback() {
-+            @Override
-+            public void found(Rect bounds) {
-+                dragAsync(bounds.centerX(), bounds.centerY(), tx, ty, new DragCallback() {
-+                    @Override
-+                    public void done(boolean ok) {
-+                        if (!ok) {
-+                            finishAction(false, "folder", "item-drag-failed");
-+                            return;
-+                        }
-+                        handler.postDelayed(new Runnable() {
-+                            @Override
-+                            public void run() {
-+                                dragItemsIntoFolder(items, index + 1, tx, ty);
-+                            }
-+                        }, 1000L);
-+                    }
-+                });
-+            }
-+
-+            @Override
-+            public void failed(String detail) {
-+                finishAction(false, "folder", detail);
-+            }
-+        });
-+    }
-+
-     private void doEat(String label, int screen) {
-         scanLimit = Math.max(6, Math.min(9, screen + 2));
-         scanLeft = 0;
-@@ -459,6 +1153,10 @@ public class SpiritAccessibilityService extends AccessibilityService {
-         return value != null && value.toString().contains(needle);
-     }
- 
-+    private int dp(int value) {
-+        return Math.round(value * getResources().getDisplayMetrics().density);
-+    }
-+
-     private void toast(String msg) {
-         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-     }
+     private String failureLine(String detail) {
+         if (detail == null) return "没抓到，再试一次。";
+         if (detail.startsWith("not-found")) return "没扫到它，先把桌面滑到目标那一页再试。";
+         if ("not-launcher".equals(detail)) return "先回到桌面，瑶才敢伸手。";
+         if ("no-root".equals(detail)) return "桌面还没准备好，等一下再试。";
++        if (detail.startsWith("db-backup-failed")) return "launcher.db 备份失败，桌面没有改动。";
++        if (detail.startsWith("db-write-failed")) return "写回 launcher.db 失败，已经回滚。";
++        if (detail.startsWith("db-verify-failed")) return "写完后校验没通过，已经回滚。";
++        if (detail.startsWith("db-rollback-failed")) return "回滚也失败了，先别动桌面，告诉我。";
++        if (detail.startsWith("db-")) return "数据库操作没完成，桌面已尽量恢复。";
+         if ("long-press-failed".equals(detail)) return "长按没成功，再试一次。";
+         if ("root-still-open".equals(detail)) return "移除弹窗还在，再试一次。";
+         return "没抓到，再试一次。";
 diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
-index c71d6b9..a39ff95 100644
+index c71d6b9..14f0229 100644
 --- a/www/css/spirit-house.css
 +++ b/www/css/spirit-house.css
-@@ -420,3 +420,70 @@ body.spirit-memorial-open{overflow:hidden}
+@@ -420,3 +420,73 @@ body.spirit-memorial-open{overflow:hidden}
   .bond-chip{flex:0 0 94px;min-width:94px}
   .partner-actions a,.partner-actions button{white-space:normal;line-height:1.35}
  }
 +
-+/* v129 桌面管家 */
-+.desktop-manager{display:grid;gap:10px;margin-top:12px;padding:12px;border:1px solid rgba(255,211,110,.22);border-radius:16px;background:linear-gradient(160deg,rgba(9,16,34,.96),rgba(15,27,48,.9))}
-+.desktop-manager[hidden]{display:none!important}
-+.dm-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-+.dm-head b{display:block;color:var(--sp-gold);font-size:16px;letter-spacing:.04em}
-+.dm-head span{display:block;margin-top:2px;color:var(--ang-muted);font-size:10.5px;line-height:1.4}
-+.dm-ghost{min-height:30px;padding:0 9px;border:1px solid rgba(255,211,110,.26);border-radius:9px;background:rgba(255,211,110,.06);color:var(--sp-gold);font-size:10.5px;cursor:pointer;white-space:nowrap}
-+.dm-ghost:hover{background:rgba(255,211,110,.13)}
-+.dm-tools{display:flex;gap:7px}
-+.dm-tools input{flex:1;min-width:0;height:34px;padding:0 10px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:rgba(255,255,255,.045);color:#fff;font:inherit;font-size:12px;outline:none}
-+.dm-tools input:focus{border-color:rgba(255,211,110,.55);background:rgba(255,211,110,.05)}
-+.dm-page-tabs{display:flex;gap:6px;overflow-x:auto;padding:1px 0 3px;scrollbar-width:none}
++/* ===== 桌面管家 v1.0.131 ===== */
++.dm-shell{position:relative;margin-top:12px;padding:12px 10px 10px;border:1px solid rgba(199,166,255,.22);border-radius:14px;background:linear-gradient(180deg,rgba(21,20,44,.88),rgba(9,12,28,.92))}
++.dm-shell[hidden]{display:none!important}
++.dm-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}
++.dm-head b{display:block;color:var(--ang-text);font-size:14px;letter-spacing:.04em}
++.dm-head small{display:block;margin-top:3px;color:var(--ang-muted);font-size:10px;line-height:1.5}
++.dm-head>span{flex:0 0 auto;padding:3px 8px;border:1px solid rgba(110,231,255,.22);border-radius:99px;color:var(--sp-cyan);font-size:10px}
++.dm-scan-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
++.dm-scan-row .desktop-probe-btn{margin-top:0}
++.dm-tools{display:flex;flex-direction:column;gap:7px;margin-top:9px}
++.dm-tools input[type=search]{width:100%;box-sizing:border-box;min-height:34px;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.045);color:var(--ang-text);font:inherit;font-size:11px;outline:none}
++.dm-tools input[type=search]:focus{border-color:rgba(110,231,255,.45)}
++.dm-db-toggle{display:flex;align-items:center;gap:7px;color:var(--ang-muted);font-size:10.5px;line-height:1.4;cursor:pointer}
++.dm-db-toggle input{accent-color:#6ee7ff;width:15px;height:15px}
++.dm-db-note{margin:5px 0 0;color:rgba(255,255,255,.42);font-size:9.5px;line-height:1.55}
++.dm-page-tabs{display:flex;gap:6px;overflow-x:auto;padding:9px 0 7px;scrollbar-width:none}
 +.dm-page-tabs::-webkit-scrollbar{display:none}
-+.dm-page-tab{flex:0 0 auto;min-height:27px;padding:0 9px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.035);color:var(--ang-muted);font-size:10.5px;cursor:pointer}
-+.dm-page-tab.on{border-color:rgba(255,211,110,.58);background:rgba(255,211,110,.13);color:var(--sp-gold)}
-+.dm-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;max-height:46vh;overflow-y:auto;padding:2px 0 4px;scrollbar-width:thin;scrollbar-color:rgba(255,211,110,.3) transparent}
-+.dm-app{min-width:0;padding:7px 5px 6px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.035);color:var(--ang-text);font:inherit;text-align:center;cursor:pointer;position:relative;transition:border-color .16s,background .16s,transform .16s}
-+.dm-app:hover{border-color:rgba(255,211,110,.3);background:rgba(255,211,110,.06)}
-+.dm-app.on{border-color:rgba(255,211,110,.72);background:rgba(255,211,110,.12);box-shadow:0 0 0 1px rgba(255,211,110,.12) inset;transform:translateY(-1px)}
-+.dm-app .dm-icon{display:grid;place-items:center;width:34px;height:34px;margin:0 auto 4px;border-radius:9px;overflow:hidden;background:rgba(255,255,255,.07);color:var(--sp-gold);font-size:13px}
-+.dm-app .dm-icon img{width:100%;height:100%;object-fit:cover;display:block}
-+.dm-app b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;font-weight:500;line-height:1.3}
-+.dm-app small{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.42);font-size:8.5px}
-+.dm-app .dm-check{position:absolute;right:4px;top:4px;display:none;width:14px;height:14px;border-radius:50%;background:var(--sp-gold);color:#171026;font-size:9px;line-height:14px;font-weight:700}
-+.dm-app.on .dm-check{display:block}
-+.dm-empty{display:grid;place-items:center;min-height:80px;color:var(--ang-muted);font-size:11px;border:1px dashed rgba(255,255,255,.13);border-radius:12px}
++.dm-page-tab{flex:0 0 auto;min-height:28px;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:99px;background:rgba(255,255,255,.03);color:var(--ang-muted);font:inherit;font-size:10px;cursor:pointer;white-space:nowrap}
++.dm-page-tab.is-active{border-color:rgba(199,166,255,.5);background:rgba(199,166,255,.14);color:#efe7ff}
++.dm-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-height:420px;overflow:auto;padding:2px 1px 8px;overscroll-behavior:contain}
++.dm-app{position:relative;display:flex;flex-direction:column;align-items:center;min-width:0;padding:8px 3px 7px;border:1px solid rgba(255,255,255,.075);border-radius:11px;background:rgba(255,255,255,.028);color:var(--ang-text);font:inherit;cursor:pointer;transition:border-color .16s,background .16s,transform .16s}
++.dm-app:active{transform:scale(.97)}
++.dm-app.is-selected{border-color:rgba(255,211,110,.75);background:rgba(255,211,110,.12);box-shadow:0 0 0 1px rgba(255,211,110,.2) inset,0 6px 18px rgba(255,211,110,.08)}
++.dm-app.is-selected .dm-check{opacity:1;transform:scale(1)}
++.dm-icon{position:relative;display:flex;align-items:center;justify-content:center;width:42px;height:42px;margin-bottom:5px;border-radius:11px;background:rgba(255,255,255,.06);overflow:hidden}
++.dm-icon img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:transparent}
++.dm-icon i{color:#c7a6ff;font-style:normal;font-size:16px;font-weight:600}
++.dm-app b{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-size:10px;font-weight:500;line-height:1.35}
++.dm-app small{display:block;width:100%;margin-top:2px;color:var(--ang-muted);font-size:8px;line-height:1.3;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++.dm-check{position:absolute;right:4px;top:4px;display:flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#ffd36e;color:#1a1630;font-size:9px;font-weight:700;opacity:0;transform:scale(.7);transition:.15s}
++.dm-empty{padding:22px 8px;color:var(--ang-muted);font-size:11px;text-align:center}
 +.dm-empty[hidden]{display:none!important}
-+.dm-actionbar{position:sticky;bottom:0;z-index:4;display:grid;gap:7px;padding:9px 0 2px;background:linear-gradient(to top,rgba(9,16,34,.98) 55%,rgba(9,16,34,.72));border-top:1px solid rgba(255,211,110,.16)}
-+.dm-selection{display:flex;align-items:baseline;gap:7px;min-width:0}
-+.dm-selection b{color:var(--sp-gold);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-+.dm-selection span{color:var(--ang-muted);font-size:9.5px;white-space:nowrap}
-+.dm-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-+.dm-actions button{min-height:34px;padding:0 5px;border:1px solid rgba(255,211,110,.28);border-radius:10px;background:rgba(255,211,110,.08);color:var(--sp-gold);font:inherit;font-size:11px;cursor:pointer}
-+.dm-actions button:disabled{opacity:.36;cursor:default}
-+.dm-actions button:not(:disabled):hover{background:rgba(255,211,110,.16)}
-+.dm-command{display:flex;gap:6px}
-+.dm-command input{flex:1;min-width:0;height:34px;padding:0 9px;border:1px solid rgba(110,231,255,.2);border-radius:9px;background:rgba(110,231,255,.05);color:#fff;font:inherit;font-size:10.5px;outline:none}
-+.dm-command input:focus{border-color:rgba(110,231,255,.6)}
-+.dm-command button{min-height:34px;padding:0 11px;border:1px solid rgba(110,231,255,.4);border-radius:9px;background:rgba(110,231,255,.1);color:var(--sp-cyan);font:inherit;font-size:11px;cursor:pointer;white-space:nowrap}
-+.dm-note{margin:0;color:rgba(255,255,255,.45);font-size:9.5px;line-height:1.55}
-+.dm-exp{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border:1px dashed rgba(255,255,255,.13);border-radius:9px;color:var(--ang-muted);font-size:10px}
-+.dm-exp label{display:flex;align-items:center;gap:6px;cursor:pointer}
-+.dm-exp input{accent-color:#ffd36e}
-+.dm-exp span{color:rgba(255,211,110,.65);font-size:9px;text-align:right}
-+.desktop-probe-out{max-height:180px;overflow:auto;margin:0;padding:8px;border-radius:9px;background:rgba(0,0,0,.2);color:rgba(255,255,255,.55);font-size:9px;line-height:1.5;white-space:pre-wrap}
-+.dm-target-modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:14px;background:rgba(3,7,17,.82);backdrop-filter:blur(5px)}
-+.dm-target-modal[hidden]{display:none!important}
-+.dm-target-card{width:min(520px,100%);max-height:82vh;overflow:auto;padding:12px;border:1px solid rgba(255,211,110,.28);border-radius:18px;background:linear-gradient(160deg,#111a2d,#0a1120);box-shadow:0 24px 70px rgba(0,0,0,.55)}
-+.dm-target-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-+.dm-target-head b{color:var(--sp-gold);font-size:15px}
-+.dm-target-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
-+.dm-cell{min-height:48px;padding:4px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.03);color:var(--ang-muted);font:inherit;font-size:9px;cursor:pointer;display:grid;place-items:center;text-align:center;line-height:1.25}
-+.dm-cell.free{border-color:rgba(110,231,255,.18);color:rgba(110,231,255,.55)}
-+.dm-cell.occupied{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.055);color:rgba(255,255,255,.55)}
-+.dm-cell.folder{border-color:rgba(255,211,110,.5);background:rgba(255,211,110,.1);color:var(--sp-gold)}
-+.dm-cell.on{border-color:var(--sp-gold);box-shadow:0 0 0 1px var(--sp-gold) inset;background:rgba(255,211,110,.17);color:#fff}
-+.dm-cell:disabled{opacity:.35;cursor:default}
-+.dm-target-hint{margin:8px 0 0;color:var(--ang-muted);font-size:10px;line-height:1.5}
-+.dm-folder-name{margin-top:8px}
++.dm-dock{position:sticky;bottom:0;z-index:5;margin:2px -2px 0;padding:8px;border:1px solid rgba(199,166,255,.25);border-radius:12px;background:rgba(10,13,29,.96);box-shadow:0 -6px 22px rgba(8,13,27,.55);backdrop-filter:blur(10px)}
++.dm-selection{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0;margin-bottom:7px}
++.dm-selection b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ang-text);font-size:11px;font-weight:500}
++.dm-selection small{flex:0 0 auto;color:var(--ang-muted);font-size:9px}
++.dm-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
++.dm-action{min-height:33px;padding:0 4px;border:1px solid rgba(110,231,255,.25);border-radius:8px;background:rgba(110,231,255,.08);color:var(--sp-cyan);font:inherit;font-size:10.5px;cursor:pointer}
++.dm-action:disabled{opacity:.34;cursor:default}
++.dm-action.is-special{border-color:rgba(255,211,110,.35);background:rgba(255,211,110,.08);color:#ffd36e}
++.dm-command{display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:8px}
++.dm-command input{min-width:0;min-height:34px;padding:0 10px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.04);color:var(--ang-text);font:inherit;font-size:10.5px;outline:none}
++.dm-command input:focus{border-color:rgba(199,166,255,.5)}
++.dm-command button{min-height:34px;padding:0 12px;border:1px solid rgba(255,211,110,.36);border-radius:9px;background:rgba(255,211,110,.1);color:#ffd36e;font:inherit;font-size:10.5px;cursor:pointer}
++.dm-action-out{margin-top:8px;padding:8px 10px;border:1px solid rgba(110,231,255,.18);border-radius:9px;background:rgba(110,231,255,.06);color:var(--sp-cyan);font-size:10px;line-height:1.6}
++.dm-action-out[hidden]{display:none!important}
++.dm-action-out.is-error{border-color:rgba(255,120,150,.3);background:rgba(255,90,120,.07);color:#ff9fb2}
++.dm-diag{margin-top:9px}
++.dm-diag summary{color:rgba(255,255,255,.38);font-size:9.5px;cursor:pointer}
++.dm-diag .desktop-probe-out{max-height:220px;margin-top:7px}
++.dm-modal{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgba(4,5,13,.72);padding:12px}
++.dm-modal[hidden]{display:none!important}
++.dm-modal-card{width:100%;max-width:520px;max-height:82vh;overflow:auto;padding:14px 12px;border:1px solid rgba(199,166,255,.35);border-radius:16px;background:linear-gradient(180deg,#191631,#0b1021);box-shadow:0 18px 60px rgba(0,0,0,.55)}
++.dm-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
++.dm-modal-head b{color:var(--ang-text);font-size:13px}
++.dm-modal-head button{width:28px;height:28px;border:1px solid rgba(255,255,255,.12);border-radius:50%;background:rgba(255,255,255,.05);color:var(--ang-muted);font:inherit;font-size:16px;cursor:pointer}
++.dm-modal-note{margin:6px 0 0;color:var(--ang-muted);font-size:9.5px;line-height:1.5}
++.dm-target-grid{display:grid;gap:5px;margin-top:8px}
++.dm-cell{min-width:0;min-height:50px;padding:3px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.025);color:var(--ang-muted);font:inherit;font-size:8px;line-height:1.25;cursor:pointer;overflow:hidden}
++.dm-cell.is-empty{border-color:rgba(110,231,255,.22);background:rgba(110,231,255,.055);color:rgba(110,231,255,.72)}
++.dm-cell.is-folder{border-color:rgba(255,211,110,.45);background:rgba(255,211,110,.09);color:#ffd36e}
++.dm-cell.is-app{opacity:.52;cursor:default}
++.dm-cell b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ang-text);font-size:8.5px;font-weight:500}
++.dm-cell small{display:block;margin-top:2px;color:inherit;font-size:7.5px}
++.dm-folder-name{display:flex;align-items:center;gap:7px;margin-top:10px;color:var(--ang-muted);font-size:10px}
 +.dm-folder-name[hidden]{display:none!important}
-+.dm-folder-name input{width:100%;height:34px;padding:0 9px;border:1px solid rgba(255,211,110,.2);border-radius:9px;background:rgba(255,211,110,.05);color:#fff;font:inherit;font-size:11px;outline:none}
-+.dm-target-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.09)}
-+.dm-target-foot span{color:var(--ang-muted);font-size:10px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-+.dm-target-foot button{min-height:34px;padding:0 14px;border:1px solid rgba(255,211,110,.5);border-radius:9px;background:rgba(255,211,110,.16);color:var(--sp-gold);font:inherit;font-size:11px;cursor:pointer}
-+.dm-target-foot button:disabled{opacity:.35;cursor:default}
-+@media(max-width:380px){.dm-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.dm-actions button{font-size:10px}}
++.dm-folder-name input{flex:1;min-width:0;min-height:32px;padding:0 9px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04);color:var(--ang-text);font:inherit;font-size:10.5px}
++.dm-target-hint{margin:9px 0 0;color:var(--ang-muted);font-size:9.5px;line-height:1.5}
++@media (max-width:360px){.dm-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.dm-icon{width:38px;height:38px}}
 diff --git a/www/jingling.html b/www/jingling.html
-index bf4d4c0..b0ded4f 100644
+index bf4d4c0..729d38f 100644
 --- a/www/jingling.html
 +++ b/www/jingling.html
 @@ -8,7 +8,7 @@
@@ -1137,7 +1133,7 @@ index bf4d4c0..b0ded4f 100644
  <link rel="stylesheet" href="css/app-shell.css?v=2">
  <script src="js/app-shell.js?v=2" defer></script>
  </head>
-@@ -101,20 +101,54 @@
+@@ -101,20 +101,50 @@
         <label><input type="checkbox" id="noDoodle"> 桌面涂鸦</label>
        </div>
        <p class="ws-note">只影响退出 App 后的桌面悬浮精灵，不改变页面里的全站挂件。</p>
@@ -1148,62 +1144,58 @@ index bf4d4c0..b0ded4f 100644
 -       <div class="desktop-icon-picker" id="desktopIconPicker" hidden>
 -        <div class="desktop-icon-picker-head"><b>选择要吃的图标</b><span id="desktopIconCount">0 个</span></div>
 -        <div class="desktop-icon-list" id="desktopIconList"></div>
-+      <div class="desktop-manager" id="desktopProbe" hidden>
++      <div class="desktop-probe dm-shell" id="desktopProbe" hidden>
 +       <div class="dm-head">
-+        <div><b>桌面管家</b><span id="dmSummary">正在读取桌面…</span></div>
-+        <button type="button" class="dm-ghost" id="desktopProbeBtn">重新扫描</button>
-+       </div>
++        <div><b>桌面管家</b><small>真实图标 · 按页整理 · 选中后直接操作</small></div>
++        <span id="desktopIconCount">0 个</span>
+        </div>
+-       <div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div>
+-       <div class="desktop-probe-actions">
++       <div class="dm-scan-row">
++        <button type="button" class="desktop-probe-btn" id="desktopProbeBtn">扫描桌面</button>
+         <button type="button" class="desktop-probe-btn" id="desktopAccessBtn">开启无障碍</button>
+-        <button type="button" class="desktop-probe-btn" id="desktopEatBtn" disabled>吃掉选中图标</button>
+        </div>
+-       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。</p>
 +       <div class="dm-tools">
-+        <input type="search" id="desktopSearch" placeholder="搜索应用名或包名">
-+        <button type="button" class="dm-ghost" id="desktopAccessBtn">无障碍</button>
++        <input type="search" id="desktopSearch" placeholder="搜索应用名或包名" autocomplete="off">
++        <label class="dm-db-toggle"><input type="checkbox" id="launcherDbSwitch"> 实验性数据库写入</label>
 +       </div>
++       <p class="dm-db-note" id="desktopDbNote">默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。</p>
 +       <div class="dm-page-tabs" id="desktopPageTabs"></div>
 +       <div class="dm-grid" id="desktopIconList"></div>
 +       <div class="dm-empty" id="desktopEmpty" hidden>没有匹配的应用</div>
-+       <div class="dm-actionbar" id="desktopActionBar">
-+        <div class="dm-selection"><b id="desktopSelectionTitle">未选择应用</b><span id="desktopSelectionMeta">点图标可多选</span></div>
++       <div class="dm-dock" id="desktopActionDock">
++        <div class="dm-selection"><b id="desktopSelectionText">未选择</b><small id="desktopSelectionSub">点一个应用开始</small></div>
 +        <div class="dm-actions">
-+         <button type="button" id="desktopEatBtn" disabled>吃掉</button>
-+         <button type="button" id="desktopMoveBtn" disabled>移动</button>
-+         <button type="button" id="desktopSwapBtn" disabled>交换</button>
-+         <button type="button" id="desktopFolderBtn" disabled>文件夹</button>
++         <button type="button" class="dm-action" id="desktopEatBtn" disabled>吃掉</button>
++         <button type="button" class="dm-action" id="desktopMoveBtn" disabled>移动</button>
++         <button type="button" class="dm-action" id="desktopSwapBtn" disabled>交换</button>
++         <button type="button" class="dm-action" id="desktopFolderBtn" disabled>文件夹</button>
 +        </div>
 +       </div>
 +       <div class="dm-command">
-+        <input id="desktopCommand" placeholder="例：把微信和支付宝交换位置">
-+        <button type="button" id="desktopCommandBtn">执行</button>
++        <input type="text" id="desktopCommand" placeholder="例：把微信和支付宝交换位置" autocomplete="off">
++        <button type="button" id="desktopCommandBtn">执行指令</button>
 +       </div>
-+       <p class="dm-note">点图标选中；吃掉/移动只用 1 个，交换用 2 个，文件夹用 2 个以上。执行按钮就在选择栏下方。</p>
-+       <div class="dm-exp">
-+        <label><input type="checkbox" id="desktopDbToggle"> 数据库兜底实验</label>
-+        <span id="desktopDbState">检测中…</span>
-        </div>
-        <div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div>
--       <div class="desktop-probe-actions">
--        <button type="button" class="desktop-probe-btn" id="desktopAccessBtn">开启无障碍</button>
--        <button type="button" class="desktop-probe-btn" id="desktopEatBtn" disabled>吃掉选中图标</button>
-+       <p class="ws-note">吃掉走 ColorOS 官方「移除」；移动/交换/文件夹优先走系统拖拽，数据库兜底默认关闭。</p>
-+      </div>
++       <div class="dm-action-out" id="desktopActionOut" hidden></div>
++       <details class="dm-diag"><summary>诊断信息</summary><div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div></details>
++       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。移动/交换/文件夹默认关闭数据库写入。</p>
 +
-+      <div class="dm-target-modal" id="dmTargetModal" hidden>
-+       <div class="dm-target-card">
-+        <div class="dm-target-head"><b>选择目标位置</b><button type="button" class="dm-ghost" id="dmTargetClose">关闭</button></div>
-+        <div class="dm-page-tabs" id="dmTargetPageTabs"></div>
-+        <div class="dm-target-grid" id="dmTargetGrid"></div>
-+        <p class="dm-target-hint" id="dmTargetHint">先选一个空格，再确认。</p>
-+        <div class="dm-folder-name" id="dmFolderNameRow" hidden>
-+         <input id="dmFolderName" placeholder="文件夹名，留空自动命名">
++       <div class="dm-modal" id="desktopTargetModal" hidden>
++        <div class="dm-modal-card">
++         <div class="dm-modal-head"><b id="desktopTargetTitle">选择目标位置</b><button type="button" id="desktopTargetClose" aria-label="关闭">×</button></div>
++         <p class="dm-modal-note">行列从 1 开始；绿色为空位，金色为已有文件夹，灰色为已占用应用。</p>
++         <div class="dm-page-tabs" id="desktopTargetPageTabs"></div>
++         <div class="dm-target-grid" id="desktopTargetGrid"></div>
++         <label class="dm-folder-name" id="desktopFolderNameWrap" hidden>文件夹名 <input type="text" id="desktopFolderName" placeholder="留空自动命名"></label>
++         <p class="dm-target-hint" id="desktopTargetHint">点一个空位</p>
 +        </div>
-+        <div class="dm-target-foot">
-+         <span id="dmTargetSummary">未选择位置</span>
-+         <button type="button" id="dmTargetConfirm" disabled>确定</button>
-+        </div>
-        </div>
--       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。</p>
++       </div>
        </div>
       </div>
  
-@@ -286,7 +320,7 @@
+@@ -286,7 +316,7 @@
  <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
  
  <script src="js/spirit-core.js?v=15"></script>
@@ -1213,549 +1205,651 @@ index bf4d4c0..b0ded4f 100644
  </body>
  </html>
 diff --git a/www/js/jingling.js b/www/js/jingling.js
-index 2e2fabe..158ef4d 100644
+index 2e2fabe..b353812 100644
 --- a/www/js/jingling.js
 +++ b/www/js/jingling.js
-@@ -1071,8 +1071,15 @@
+@@ -1067,12 +1067,13 @@
+     try { data = JSON.parse(raw || '{}'); } catch (e) { data = null; }
+     if (!data || !data.ok) {
+       out.textContent = '探测失败：' + ((data && data.dbError) || '没有拿到原生返回。');
+-      updateDesktopProbeActions(null);
++      renderDesktopManager(null);
++      showActionOut('桌面读取失败：' + ((data && data.dbError) || '没有拿到原生返回'), true);
        return;
      }
      window.__tafeiLastProbe = data;
-+    dmState.pageCount = dmPageCount(data);
-+    var grid = dmGridSize(data);
-+    dmState.cols = grid.cols;
-+    dmState.rows = grid.rows;
-+    dmState.folderIds = dmBuildFolders(data);
-+    if (dmState.page >= dmState.pageCount) dmState.page = -1;
-+    renderPageTabs();
-     renderDesktopIconList(data);
+-    renderDesktopIconList(data);
 -    updateDesktopProbeActions(data);
-+    updateDesktopProbeActions();
++    renderDesktopManager(data);
++    showActionOut('');
      var lines = [];
      var diagLines = data.diag || [];
      if (!Array.isArray(diagLines)) diagLines = String(diagLines).split(/\r?\n/);
-@@ -1125,51 +1132,200 @@
+@@ -1125,153 +1126,648 @@
      out.textContent = lines.join('\n');
    }
  
 -  function renderDesktopIconList(data) {
 -    var picker = $('desktopIconPicker');
--    var list = $('desktopIconList');
--    var count = $('desktopIconCount');
++  var dmState = {
++    data: null,
++    icons: [],
++    selected: {},
++    page: 'all',
++    search: '',
++    iconCache: {},
++    targetAction: null,
++    targetPage: 0,
++    busy: false
++  };
++
++  function dmKey(item, index) {
++    if (item && item.rowId != null && item.rowId >= 0) return 'r' + item.rowId;
++    return 'i' + index;
++  }
++
++  function dmAllIcons() {
++    return (dmState.data && Array.isArray(dmState.data.samples)) ? dmState.data.samples : [];
++  }
++
++  function dmIconMap() {
++    var map = {};
++    dmAllIcons().forEach(function (item, index) { map[dmKey(item, index)] = item; });
++    return map;
++  }
++
++  function dmSelectedItems() {
++    var map = dmIconMap();
++    var rows = [];
++    Object.keys(dmState.selected).forEach(function (key) {
++      if (dmState.selected[key] && map[key]) rows.push(map[key]);
++    });
++    return rows;
++  }
++
++  function dmLabel(item) {
++    return item && (item.label || item.package) ? String(item.label || item.package) : '未命名';
++  }
++
++  function dmPos(item) {
++    return '第' + (Number(item.screen) + 1) + '页 · ' + (Number(item.cellY) + 1) + '行' + (Number(item.cellX) + 1) + '列';
++  }
++
++  function dmFolders() {
++    return (dmState.data && Array.isArray(dmState.data.folders)) ? dmState.data.folders : [];
++  }
++
++  function dmPageList() {
++    var pages = {};
++    dmAllIcons().forEach(function (item) {
++      var p = Number(item.screen);
++      if (p >= 0) pages[p] = true;
++    });
++    dmFolders().forEach(function (item) {
++      var p = Number(item.screen);
++      if (p >= 0) pages[p] = true;
++    });
++    return Object.keys(pages).map(Number).sort(function (a, b) { return a - b; });
++  }
++
++  function renderDesktopPageTabs() {
++    var box = $('desktopPageTabs');
++    if (!box) return;
++    var pages = dmPageList();
++    var html = '<button type="button" class="dm-page-tab' + (dmState.page === 'all' ? ' is-active' : '') + '" data-dm-page="all">全部</button>';
++    pages.forEach(function (p) {
++      html += '<button type="button" class="dm-page-tab' + (dmState.page === p ? ' is-active' : '') + '" data-dm-page="' + p + '">第' + (p + 1) + '页</button>';
++    });
++    box.innerHTML = html;
++  }
++
++  function dmFilteredIcons() {
++    var q = dmState.search.trim().toLowerCase();
++    return dmAllIcons().filter(function (item) {
++      if (dmState.page !== 'all' && Number(item.screen) !== Number(dmState.page)) return false;
++      if (!q) return true;
++      return String(item.label || '').toLowerCase().indexOf(q) >= 0
++        || String(item.package || '').toLowerCase().indexOf(q) >= 0;
++    });
++  }
++
++  function hydrateDesktopIcons() {
++    Array.prototype.forEach.call(document.querySelectorAll('.dm-app img[data-pkg]'), function (img) {
++      var pkg = img.getAttribute('data-pkg');
++      if (!pkg || img.getAttribute('data-loaded') === '1') return;
++      if (dmState.iconCache[pkg]) {
++        img.src = 'data:image/png;base64,' + dmState.iconCache[pkg];
++        img.setAttribute('data-loaded', '1');
++        return;
++      }
++      window.setTimeout(function () {
++        if (!img.parentNode) return;
++        var data = String(nativeOverlayCall('desktopAppIcon', '', pkg) || '');
++        if (!data) return;
++        dmState.iconCache[pkg] = data;
++        img.src = 'data:image/png;base64,' + data;
++        img.setAttribute('data-loaded', '1');
++      }, 35);
++    });
++  }
++
++  function renderDesktopIconList() {
+     var list = $('desktopIconList');
+     var count = $('desktopIconCount');
 -    if (!picker || !list) return;
 -    var icons = (data && data.samples) || [];
 -    picker.hidden = !icons.length;
 -    if (count) count.textContent = icons.length + ' 个';
--    if (!icons.length) {
--      list.innerHTML = '';
++    var empty = $('desktopEmpty');
++    if (!list) return;
++    var all = dmAllIcons();
++    if (count) count.textContent = all.length + ' 个';
++    var icons = dmFilteredIcons();
++    if (empty) empty.hidden = icons.length > 0;
+     if (!icons.length) {
+       list.innerHTML = '';
 -      window.__tafeiSelectedIconIndex = 0;
-+  var dmState = {
-+    data: null,
-+    selected: [],
-+    page: -1,
-+    search: '',
-+    pageCount: 1,
-+    cols: 4,
-+    rows: 6,
-+    folderIds: {},
-+    iconCache: {},
-+    iconQueue: [],
-+    iconLoading: false,
-+    target: null,
-+    actionTimer: 0,
-+    actionStartedAt: 0
-+  };
-+
-+  function dmKey(item) {
-+    if (!item) return '';
-+    if (item.id && item.id > 0) return 'id:' + item.id;
-+    return [item.package || '', item.label || '', item.screen, item.cellX, item.cellY].join('|');
-+  }
-+
-+  function dmSelectedItems() {
-+    var icons = (dmState.data && dmState.data.samples) || [];
-+    var map = {};
-+    icons.forEach(function (item) { map[dmKey(item)] = item; });
-+    return dmState.selected.map(function (key) { return map[key]; }).filter(Boolean);
-+  }
-+
-+  function dmPageCount(data) {
-+    var max = 0;
-+    ((data && data.samples) || []).forEach(function (item) { if (item.screen > max) max = item.screen; });
-+    ((data && data.slots) || []).forEach(function (slot) { if (slot.screen > max) max = slot.screen; });
-+    return max + 1;
-+  }
-+
-+  function dmGridSize(data) {
-+    var cols = 4;
-+    var rows = 6;
-+    ((data && data.samples) || []).forEach(function (item) {
-+      if (item.cellX + 1 > cols) cols = item.cellX + 1;
-+      if (item.cellY + 1 > rows) rows = item.cellY + 1;
-+    });
-+    ((data && data.slots) || []).forEach(function (slot) {
-+      if (slot.cellX + 1 > cols) cols = slot.cellX + 1;
-+      if (slot.cellY + 1 > rows) rows = slot.cellY + 1;
-+    });
-+    return {cols: Math.max(4, cols), rows: Math.max(6, rows)};
-+  }
-+
-+  function dmBuildFolders(data) {
-+    var ids = {};
-+    ((data && data.slots) || []).forEach(function (slot) {
-+      if (slot.itemType === 2) ids['id:' + slot.id] = true;
-+      if (slot.container > 0) ids['id:' + slot.container] = true;
-+    });
-+    return ids;
-+  }
-+
-+  function dmSlotAt(page, row, col) {
-+    var slots = (dmState.data && dmState.data.slots) || [];
-+    for (var i = 0; i < slots.length; i++) {
-+      var slot = slots[i];
-+      if (slot.container === -100 && slot.screen === page && slot.cellY === row && slot.cellX === col) return slot;
-+    }
-+    return null;
-+  }
-+
-+  function dmIsFolder(slot) {
-+    if (!slot) return false;
-+    return slot.itemType === 2 || !!dmState.folderIds['id:' + slot.id];
-+  }
-+
-+  function dmPageLabel(page) {
-+    return page < 0 ? '全部' : ('第' + (page + 1) + '页');
-+  }
-+
-+  function dmQueueIcon(pkg, el) {
-+    if (!pkg || !el) return;
-+    if (dmState.iconCache[pkg]) {
-+      el.innerHTML = '<img alt="" src="data:image/png;base64,' + dmState.iconCache[pkg] + '">';
++      renderDesktopDock();
        return;
      }
 -    if (typeof window.__tafeiSelectedIconIndex !== 'number'
 -        || window.__tafeiSelectedIconIndex < 0
 -        || window.__tafeiSelectedIconIndex >= icons.length) {
 -      window.__tafeiSelectedIconIndex = 0;
-+    if (el.getAttribute('data-icon-pkg') === pkg && el.getAttribute('data-icon-queued') === '1') return;
-+    el.setAttribute('data-icon-pkg', pkg);
-+    el.setAttribute('data-icon-queued', '1');
-+    dmState.iconQueue.push({pkg: pkg, el: el});
-+    if (!dmState.iconLoading) {
-+      dmState.iconLoading = true;
-+      setTimeout(dmLoadNextIcon, 0);
-     }
--    var html = [];
--    icons.forEach(function (item, index) {
+-    }
++    var keepScroll = list.scrollTop;
+     var html = [];
+     icons.forEach(function (item, index) {
 -      var selected = index === window.__tafeiSelectedIconIndex ? ' is-selected' : '';
 -      html.push('<button type="button" class="desktop-icon-item' + selected + '" data-icon-index="' + index + '">'
 -        + '<b>' + esc(item.label || item.package || '未命名') + '</b>'
 -        + '<small>屏' + item.screen + ' · (' + item.cellX + ',' + item.cellY + ')</small>'
 -        + '</button>');
-+  }
-+
-+  function dmLoadNextIcon() {
-+    var next = dmState.iconQueue.shift();
-+    if (!next) {
-+      dmState.iconLoading = false;
-+      return;
-+    }
-+    var data = String(nativeOverlayCall('appIconData', '', next.pkg) || '');
-+    if (data) {
-+      dmState.iconCache[next.pkg] = data;
-+      if (next.el && next.el.isConnected) {
-+        next.el.innerHTML = '<img alt="" src="data:image/png;base64,' + data + '">';
-+      }
-+    }
-+    setTimeout(dmLoadNextIcon, 14);
-+  }
-+
-+  function renderPageTabs() {
-+    var box = $('desktopPageTabs');
-+    if (!box) return;
-+    var html = ['<button type="button" class="dm-page-tab' + (dmState.page < 0 ? ' on' : '') + '" data-dm-page="-1">全部</button>'];
-+    for (var i = 0; i < dmState.pageCount; i++) {
-+      html.push('<button type="button" class="dm-page-tab' + (dmState.page === i ? ' on' : '') + '" data-dm-page="' + i + '">第' + (i + 1) + '页</button>');
-+    }
-+    box.innerHTML = html.join('');
-+  }
-+
-+  function renderDesktopIconList(data) {
-+    var list = $('desktopIconList');
-+    var empty = $('desktopEmpty');
-+    var summary = $('dmSummary');
-+    if (!list) return;
-+    if (data) dmState.data = data;
-+    var icons = (dmState.data && dmState.data.samples) || [];
-+    var query = (dmState.search || '').trim().toLowerCase();
-+    var visible = icons.filter(function (item) {
-+      if (dmState.page >= 0 && item.screen !== dmState.page) return false;
-+      if (!query) return true;
-+      return String(item.label || '').toLowerCase().indexOf(query) >= 0
-+        || String(item.package || '').toLowerCase().indexOf(query) >= 0;
-+    });
-+    visible.sort(function (a, b) {
-+      return (a.screen - b.screen) || (a.cellY - b.cellY) || (a.cellX - b.cellX);
++      var key = dmKey(item, index);
++      var chosen = !!dmState.selected[key];
++      var label = dmLabel(item);
++      var initial = label.slice(0, 2);
++      html.push('<button type="button" class="dm-app' + (chosen ? ' is-selected' : '') + '" data-dm-key="' + esc(key) + '">'
++        + '<span class="dm-icon"><i>' + esc(initial) + '</i><img data-pkg="' + esc(item.package || '') + '" alt="" loading="lazy"></span>'
++        + '<b>' + esc(label) + '</b><small>' + esc(dmPos(item)) + '</small>'
++        + '<span class="dm-check">✓</span></button>');
      });
--    list.innerHTML = html.join('');
-+    if (summary) summary.textContent = icons.length + ' 个应用 · ' + dmState.pageCount + ' 页';
-+    if (!visible.length) {
-+      list.innerHTML = '';
-+      if (empty) empty.hidden = false;
-+    } else {
-+      if (empty) empty.hidden = true;
-+      var html = [];
-+      visible.forEach(function (item) {
-+        var key = dmKey(item);
-+        var on = dmState.selected.indexOf(key) >= 0;
-+        var letter = String(item.label || item.package || '?').slice(0, 1);
-+        html.push('<button type="button" class="dm-app' + (on ? ' on' : '') + '" data-dm-key="' + encodeURIComponent(key) + '">'
-+          + '<span class="dm-check">✓</span>'
-+          + '<span class="dm-icon" data-icon-box="1">' + esc(letter) + '</span>'
-+          + '<b>' + esc(item.label || item.package || '未命名') + '</b>'
-+          + '<small>第' + (item.screen + 1) + '页 · ' + (item.cellY + 1) + '行' + (item.cellX + 1) + '列</small>'
-+          + '</button>');
-+      });
-+      list.innerHTML = html.join('');
-+      var boxes = list.querySelectorAll('.dm-app');
-+      for (var i = 0; i < boxes.length && i < visible.length; i++) {
-+        var box = boxes[i].querySelector('.dm-icon');
-+        dmQueueIcon(visible[i].package, box);
-+      }
-+    }
-+    updateDesktopProbeActions(dmState.data);
+     list.innerHTML = html.join('');
++    list.scrollTop = keepScroll;
++    hydrateDesktopIcons();
++    renderDesktopDock();
    }
  
-   function selectedDesktopIcon() {
+-  function selectedDesktopIcon() {
 -    var data = window.__tafeiLastProbe;
 -    var icons = (data && data.samples) || [];
 -    var index = window.__tafeiSelectedIconIndex || 0;
 -    if (!icons.length) return null;
 -    if (index < 0 || index >= icons.length) index = 0;
 -    return icons[index];
-+    return dmSelectedItems()[0] || null;
++  function renderDesktopDock() {
++    var rows = dmSelectedItems();
++    var text = $('desktopSelectionText');
++    var sub = $('desktopSelectionSub');
++    var n = rows.length;
++    if (text) {
++      if (n === 0) text.textContent = '未选择';
++      else if (n === 1) text.textContent = dmLabel(rows[0]);
++      else if (n === 2) text.textContent = dmLabel(rows[0]) + ' + ' + dmLabel(rows[1]);
++      else text.textContent = '已选 ' + n + ' 个应用';
++    }
++    if (sub) {
++      if (n === 1) sub.textContent = dmPos(rows[0]);
++      else if (n > 1) sub.textContent = '可做文件夹';
++      else sub.textContent = '点一个应用开始';
++    }
++    var eat = $('desktopEatBtn');
++    var move = $('desktopMoveBtn');
++    var swap = $('desktopSwapBtn');
++    var folder = $('desktopFolderBtn');
++    if (eat) eat.disabled = n !== 1 || dmState.busy;
++    if (move) move.disabled = n !== 1 || dmState.busy;
++    if (swap) swap.disabled = n !== 2 || dmState.busy;
++    if (folder) folder.disabled = n < 2 || dmState.busy;
    }
  
 -  function updateDesktopProbeActions(data) {
-+  function updateDesktopProbeActions() {
-+    var items = dmSelectedItems();
-+    var count = items.length;
-+    var title = $('desktopSelectionTitle');
-+    var meta = $('desktopSelectionMeta');
-     var eat = $('desktopEatBtn');
+-    var eat = $('desktopEatBtn');
 -    if (!eat) return;
 -    var icons = (data && data.samples) || [];
 -    var item = selectedDesktopIcon();
 -    eat.disabled = !item;
 -    eat.textContent = item ? ('吃掉「' + (item.label || item.package || '这个图标') + '」') : '吃掉选中图标';
-+    var move = $('desktopMoveBtn');
-+    var swap = $('desktopSwapBtn');
-+    var folder = $('desktopFolderBtn');
-+    if (title) title.textContent = count === 0 ? '未选择应用' : (count === 1 ? (items[0].label || items[0].package || '已选择') : ('已选择 ' + count + ' 个应用'));
-+    if (meta) meta.textContent = count === 0 ? '点图标可多选' : (count === 1 ? '吃掉 / 移动' : '交换 / 文件夹');
-+    if (eat) eat.disabled = count !== 1;
-+    if (move) move.disabled = count !== 1;
-+    if (swap) swap.disabled = count !== 2;
-+    if (folder) folder.disabled = count < 2;
-+  }
-+
-+  function dmSetSelected(keys) {
-+    dmState.selected = keys || [];
++  function renderDesktopManager(data) {
++    dmState.data = data || null;
++    window.__tafeiLastProbe = data;
++    var map = dmIconMap();
++    Object.keys(dmState.selected).forEach(function (key) {
++      if (!map[key]) delete dmState.selected[key];
++    });
++    if (dmState.page !== 'all' && dmPageList().indexOf(Number(dmState.page)) < 0) dmState.page = 'all';
++    renderDesktopPageTabs();
 +    renderDesktopIconList();
-+    updateDesktopProbeActions();
 +  }
 +
-+  function dmFail(text) {
-+    toast(text, true);
++  function toggleDesktopIcon(key) {
++    var map = dmIconMap();
++    if (!map[key]) return;
++    if (dmState.selected[key]) delete dmState.selected[key];
++    else dmState.selected[key] = true;
++    renderDesktopIconList();
++  }
++
++  function deselectAll() {
++    dmState.selected = {};
++    renderDesktopIconList();
++  }
++
++  function showActionOut(text, isError) {
++    var out = $('desktopActionOut');
++    if (!out) return;
++    out.hidden = !text;
++    out.className = 'dm-action-out' + (isError ? ' is-error' : '');
++    out.textContent = text || '';
++  }
++
++  function scanDesktop() {
++    var button = $('desktopProbeBtn');
++    var out = $('desktopProbeOut');
++    if (button) button.disabled = true;
++    if (out) out.textContent = '正在读取桌面环境…\n首次检测可能会在 KernelSU 里弹出授权。';
++    showActionOut('正在扫描桌面…');
++    window.setTimeout(function () {
++      var raw = String(nativeOverlayCall('desktopProbe', ''));
++      renderDesktopProbe(raw);
++      if (button) button.disabled = false;
++    }, 120);
++  }
++
++  function ddText(detail) {
++    if (!detail) return '操作失败，请重试';
++    if (detail.indexOf('db-no-path') >= 0 || detail.indexOf('no-path') >= 0) return '没有读到 launcher.db，请先扫描桌面';
++    if (detail.indexOf('db-backup') >= 0) return '备份 launcher.db 失败，已中止，桌面未改动';
++    if (detail.indexOf('db-verify') >= 0) return '写入后校验失败，已自动回滚';
++    if (detail.indexOf('rollback-failed') >= 0) return '回滚失败，请立即检查桌面数据';
++    if (detail.indexOf('target-occupied') >= 0) return '目标格已有应用，不能直接放进去';
++    if (detail.indexOf('folder-item-is-folder') >= 0) return '选中的项目里包含文件夹，暂不支持';
++    if (detail.indexOf('db-off') >= 0) return '实验性数据库写入未开启';
++    if (detail.indexOf('busy') >= 0) return '上一项操作还在执行';
++    if (detail.indexOf('not-folder') >= 0) return '目标不是文件夹';
++    if (detail.indexOf('unknown-action') >= 0) return '不支持的操作类型';
++    return String(detail).slice(0, 100);
++  }
++
++  function executeDbAction(action, items, target) {
++    if (!items || !items.length) { showActionOut('没有选中应用', true); return; }
++    if (String(nativeOverlayCall('launcherDbWriteEnabled', '0')) !== '1') {
++      showActionOut('移动、交换、文件夹需要先开启「实验性数据库写入」；默认关闭，不会偷改桌面。', true);
++      toast('请先开启实验性数据库写入。', true);
++      var sw = $('launcherDbSwitch');
++      if (sw) sw.scrollIntoView({behavior: 'smooth', block: 'center'});
++      return;
++    }
++    var label = items.map(dmLabel).join(' / ');
++    var confirmText = action === 'folder'
++      ? '把「' + label + '」做成文件夹？写入前会自动备份 launcher.db，失败自动回滚。'
++      : (action === 'swap'
++        ? '交换「' + label + '」的位置？写入前会自动备份 launcher.db，失败自动回滚。'
++        : '把「' + label + '」移到目标位置？写入前会自动备份 launcher.db，失败自动回滚。');
++    if (!window.confirm(confirmText)) return;
++    var payload = {
++      items: items.map(function (item) {
++        return {
++          rowId: item.rowId,
++          label: dmLabel(item),
++          package: item.package,
++          screen: item.screen,
++          cellX: item.cellX,
++          cellY: item.cellY,
++          container: item.container,
++          itemType: item.itemType
++        };
++      }),
++      target: target || null
++    };
++    dmState.busy = true;
++    renderDesktopDock();
++    showActionOut('正在写入并校验…');
++    var result = String(nativeOverlayCall('desktopAction', 'error', action, JSON.stringify(payload)));
++    if (result === 'db-off') {
++      dmState.busy = false;
++      renderDesktopDock();
++      showActionOut('实验性数据库写入未开启', true);
++      return;
++    }
++    if (result === 'busy') {
++      dmState.busy = false;
++      renderDesktopDock();
++      showActionOut('上一项操作还在执行', true);
++      return;
++    }
++    if (result !== 'started') {
++      dmState.busy = false;
++      renderDesktopDock();
++      showActionOut('启动失败：' + ddText(result), true);
++      return;
++    }
++    var startedAt = Date.now();
++    var timer = setInterval(function () {
++      var raw = String(nativeOverlayCall('desktopActionStatus', 'idle||'));
++      var parts = raw.split('|');
++      var state = parts[0] || 'idle';
++      var detail = parts[2] || '';
++      if (state === 'running') {
++        showActionOut(detail.indexOf('db-backup') >= 0 ? '正在备份 launcher.db…' : '正在写入并重启桌面校验…');
++        return;
++      }
++      clearInterval(timer);
++      dmState.busy = false;
++      renderDesktopDock();
++      if (state === 'success') {
++        showActionOut('操作成功，正在刷新桌面图标…');
++        toast('操作成功。', false);
++        setTimeout(scanDesktop, 500);
++      } else {
++        showActionOut('操作失败：' + ddText(detail), true);
++        toast('操作失败：' + ddText(detail), true);
++      }
++    }, 450);
++    setTimeout(function () {
++      if (dmState.busy) {
++        clearInterval(timer);
++        dmState.busy = false;
++        renderDesktopDock();
++        showActionOut('操作超时，桌面可能正在重启；请重新扫描确认。', true);
++      }
++    }, 35000);
++  }
++
++  function openTargetModal(action) {
++    var items = dmSelectedItems();
++    if (!items.length) { toast('请先选择应用。', true); return; }
++    dmState.targetAction = action;
++    dmState.targetPage = Number(items[0].screen) || 0;
++    var title = $('desktopTargetTitle');
++    if (title) title.textContent = action === 'folder' ? '选择文件夹位置' : '选择目标位置';
++    var wrap = $('desktopFolderNameWrap');
++    if (wrap) wrap.hidden = action !== 'folder';
++    var hint = $('desktopTargetHint');
++    if (hint) hint.textContent = action === 'folder' ? '点空位新建文件夹，点金色文件夹并入' : '只能点绿色空位';
++    renderTargetPageTabs();
++    renderTargetGrid();
++    var modal = $('desktopTargetModal');
++    if (modal) modal.hidden = false;
++  }
++
++  function closeTargetModal() {
++    var modal = $('desktopTargetModal');
++    if (modal) modal.hidden = true;
++    dmState.targetAction = null;
++  }
++
++  function targetPageList() {
++    var max = 0;
++    dmAllIcons().forEach(function (item) { max = Math.max(max, Number(item.screen) || 0); });
++    dmFolders().forEach(function (item) { max = Math.max(max, Number(item.screen) || 0); });
++    var pages = [];
++    for (var i = 0; i <= max; i++) pages.push(i);
++    return pages;
++  }
++
++  function renderTargetPageTabs() {
++    var box = $('desktopTargetPageTabs');
++    if (!box) return;
++    box.innerHTML = targetPageList().map(function (p) {
++      return '<button type="button" class="dm-page-tab' + (Number(dmState.targetPage) === p ? ' is-active' : '') + '" data-dm-target-page="' + p + '">第' + (p + 1) + '页</button>';
++    }).join('');
++  }
++
++  function targetGridSize() {
++    var cols = 4, rows = 6;
++    dmAllIcons().forEach(function (item) {
++      cols = Math.max(cols, (Number(item.cellX) || 0) + 1);
++      rows = Math.max(rows, (Number(item.cellY) || 0) + 1);
++    });
++    dmFolders().forEach(function (item) {
++      cols = Math.max(cols, (Number(item.cellX) || 0) + 1);
++      rows = Math.max(rows, (Number(item.cellY) || 0) + 1);
++    });
++    return {cols: cols, rows: rows};
++  }
++
++  function renderTargetGrid() {
++    var grid = $('desktopTargetGrid');
++    if (!grid) return;
++    var size = targetGridSize();
++    var map = {};
++    dmAllIcons().forEach(function (item) {
++      if (Number(item.screen) !== Number(dmState.targetPage)) return;
++      map[(Number(item.cellY) || 0) + '|' + (Number(item.cellX) || 0)] = item;
++    });
++    dmFolders().forEach(function (item) {
++      if (Number(item.screen) !== Number(dmState.targetPage)) return;
++      map[(Number(item.cellY) || 0) + '|' + (Number(item.cellX) || 0)] = item;
++    });
++    var html = [];
++    for (var r = 0; r < size.rows; r++) {
++      for (var c = 0; c < size.cols; c++) {
++        var item = map[r + '|' + c];
++        var cls = 'dm-cell';
++        var label = '空位';
++        if (item) {
++          label = dmLabel(item);
++          cls += item.itemType === 2 ? ' is-folder' : ' is-app';
++        } else {
++          cls += ' is-empty';
++        }
++        html.push('<button type="button" class="' + cls + '" data-dm-cell="1" data-screen="' + dmState.targetPage + '" data-x="' + c + '" data-y="' + r + '">'
++          + '<b>' + (r + 1) + '-' + (c + 1) + '</b><small>' + esc(label) + '</small></button>');
++      }
++    }
++    grid.style.gridTemplateColumns = 'repeat(' + size.cols + ',minmax(0,1fr))';
++    grid.innerHTML = html.join('');
++  }
++
++  function pickTargetCell(button) {
++    var action = dmState.targetAction;
++    var screen = parseInt(button.getAttribute('data-screen'), 10);
++    var cellX = parseInt(button.getAttribute('data-x'), 10);
++    var cellY = parseInt(button.getAttribute('data-y'), 10);
++    var item = null;
++    dmAllIcons().forEach(function (row) {
++      if (Number(row.screen) === screen && Number(row.cellX) === cellX && Number(row.cellY) === cellY) item = row;
++    });
++    dmFolders().forEach(function (row) {
++      if (Number(row.screen) === screen && Number(row.cellX) === cellX && Number(row.cellY) === cellY) item = row;
++    });
++    if (action === 'move' && item) { toast('这个位置已有应用，请选空位。', true); return; }
++    if (action === 'folder' && item && item.itemType !== 2) { toast('这个位置是应用，不是文件夹；请选空位或已有文件夹。', true); return; }
++    var target = {screen: screen, cellX: cellX, cellY: cellY, folderId: item && item.itemType === 2 ? item.rowId : -1};
++    var nameInput = $('desktopFolderName');
++    var name = nameInput ? nameInput.value.trim() : '';
++    if (name) target.name = name;
++    closeTargetModal();
++    executeDbAction(action, dmSelectedItems(), target);
++  }
++
++  function locTarget(text) {
++    var m = /第?\s*(\d+)\s*页(?:第)?\s*(\d+)\s*行(?:第)?\s*(\d+)\s*列/.exec(text);
++    if (!m) return null;
++    return {
++      screen: Math.max(0, parseInt(m[1], 10) - 1),
++      cellX: Math.max(0, parseInt(m[3], 10) - 1),
++      cellY: Math.max(0, parseInt(m[2], 10) - 1),
++      folderId: -1
++    };
++  }
++
++  function mentionedIcons(text) {
++    var icons = dmAllIcons();
++    var found = [];
++    var used = {};
++    icons.map(function (item, index) { return {item: item, index: index}; })
++      .filter(function (row) { return row.item.label && String(row.item.label).length >= 2; })
++      .sort(function (a, b) { return String(b.item.label).length - String(a.item.label).length; })
++      .forEach(function (row) {
++        var label = String(row.item.label);
++        if (used[row.index]) return;
++        if (text.indexOf(label) >= 0) {
++          used[row.index] = true;
++          found.push(row.item);
++        }
++      });
++    if (!found.length) {
++      icons.forEach(function (item, index) {
++        if (used[index]) return;
++        if (item.package && text.indexOf(item.package) >= 0) {
++          used[index] = true;
++          found.push(item);
++        }
++      });
++    }
++    return found;
++  }
++
++  function parseDesktopCommand(text) {
++    var raw = String(text || '').trim();
++    if (!raw) return {error: '请输入指令'};
++    var action = '';
++    if (/交换/.test(raw)) action = 'swap';
++    else if (/文件夹|做成/.test(raw)) action = 'folder';
++    else if (/移到|移动到|放到|移动/.test(raw)) action = 'move';
++    if (!action) return {error: '没识别到动作，请用“交换 / 移到 / 做成文件夹”'};
++    var target = locTarget(raw);
++    if ((action === 'folder' || action === 'move') && !target) return {error: '缺少目标位置：第几页第几行第几列'};
++    var found = mentionedIcons(raw);
++    if (!found.length) found = dmSelectedItems();
++    if (action === 'swap' && found.length < 2) return {error: '交换需要两个应用'};
++    if (action === 'move' && found.length < 1) return {error: '移动需要一个应用'};
++    if (action === 'folder' && found.length < 2) return {error: '文件夹至少需要两个应用'};
++    if (action === 'folder') {
++      var fm = /叫\s*[“"']([^”"']+)[”"']/.exec(raw);
++      if (fm) target.name = fm[1];
++    }
++    return {action: action, items: found.slice(0, action === 'swap' ? 2 : found.length), target: target};
++  }
++
++  function executeDesktopCommand() {
++    var input = $('desktopCommand');
++    var parsed = parseDesktopCommand(input ? input.value : '');
++    if (parsed.error) { showActionOut(parsed.error, true); toast(parsed.error, true); return; }
++    dmState.selected = {};
++    parsed.items.forEach(function (item, index) { dmState.selected[dmKey(item, index)] = true; });
++    renderDesktopIconList();
++    if (parsed.action === 'swap') executeDbAction('swap', parsed.items, null);
++    else executeDbAction(parsed.action, parsed.items, parsed.target);
    }
  
    function pollDesktopEat(item) {
-@@ -1190,20 +1346,20 @@
+-    var eat = $('desktopEatBtn');
++    dmState.busy = true;
++    renderDesktopDock();
+     var startedAt = Date.now();
+-    if (eat) eat.disabled = true;
+     var timer = setInterval(function () {
+       var raw = String(nativeOverlayCall('desktopEatStatus', 'idle||'));
+       var parts = raw.split('|');
+       var state = parts[0] || 'idle';
+       var eventRaw = String(nativeOverlayCall('desktopEatEvent', 'idle|||||0'));
+-      var eventParts = eventRaw.split('|');
+-      var phase = eventParts[0] || '';
+-      if (eat && state === 'running') {
+-        if (phase === 'scan') eat.textContent = '瑶正在扫桌面…';
+-        else if (phase === 'found' || phase === 'removing') eat.textContent = '正在移除「' + (item.label || item.package || '图标') + '」…';
+-        else eat.textContent = '瑶正在动手…';
++      var phase = (eventRaw.split('|')[0] || '');
++      if (state === 'running') {
++        showActionOut(phase === 'scan' ? '瑶正在扫桌面…' : (phase === 'removing' ? '正在移除「' + dmLabel(item) + '」…' : '瑶正在动手…'));
++        return;
        }
++      clearInterval(timer);
++      dmState.busy = false;
++      renderDesktopDock();
        if (state === 'success') {
-         clearInterval(timer);
+-        clearInterval(timer);
 -        if (eat) eat.disabled = false;
-+        if (eat) eat.textContent = '吃掉';
-         toast('已吃掉「' + (item.label || item.package) + '」，应用还在抽屉里。');
-+        var key = dmKey(item);
-+        dmState.selected = dmState.selected.filter(function (v) { return v !== key; });
-         var data = window.__tafeiLastProbe;
-         if (data && Array.isArray(data.samples)) {
+-        toast('已吃掉「' + (item.label || item.package) + '」，应用还在抽屉里。');
+-        var data = window.__tafeiLastProbe;
+-        if (data && Array.isArray(data.samples)) {
 -          var index = window.__tafeiSelectedIconIndex || 0;
 -          data.samples.splice(index, 1);
 -          window.__tafeiSelectedIconIndex = Math.max(0, Math.min(index, data.samples.length - 1));
 -          renderDesktopIconList(data);
 -          updateDesktopProbeActions(data);
-+          data.samples = data.samples.filter(function (v) { return dmKey(v) !== key; });
-         }
-+        renderDesktopIconList(data);
-+        updateDesktopProbeActions();
+-        }
++        showActionOut('已吃掉「' + dmLabel(item) + '」，应用还在抽屉里。');
++        toast('已吃掉「' + dmLabel(item) + '」。', false);
++        dmState.selected = {};
++        setTimeout(scanDesktop, 500);
        } else if (state === 'failed') {
-         clearInterval(timer);
+-        clearInterval(timer);
 -        if (eat) eat.disabled = false;
 -        updateDesktopProbeActions(window.__tafeiLastProbe);
-+        if (eat) eat.textContent = '吃掉';
-+        updateDesktopProbeActions();
-         var detail = parts[2] || '';
-         var failureText = detail;
-         if (detail.indexOf('not-found') === 0) failureText = '没扫到目标，请手动滑到那一页再试';
-@@ -1212,66 +1368,416 @@
-         else if (detail === 'long-press-failed') failureText = '长按发送失败，请重试';
-         else if (detail === 'root-still-open') failureText = '移除弹窗没有关闭，请重试';
-         toast('吃掉失败：' + (failureText || '请重试'), true);
--      } else if (Date.now() - startedAt > 20000) {
-+      } else if (Date.now() - startedAt > 24000) {
-         clearInterval(timer);
+-        var detail = parts[2] || '';
+-        var failureText = detail;
+-        if (detail.indexOf('not-found') === 0) failureText = '没扫到目标，请手动滑到那一页再试';
+-        else if (detail === 'not-launcher') failureText = '请先回到桌面再试';
+-        else if (detail === 'no-root') failureText = '桌面还没准备好，请稍后重试';
+-        else if (detail === 'long-press-failed') failureText = '长按发送失败，请重试';
+-        else if (detail === 'root-still-open') failureText = '移除弹窗没有关闭，请重试';
+-        toast('吃掉失败：' + (failureText || '请重试'), true);
++        showActionOut('吃掉失败：' + ddText(parts[2]), true);
++        toast('吃掉失败：' + ddText(parts[2]), true);
+       } else if (Date.now() - startedAt > 20000) {
+-        clearInterval(timer);
 -        if (eat) eat.disabled = false;
 -        updateDesktopProbeActions(window.__tafeiLastProbe);
-+        if (eat) eat.textContent = '吃掉';
-+        updateDesktopProbeActions();
-         toast('操作超时，请确认桌面弹窗状态。', true);
+-        toast('操作超时，请确认桌面弹窗状态。', true);
++        showActionOut('操作超时，请确认桌面弹窗状态。', true);
        }
      }, 400);
    }
  
-+  function dmPayload(type, items, target, folderName) {
-+    var empty = [];
-+    for (var r = 0; r < dmState.rows; r++) {
-+      for (var c = 0; c < dmState.cols; c++) {
-+        if (!dmSlotAt(target.screen, r, c)) empty.push({row: r, col: c});
-+      }
-+    }
-+    var folderSlot = target.slot && dmIsFolder(target.slot) ? target.slot : null;
-+    return {
-+      items: items.map(function (item) {
-+        return {id: item.id || -1, label: item.label || '', package: item.package || '', screen: item.screen, cellX: item.cellX, cellY: item.cellY};
-+      }),
-+      target: {screen: target.screen, row: target.row, col: target.col},
-+      targetFolder: folderSlot ? {id: folderSlot.id, title: folderSlot.title || ''} : null,
-+      folderName: folderName || '',
-+      cols: dmState.cols,
-+      rows: dmState.rows,
-+      emptyCells: empty,
-+      db: String(nativeOverlayCall('desktopDbExperimental', '0')) === '1'
-+    };
-+  }
-+
-+  function pollDesktopAction(type, baseline) {
-+    var startedAt = Date.now();
-+    if (dmState.actionTimer) clearInterval(dmState.actionTimer);
-+    dmState.actionTimer = setInterval(function () {
-+      var raw = String(nativeOverlayCall('desktopActionResult', 'idle|||0'));
-+      var p = raw.split('|');
-+      var state = p[0] || 'idle';
-+      var action = p[1] || '';
-+      var detail = p[2] || '';
-+      var eventId = parseInt(p[3] || '0', 10) || 0;
-+      if (eventId <= baseline) return;
-+      if (state === 'success') {
-+        clearInterval(dmState.actionTimer);
-+        dmState.actionTimer = 0;
-+        toast('桌面操作完成，正在刷新列表。');
-+        setTimeout(refreshDesktopProbe, 700);
-+      } else if (state === 'failed') {
-+        clearInterval(dmState.actionTimer);
-+        dmState.actionTimer = 0;
-+        toast('桌面操作失败：' + (detail || '请重试'), true);
-+      } else if (Date.now() - startedAt > 30000) {
-+        clearInterval(dmState.actionTimer);
-+        dmState.actionTimer = 0;
-+        toast('桌面操作超时，请查看桌面状态。', true);
-+      }
-+    }, 500);
-+  }
-+
-+  function startDesktopAction(type, payload) {
-+    var baseline = parseInt(String(nativeOverlayCall('desktopActionEventId', '0')), 10) || 0;
-+    var result = String(nativeOverlayCall('desktopAction', 'off', type, JSON.stringify(payload)));
-+    if (result !== 'started') {
-+      dmFail('操作启动失败：' + result);
-+      return false;
-+    }
-+    toast(type === 'move' ? '瑶正在把图标搬过去…' : (type === 'swap' ? '瑶正在交换两个图标…' : '瑶正在整理文件夹…'));
-+    pollDesktopAction(type, baseline);
-+    return true;
-+  }
-+
-+  function renderTargetPageTabs() {
-+    var box = $('dmTargetPageTabs');
-+    if (!box || !dmState.target) return;
-+    var html = [];
-+    for (var i = 0; i < dmState.pageCount; i++) {
-+      html.push('<button type="button" class="dm-page-tab' + (dmState.target.page === i ? ' on' : '') + '" data-dm-target-page="' + i + '">第' + (i + 1) + '页</button>');
-+    }
-+    box.innerHTML = html.join('');
-+  }
-+
-+  function renderTargetGrid() {
-+    var grid = $('dmTargetGrid');
-+    if (!grid || !dmState.target) return;
-+    var target = dmState.target;
-+    var html = [];
-+    for (var r = 0; r < dmState.rows; r++) {
-+      for (var c = 0; c < dmState.cols; c++) {
-+        var slot = dmSlotAt(target.page, r, c);
-+        var cls = 'dm-cell';
-+        var text = (r + 1) + '行' + (c + 1) + '列';
-+        var folder = dmIsFolder(slot);
-+        var disabled = false;
-+        if (!slot) {
-+          cls += ' free';
-+        } else if (folder) {
-+          cls += ' folder';
-+          text = '文件夹<br>' + esc(slot.title || '');
-+          disabled = target.mode !== 'folder';
-+        } else {
-+          cls += ' occupied';
-+          text = esc(slot.title || slot.package || '占用');
-+          disabled = true;
-+        }
-+        if (target.row === r && target.col === c) cls += ' on';
-+        html.push('<button type="button" class="' + cls + '" data-dm-row="' + r + '" data-dm-col="' + c + '"' + (disabled ? ' disabled' : '') + '>' + text + '</button>');
-+      }
-+    }
-+    grid.innerHTML = html.join('');
-+    var nameRow = $('dmFolderNameRow');
-+    if (nameRow) nameRow.hidden = target.mode !== 'folder' || (target.slot && dmIsFolder(target.slot));
-+  }
-+
-+  function openTargetModal(mode, preset) {
-+    var items = dmSelectedItems();
-+    if (mode === 'move' && items.length !== 1) { dmFail('移动只能选 1 个应用。'); return; }
-+    if (mode === 'folder' && items.length < 2) { dmFail('文件夹至少要选 2 个应用。'); return; }
-+    var page = preset && typeof preset.page === 'number' ? preset.page : items[0].screen;
-+    dmState.target = {mode: mode, page: page, row: preset && preset.row, col: preset && preset.col, slot: null};
-+    var modal = $('dmTargetModal');
-+    if (modal) modal.hidden = false;
-+    var title = modal && modal.querySelector('.dm-target-head b');
-+    if (title) title.textContent = mode === 'move' ? '移动到哪一格' : '文件夹放在哪一格';
-+    var hint = $('dmTargetHint');
-+    if (hint) hint.textContent = mode === 'move' ? '只能选空位；跨页需要数据库兜底实验开启。' : '选空位会新建文件夹；选已有文件夹会并入。';
-+    var folderInput = $('dmFolderName');
-+    if (folderInput) folderInput.value = '';
-+    renderTargetPageTabs();
-+    renderTargetGrid();
-+    var summary = $('dmTargetSummary');
-+    if (summary) summary.textContent = '第' + (page + 1) + '页 · 未选择位置';
-+    var confirm = $('dmTargetConfirm');
-+    if (confirm) confirm.disabled = true;
-+  }
-+
-+  function closeTargetModal() {
-+    var modal = $('dmTargetModal');
-+    if (modal) modal.hidden = true;
-+    dmState.target = null;
-+  }
-+
-+  function confirmTarget() {
-+    var target = dmState.target;
-+    if (!target || target.row == null || target.col == null) return;
-+    var items = dmSelectedItems();
-+    var slot = dmSlotAt(target.page, target.row, target.col);
-+    if (target.mode === 'move' && slot) { dmFail('目标格被占用了，请换一个空位。'); return; }
-+    if (target.mode === 'folder' && slot && !dmIsFolder(slot)) { dmFail('目标格是普通应用，不是文件夹；请换空位或已有文件夹。'); return; }
-+    var payload = dmPayload(target.mode, items, {screen: target.page, row: target.row, col: target.col, slot: slot}, ($('dmFolderName') || {}).value || '');
-+    var action = target.mode === 'move' ? 'move' : 'folder';
-+    closeTargetModal();
-+    startDesktopAction(action, payload);
-+  }
-+
-+  function dmChineseNumber(value) {
-+    var text = String(value || '').trim();
-+    if (/^\d+$/.test(text)) return parseInt(text, 10);
-+    var digits = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10};
-+    if (text === '十') return 10;
-+    if (text.length === 1) return digits[text] || 0;
-+    if (text.indexOf('十') === 0) return 10 + (digits[text.slice(1)] || 0);
-+    if (text.indexOf('十') > 0) return (digits[text.slice(0, 1)] || 0) * 10 + (digits[text.slice(2)] || 0);
-+    return 0;
-+  }
-+
-+  function dmFindMentioned(text) {
-+    var icons = (dmState.data && dmState.data.samples) || [];
-+    var candidates = [];
-+    icons.forEach(function (item) {
-+      var label = String(item.label || '').trim();
-+      if (!label) return;
-+      var at = text.indexOf(label);
-+      if (at >= 0) candidates.push({item: item, start: at, end: at + label.length, len: label.length});
-+    });
-+    candidates.sort(function (a, b) { return b.len - a.len || a.start - b.start; });
-+    var taken = [];
-+    var picked = [];
-+    candidates.forEach(function (cand) {
-+      var overlap = taken.some(function (range) { return cand.start < range.end && cand.end > range.start; });
-+      if (overlap) return;
-+      taken.push({start: cand.start, end: cand.end});
-+      picked.push(cand.item);
-+    });
-+    picked.sort(function (a, b) {
-+      return text.indexOf(a.label) - text.indexOf(b.label);
-+    });
-+    return picked;
-+  }
-+
-+  function dmParseLocation(text) {
-+    var m = text.match(/第\s*([0-9一二三四五六七八九十]+)\s*页[^0-9第]{0,14}?([0-9]+)\s*行[^0-9]{0,8}?([0-9]+)\s*列/);
-+    if (!m) m = text.match(/第\s*([0-9一二三四五六七八九十]+)\s*页.*?([0-9]+)\s*行.*?([0-9]+)\s*列/);
-+    if (!m) return null;
-+    var page = dmChineseNumber(m[1]) - 1;
-+    var row = parseInt(m[2], 10) - 1;
-+    var col = parseInt(m[3], 10) - 1;
-+    if (page < 0 || row < 0 || col < 0) return null;
-+    if (page >= dmState.pageCount || row >= dmState.rows || col >= dmState.cols) return null;
-+    return {page: page, row: row, col: col};
-+  }
-+
-+  function dmParseFolderName(text) {
-+    var m = text.match(/(?:叫|命名为)\s*[“"「']?([^”"」'，。,\s]+)/);
-+    return m ? m[1] : '';
-+  }
-+
-+  function executeDesktopCommand() {
-+    var input = $('desktopCommand');
-+    var text = String((input && input.value) || '').trim();
-+    if (!text) { dmFail('先输入一条指令。'); return; }
-+    if (!dmState.data || !(dmState.data.samples || []).length) { dmFail('先点“重新扫描”读取桌面。'); return; }
-+    var items = dmFindMentioned(text);
-+    var location = dmParseLocation(text);
-+    var folderName = dmParseFolderName(text);
-+    var isFolder = text.indexOf('文件夹') >= 0 || text.indexOf('合并') >= 0;
-+    var isSwap = text.indexOf('交换') >= 0 || text.indexOf('换位置') >= 0;
-+    var isMove = text.indexOf('移到') >= 0 || text.indexOf('放到') >= 0 || text.indexOf('移动') >= 0;
-+    if (isFolder) {
-+      if (items.length < 2) { dmFail('文件夹指令至少要有 2 个应用名。'); return; }
-+      if (!location) { dmState.selected = items.map(dmKey); renderDesktopIconList(); updateDesktopProbeActions(); openTargetModal('folder'); dmFail('已选中应用，请再补一个目标页/行/列。'); return; }
-+      var slot = dmSlotAt(location.page, location.row, location.col);
-+      if (slot && !dmIsFolder(slot)) { dmFail('目标格是普通应用，不能直接做成文件夹。'); return; }
-+      dmState.selected = items.map(dmKey);
-+      renderDesktopIconList();
-+      updateDesktopProbeActions();
-+      startDesktopAction('folder', dmPayload('folder', items, {screen: location.page, row: location.row, col: location.col, slot: slot}, folderName));
++  function eatSelected() {
++    var rows = dmSelectedItems();
++    if (rows.length !== 1) { toast('请只选一个应用。', true); return; }
++    var item = rows[0];
++    if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
++      nativeOverlayCall('openAccessibility', null);
++      toast('无障碍还没连接，请先开启「挞飞桌面互动」。', true);
 +      return;
 +    }
-+    if (isSwap) {
-+      if (items.length !== 2) { dmFail('交换指令必须正好提到 2 个应用。'); return; }
-+      dmState.selected = items.map(dmKey);
-+      renderDesktopIconList();
-+      updateDesktopProbeActions();
-+      startDesktopAction('swap', dmPayload('swap', items, {screen: items[0].screen, row: items[0].cellY, col: items[0].cellX, slot: null}));
-+      return;
-+    }
-+    if (isMove) {
-+      if (items.length !== 1) { dmFail('移动指令必须正好提到 1 个应用。'); return; }
-+      if (!location) { dmState.selected = items.map(dmKey); renderDesktopIconList(); updateDesktopProbeActions(); openTargetModal('move'); dmFail('已选中应用，请再选目标位置。'); return; }
-+      dmState.selected = items.map(dmKey);
-+      renderDesktopIconList();
-+      updateDesktopProbeActions();
-+      startDesktopAction('move', dmPayload('move', items, {screen: location.page, row: location.row, col: location.col, slot: dmSlotAt(location.page, location.row, location.col)}));
-+      return;
-+    }
-+    dmFail('没认出指令。可用：交换位置 / 移动到第X页第Y行第Z列 / 做成文件夹。');
++    if (!window.confirm('吃掉「' + dmLabel(item) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
++    var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
++    if (result === 'accessibility-off') toast('请先开启无障碍服务。', true);
++    else if (result === 'started') {
++      toast('正在回到桌面，长按「' + dmLabel(item) + '」…');
++      pollDesktopEat(item);
++    } else toast('吃掉启动失败：' + result, true);
 +  }
-+
-+  function refreshDesktopProbe() {
-+    var raw = String(nativeOverlayCall('desktopProbe', ''));
-+    renderDesktopProbe(raw);
++  function initDesktopDbSwitch() {
++    var box = $('launcherDbSwitch');
++    var note = $('desktopDbNote');
++    if (!box) return;
++    var enabled = String(nativeOverlayCall('launcherDbWriteEnabled', '0')) === '1';
++    box.checked = enabled;
++    if (note) note.textContent = enabled
++      ? '已开启。每次移动/交换/文件夹都会先备份 launcher.db，写入后重启桌面校验，失败自动回滚。'
++      : '默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。';
++    box.addEventListener('change', function () {
++      if (box.checked) {
++        var ok = window.confirm('实验性数据库写入会直接修改 ColorOS 桌面数据库。\n每次操作前会自动备份 launcher.db，失败会尝试回滚，但仍可能导致桌面重启或位置错乱。\n确认开启？');
++        if (!ok) { box.checked = false; return; }
++      }
++      var result = String(nativeOverlayCall('setLauncherDbWriteEnabled', '0', box.checked ? '1' : '0'));
++      var on = result === '1';
++      box.checked = on;
++      if (note) note.textContent = on
++        ? '已开启。每次移动/交换/文件夹都会先备份 launcher.db，写入后重启桌面校验，失败自动回滚。'
++        : '默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。';
++      if (result === 'backup-failed') toast('备份 launcher.db 失败，开关没有开启；请先扫描桌面并确认 Root。', true);
++      else toast(on ? '实验性数据库写入已开启，已完成 launcher.db 备份。' : '实验性数据库写入已关闭。', !on);
++    });
 +  }
 +
    function initDesktopProbe() {
@@ -1765,56 +1859,18 @@ index 2e2fabe..158ef4d 100644
      if (String(nativeOverlayCall('desktopProbeSupported', '0')) !== '1') return;
      box.hidden = false;
 -    button.addEventListener('click', function () {
-+
-+    var dbToggle = $('desktopDbToggle');
-+    var dbState = $('desktopDbState');
-+    var dbAvailable = String(nativeOverlayCall('desktopDbAvailable', '0')) === '1';
-+    if (dbToggle) {
-+      dbToggle.disabled = !dbAvailable;
-+      dbToggle.checked = dbAvailable && String(nativeOverlayCall('desktopDbExperimental', '0')) === '1';
-+      dbToggle.addEventListener('change', function () {
-+        if (dbToggle.checked) {
-+          if (!window.confirm('数据库兜底实验：拖动失败时会直接写 launcher.db，并先备份。\n只在你知道风险时开启。')) {
-+            dbToggle.checked = false;
-+            return;
-+          }
-+          nativeOverlayCall('setDesktopDbExperimental', null, '1');
-+          if (dbState) dbState.textContent = '已开启（实验）';
-+          toast('数据库兜底已开启；失败会尝试备份回滚。', true);
-+        } else {
-+          nativeOverlayCall('setDesktopDbExperimental', null, '0');
-+          if (dbState) dbState.textContent = '已关闭';
-+          toast('数据库兜底已关闭。');
-+        }
-+      });
-+    }
-+    if (dbState) {
-+      if (!dbAvailable) dbState.textContent = '当前设备没有 sqlite3，实验不可用';
-+      else dbState.textContent = (dbToggle && dbToggle.checked) ? '已开启（实验）' : '已关闭';
-+    }
-+
-+    function refresh() {
-       var out = $('desktopProbeOut');
-       button.disabled = true;
-       if (out) out.textContent = '正在读取桌面环境…\n首次检测可能会在 KernelSU 里弹出授权。';
-       setTimeout(function () {
+-      var out = $('desktopProbeOut');
+-      button.disabled = true;
+-      if (out) out.textContent = '正在读取桌面环境…\n首次检测可能会在 KernelSU 里弹出授权。';
+-      setTimeout(function () {
 -        var raw = String(nativeOverlayCall('desktopProbe', ''));
 -        renderDesktopProbe(raw);
-+        refreshDesktopProbe();
-         button.disabled = false;
-+        if (out) out.textContent = out.textContent || '桌面扫描完成。';
-       }, 120);
+-        button.disabled = false;
+-      }, 120);
 -    });
-+    }
-+    button.addEventListener('click', refresh);
-+    var didAuto = false;
-+    setTimeout(function () {
-+      if (!didAuto && !window.__tafeiLastProbe) {
-+        didAuto = true;
-+        refresh();
-+      }
-+    }, 300);
++    initDesktopDbSwitch();
 +
++    button.addEventListener('click', scanDesktop);
      var access = $('desktopAccessBtn');
      if (access) access.addEventListener('click', function () {
        nativeOverlayCall('openAccessibility', null);
@@ -1827,115 +1883,92 @@ index 2e2fabe..158ef4d 100644
 +      renderDesktopIconList();
 +    });
 +
-+    var tabs = $('desktopPageTabs');
-+    if (tabs) tabs.addEventListener('click', function (event) {
-+      var target = event.target.closest && event.target.closest('[data-dm-page]');
-+      if (!target) return;
-+      dmState.page = parseInt(target.getAttribute('data-dm-page'), 10);
-+      renderPageTabs();
++    var pages = $('desktopPageTabs');
++    if (pages) pages.addEventListener('click', function (event) {
++      var target = event.target;
++      while (target && target !== pages && !target.getAttribute('data-dm-page')) target = target.parentElement;
++      if (!target || target === pages) return;
++      var page = target.getAttribute('data-dm-page');
++      dmState.page = page === 'all' ? 'all' : Number(page);
++      renderDesktopPageTabs();
 +      renderDesktopIconList();
 +    });
 +
      var list = $('desktopIconList');
      if (list) list.addEventListener('click', function (event) {
--      var target = event.target;
+       var target = event.target;
 -      while (target && target !== list && !target.getAttribute('data-icon-index')) {
 -        target = target.parentElement;
 -      }
--      if (!target || target === list) return;
++      while (target && target !== list && !target.getAttribute('data-dm-key')) target = target.parentElement;
+       if (!target || target === list) return;
 -      var index = parseInt(target.getAttribute('data-icon-index'), 10);
 -      if (isNaN(index)) return;
 -      window.__tafeiSelectedIconIndex = index;
 -      renderDesktopIconList(window.__tafeiLastProbe);
 -      updateDesktopProbeActions(window.__tafeiLastProbe);
-+      var target = event.target.closest && event.target.closest('[data-dm-key]');
-+      if (!target) return;
-+      var key = decodeURIComponent(target.getAttribute('data-dm-key') || '');
-+      if (!key) return;
-+      var at = dmState.selected.indexOf(key);
-+      if (at >= 0) dmState.selected.splice(at, 1);
-+      else dmState.selected.push(key);
-+      renderDesktopIconList();
-+      updateDesktopProbeActions();
++      toggleDesktopIcon(target.getAttribute('data-dm-key'));
      });
 +
      var eat = $('desktopEatBtn');
-     if (eat) eat.addEventListener('click', function () {
-       var item = selectedDesktopIcon();
+-    if (eat) eat.addEventListener('click', function () {
+-      var item = selectedDesktopIcon();
 -      if (!item) { toast('请先检测一次桌面。', true); return; }
-+      if (!item) { dmFail('请先选择一个应用。'); return; }
-       if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
-         nativeOverlayCall('openAccessibility', null);
+-      if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
+-        nativeOverlayCall('openAccessibility', null);
 -        toast('无障碍还没连接，请先开启「挞飞桌面互动」。', true);
-+        dmFail('无障碍还没连接，请先开启「挞飞桌面互动」。');
-         return;
-       }
-       if (!window.confirm('吃掉「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
-       var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
+-        return;
+-      }
+-      if (!window.confirm('吃掉「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
+-      var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
 -      if (result === 'accessibility-off') toast('请先开启无障碍服务。', true);
 -      else if (result === 'started') {
 -        toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
 -        pollDesktopEat(item);
 -      } else toast('吃掉启动失败：' + result, true);
-+      if (result === 'accessibility-off') dmFail('请先开启无障碍服务。');
-+      else if (result === 'started') pollDesktopEat(item);
-+      else dmFail('吃掉启动失败：' + result);
-+    });
-+
++    if (eat) eat.addEventListener('click', eatSelected);
 +    var move = $('desktopMoveBtn');
 +    if (move) move.addEventListener('click', function () { openTargetModal('move'); });
-+    var folder = $('desktopFolderBtn');
-+    if (folder) folder.addEventListener('click', function () { openTargetModal('folder'); });
 +    var swap = $('desktopSwapBtn');
 +    if (swap) swap.addEventListener('click', function () {
-+      var items = dmSelectedItems();
-+      if (items.length !== 2) { dmFail('交换必须正好选 2 个应用。'); return; }
-+      if (!window.confirm('交换「' + (items[0].label || items[0].package) + '」和「' + (items[1].label || items[1].package) + '」？')) return;
-+      startDesktopAction('swap', dmPayload('swap', items, {screen: items[0].screen, row: items[0].cellY, col: items[0].cellX, slot: null}));
++      var rows = dmSelectedItems();
++      if (rows.length !== 2) { toast('交换需要正好两个应用。', true); return; }
++      executeDbAction('swap', rows, null);
 +    });
++    var folder = $('desktopFolderBtn');
++    if (folder) folder.addEventListener('click', function () { openTargetModal('folder'); });
 +
-+    var commandBtn = $('desktopCommandBtn');
-+    if (commandBtn) commandBtn.addEventListener('click', executeDesktopCommand);
-+    var command = $('desktopCommand');
-+    if (command) command.addEventListener('keydown', function (event) {
-+      if (event.key === 'Enter') executeDesktopCommand();
++    var command = $('desktopCommandBtn');
++    if (command) command.addEventListener('click', executeDesktopCommand);
++    var commandInput = $('desktopCommand');
++    if (commandInput) commandInput.addEventListener('keydown', function (event) {
++      if (event.key === 'Enter') { event.preventDefault(); executeDesktopCommand(); }
+     });
++
++    var close = $('desktopTargetClose');
++    if (close) close.addEventListener('click', closeTargetModal);
++    var modal = $('desktopTargetModal');
++    if (modal) modal.addEventListener('click', function (event) {
++      if (event.target === modal) closeTargetModal();
 +    });
-+
-+    var targetClose = $('dmTargetClose');
-+    if (targetClose) targetClose.addEventListener('click', closeTargetModal);
-+    var targetTabs = $('dmTargetPageTabs');
-+    if (targetTabs) targetTabs.addEventListener('click', function (event) {
-+      var target = event.target.closest && event.target.closest('[data-dm-target-page]');
-+      if (!target || !dmState.target) return;
-+      dmState.target.page = parseInt(target.getAttribute('data-dm-target-page'), 10);
-+      dmState.target.row = null;
-+      dmState.target.col = null;
-+      dmState.target.slot = null;
++    var targetPages = $('desktopTargetPageTabs');
++    if (targetPages) targetPages.addEventListener('click', function (event) {
++      var target = event.target;
++      while (target && target !== targetPages && !target.getAttribute('data-dm-target-page')) target = target.parentElement;
++      if (!target || target === targetPages) return;
++      dmState.targetPage = Number(target.getAttribute('data-dm-target-page'));
 +      renderTargetPageTabs();
 +      renderTargetGrid();
-+      var summary = $('dmTargetSummary');
-+      if (summary) summary.textContent = '第' + (dmState.target.page + 1) + '页 · 未选择位置';
-+      var confirm = $('dmTargetConfirm');
-+      if (confirm) confirm.disabled = true;
 +    });
-+    var targetGrid = $('dmTargetGrid');
++    var targetGrid = $('desktopTargetGrid');
 +    if (targetGrid) targetGrid.addEventListener('click', function (event) {
-+      var target = event.target.closest && event.target.closest('[data-dm-row]');
-+      if (!target || !dmState.target) return;
-+      var row = parseInt(target.getAttribute('data-dm-row'), 10);
-+      var col = parseInt(target.getAttribute('data-dm-col'), 10);
-+      if (isNaN(row) || isNaN(col)) return;
-+      dmState.target.row = row;
-+      dmState.target.col = col;
-+      dmState.target.slot = dmSlotAt(dmState.target.page, row, col);
-+      renderTargetGrid();
-+      var summary = $('dmTargetSummary');
-+      if (summary) summary.textContent = '第' + (dmState.target.page + 1) + '页 · 第' + (row + 1) + '行第' + (col + 1) + '列';
-+      var confirm = $('dmTargetConfirm');
-+      if (confirm) confirm.disabled = false;
-     });
-+    var confirm = $('dmTargetConfirm');
-+    if (confirm) confirm.addEventListener('click', confirmTarget);
++      var target = event.target;
++      while (target && target !== targetGrid && !target.getAttribute('data-dm-cell')) target = target.parentElement;
++      if (!target || target === targetGrid) return;
++      pickTargetCell(target);
++    });
++
++    if (window.__tafeiLastProbe) renderDesktopManager(window.__tafeiLastProbe);
    }
  
    $('nativeOverlayToggle')?.addEventListener('click', function () {

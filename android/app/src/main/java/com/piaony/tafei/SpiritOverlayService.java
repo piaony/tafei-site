@@ -817,6 +817,16 @@ public class SpiritOverlayService extends Service {
                 eatY = y;
             }
             eatFoundShown = false;
+            if (detail.startsWith("db-")) {
+                if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
+                    eatEffectView.setVisibility(View.VISIBLE);
+                    eatEffectView.playDesktopAction(eatX, eatY, detail, label);
+                }
+                showFrame("emotion-happy", 1200);
+                if (particleView != null) particleView.burst(10);
+                if (!appForeground) showBubble(actionLine(detail, label));
+                return;
+            }
             if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
                 eatEffectView.setVisibility(View.VISIBLE);
                 eatEffectView.playSuccess(eatX, eatY, spiritCenterX(), spiritCenterY(), appIcon(eatPkg), eatLabel);
@@ -840,11 +850,22 @@ public class SpiritOverlayService extends Service {
         }
     }
 
+    private String actionLine(String detail, String label) {
+        if (detail.contains("swap")) return "换好了，「" + label + "」已经在新位置。";
+        if (detail.contains("folder")) return "收好了，「" + label + "」已经进文件夹。";
+        return "搬好了，「" + label + "」已经在新位置。";
+    }
+
     private String failureLine(String detail) {
         if (detail == null) return "没抓到，再试一次。";
         if (detail.startsWith("not-found")) return "没扫到它，先把桌面滑到目标那一页再试。";
         if ("not-launcher".equals(detail)) return "先回到桌面，瑶才敢伸手。";
         if ("no-root".equals(detail)) return "桌面还没准备好，等一下再试。";
+        if (detail.startsWith("db-backup-failed")) return "launcher.db 备份失败，桌面没有改动。";
+        if (detail.startsWith("db-write-failed")) return "写回 launcher.db 失败，已经回滚。";
+        if (detail.startsWith("db-verify-failed")) return "写完后校验没通过，已经回滚。";
+        if (detail.startsWith("db-rollback-failed")) return "回滚也失败了，先别动桌面，告诉我。";
+        if (detail.startsWith("db-")) return "数据库操作没完成，桌面已尽量恢复。";
         if ("long-press-failed".equals(detail)) return "长按没成功，再试一次。";
         if ("root-still-open".equals(detail)) return "移除弹窗还在，再试一次。";
         return "没抓到，再试一次。";

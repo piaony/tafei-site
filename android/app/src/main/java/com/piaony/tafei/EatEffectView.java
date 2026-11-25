@@ -22,6 +22,7 @@ public class EatEffectView extends View {
     private static final int MODE_FOUND = 1;
     private static final int MODE_SUCCESS = 2;
     private static final int MODE_FAIL = 3;
+    private static final int MODE_ACTION = 4;
     private static final int BIT_COUNT = 26;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
@@ -38,6 +39,7 @@ public class EatEffectView extends View {
     private float targetY;
     private Bitmap icon;
     private String label = "";
+    private String action = "";
 
     private float[] bitAngles;
     private float[] bitSpeeds;
@@ -81,6 +83,19 @@ public class EatEffectView extends View {
         invalidate();
     }
 
+    public void playDesktopAction(float tx, float ty, String actionName, String name) {
+        mode = MODE_ACTION;
+        startedAt = SystemClock.uptimeMillis();
+        targetX = tx;
+        targetY = ty;
+        action = actionName == null ? "" : actionName;
+        label = name == null ? "" : name;
+        icon = null;
+        bitAngles = null;
+        makeBits();
+        invalidate();
+    }
+
     public void playFailure(float tx, float ty, Bitmap appIcon) {
         mode = MODE_FAIL;
         startedAt = SystemClock.uptimeMillis();
@@ -111,9 +126,13 @@ public class EatEffectView extends View {
             drawSuccess(canvas, elapsed);
             if (elapsed < 1.15f) postInvalidateDelayed(30);
             else mode = MODE_NONE;
-        } else {
+        } else if (mode == MODE_FAIL) {
             drawFailure(canvas, elapsed);
             if (elapsed < 0.95f) postInvalidateDelayed(30);
+            else mode = MODE_NONE;
+        } else {
+            drawDesktopAction(canvas, elapsed);
+            if (elapsed < 1.35f) postInvalidateDelayed(30);
             else mode = MODE_NONE;
         }
     }
@@ -203,6 +222,122 @@ public class EatEffectView extends View {
             paint.setColor(Color.parseColor("#FFD36E"));
             paint.setAlpha((int) (150 * (1f - bt)));
             canvas.drawCircle(spiritX, spiritY, dp(24) + dp(56) * bt, paint);
+        }
+    }
+
+    private void drawDesktopAction(Canvas canvas, float elapsed) {
+        float p = Math.min(1f, elapsed / 0.85f);
+        float ease = 1f - (float) Math.pow(1f - p, 3f);
+        boolean swap = action.contains("swap");
+        boolean folder = action.contains("folder");
+        int accent = swap ? Color.parseColor("#C7A6FF")
+            : (folder ? Color.parseColor("#FFD36E") : Color.parseColor("#8CE8FF"));
+
+        // 目标格的四角定位框。
+        float half = dp(26) + dp(8) * ease;
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(dp(1.4f));
+        paint.setColor(accent);
+        paint.setAlpha((int) (190 * (1f - 0.25f * p)));
+        float gap = dp(7);
+        // 左上
+        canvas.drawLine(targetX - half, targetY - half, targetX - half + gap, targetY - half, paint);
+        canvas.drawLine(targetX - half, targetY - half, targetX - half, targetY - half + gap, paint);
+        // 右上
+        canvas.drawLine(targetX + half, targetY - half, targetX + half - gap, targetY - half, paint);
+        canvas.drawLine(targetX + half, targetY - half, targetX + half, targetY - half + gap, paint);
+        // 左下
+        canvas.drawLine(targetX - half, targetY + half, targetX - half + gap, targetY + half, paint);
+        canvas.drawLine(targetX - half, targetY + half, targetX - half, targetY + half - gap, paint);
+        // 右下
+        canvas.drawLine(targetX + half, targetY + half, targetX + half - gap, targetY + half, paint);
+        canvas.drawLine(targetX + half, targetY + half, targetX + half, targetY + half - gap, paint);
+
+        // 两道不同速度的扩散环。
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(dp(1.6f));
+        paint.setColor(accent);
+        paint.setAlpha((int) (200 * (1f - p)));
+        canvas.drawCircle(targetX, targetY, dp(18) + dp(30) * ease, paint);
+        paint.setStrokeWidth(dp(1f));
+        paint.setAlpha((int) (120 * (1f - p)));
+        canvas.drawCircle(targetX, targetY, dp(28) + dp(52) * ease, paint);
+
+        // 交换：两个虚影小圆点对向滑过；文件夹：四颗星点收拢。
+        paint.setStyle(Paint.Style.FILL);
+        if (swap) {
+            float dx = dp(30) + dp(14) * ease;
+            float dy = dp(20) + dp(9) * ease;
+            paint.setColor(Color.parseColor("#C7A6FF"));
+            paint.setAlpha((int) (210 * (1f - p)));
+            canvas.drawCircle(targetX - dx, targetY - dy, dp(4.4f), paint);
+            paint.setColor(Color.parseColor("#8CE8FF"));
+            canvas.drawCircle(targetX + dx, targetY + dy, dp(4.4f), paint);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(dp(1.2f));
+            paint.setAlpha((int) (150 * (1f - p)));
+            canvas.drawArc(new RectF(targetX - dp(42), targetY - dp(42), targetX + dp(42), targetY + dp(42)),
+                -40f + 180f * ease, 120f, false, paint);
+        } else if (folder) {
+            for (int i = 0; i < 5; i++) {
+                float a = (float) (i * Math.PI * 2 / 5 + elapsed * 1.5f);
+                float radius = dp(34) * (1f - ease);
+                float sx = targetX + (float) Math.cos(a) * radius;
+                float sy = targetY + (float) Math.sin(a) * radius;
+                paint.setColor(i % 2 == 0 ? Color.parseColor("#FFD36E") : Color.parseColor("#FFF2BF"));
+                paint.setAlpha((int) (230 * (1f - p)));
+                drawStar(canvas, sx, sy, dp(2.6f + 1.4f * (1f - p)), accent, (int) (230 * (1f - p)));
+            }
+            // 文件夹底色小方框。
+            dst.set(targetX - dp(17), targetY - dp(14), targetX + dp(17), targetY + dp(14));
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(dp(1.4f));
+            paint.setColor(Color.parseColor("#FFD36E"));
+            paint.setAlpha((int) (170 * (1f - p * 0.5f)));
+            canvas.drawRoundRect(dst, dp(5), dp(5), paint);
+            canvas.drawLine(dst.left + dp(5), dst.top + dp(7), dst.right - dp(5), dst.top + dp(7), paint);
+        } else {
+            // 移动：从中心向外的速度线。
+            paint.setStrokeWidth(dp(1.2f));
+            for (int i = 0; i < 6; i++) {
+                float a = (float) (i * Math.PI / 3 + 0.2);
+                float r1 = dp(18) + dp(16) * ease;
+                float r2 = r1 + dp(12) * (1f - p);
+                paint.setColor(Color.parseColor(i % 2 == 0 ? "#8CE8FF" : "#FFF2BF"));
+                paint.setAlpha((int) (180 * (1f - p)));
+                canvas.drawLine(targetX + (float) Math.cos(a) * r1, targetY + (float) Math.sin(a) * r1,
+                    targetX + (float) Math.cos(a) * r2, targetY + (float) Math.sin(a) * r2, paint);
+            }
+        }
+
+        // 星屑爆开。
+        float burst = Math.max(0f, (elapsed - 0.22f) / 0.7f);
+        if (burst > 0f && burst < 1f) {
+            paint.setStyle(Paint.Style.FILL);
+            for (int i = 0; i < BIT_COUNT; i++) {
+                float radius = dp(7) + dp(58) * bitSpeeds[i] * burst;
+                float bx = targetX + (float) Math.cos(bitAngles[i]) * radius;
+                float by = targetY + (float) Math.sin(bitAngles[i]) * radius + dp(8) * burst * burst;
+                paint.setColor(bitColors[i]);
+                paint.setAlpha((int) (220 * (1f - burst)));
+                if (i % 5 == 0) drawStar(canvas, bx, by, dp(2.2f + bitSpeeds[i] * 1.7f), bitColors[i], (int) (220 * (1f - burst)));
+                else canvas.drawCircle(bx, by, dp(1.1f + bitSpeeds[i] * 1.4f), paint);
+            }
+        }
+
+        // 目标下方的小标签。
+        if (label.length() > 0) {
+            String tag = (swap ? "交换 · " : (folder ? "文件夹 · " : "移动 · ")) + label;
+            paint.setStyle(Paint.Style.FILL);
+            paint.setTextSize(dp(10.5f));
+            paint.setColor(Color.parseColor("#0B1021"));
+            paint.setAlpha((int) (215 * (1f - Math.max(0f, (elapsed - 1.05f) / 0.3f))));
+            float tw = paint.measureText(tag);
+            dst.set(targetX - tw / 2 - dp(8), targetY + dp(34),
+                targetX + tw / 2 + dp(8), targetY + dp(52));
+            canvas.drawRoundRect(dst, dp(8), dp(8), paint);
+            paint.setColor(accent);
+            canvas.drawText(tag, targetX - tw / 2, targetY + dp(46), paint);
         }
     }
 

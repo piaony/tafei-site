@@ -33,13 +33,17 @@ import java.util.regex.Pattern;
 public final class DesktopProbe {
 
     private static final Pattern COMPONENT = Pattern.compile("component=([^;]+)");
-    private static volatile String lastLauncherDbPath = "";
+    private static volatile String lastDbPath = "";
+    private static volatile String lastTable = "singledesktopitems";
 
     private DesktopProbe() {}
 
-    /** 最近一次读到的 launcher.db（可能是 /proc/<pid>/root/...）。 */
-    public static String lastLauncherDbPath() {
-        return lastLauncherDbPath;
+    public static String launcherDbPath() {
+        return lastDbPath;
+    }
+
+    public static String launcherTable() {
+        return lastTable;
     }
 
     public static String probe(Context context) {
@@ -101,6 +105,7 @@ public final class DesktopProbe {
                 out.put("containers", new JSONObject());
                 out.put("appShortcutCount", 0);
                 out.put("totalRows", 0);
+                out.put("folders", new JSONArray());
                 out.put("dbPath", "");
                 out.put("dbFile", "");
                 out.put("desktopMode", "unknown");
@@ -182,6 +187,7 @@ public final class DesktopProbe {
                 out.put("containers", new JSONObject());
                 out.put("appShortcutCount", 0);
                 out.put("totalRows", 0);
+                out.put("folders", new JSONArray());
                 out.put("dbPath", "");
                 out.put("dbFile", "");
             } else {
@@ -194,6 +200,7 @@ public final class DesktopProbe {
                 out.put("appShortcutCount", selected.optInt("appShortcutCount"));
                 out.put("totalRows", selected.optInt("totalRows"));
                 out.put("samples", selected.optJSONArray("samples"));
+                out.put("folders", selected.optJSONArray("folders"));
                 out.put("desktopMode", "unknown");
             }
         } catch (Throwable t) {
@@ -279,7 +286,7 @@ public final class DesktopProbe {
 
                 JSONObject containers = new JSONObject();
                 JSONArray samples = new JSONArray();
-                JSONArray slots = new JSONArray();
+                JSONArray folders = new JSONArray();
                 int appShortcutCount = 0;
                 int totalRows = 0;
 
@@ -297,41 +304,43 @@ public final class DesktopProbe {
                             containers.put(container, count);
                         }
                         int containerValue = intValue(rows, "container", Integer.MIN_VALUE);
+                        if (containerValue != -100) continue;
                         int screen = intValue(rows, "screen", -1);
                         int cellX = intValue(rows, "cellX", -1);
                         int cellY = intValue(rows, "cellY", -1);
+                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
+                        if (itemType == 2) {
+                            JSONObject folder = new JSONObject();
+                            folder.put("rowId", intValue(rows, "_id", -1));
+                            String folderTitle = stringValue(rows, "title");
+                            folder.put("label", folderTitle == null || folderTitle.isEmpty() ? "文件夹" : folderTitle);
+                            folder.put("package", "");
+                            folder.put("screen", screen);
+                            folder.put("cellX", cellX);
+                            folder.put("cellY", cellY);
+                            folder.put("itemType", 2);
+                            folder.put("container", containerValue);
+                            folders.put(folder);
+                            continue;
+                        }
+                        if (itemType != 0) continue;
+                        appShortcutCount++;
+                        if (samples.length() >= 200) continue;
                         String intent = stringValue(rows, "intent");
                         String component = componentOf(intent);
                         String pkg = component == null ? "" : component.split("/")[0];
                         String title = stringValue(rows, "title");
-                        if (containerValue == -100 && screen >= 0 && cellX >= 0 && cellY >= 0) {
-                            JSONObject slot = new JSONObject();
-                            slot.put("id", intValue(rows, "_id", -1));
-                            slot.put("title", title == null ? "" : title);
-                            slot.put("package", pkg);
-                            slot.put("itemType", itemType);
-                            slot.put("container", containerValue);
-                            slot.put("screen", screen);
-                            slot.put("cellX", cellX);
-                            slot.put("cellY", cellY);
-                            slots.put(slot);
-                        }
-                        if (itemType != 0) continue;
-                        if (containerValue != -100) continue;
-                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
-                        appShortcutCount++;
-                        if (samples.length() >= 200) continue;
                         String label = resolveLabel(context, pkg, title);
                         JSONObject item = new JSONObject();
-                        item.put("id", intValue(rows, "_id", -1));
                         item.put("label", label == null ? "" : label);
                         item.put("package", pkg);
                         item.put("component", component == null ? "" : component);
-                        item.put("itemType", itemType);
-                        item.put("container", containerValue);
+                        item.put("rowId", intValue(rows, "_id", -1));
                         item.put("screen", screen);
                         item.put("cellX", cellX);
                         item.put("cellY", cellY);
+                        item.put("itemType", itemType);
+                        item.put("container", containerValue);
                         samples.put(item);
                     }
                 } finally {
@@ -341,15 +350,14 @@ public final class DesktopProbe {
                 result.put("path", remotePath);
                 result.put("file", name);
                 result.put("table", itemsTable);
+                lastDbPath = remotePath;
+                lastTable = itemsTable;
                 result.put("columns", columnArray);
                 result.put("containers", containers);
                 result.put("appShortcutCount", appShortcutCount);
                 result.put("totalRows", totalRows);
                 result.put("samples", samples);
-                result.put("slots", slots);
-                if (name.equals("launcher.db") && remotePath != null && remotePath.contains("user_de/0/")) {
-                    lastLauncherDbPath = remotePath;
-                }
+                result.put("folders", folders);
                 return result;
             } catch (Throwable t) {
                 addDiag(diag, name + "：打开失败 " + String.valueOf(t.getMessage()));

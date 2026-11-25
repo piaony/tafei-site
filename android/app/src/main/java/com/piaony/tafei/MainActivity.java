@@ -3,7 +3,11 @@ package com.piaony.tafei;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.util.Base64;
 import android.net.Uri;
 import android.os.Build;
 import android.graphics.drawable.ColorDrawable;
@@ -16,6 +20,10 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -161,6 +169,7 @@ public class MainActivity extends BridgeActivity {
     /* 供「我的」页调用：读版本号、手动检查更新 */
     public static class NativeBridge {
         private final MainActivity act;
+        private final Map<String, String> iconCache = new HashMap<>();
 
         NativeBridge(MainActivity a) {
             this.act = a;
@@ -218,28 +227,6 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
-        public String appIconData(String pkg) {
-            return AppIconUtil.data(act, pkg);
-        }
-
-        @JavascriptInterface
-        public String desktopDbAvailable() {
-            return LauncherDbEditor.available(act) ? "1" : "0";
-        }
-
-        @JavascriptInterface
-        public String desktopDbExperimental() {
-            return act.getSharedPreferences("tafei_app", 0)
-                .getBoolean("desktop_db_experiment", false) ? "1" : "0";
-        }
-
-        @JavascriptInterface
-        public void setDesktopDbExperimental(String enabled) {
-            act.getSharedPreferences("tafei_app", 0).edit()
-                .putBoolean("desktop_db_experiment", "1".equals(enabled)).apply();
-        }
-
-        @JavascriptInterface
         public String accessibilityReady() {
             return SpiritAccessibilityService.isReady() ? "1" : "0";
         }
@@ -268,42 +255,50 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
-        public String desktopActionResult() {
-            return SpiritAccessibilityService.lastAction();
+        public String desktopActionStatus() {
+            return SpiritAccessibilityService.lastResult();
         }
 
         @JavascriptInterface
-        public String desktopActionEventId() {
-            return String.valueOf(SpiritAccessibilityService.lastActionId());
+        public String desktopActionEvent() {
+            return SpiritAccessibilityService.lastEvent();
         }
 
         @JavascriptInterface
-        public String desktopAction(String type, String payload) {
-            if (!SpiritAccessibilityService.isReady()) {
-                openAccessibility();
-                return "accessibility-off";
+        public String desktopAppIcon(String pkg) {
+            if (pkg == null || pkg.trim().isEmpty()) return "";
+            String cached = iconCache.get(pkg);
+            if (cached != null) return cached;
+            try {
+                Drawable drawable = act.getPackageManager().getApplicationIcon(pkg);
+                int size = Math.round(56 * act.getResources().getDisplayMetrics().density);
+                Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                drawable.setBounds(0, 0, size, size);
+                drawable.draw(canvas);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+                String data = Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
+                iconCache.put(pkg, data);
+                return data;
+            } catch (Exception e) {
+                return "";
             }
-            if (!"move".equals(type) && !"swap".equals(type) && !"folder".equals(type)) {
-                return "bad-type";
-            }
-            boolean db = act.getSharedPreferences("tafei_app", 0)
-                .getBoolean("desktop_db_experiment", false);
-            String result = SpiritAccessibilityService.startDesktopAction(type, payload, db);
-            if ("started".equals(result)) {
-                act.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent home = new Intent(Intent.ACTION_MAIN);
-                        home.addCategory(Intent.CATEGORY_HOME);
-                        home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        try {
-                            act.startActivity(home);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                });
-            }
-            return result;
+        }
+
+        @JavascriptInterface
+        public String launcherDbWriteEnabled() {
+            return LauncherDbOps.isEnabled(act) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String setLauncherDbWriteEnabled(String enabled) {
+            return LauncherDbOps.setEnabledWithBackup(act, "1".equals(enabled) || "true".equals(enabled));
+        }
+
+        @JavascriptInterface
+        public String desktopAction(String action, String payload) {
+            return LauncherDbOps.start(act, action, payload);
         }
 
         @JavascriptInterface

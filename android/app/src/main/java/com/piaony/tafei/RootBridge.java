@@ -135,6 +135,26 @@ public final class RootBridge {
         }
     }
 
+    /** 把 App 私有文件写回 root 可见路径；尽量保留原文件的 uid/gid。 */
+    public static boolean copyFromFile(File localFile, String remotePath) {
+        if (localFile == null || !localFile.exists() || remotePath == null || remotePath.contains("\n")) {
+            return false;
+        }
+        String owner = "0:0";
+        Result stat = run("stat -c '%u:%g' " + quote(remotePath));
+        if (stat.exitCode == 0) {
+            String line = stat.output == null ? "" : stat.output.trim();
+            if (line.matches("^[0-9]+:[0-9]+$")) owner = line;
+        }
+        String temp = remotePath + ".tafei_tmp";
+        String cmd = "cp " + quote(localFile.getAbsolutePath()) + " " + quote(temp)
+            + " && chown " + owner + " " + quote(temp)
+            + " && chmod 600 " + quote(temp)
+            + " && mv -f " + quote(temp) + " " + quote(remotePath);
+        Result result = run(cmd, 20000L);
+        return result.exitCode == 0;
+    }
+
     private static String findSu() {
         for (String path : SU_CANDIDATES) {
             if (path.equals("su") || new File(path).exists()) return path;
