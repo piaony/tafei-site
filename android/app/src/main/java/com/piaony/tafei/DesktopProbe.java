@@ -33,8 +33,14 @@ import java.util.regex.Pattern;
 public final class DesktopProbe {
 
     private static final Pattern COMPONENT = Pattern.compile("component=([^;]+)");
+    private static volatile String lastLauncherDbPath = "";
 
     private DesktopProbe() {}
+
+    /** 最近一次读到的 launcher.db（可能是 /proc/<pid>/root/...）。 */
+    public static String lastLauncherDbPath() {
+        return lastLauncherDbPath;
+    }
 
     public static String probe(Context context) {
         JSONObject out = new JSONObject();
@@ -273,6 +279,7 @@ public final class DesktopProbe {
 
                 JSONObject containers = new JSONObject();
                 JSONArray samples = new JSONArray();
+                JSONArray slots = new JSONArray();
                 int appShortcutCount = 0;
                 int totalRows = 0;
 
@@ -289,24 +296,39 @@ public final class DesktopProbe {
                             int count = containers.optInt(container, 0) + 1;
                             containers.put(container, count);
                         }
-                        if (itemType != 0) continue;
                         int containerValue = intValue(rows, "container", Integer.MIN_VALUE);
-                        if (containerValue != -100) continue;
                         int screen = intValue(rows, "screen", -1);
                         int cellX = intValue(rows, "cellX", -1);
                         int cellY = intValue(rows, "cellY", -1);
-                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
-                        appShortcutCount++;
-                        if (samples.length() >= 200) continue;
                         String intent = stringValue(rows, "intent");
                         String component = componentOf(intent);
                         String pkg = component == null ? "" : component.split("/")[0];
                         String title = stringValue(rows, "title");
+                        if (containerValue == -100 && screen >= 0 && cellX >= 0 && cellY >= 0) {
+                            JSONObject slot = new JSONObject();
+                            slot.put("id", intValue(rows, "_id", -1));
+                            slot.put("title", title == null ? "" : title);
+                            slot.put("package", pkg);
+                            slot.put("itemType", itemType);
+                            slot.put("container", containerValue);
+                            slot.put("screen", screen);
+                            slot.put("cellX", cellX);
+                            slot.put("cellY", cellY);
+                            slots.put(slot);
+                        }
+                        if (itemType != 0) continue;
+                        if (containerValue != -100) continue;
+                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
+                        appShortcutCount++;
+                        if (samples.length() >= 200) continue;
                         String label = resolveLabel(context, pkg, title);
                         JSONObject item = new JSONObject();
+                        item.put("id", intValue(rows, "_id", -1));
                         item.put("label", label == null ? "" : label);
                         item.put("package", pkg);
                         item.put("component", component == null ? "" : component);
+                        item.put("itemType", itemType);
+                        item.put("container", containerValue);
                         item.put("screen", screen);
                         item.put("cellX", cellX);
                         item.put("cellY", cellY);
@@ -324,6 +346,10 @@ public final class DesktopProbe {
                 result.put("appShortcutCount", appShortcutCount);
                 result.put("totalRows", totalRows);
                 result.put("samples", samples);
+                result.put("slots", slots);
+                if (name.equals("launcher.db") && remotePath != null && remotePath.contains("user_de/0/")) {
+                    lastLauncherDbPath = remotePath;
+                }
                 return result;
             } catch (Throwable t) {
                 addDiag(diag, name + "：打开失败 " + String.valueOf(t.getMessage()));

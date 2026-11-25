@@ -1071,8 +1071,15 @@
       return;
     }
     window.__tafeiLastProbe = data;
+    dmState.pageCount = dmPageCount(data);
+    var grid = dmGridSize(data);
+    dmState.cols = grid.cols;
+    dmState.rows = grid.rows;
+    dmState.folderIds = dmBuildFolders(data);
+    if (dmState.page >= dmState.pageCount) dmState.page = -1;
+    renderPageTabs();
     renderDesktopIconList(data);
-    updateDesktopProbeActions(data);
+    updateDesktopProbeActions();
     var lines = [];
     var diagLines = data.diag || [];
     if (!Array.isArray(diagLines)) diagLines = String(diagLines).split(/\r?\n/);
@@ -1125,51 +1132,200 @@
     out.textContent = lines.join('\n');
   }
 
-  function renderDesktopIconList(data) {
-    var picker = $('desktopIconPicker');
-    var list = $('desktopIconList');
-    var count = $('desktopIconCount');
-    if (!picker || !list) return;
-    var icons = (data && data.samples) || [];
-    picker.hidden = !icons.length;
-    if (count) count.textContent = icons.length + ' 个';
-    if (!icons.length) {
-      list.innerHTML = '';
-      window.__tafeiSelectedIconIndex = 0;
+  var dmState = {
+    data: null,
+    selected: [],
+    page: -1,
+    search: '',
+    pageCount: 1,
+    cols: 4,
+    rows: 6,
+    folderIds: {},
+    iconCache: {},
+    iconQueue: [],
+    iconLoading: false,
+    target: null,
+    actionTimer: 0,
+    actionStartedAt: 0
+  };
+
+  function dmKey(item) {
+    if (!item) return '';
+    if (item.id && item.id > 0) return 'id:' + item.id;
+    return [item.package || '', item.label || '', item.screen, item.cellX, item.cellY].join('|');
+  }
+
+  function dmSelectedItems() {
+    var icons = (dmState.data && dmState.data.samples) || [];
+    var map = {};
+    icons.forEach(function (item) { map[dmKey(item)] = item; });
+    return dmState.selected.map(function (key) { return map[key]; }).filter(Boolean);
+  }
+
+  function dmPageCount(data) {
+    var max = 0;
+    ((data && data.samples) || []).forEach(function (item) { if (item.screen > max) max = item.screen; });
+    ((data && data.slots) || []).forEach(function (slot) { if (slot.screen > max) max = slot.screen; });
+    return max + 1;
+  }
+
+  function dmGridSize(data) {
+    var cols = 4;
+    var rows = 6;
+    ((data && data.samples) || []).forEach(function (item) {
+      if (item.cellX + 1 > cols) cols = item.cellX + 1;
+      if (item.cellY + 1 > rows) rows = item.cellY + 1;
+    });
+    ((data && data.slots) || []).forEach(function (slot) {
+      if (slot.cellX + 1 > cols) cols = slot.cellX + 1;
+      if (slot.cellY + 1 > rows) rows = slot.cellY + 1;
+    });
+    return {cols: Math.max(4, cols), rows: Math.max(6, rows)};
+  }
+
+  function dmBuildFolders(data) {
+    var ids = {};
+    ((data && data.slots) || []).forEach(function (slot) {
+      if (slot.itemType === 2) ids['id:' + slot.id] = true;
+      if (slot.container > 0) ids['id:' + slot.container] = true;
+    });
+    return ids;
+  }
+
+  function dmSlotAt(page, row, col) {
+    var slots = (dmState.data && dmState.data.slots) || [];
+    for (var i = 0; i < slots.length; i++) {
+      var slot = slots[i];
+      if (slot.container === -100 && slot.screen === page && slot.cellY === row && slot.cellX === col) return slot;
+    }
+    return null;
+  }
+
+  function dmIsFolder(slot) {
+    if (!slot) return false;
+    return slot.itemType === 2 || !!dmState.folderIds['id:' + slot.id];
+  }
+
+  function dmPageLabel(page) {
+    return page < 0 ? '全部' : ('第' + (page + 1) + '页');
+  }
+
+  function dmQueueIcon(pkg, el) {
+    if (!pkg || !el) return;
+    if (dmState.iconCache[pkg]) {
+      el.innerHTML = '<img alt="" src="data:image/png;base64,' + dmState.iconCache[pkg] + '">';
       return;
     }
-    if (typeof window.__tafeiSelectedIconIndex !== 'number'
-        || window.__tafeiSelectedIconIndex < 0
-        || window.__tafeiSelectedIconIndex >= icons.length) {
-      window.__tafeiSelectedIconIndex = 0;
+    if (el.getAttribute('data-icon-pkg') === pkg && el.getAttribute('data-icon-queued') === '1') return;
+    el.setAttribute('data-icon-pkg', pkg);
+    el.setAttribute('data-icon-queued', '1');
+    dmState.iconQueue.push({pkg: pkg, el: el});
+    if (!dmState.iconLoading) {
+      dmState.iconLoading = true;
+      setTimeout(dmLoadNextIcon, 0);
     }
-    var html = [];
-    icons.forEach(function (item, index) {
-      var selected = index === window.__tafeiSelectedIconIndex ? ' is-selected' : '';
-      html.push('<button type="button" class="desktop-icon-item' + selected + '" data-icon-index="' + index + '">'
-        + '<b>' + esc(item.label || item.package || '未命名') + '</b>'
-        + '<small>屏' + item.screen + ' · (' + item.cellX + ',' + item.cellY + ')</small>'
-        + '</button>');
+  }
+
+  function dmLoadNextIcon() {
+    var next = dmState.iconQueue.shift();
+    if (!next) {
+      dmState.iconLoading = false;
+      return;
+    }
+    var data = String(nativeOverlayCall('appIconData', '', next.pkg) || '');
+    if (data) {
+      dmState.iconCache[next.pkg] = data;
+      if (next.el && next.el.isConnected) {
+        next.el.innerHTML = '<img alt="" src="data:image/png;base64,' + data + '">';
+      }
+    }
+    setTimeout(dmLoadNextIcon, 14);
+  }
+
+  function renderPageTabs() {
+    var box = $('desktopPageTabs');
+    if (!box) return;
+    var html = ['<button type="button" class="dm-page-tab' + (dmState.page < 0 ? ' on' : '') + '" data-dm-page="-1">全部</button>'];
+    for (var i = 0; i < dmState.pageCount; i++) {
+      html.push('<button type="button" class="dm-page-tab' + (dmState.page === i ? ' on' : '') + '" data-dm-page="' + i + '">第' + (i + 1) + '页</button>');
+    }
+    box.innerHTML = html.join('');
+  }
+
+  function renderDesktopIconList(data) {
+    var list = $('desktopIconList');
+    var empty = $('desktopEmpty');
+    var summary = $('dmSummary');
+    if (!list) return;
+    if (data) dmState.data = data;
+    var icons = (dmState.data && dmState.data.samples) || [];
+    var query = (dmState.search || '').trim().toLowerCase();
+    var visible = icons.filter(function (item) {
+      if (dmState.page >= 0 && item.screen !== dmState.page) return false;
+      if (!query) return true;
+      return String(item.label || '').toLowerCase().indexOf(query) >= 0
+        || String(item.package || '').toLowerCase().indexOf(query) >= 0;
     });
-    list.innerHTML = html.join('');
+    visible.sort(function (a, b) {
+      return (a.screen - b.screen) || (a.cellY - b.cellY) || (a.cellX - b.cellX);
+    });
+    if (summary) summary.textContent = icons.length + ' 个应用 · ' + dmState.pageCount + ' 页';
+    if (!visible.length) {
+      list.innerHTML = '';
+      if (empty) empty.hidden = false;
+    } else {
+      if (empty) empty.hidden = true;
+      var html = [];
+      visible.forEach(function (item) {
+        var key = dmKey(item);
+        var on = dmState.selected.indexOf(key) >= 0;
+        var letter = String(item.label || item.package || '?').slice(0, 1);
+        html.push('<button type="button" class="dm-app' + (on ? ' on' : '') + '" data-dm-key="' + encodeURIComponent(key) + '">'
+          + '<span class="dm-check">✓</span>'
+          + '<span class="dm-icon" data-icon-box="1">' + esc(letter) + '</span>'
+          + '<b>' + esc(item.label || item.package || '未命名') + '</b>'
+          + '<small>第' + (item.screen + 1) + '页 · ' + (item.cellY + 1) + '行' + (item.cellX + 1) + '列</small>'
+          + '</button>');
+      });
+      list.innerHTML = html.join('');
+      var boxes = list.querySelectorAll('.dm-app');
+      for (var i = 0; i < boxes.length && i < visible.length; i++) {
+        var box = boxes[i].querySelector('.dm-icon');
+        dmQueueIcon(visible[i].package, box);
+      }
+    }
+    updateDesktopProbeActions(dmState.data);
   }
 
   function selectedDesktopIcon() {
-    var data = window.__tafeiLastProbe;
-    var icons = (data && data.samples) || [];
-    var index = window.__tafeiSelectedIconIndex || 0;
-    if (!icons.length) return null;
-    if (index < 0 || index >= icons.length) index = 0;
-    return icons[index];
+    return dmSelectedItems()[0] || null;
   }
 
-  function updateDesktopProbeActions(data) {
+  function updateDesktopProbeActions() {
+    var items = dmSelectedItems();
+    var count = items.length;
+    var title = $('desktopSelectionTitle');
+    var meta = $('desktopSelectionMeta');
     var eat = $('desktopEatBtn');
-    if (!eat) return;
-    var icons = (data && data.samples) || [];
-    var item = selectedDesktopIcon();
-    eat.disabled = !item;
-    eat.textContent = item ? ('吃掉「' + (item.label || item.package || '这个图标') + '」') : '吃掉选中图标';
+    var move = $('desktopMoveBtn');
+    var swap = $('desktopSwapBtn');
+    var folder = $('desktopFolderBtn');
+    if (title) title.textContent = count === 0 ? '未选择应用' : (count === 1 ? (items[0].label || items[0].package || '已选择') : ('已选择 ' + count + ' 个应用'));
+    if (meta) meta.textContent = count === 0 ? '点图标可多选' : (count === 1 ? '吃掉 / 移动' : '交换 / 文件夹');
+    if (eat) eat.disabled = count !== 1;
+    if (move) move.disabled = count !== 1;
+    if (swap) swap.disabled = count !== 2;
+    if (folder) folder.disabled = count < 2;
+  }
+
+  function dmSetSelected(keys) {
+    dmState.selected = keys || [];
+    renderDesktopIconList();
+    updateDesktopProbeActions();
+  }
+
+  function dmFail(text) {
+    toast(text, true);
   }
 
   function pollDesktopEat(item) {
@@ -1190,20 +1346,20 @@
       }
       if (state === 'success') {
         clearInterval(timer);
-        if (eat) eat.disabled = false;
+        if (eat) eat.textContent = '吃掉';
         toast('已吃掉「' + (item.label || item.package) + '」，应用还在抽屉里。');
+        var key = dmKey(item);
+        dmState.selected = dmState.selected.filter(function (v) { return v !== key; });
         var data = window.__tafeiLastProbe;
         if (data && Array.isArray(data.samples)) {
-          var index = window.__tafeiSelectedIconIndex || 0;
-          data.samples.splice(index, 1);
-          window.__tafeiSelectedIconIndex = Math.max(0, Math.min(index, data.samples.length - 1));
-          renderDesktopIconList(data);
-          updateDesktopProbeActions(data);
+          data.samples = data.samples.filter(function (v) { return dmKey(v) !== key; });
         }
+        renderDesktopIconList(data);
+        updateDesktopProbeActions();
       } else if (state === 'failed') {
         clearInterval(timer);
-        if (eat) eat.disabled = false;
-        updateDesktopProbeActions(window.__tafeiLastProbe);
+        if (eat) eat.textContent = '吃掉';
+        updateDesktopProbeActions();
         var detail = parts[2] || '';
         var failureText = detail;
         if (detail.indexOf('not-found') === 0) failureText = '没扫到目标，请手动滑到那一页再试';
@@ -1212,13 +1368,257 @@
         else if (detail === 'long-press-failed') failureText = '长按发送失败，请重试';
         else if (detail === 'root-still-open') failureText = '移除弹窗没有关闭，请重试';
         toast('吃掉失败：' + (failureText || '请重试'), true);
-      } else if (Date.now() - startedAt > 20000) {
+      } else if (Date.now() - startedAt > 24000) {
         clearInterval(timer);
-        if (eat) eat.disabled = false;
-        updateDesktopProbeActions(window.__tafeiLastProbe);
+        if (eat) eat.textContent = '吃掉';
+        updateDesktopProbeActions();
         toast('操作超时，请确认桌面弹窗状态。', true);
       }
     }, 400);
+  }
+
+  function dmPayload(type, items, target, folderName) {
+    var empty = [];
+    for (var r = 0; r < dmState.rows; r++) {
+      for (var c = 0; c < dmState.cols; c++) {
+        if (!dmSlotAt(target.screen, r, c)) empty.push({row: r, col: c});
+      }
+    }
+    var folderSlot = target.slot && dmIsFolder(target.slot) ? target.slot : null;
+    return {
+      items: items.map(function (item) {
+        return {id: item.id || -1, label: item.label || '', package: item.package || '', screen: item.screen, cellX: item.cellX, cellY: item.cellY};
+      }),
+      target: {screen: target.screen, row: target.row, col: target.col},
+      targetFolder: folderSlot ? {id: folderSlot.id, title: folderSlot.title || ''} : null,
+      folderName: folderName || '',
+      cols: dmState.cols,
+      rows: dmState.rows,
+      emptyCells: empty,
+      db: String(nativeOverlayCall('desktopDbExperimental', '0')) === '1'
+    };
+  }
+
+  function pollDesktopAction(type, baseline) {
+    var startedAt = Date.now();
+    if (dmState.actionTimer) clearInterval(dmState.actionTimer);
+    dmState.actionTimer = setInterval(function () {
+      var raw = String(nativeOverlayCall('desktopActionResult', 'idle|||0'));
+      var p = raw.split('|');
+      var state = p[0] || 'idle';
+      var action = p[1] || '';
+      var detail = p[2] || '';
+      var eventId = parseInt(p[3] || '0', 10) || 0;
+      if (eventId <= baseline) return;
+      if (state === 'success') {
+        clearInterval(dmState.actionTimer);
+        dmState.actionTimer = 0;
+        toast('桌面操作完成，正在刷新列表。');
+        setTimeout(refreshDesktopProbe, 700);
+      } else if (state === 'failed') {
+        clearInterval(dmState.actionTimer);
+        dmState.actionTimer = 0;
+        toast('桌面操作失败：' + (detail || '请重试'), true);
+      } else if (Date.now() - startedAt > 30000) {
+        clearInterval(dmState.actionTimer);
+        dmState.actionTimer = 0;
+        toast('桌面操作超时，请查看桌面状态。', true);
+      }
+    }, 500);
+  }
+
+  function startDesktopAction(type, payload) {
+    var baseline = parseInt(String(nativeOverlayCall('desktopActionEventId', '0')), 10) || 0;
+    var result = String(nativeOverlayCall('desktopAction', 'off', type, JSON.stringify(payload)));
+    if (result !== 'started') {
+      dmFail('操作启动失败：' + result);
+      return false;
+    }
+    toast(type === 'move' ? '瑶正在把图标搬过去…' : (type === 'swap' ? '瑶正在交换两个图标…' : '瑶正在整理文件夹…'));
+    pollDesktopAction(type, baseline);
+    return true;
+  }
+
+  function renderTargetPageTabs() {
+    var box = $('dmTargetPageTabs');
+    if (!box || !dmState.target) return;
+    var html = [];
+    for (var i = 0; i < dmState.pageCount; i++) {
+      html.push('<button type="button" class="dm-page-tab' + (dmState.target.page === i ? ' on' : '') + '" data-dm-target-page="' + i + '">第' + (i + 1) + '页</button>');
+    }
+    box.innerHTML = html.join('');
+  }
+
+  function renderTargetGrid() {
+    var grid = $('dmTargetGrid');
+    if (!grid || !dmState.target) return;
+    var target = dmState.target;
+    var html = [];
+    for (var r = 0; r < dmState.rows; r++) {
+      for (var c = 0; c < dmState.cols; c++) {
+        var slot = dmSlotAt(target.page, r, c);
+        var cls = 'dm-cell';
+        var text = (r + 1) + '行' + (c + 1) + '列';
+        var folder = dmIsFolder(slot);
+        var disabled = false;
+        if (!slot) {
+          cls += ' free';
+        } else if (folder) {
+          cls += ' folder';
+          text = '文件夹<br>' + esc(slot.title || '');
+          disabled = target.mode !== 'folder';
+        } else {
+          cls += ' occupied';
+          text = esc(slot.title || slot.package || '占用');
+          disabled = true;
+        }
+        if (target.row === r && target.col === c) cls += ' on';
+        html.push('<button type="button" class="' + cls + '" data-dm-row="' + r + '" data-dm-col="' + c + '"' + (disabled ? ' disabled' : '') + '>' + text + '</button>');
+      }
+    }
+    grid.innerHTML = html.join('');
+    var nameRow = $('dmFolderNameRow');
+    if (nameRow) nameRow.hidden = target.mode !== 'folder' || (target.slot && dmIsFolder(target.slot));
+  }
+
+  function openTargetModal(mode, preset) {
+    var items = dmSelectedItems();
+    if (mode === 'move' && items.length !== 1) { dmFail('移动只能选 1 个应用。'); return; }
+    if (mode === 'folder' && items.length < 2) { dmFail('文件夹至少要选 2 个应用。'); return; }
+    var page = preset && typeof preset.page === 'number' ? preset.page : items[0].screen;
+    dmState.target = {mode: mode, page: page, row: preset && preset.row, col: preset && preset.col, slot: null};
+    var modal = $('dmTargetModal');
+    if (modal) modal.hidden = false;
+    var title = modal && modal.querySelector('.dm-target-head b');
+    if (title) title.textContent = mode === 'move' ? '移动到哪一格' : '文件夹放在哪一格';
+    var hint = $('dmTargetHint');
+    if (hint) hint.textContent = mode === 'move' ? '只能选空位；跨页需要数据库兜底实验开启。' : '选空位会新建文件夹；选已有文件夹会并入。';
+    var folderInput = $('dmFolderName');
+    if (folderInput) folderInput.value = '';
+    renderTargetPageTabs();
+    renderTargetGrid();
+    var summary = $('dmTargetSummary');
+    if (summary) summary.textContent = '第' + (page + 1) + '页 · 未选择位置';
+    var confirm = $('dmTargetConfirm');
+    if (confirm) confirm.disabled = true;
+  }
+
+  function closeTargetModal() {
+    var modal = $('dmTargetModal');
+    if (modal) modal.hidden = true;
+    dmState.target = null;
+  }
+
+  function confirmTarget() {
+    var target = dmState.target;
+    if (!target || target.row == null || target.col == null) return;
+    var items = dmSelectedItems();
+    var slot = dmSlotAt(target.page, target.row, target.col);
+    if (target.mode === 'move' && slot) { dmFail('目标格被占用了，请换一个空位。'); return; }
+    if (target.mode === 'folder' && slot && !dmIsFolder(slot)) { dmFail('目标格是普通应用，不是文件夹；请换空位或已有文件夹。'); return; }
+    var payload = dmPayload(target.mode, items, {screen: target.page, row: target.row, col: target.col, slot: slot}, ($('dmFolderName') || {}).value || '');
+    var action = target.mode === 'move' ? 'move' : 'folder';
+    closeTargetModal();
+    startDesktopAction(action, payload);
+  }
+
+  function dmChineseNumber(value) {
+    var text = String(value || '').trim();
+    if (/^\d+$/.test(text)) return parseInt(text, 10);
+    var digits = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10};
+    if (text === '十') return 10;
+    if (text.length === 1) return digits[text] || 0;
+    if (text.indexOf('十') === 0) return 10 + (digits[text.slice(1)] || 0);
+    if (text.indexOf('十') > 0) return (digits[text.slice(0, 1)] || 0) * 10 + (digits[text.slice(2)] || 0);
+    return 0;
+  }
+
+  function dmFindMentioned(text) {
+    var icons = (dmState.data && dmState.data.samples) || [];
+    var candidates = [];
+    icons.forEach(function (item) {
+      var label = String(item.label || '').trim();
+      if (!label) return;
+      var at = text.indexOf(label);
+      if (at >= 0) candidates.push({item: item, start: at, end: at + label.length, len: label.length});
+    });
+    candidates.sort(function (a, b) { return b.len - a.len || a.start - b.start; });
+    var taken = [];
+    var picked = [];
+    candidates.forEach(function (cand) {
+      var overlap = taken.some(function (range) { return cand.start < range.end && cand.end > range.start; });
+      if (overlap) return;
+      taken.push({start: cand.start, end: cand.end});
+      picked.push(cand.item);
+    });
+    picked.sort(function (a, b) {
+      return text.indexOf(a.label) - text.indexOf(b.label);
+    });
+    return picked;
+  }
+
+  function dmParseLocation(text) {
+    var m = text.match(/第\s*([0-9一二三四五六七八九十]+)\s*页[^0-9第]{0,14}?([0-9]+)\s*行[^0-9]{0,8}?([0-9]+)\s*列/);
+    if (!m) m = text.match(/第\s*([0-9一二三四五六七八九十]+)\s*页.*?([0-9]+)\s*行.*?([0-9]+)\s*列/);
+    if (!m) return null;
+    var page = dmChineseNumber(m[1]) - 1;
+    var row = parseInt(m[2], 10) - 1;
+    var col = parseInt(m[3], 10) - 1;
+    if (page < 0 || row < 0 || col < 0) return null;
+    if (page >= dmState.pageCount || row >= dmState.rows || col >= dmState.cols) return null;
+    return {page: page, row: row, col: col};
+  }
+
+  function dmParseFolderName(text) {
+    var m = text.match(/(?:叫|命名为)\s*[“"「']?([^”"」'，。,\s]+)/);
+    return m ? m[1] : '';
+  }
+
+  function executeDesktopCommand() {
+    var input = $('desktopCommand');
+    var text = String((input && input.value) || '').trim();
+    if (!text) { dmFail('先输入一条指令。'); return; }
+    if (!dmState.data || !(dmState.data.samples || []).length) { dmFail('先点“重新扫描”读取桌面。'); return; }
+    var items = dmFindMentioned(text);
+    var location = dmParseLocation(text);
+    var folderName = dmParseFolderName(text);
+    var isFolder = text.indexOf('文件夹') >= 0 || text.indexOf('合并') >= 0;
+    var isSwap = text.indexOf('交换') >= 0 || text.indexOf('换位置') >= 0;
+    var isMove = text.indexOf('移到') >= 0 || text.indexOf('放到') >= 0 || text.indexOf('移动') >= 0;
+    if (isFolder) {
+      if (items.length < 2) { dmFail('文件夹指令至少要有 2 个应用名。'); return; }
+      if (!location) { dmState.selected = items.map(dmKey); renderDesktopIconList(); updateDesktopProbeActions(); openTargetModal('folder'); dmFail('已选中应用，请再补一个目标页/行/列。'); return; }
+      var slot = dmSlotAt(location.page, location.row, location.col);
+      if (slot && !dmIsFolder(slot)) { dmFail('目标格是普通应用，不能直接做成文件夹。'); return; }
+      dmState.selected = items.map(dmKey);
+      renderDesktopIconList();
+      updateDesktopProbeActions();
+      startDesktopAction('folder', dmPayload('folder', items, {screen: location.page, row: location.row, col: location.col, slot: slot}, folderName));
+      return;
+    }
+    if (isSwap) {
+      if (items.length !== 2) { dmFail('交换指令必须正好提到 2 个应用。'); return; }
+      dmState.selected = items.map(dmKey);
+      renderDesktopIconList();
+      updateDesktopProbeActions();
+      startDesktopAction('swap', dmPayload('swap', items, {screen: items[0].screen, row: items[0].cellY, col: items[0].cellX, slot: null}));
+      return;
+    }
+    if (isMove) {
+      if (items.length !== 1) { dmFail('移动指令必须正好提到 1 个应用。'); return; }
+      if (!location) { dmState.selected = items.map(dmKey); renderDesktopIconList(); updateDesktopProbeActions(); openTargetModal('move'); dmFail('已选中应用，请再选目标位置。'); return; }
+      dmState.selected = items.map(dmKey);
+      renderDesktopIconList();
+      updateDesktopProbeActions();
+      startDesktopAction('move', dmPayload('move', items, {screen: location.page, row: location.row, col: location.col, slot: dmSlotAt(location.page, location.row, location.col)}));
+      return;
+    }
+    dmFail('没认出指令。可用：交换位置 / 移动到第X页第Y行第Z列 / 做成文件夹。');
+  }
+
+  function refreshDesktopProbe() {
+    var raw = String(nativeOverlayCall('desktopProbe', ''));
+    renderDesktopProbe(raw);
   }
 
   function initDesktopProbe() {
@@ -1227,51 +1627,157 @@
     if (!box || !button) return;
     if (String(nativeOverlayCall('desktopProbeSupported', '0')) !== '1') return;
     box.hidden = false;
-    button.addEventListener('click', function () {
+
+    var dbToggle = $('desktopDbToggle');
+    var dbState = $('desktopDbState');
+    var dbAvailable = String(nativeOverlayCall('desktopDbAvailable', '0')) === '1';
+    if (dbToggle) {
+      dbToggle.disabled = !dbAvailable;
+      dbToggle.checked = dbAvailable && String(nativeOverlayCall('desktopDbExperimental', '0')) === '1';
+      dbToggle.addEventListener('change', function () {
+        if (dbToggle.checked) {
+          if (!window.confirm('数据库兜底实验：拖动失败时会直接写 launcher.db，并先备份。\n只在你知道风险时开启。')) {
+            dbToggle.checked = false;
+            return;
+          }
+          nativeOverlayCall('setDesktopDbExperimental', null, '1');
+          if (dbState) dbState.textContent = '已开启（实验）';
+          toast('数据库兜底已开启；失败会尝试备份回滚。', true);
+        } else {
+          nativeOverlayCall('setDesktopDbExperimental', null, '0');
+          if (dbState) dbState.textContent = '已关闭';
+          toast('数据库兜底已关闭。');
+        }
+      });
+    }
+    if (dbState) {
+      if (!dbAvailable) dbState.textContent = '当前设备没有 sqlite3，实验不可用';
+      else dbState.textContent = (dbToggle && dbToggle.checked) ? '已开启（实验）' : '已关闭';
+    }
+
+    function refresh() {
       var out = $('desktopProbeOut');
       button.disabled = true;
       if (out) out.textContent = '正在读取桌面环境…\n首次检测可能会在 KernelSU 里弹出授权。';
       setTimeout(function () {
-        var raw = String(nativeOverlayCall('desktopProbe', ''));
-        renderDesktopProbe(raw);
+        refreshDesktopProbe();
         button.disabled = false;
+        if (out) out.textContent = out.textContent || '桌面扫描完成。';
       }, 120);
-    });
+    }
+    button.addEventListener('click', refresh);
+    var didAuto = false;
+    setTimeout(function () {
+      if (!didAuto && !window.__tafeiLastProbe) {
+        didAuto = true;
+        refresh();
+      }
+    }, 300);
+
     var access = $('desktopAccessBtn');
     if (access) access.addEventListener('click', function () {
       nativeOverlayCall('openAccessibility', null);
       toast('请在系统设置里找到「挞飞桌面互动」并开启；首次可能需要先允许受限设置。');
     });
+
+    var search = $('desktopSearch');
+    if (search) search.addEventListener('input', function () {
+      dmState.search = search.value || '';
+      renderDesktopIconList();
+    });
+
+    var tabs = $('desktopPageTabs');
+    if (tabs) tabs.addEventListener('click', function (event) {
+      var target = event.target.closest && event.target.closest('[data-dm-page]');
+      if (!target) return;
+      dmState.page = parseInt(target.getAttribute('data-dm-page'), 10);
+      renderPageTabs();
+      renderDesktopIconList();
+    });
+
     var list = $('desktopIconList');
     if (list) list.addEventListener('click', function (event) {
-      var target = event.target;
-      while (target && target !== list && !target.getAttribute('data-icon-index')) {
-        target = target.parentElement;
-      }
-      if (!target || target === list) return;
-      var index = parseInt(target.getAttribute('data-icon-index'), 10);
-      if (isNaN(index)) return;
-      window.__tafeiSelectedIconIndex = index;
-      renderDesktopIconList(window.__tafeiLastProbe);
-      updateDesktopProbeActions(window.__tafeiLastProbe);
+      var target = event.target.closest && event.target.closest('[data-dm-key]');
+      if (!target) return;
+      var key = decodeURIComponent(target.getAttribute('data-dm-key') || '');
+      if (!key) return;
+      var at = dmState.selected.indexOf(key);
+      if (at >= 0) dmState.selected.splice(at, 1);
+      else dmState.selected.push(key);
+      renderDesktopIconList();
+      updateDesktopProbeActions();
     });
+
     var eat = $('desktopEatBtn');
     if (eat) eat.addEventListener('click', function () {
       var item = selectedDesktopIcon();
-      if (!item) { toast('请先检测一次桌面。', true); return; }
+      if (!item) { dmFail('请先选择一个应用。'); return; }
       if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
         nativeOverlayCall('openAccessibility', null);
-        toast('无障碍还没连接，请先开启「挞飞桌面互动」。', true);
+        dmFail('无障碍还没连接，请先开启「挞飞桌面互动」。');
         return;
       }
       if (!window.confirm('吃掉「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
       var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
-      if (result === 'accessibility-off') toast('请先开启无障碍服务。', true);
-      else if (result === 'started') {
-        toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
-        pollDesktopEat(item);
-      } else toast('吃掉启动失败：' + result, true);
+      if (result === 'accessibility-off') dmFail('请先开启无障碍服务。');
+      else if (result === 'started') pollDesktopEat(item);
+      else dmFail('吃掉启动失败：' + result);
     });
+
+    var move = $('desktopMoveBtn');
+    if (move) move.addEventListener('click', function () { openTargetModal('move'); });
+    var folder = $('desktopFolderBtn');
+    if (folder) folder.addEventListener('click', function () { openTargetModal('folder'); });
+    var swap = $('desktopSwapBtn');
+    if (swap) swap.addEventListener('click', function () {
+      var items = dmSelectedItems();
+      if (items.length !== 2) { dmFail('交换必须正好选 2 个应用。'); return; }
+      if (!window.confirm('交换「' + (items[0].label || items[0].package) + '」和「' + (items[1].label || items[1].package) + '」？')) return;
+      startDesktopAction('swap', dmPayload('swap', items, {screen: items[0].screen, row: items[0].cellY, col: items[0].cellX, slot: null}));
+    });
+
+    var commandBtn = $('desktopCommandBtn');
+    if (commandBtn) commandBtn.addEventListener('click', executeDesktopCommand);
+    var command = $('desktopCommand');
+    if (command) command.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') executeDesktopCommand();
+    });
+
+    var targetClose = $('dmTargetClose');
+    if (targetClose) targetClose.addEventListener('click', closeTargetModal);
+    var targetTabs = $('dmTargetPageTabs');
+    if (targetTabs) targetTabs.addEventListener('click', function (event) {
+      var target = event.target.closest && event.target.closest('[data-dm-target-page]');
+      if (!target || !dmState.target) return;
+      dmState.target.page = parseInt(target.getAttribute('data-dm-target-page'), 10);
+      dmState.target.row = null;
+      dmState.target.col = null;
+      dmState.target.slot = null;
+      renderTargetPageTabs();
+      renderTargetGrid();
+      var summary = $('dmTargetSummary');
+      if (summary) summary.textContent = '第' + (dmState.target.page + 1) + '页 · 未选择位置';
+      var confirm = $('dmTargetConfirm');
+      if (confirm) confirm.disabled = true;
+    });
+    var targetGrid = $('dmTargetGrid');
+    if (targetGrid) targetGrid.addEventListener('click', function (event) {
+      var target = event.target.closest && event.target.closest('[data-dm-row]');
+      if (!target || !dmState.target) return;
+      var row = parseInt(target.getAttribute('data-dm-row'), 10);
+      var col = parseInt(target.getAttribute('data-dm-col'), 10);
+      if (isNaN(row) || isNaN(col)) return;
+      dmState.target.row = row;
+      dmState.target.col = col;
+      dmState.target.slot = dmSlotAt(dmState.target.page, row, col);
+      renderTargetGrid();
+      var summary = $('dmTargetSummary');
+      if (summary) summary.textContent = '第' + (dmState.target.page + 1) + '页 · 第' + (row + 1) + '行第' + (col + 1) + '列';
+      var confirm = $('dmTargetConfirm');
+      if (confirm) confirm.disabled = false;
+    });
+    var confirm = $('dmTargetConfirm');
+    if (confirm) confirm.addEventListener('click', confirmTarget);
   }
 
   $('nativeOverlayToggle')?.addEventListener('click', function () {

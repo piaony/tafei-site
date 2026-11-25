@@ -218,6 +218,28 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public String appIconData(String pkg) {
+            return AppIconUtil.data(act, pkg);
+        }
+
+        @JavascriptInterface
+        public String desktopDbAvailable() {
+            return LauncherDbEditor.available(act) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String desktopDbExperimental() {
+            return act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("desktop_db_experiment", false) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public void setDesktopDbExperimental(String enabled) {
+            act.getSharedPreferences("tafei_app", 0).edit()
+                .putBoolean("desktop_db_experiment", "1".equals(enabled)).apply();
+        }
+
+        @JavascriptInterface
         public String accessibilityReady() {
             return SpiritAccessibilityService.isReady() ? "1" : "0";
         }
@@ -243,6 +265,45 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public String desktopEatEvent() {
             return SpiritAccessibilityService.lastEvent();
+        }
+
+        @JavascriptInterface
+        public String desktopActionResult() {
+            return SpiritAccessibilityService.lastAction();
+        }
+
+        @JavascriptInterface
+        public String desktopActionEventId() {
+            return String.valueOf(SpiritAccessibilityService.lastActionId());
+        }
+
+        @JavascriptInterface
+        public String desktopAction(String type, String payload) {
+            if (!SpiritAccessibilityService.isReady()) {
+                openAccessibility();
+                return "accessibility-off";
+            }
+            if (!"move".equals(type) && !"swap".equals(type) && !"folder".equals(type)) {
+                return "bad-type";
+            }
+            boolean db = act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("desktop_db_experiment", false);
+            String result = SpiritAccessibilityService.startDesktopAction(type, payload, db);
+            if ("started".equals(result)) {
+                act.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent home = new Intent(Intent.ACTION_MAIN);
+                        home.addCategory(Intent.CATEGORY_HOME);
+                        home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        try {
+                            act.startActivity(home);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                });
+            }
+            return result;
         }
 
         @JavascriptInterface

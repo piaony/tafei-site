@@ -11,6 +11,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +35,11 @@ public class SpiritAccessibilityService extends AccessibilityService {
     private static volatile int lastEventX = 0;
     private static volatile int lastEventY = 0;
     private static volatile long lastEventId = 0L;
+    private static volatile String lastActionState = "idle";
+    private static volatile String lastActionType = "";
+    private static volatile String lastActionDetail = "";
+    private static volatile long lastActionId = 0L;
+    private static volatile boolean actionRunning = false;
 
     public static String lastResult() {
         return lastResult;
@@ -44,6 +53,21 @@ public class SpiritAccessibilityService extends AccessibilityService {
 
     public static long lastEventId() {
         return lastEventId;
+    }
+
+    public static String lastAction() {
+        return lastActionState + "|" + lastActionType + "|" + lastActionDetail + "|" + lastActionId;
+    }
+
+    public static long lastActionId() {
+        return lastActionId;
+    }
+
+    private static void reportAction(String state, String type, String detail) {
+        lastActionState = state;
+        lastActionType = type == null ? "" : type.replace("|", " ");
+        lastActionDetail = detail == null ? "" : detail.replace("|", " ");
+        lastActionId++;
     }
 
     private static void report(String state, String label, String detail) {
@@ -72,6 +96,11 @@ public class SpiritAccessibilityService extends AccessibilityService {
     private int scanLeft = 0;
     private int scanRight = 0;
     private int navOffset = 0;
+    private int actionCols = 4;
+    private int actionRows = 6;
+    private int actionScanLimit = 6;
+    private int actionScanLeft = 0;
+    private int actionScanRight = 0;
 
     @Override
     protected void onServiceConnected() {
@@ -112,6 +141,671 @@ public class SpiritAccessibilityService extends AccessibilityService {
             }
         }, 800L);
         return "started";
+    }
+
+    private static final class ActionItem {
+        final int id;
+        final String label;
+        final String pkg;
+        final int screen;
+        final int cellX;
+        final int cellY;
+
+        ActionItem(JSONObject json) {
+            this(json.optInt("id", -1), json.optString("label", ""), json.optString("package", ""),
+                json.optInt("screen", 0), json.optInt("cellX", 0), json.optInt("cellY", 0));
+        }
+
+        ActionItem(int id, String label, String pkg, int screen, int cellX, int cellY) {
+            this.id = id;
+            this.label = label == null ? "" : label;
+            this.pkg = pkg == null ? "" : pkg;
+            this.screen = screen;
+            this.cellX = cellX;
+            this.cellY = cellY;
+        }
+    }
+
+    private static final class ActionTarget {
+        int screen = 0;
+        int row = 0;
+        int col = 0;
+        String folderTitle = "";
+        String folderName = "";
+        final List<int[]> emptyCells = new ArrayList<>();
+    }
+
+    private interface ScanCallback {
+        void found(Rect bounds);
+        void failed(String detail);
+    }
+
+    private interface DragCallback {
+        void done(boolean ok);
+    }
+
+    public static String startDesktopAction(String type, String payload, boolean dbEnabled) {
+        SpiritAccessibilityService service = instance;
+        if (service == null) return "no-service";
+        if (actionRunning) return "busy";
+        try {
+            JSONObject root = new JSONObject(payload == null ? "{}" : payload);
+            JSONArray array = root.optJSONArray("items");
+            if (array == null || array.length() == 0) return "no-items";
+            List<ActionItem> items = new ArrayList<>();
+            for (int i = 0; i < array.length(); i++) items.add(new ActionItem(array.getJSONObject(i)));
+            ActionTarget target = new ActionTarget();
+            JSONObject targetJson = root.optJSONObject("target");
+            if (targetJson != null) {
+                target.screen = targetJson.optInt("screen", items.get(0).screen);
+                target.row = targetJson.optInt("row", 0);
+                target.col = targetJson.optInt("col", 0);
+            }
+            JSONObject folder = root.optJSONObject("targetFolder");
+            if (folder != null) {
+                target.folderTitle = folder.optString("title", "");
+            }
+            target.folderName = root.optString("folderName", "");
+            JSONArray empties = root.optJSONArray("emptyCells");
+            if (empties != null) {
+                for (int i = 0; i < empties.length(); i++) {
+                    JSONObject cell = empties.getJSONObject(i);
+                    target.emptyCells.add(new int[]{cell.optInt("row", -1), cell.optInt("col", -1)});
+                }
+            }
+            service.actionCols = Math.max(2, root.optInt("cols", 4));
+            service.actionRows = Math.max(2, root.optInt("rows", 6));
+            actionRunning = true;
+            reportAction("running", type, "start");
+            final String actionType = type;
+            final List<ActionItem> actionItems = items;
+            final ActionTarget actionTarget = target;
+            final boolean database = dbEnabled;
+            service.handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if ("move".equals(actionType)) service.runMove(actionItems, actionTarget, database);
+                        else if ("swap".equals(actionType)) service.runSwap(actionItems, actionTarget, database);
+                        else if ("folder".equals(actionType)) service.runFolder(actionItems, actionTarget, database);
+                        else finishAction(false, actionType, "unknown-action");
+                    } catch (Throwable t) {
+                        finishAction(false, actionType, "exception:" + t.getMessage());
+                    }
+                }
+            }, 800L);
+            return "started";
+        } catch (Throwable t) {
+            actionRunning = false;
+            reportAction("failed", type, "bad-payload");
+            return "bad-payload";
+        }
+    }
+
+    private void finishAction(boolean success, String type, String detail) {
+        actionRunning = false;
+        reportAction(success ? "success" : "failed", type, detail);
+        try {
+            toast(success ? "桌面管家：完成" : "桌面管家：" + detail);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private void runMove(List<ActionItem> items, ActionTarget target, boolean database) {
+        if (items.size() != 1) {
+            finishAction(false, "move", "need-one-item");
+            return;
+        }
+        ActionItem item = items.get(0);
+        if (item.screen == target.screen) {
+            locateItem(item, new ScanCallback() {
+                @Override
+                public void found(Rect bounds) {
+                    int[] to = cellCenter(target.row, target.col);
+                    dragAsync(bounds.centerX(), bounds.centerY(), to[0], to[1], new DragCallback() {
+                        @Override
+                        public void done(boolean ok) {
+                            if (!ok) {
+                                if (database) dbMove(item, target, "move-db");
+                                else finishAction(false, "move", "drag-failed");
+                                return;
+                            }
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    verifyMove(item, target);
+                                }
+                            }, 1100L);
+                        }
+                    });
+                }
+
+                @Override
+                public void failed(String detail) {
+                    if (database) dbMove(item, target, "move-db");
+                    else finishAction(false, "move", detail);
+                }
+            });
+            return;
+        }
+        if (database) {
+            dbMove(item, target, "move-db");
+        } else {
+            finishAction(false, "move", "cross-page-needs-db");
+        }
+    }
+
+    private void dbMove(ActionItem item, ActionTarget target, String detail) {
+        if (item.id <= 0) {
+            finishAction(false, "move", "missing-id");
+            return;
+        }
+        List<LauncherDbEditor.Update> updates = new ArrayList<>();
+        updates.add(new LauncherDbEditor.Update(item.id, target.screen, target.col, target.row));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean ok = LauncherDbEditor.writePositions(getApplicationContext(), updates);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        finishAction(ok, "move", ok ? detail : "db-write-failed");
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void verifyMove(ActionItem item, ActionTarget target) {
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        AccessibilityNodeInfo node = findLabel(root, item.label, 0);
+        if (node == null) {
+            finishAction(false, "move", "move-not-visible");
+            return;
+        }
+        Rect bounds = new Rect();
+        node.getBoundsInScreen(bounds);
+        int[] to = cellCenter(target.row, target.col);
+        int dx = Math.abs(bounds.centerX() - to[0]);
+        int dy = Math.abs(bounds.centerY() - to[1]);
+        finishAction(dx < dp(90) && dy < dp(90), "move", dx < dp(90) && dy < dp(90) ? "done" : "wrong-cell");
+    }
+
+    private void locateItem(ActionItem item, ScanCallback callback) {
+        actionScanLeft = 0;
+        actionScanRight = 0;
+        actionScanLimit = Math.max(6, Math.min(9, item.screen + 2));
+        scanLabel(item.label, callback);
+    }
+
+    private void locateLabel(String label, int expectedScreen, ScanCallback callback) {
+        actionScanLeft = 0;
+        actionScanRight = 0;
+        actionScanLimit = Math.max(6, Math.min(9, Math.max(0, expectedScreen) + 2));
+        scanLabel(label, callback);
+    }
+
+    private void scanLabel(String label, ScanCallback callback) {
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) {
+            callback.failed("no-root");
+            return;
+        }
+        CharSequence pkg = root.getPackageName();
+        if (pkg == null || !"com.android.launcher".contentEquals(pkg)) {
+            callback.failed("not-launcher");
+            return;
+        }
+        AccessibilityNodeInfo target = findLabel(root, label, 0);
+        if (target != null) {
+            Rect bounds = new Rect();
+            target.getBoundsInScreen(bounds);
+            if (bounds.width() > 20 && bounds.height() > 20) {
+                callback.found(bounds);
+            } else {
+                callback.failed("invalid-bounds");
+            }
+            return;
+        }
+        if (actionScanLeft < actionScanLimit) {
+            if (swipeLeft()) {
+                actionScanLeft++;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scanLabel(label, callback);
+                    }
+                }, 520L);
+                return;
+            }
+        }
+        if (actionScanRight < actionScanLimit * 2) {
+            if (swipeRight()) {
+                actionScanRight++;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scanLabel(label, callback);
+                    }
+                }, 520L);
+                return;
+            }
+        }
+        callback.failed("not-found");
+    }
+
+    private int[] cellCenter(int row, int col) {
+        int w = getResources().getDisplayMetrics().widthPixels;
+        int h = getResources().getDisplayMetrics().heightPixels;
+        int x = (int) ((col + 0.5f) * w / Math.max(1, actionCols));
+        int y = (int) ((row + 0.5f) * h / Math.max(1, actionRows));
+        return new int[]{Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))};
+    }
+
+    private void dragAsync(int x1, int y1, int x2, int y2, DragCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean ok = false;
+                try {
+                    RootBridge.Result result = RootBridge.run(
+                        "input draganddrop " + x1 + " " + y1 + " " + x2 + " " + y2 + " 1200", 12000L);
+                    String output = result.output == null ? "" : result.output.toLowerCase();
+                    ok = result.exitCode == 0
+                        && !output.contains("unknown")
+                        && !output.contains("error")
+                        && !output.contains("usage");
+                } catch (Throwable ignored) {
+                }
+                final boolean rootOk = ok;
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (rootOk) {
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    callback.done(true);
+                                }
+                            }, 1100L);
+                            return;
+                        }
+                        boolean queued = dispatchDrag(x1, y1, x2, y2);
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.done(queued);
+                            }
+                        }, 1350L);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private boolean dispatchDrag(int x1, int y1, int x2, int y2) {
+        Path path = new Path();
+        path.moveTo(x1, y1);
+        path.lineTo(x2, y2);
+        GestureDescription.StrokeDescription stroke =
+            new GestureDescription.StrokeDescription(path, 0L, 1200L);
+        GestureDescription gesture = new GestureDescription.Builder()
+            .addStroke(stroke)
+            .build();
+        return dispatchGesture(gesture, null, null);
+    }
+
+    private void runSwap(List<ActionItem> items, ActionTarget target, boolean database) {
+        if (items.size() != 2) {
+            finishAction(false, "swap", "need-two-items");
+            return;
+        }
+        ActionItem a = items.get(0);
+        ActionItem b = items.get(1);
+        if (a.screen != b.screen) {
+            if (database) {
+                dbSwap(a, b);
+            } else {
+                finishAction(false, "swap", "cross-page-needs-db");
+            }
+            return;
+        }
+        locateItem(a, new ScanCallback() {
+            @Override
+            public void found(Rect bounds) {
+                AccessibilityNodeInfo root = getRootInActiveWindow();
+                AccessibilityNodeInfo other = findLabel(root, b.label, 0);
+                if (other == null) {
+                    finishAction(false, "swap", "second-not-on-page");
+                    return;
+                }
+                Rect otherBounds = new Rect();
+                other.getBoundsInScreen(otherBounds);
+                if (otherBounds.width() < 20 || otherBounds.height() < 20) {
+                    finishAction(false, "swap", "second-bounds");
+                    return;
+                }
+                int[] temp = emptyCell(a.cellX, a.cellY, b.cellX, b.cellY, target.emptyCells);
+                if (temp == null) {
+                    finishAction(false, "swap", "no-empty-cell");
+                    return;
+                }
+                int[] tempPoint = cellCenter(temp[0], temp[1]);
+                int ax = bounds.centerX();
+                int ay = bounds.centerY();
+                int bx = otherBounds.centerX();
+                int by = otherBounds.centerY();
+                dragAsync(ax, ay, tempPoint[0], tempPoint[1], new DragCallback() {
+                    @Override
+                    public void done(boolean ok) {
+                        if (!ok) {
+                            if (database) dbSwap(a, b);
+                            else finishAction(false, "swap", "first-drag-failed");
+                            return;
+                        }
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                dragSecondAndFinish(a, b, ax, ay, bx, by, target, database);
+                            }
+                        }, 1000L);
+                    }
+                });
+            }
+
+            @Override
+            public void failed(String detail) {
+                if (database) dbSwap(a, b);
+                else finishAction(false, "swap", detail);
+            }
+        });
+    }
+
+    private void dragSecondAndFinish(ActionItem a, ActionItem b, int ax, int ay, int bx, int by, ActionTarget target, boolean database) {
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        AccessibilityNodeInfo nodeB = findLabel(root, b.label, 0);
+        if (nodeB == null) {
+            if (database) dbSwap(a, b);
+            else finishAction(false, "swap", "second-disappeared");
+            return;
+        }
+        Rect bBounds = new Rect();
+        nodeB.getBoundsInScreen(bBounds);
+        dragAsync(bBounds.centerX(), bBounds.centerY(), ax, ay, new DragCallback() {
+            @Override
+            public void done(boolean ok) {
+                if (!ok) {
+                    if (database) dbSwap(a, b);
+                    else finishAction(false, "swap", "second-drag-failed");
+                    return;
+                }
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        AccessibilityNodeInfo root2 = getRootInActiveWindow();
+                        AccessibilityNodeInfo nodeA = findLabel(root2, a.label, 0);
+                        if (nodeA == null) {
+                            if (database) dbSwap(a, b);
+                            else finishAction(false, "swap", "first-disappeared");
+                            return;
+                        }
+                        Rect aBounds = new Rect();
+                        nodeA.getBoundsInScreen(aBounds);
+                        dragAsync(aBounds.centerX(), aBounds.centerY(), bx, by, new DragCallback() {
+                            @Override
+                            public void done(boolean ok2) {
+                                if (!ok2) {
+                                    if (database) dbSwap(a, b);
+                                    else finishAction(false, "swap", "third-drag-failed");
+                                    return;
+                                }
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        verifySwap(a, b, bx, by, ax, ay);
+                                    }
+                                }, 1100L);
+                            }
+                        });
+                    }
+                }, 1000L);
+            }
+        });
+    }
+
+    private int[] emptyCell(int ax, int ay, int bx, int by, List<int[]> cells) {
+        for (int[] cell : cells) {
+            if (cell == null || cell.length < 2) continue;
+            if (cell[1] == ax && cell[0] == ay) continue;
+            if (cell[1] == bx && cell[0] == by) continue;
+            return cell;
+        }
+        return null;
+    }
+
+    private void verifySwap(ActionItem a, ActionItem b, int ax, int ay, int bx, int by) {
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        AccessibilityNodeInfo nodeA = findLabel(root, a.label, 0);
+        AccessibilityNodeInfo nodeB = findLabel(root, b.label, 0);
+        if (nodeA == null || nodeB == null) {
+            finishAction(false, "swap", "verify-missing");
+            return;
+        }
+        Rect ra = new Rect();
+        Rect rb = new Rect();
+        nodeA.getBoundsInScreen(ra);
+        nodeB.getBoundsInScreen(rb);
+        boolean ok = Math.abs(ra.centerX() - bx) < dp(90) && Math.abs(ra.centerY() - by) < dp(90)
+            && Math.abs(rb.centerX() - ax) < dp(90) && Math.abs(rb.centerY() - ay) < dp(90);
+        finishAction(ok, "swap", ok ? "done" : "wrong-cells");
+    }
+
+    private void dbSwap(ActionItem a, ActionItem b) {
+        if (a.id <= 0 || b.id <= 0) {
+            finishAction(false, "swap", "missing-id");
+            return;
+        }
+        List<LauncherDbEditor.Update> updates = new ArrayList<>();
+        updates.add(new LauncherDbEditor.Update(a.id, b.screen, b.cellX, b.cellY));
+        updates.add(new LauncherDbEditor.Update(b.id, a.screen, a.cellX, a.cellY));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean ok = LauncherDbEditor.writePositions(getApplicationContext(), updates);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        finishAction(ok, "swap", ok ? "db" : "db-write-failed");
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void runFolder(List<ActionItem> items, ActionTarget target, boolean database) {
+        if (items.size() < 2) {
+            finishAction(false, "folder", "need-two-items");
+            return;
+        }
+        boolean allSamePage = true;
+        for (ActionItem item : items) if (item.screen != target.screen) allSamePage = false;
+        if (!allSamePage && !database) {
+            finishAction(false, "folder", "cross-page-needs-db");
+            return;
+        }
+        if (allSamePage) {
+            if (!target.folderTitle.isEmpty()) {
+                locateLabel(target.folderTitle, target.screen, new ScanCallback() {
+                    @Override
+                    public void found(Rect bounds) {
+                        dragItemsIntoFolder(items, 0, bounds.centerX(), bounds.centerY());
+                    }
+
+                    @Override
+                    public void failed(String detail) {
+                        finishAction(false, "folder", "folder-not-found");
+                    }
+                });
+                return;
+            }
+            locateItem(items.get(0), new ScanCallback() {
+                @Override
+                public void found(Rect bounds) {
+                    int[] to = cellCenter(target.row, target.col);
+                    dragAsync(bounds.centerX(), bounds.centerY(), to[0], to[1], new DragCallback() {
+                        @Override
+                        public void done(boolean ok) {
+                            if (!ok) {
+                                finishAction(false, "folder", "host-drag-failed");
+                                return;
+                            }
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dragItemsIntoFolder(items, 1, to[0], to[1]);
+                                }
+                            }, 1100L);
+                        }
+                    });
+                }
+
+                @Override
+                public void failed(String detail) {
+                    finishAction(false, "folder", detail);
+                }
+            });
+            return;
+        }
+
+        // 跨页文件夹：先把需要跨页的图标搬到目标页的空位，再在目标页做拖拽。
+        List<LauncherDbEditor.Update> updates = new ArrayList<>();
+        List<ActionItem> staged = new ArrayList<>();
+        List<int[]> used = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            ActionItem item = items.get(i);
+            boolean host = target.folderTitle.isEmpty() && i == 0;
+            if (host) {
+                if (item.id <= 0) {
+                    finishAction(false, "folder", "missing-id");
+                    return;
+                }
+                if (item.screen != target.screen || item.cellX != target.col || item.cellY != target.row) {
+                    updates.add(new LauncherDbEditor.Update(item.id, target.screen, target.col, target.row));
+                }
+                staged.add(new ActionItem(item.id, item.label, item.pkg, target.screen, target.col, target.row));
+                continue;
+            }
+            if (item.screen == target.screen) {
+                staged.add(item);
+                continue;
+            }
+            if (item.id <= 0) {
+                finishAction(false, "folder", "missing-id");
+                return;
+            }
+            int[] cell = nextEmptyCell(target, used);
+            if (cell == null) {
+                finishAction(false, "folder", "not-enough-empty-cells");
+                return;
+            }
+            used.add(cell);
+            updates.add(new LauncherDbEditor.Update(item.id, target.screen, cell[1], cell[0]));
+            staged.add(new ActionItem(item.id, item.label, item.pkg, target.screen, cell[1], cell[0]));
+        }
+        if (updates.isEmpty()) {
+            runFolder(staged, target, false);
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean ok = LauncherDbEditor.writePositions(getApplicationContext(), updates);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!ok) {
+                            finishAction(false, "folder", "db-write-failed");
+                            return;
+                        }
+                        runFolderAfterDb(staged, target);
+                    }
+                }, 2400L);
+            }
+        }).start();
+    }
+
+    private int[] nextEmptyCell(ActionTarget target, List<int[]> used) {
+        for (int[] cell : target.emptyCells) {
+            if (cell == null || cell.length < 2) continue;
+            if (cell[0] == target.row && cell[1] == target.col) continue;
+            boolean hit = false;
+            for (int[] u : used) if (u[0] == cell[0] && u[1] == cell[1]) hit = true;
+            if (!hit) return cell;
+        }
+        return null;
+    }
+
+    private void runFolderAfterDb(List<ActionItem> items, ActionTarget target) {
+        if (!target.folderTitle.isEmpty()) {
+            locateLabel(target.folderTitle, target.screen, new ScanCallback() {
+                @Override
+                public void found(Rect bounds) {
+                    dragItemsIntoFolder(items, 0, bounds.centerX(), bounds.centerY());
+                }
+
+                @Override
+                public void failed(String detail) {
+                    finishAction(false, "folder", "folder-not-found-after-db");
+                }
+            });
+            return;
+        }
+        locateItem(items.get(0), new ScanCallback() {
+            @Override
+            public void found(Rect bounds) {
+                int[] to = cellCenter(target.row, target.col);
+                // 宿主已经被数据库放到目标格；直接把其余应用拖到目标格。
+                dragItemsIntoFolder(items, 1, to[0], to[1]);
+            }
+
+            @Override
+            public void failed(String detail) {
+                finishAction(false, "folder", detail);
+            }
+        });
+    }
+
+    private void dragItemsIntoFolder(List<ActionItem> items, int index, int tx, int ty) {
+        if (index >= items.size()) {
+            finishAction(true, "folder", "done");
+            return;
+        }
+        ActionItem item = items.get(index);
+        locateItem(item, new ScanCallback() {
+            @Override
+            public void found(Rect bounds) {
+                dragAsync(bounds.centerX(), bounds.centerY(), tx, ty, new DragCallback() {
+                    @Override
+                    public void done(boolean ok) {
+                        if (!ok) {
+                            finishAction(false, "folder", "item-drag-failed");
+                            return;
+                        }
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                dragItemsIntoFolder(items, index + 1, tx, ty);
+                            }
+                        }, 1000L);
+                    }
+                });
+            }
+
+            @Override
+            public void failed(String detail) {
+                finishAction(false, "folder", detail);
+            }
+        });
     }
 
     private void doEat(String label, int screen) {
@@ -457,6 +1151,10 @@ public class SpiritAccessibilityService extends AccessibilityService {
 
     private boolean contains(CharSequence value, String needle) {
         return value != null && value.toString().contains(needle);
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void toast(String msg) {
