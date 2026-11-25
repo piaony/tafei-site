@@ -109,6 +109,10 @@ public class SpiritAccessibilityService extends AccessibilityService {
         return instance != null;
     }
 
+    public static String startDesktopAction(String action, String payload) {
+        return SpiritDesktopActions.start(instance, action, payload);
+    }
+
     public static String eatIcon(String label, String pkg, int screen, int cellX, int cellY) {
         SpiritAccessibilityService service = instance;
         if (service == null) return "no-service";

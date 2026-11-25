@@ -817,7 +817,7 @@ public class SpiritOverlayService extends Service {
                 eatY = y;
             }
             eatFoundShown = false;
-            if (detail.startsWith("db-")) {
+            if (detail.startsWith("db-") || detail.startsWith("access-")) {
                 if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
                     eatEffectView.setVisibility(View.VISIBLE);
                     eatEffectView.playDesktopAction(eatX, eatY, detail, label);
@@ -866,6 +866,10 @@ public class SpiritOverlayService extends Service {
         if (detail.startsWith("db-verify-failed")) return "写完后校验没通过，已经回滚。";
         if (detail.startsWith("db-rollback-failed")) return "回滚也失败了，先别动桌面，告诉我。";
         if (detail.startsWith("db-")) return "数据库操作没完成，桌面已尽量恢复。";
+        if (detail.startsWith("access-")) return "无障碍拖动没完成，桌面可能没变化。";
+        if ("cross-page-needs-db".equals(detail)) return "跨页操作需要先开启实验性数据库写入。";
+        if (detail.startsWith("access-not-found")) return "当前页没扫到它，先把桌面滑到目标那一页再试。";
+        if ("access-not-launcher".equals(detail)) return "先回到桌面，瑶才敢伸手。";
         if ("long-press-failed".equals(detail)) return "长按没成功，再试一次。";
         if ("root-still-open".equals(detail)) return "移除弹窗还在，再试一次。";
         return "没抓到，再试一次。";

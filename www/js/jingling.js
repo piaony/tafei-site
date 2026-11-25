@@ -1332,6 +1332,24 @@
     }, 120);
   }
 
+  function dmEmptyCells(screen) {
+    var size = targetGridSize();
+    var used = {};
+    dmAllIcons().forEach(function (row) {
+      if (Number(row.screen) === Number(screen)) used[Number(row.cellY) + ':' + Number(row.cellX)] = true;
+    });
+    dmFolders().forEach(function (row) {
+      if (Number(row.screen) === Number(screen)) used[Number(row.cellY) + ':' + Number(row.cellX)] = true;
+    });
+    var out = [];
+    for (var row = 0; row < size.rows; row++) {
+      for (var col = 0; col < size.cols; col++) {
+        if (!used[row + ':' + col]) out.push({row: row, col: col});
+      }
+    }
+    return out;
+  }
+
   function ddText(detail) {
     if (!detail) return '操作失败，请重试';
     if (detail.indexOf('db-no-path') >= 0 || detail.indexOf('no-path') >= 0) return '没有读到 launcher.db，请先扫描桌面';
@@ -1341,6 +1359,12 @@
     if (detail.indexOf('target-occupied') >= 0) return '目标格已有应用，不能直接放进去';
     if (detail.indexOf('folder-item-is-folder') >= 0) return '选中的项目里包含文件夹，暂不支持';
     if (detail.indexOf('db-off') >= 0) return '实验性数据库写入未开启';
+    if (detail.indexOf('cross-page') >= 0) return '跨页操作需要打开实验性数据库写入（默认关闭）';
+    if (detail.indexOf('access-not-launcher') >= 0) return '先回到桌面再操作';
+    if (detail.indexOf('access-not-found') >= 0) return '当前页没扫到这个应用，请先把桌面滑到它所在页';
+    if (detail.indexOf('access-drag-failed') >= 0) return '拖动没有完成，桌面可能没变化';
+    if (detail.indexOf('access-folder-drag-failed') >= 0) return '文件夹拖动没有完成';
+    if (detail.indexOf('no-empty-cell') >= 0) return '这一页没有空位做交换中转，请先腾一个空位';
     if (detail.indexOf('busy') >= 0) return '上一项操作还在执行';
     if (detail.indexOf('not-folder') >= 0) return '目标不是文件夹';
     if (detail.indexOf('unknown-action') >= 0) return '不支持的操作类型';
@@ -1349,19 +1373,24 @@
 
   function executeDbAction(action, items, target) {
     if (!items || !items.length) { showActionOut('没有选中应用', true); return; }
-    if (String(nativeOverlayCall('launcherDbWriteEnabled', '0')) !== '1') {
-      showActionOut('移动、交换、文件夹需要先开启「实验性数据库写入」；默认关闭，不会偷改桌面。', true);
-      toast('请先开启实验性数据库写入。', true);
-      var sw = $('launcherDbSwitch');
-      if (sw) sw.scrollIntoView({behavior: 'smooth', block: 'center'});
+    var label = items.map(dmLabel).join(' / ');
+    var dbOn = String(nativeOverlayCall('launcherDbWriteEnabled', '0')) === '1';
+    if (!dbOn && String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
+      showActionOut('同页拖动需要先开启无障碍服务；打开实验性数据库写入也可以。', true);
+      toast('请先开启无障碍服务。', true);
       return;
     }
-    var label = items.map(dmLabel).join(' / ');
-    var confirmText = action === 'folder'
-      ? '把「' + label + '」做成文件夹？写入前会自动备份 launcher.db，失败自动回滚。'
-      : (action === 'swap'
-        ? '交换「' + label + '」的位置？写入前会自动备份 launcher.db，失败自动回滚。'
-        : '把「' + label + '」移到目标位置？写入前会自动备份 launcher.db，失败自动回滚。');
+    var confirmText = dbOn
+      ? (action === 'folder'
+        ? '把「' + label + '」做成文件夹？会写入 launcher.db，写入前自动备份，失败自动回滚。'
+        : (action === 'swap'
+          ? '交换「' + label + '」的位置？会写入 launcher.db，写入前自动备份，失败自动回滚。'
+          : '把「' + label + '」移到目标位置？会写入 launcher.db，写入前自动备份，失败自动回滚。'))
+      : (action === 'folder'
+        ? '把「' + label + '」拖成一个文件夹？只做同页无障碍拖动，不写 launcher.db。'
+        : (action === 'swap'
+          ? '交换「' + label + '」的位置？只做同页无障碍拖动，不写 launcher.db。'
+          : '把「' + label + '」拖到目标位置？只做同页无障碍拖动，不写 launcher.db。'));
     if (!window.confirm(confirmText)) return;
     var payload = {
       items: items.map(function (item) {
@@ -1376,12 +1405,21 @@
           itemType: item.itemType
         };
       }),
-      target: target || null
+      target: target || null,
+      cols: targetGridSize().cols,
+      rows: targetGridSize().rows,
+      emptyCells: dmEmptyCells(target ? target.screen : items[0].screen)
     };
     dmState.busy = true;
     renderDesktopDock();
-    showActionOut('正在写入并校验…');
+    showActionOut(dbOn ? '正在备份并写入 launcher.db…' : '正在用无障碍拖动，别碰屏幕…');
     var result = String(nativeOverlayCall('desktopAction', 'error', action, JSON.stringify(payload)));
+    if (result === 'accessibility-off') {
+      dmState.busy = false;
+      renderDesktopDock();
+      showActionOut('无障碍服务没开启，请先开启「挞飞桌面互动」', true);
+      return;
+    }
     if (result === 'db-off') {
       dmState.busy = false;
       renderDesktopDock();
@@ -1407,7 +1445,7 @@
       var state = parts[0] || 'idle';
       var detail = parts[2] || '';
       if (state === 'running') {
-        showActionOut(detail.indexOf('db-backup') >= 0 ? '正在备份 launcher.db…' : '正在写入并重启桌面校验…');
+        showActionOut(detail.indexOf('db-backup') >= 0 ? '正在备份 launcher.db…' : (detail.indexOf('db-') === 0 ? '正在写入并重启桌面校验…' : '正在拖动图标…'));
         return;
       }
       clearInterval(timer);
@@ -1532,7 +1570,7 @@
     });
     if (action === 'move' && item) { toast('这个位置已有应用，请选空位。', true); return; }
     if (action === 'folder' && item && item.itemType !== 2) { toast('这个位置是应用，不是文件夹；请选空位或已有文件夹。', true); return; }
-    var target = {screen: screen, cellX: cellX, cellY: cellY, folderId: item && item.itemType === 2 ? item.rowId : -1};
+    var target = {screen: screen, cellX: cellX, cellY: cellY, folderId: item && item.itemType === 2 ? item.rowId : -1, title: item && item.itemType === 2 ? item.title : ''};
     var nameInput = $('desktopFolderName');
     var name = nameInput ? nameInput.value.trim() : '';
     if (name) target.name = name;
@@ -1666,8 +1704,8 @@
     var enabled = String(nativeOverlayCall('launcherDbWriteEnabled', '0')) === '1';
     box.checked = enabled;
     if (note) note.textContent = enabled
-      ? '已开启。每次移动/交换/文件夹都会先备份 launcher.db，写入后重启桌面校验，失败自动回滚。'
-      : '默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。';
+      ? '已开启。移动/交换/文件夹优先写 launcher.db：每次先备份，写完重启桌面校验，失败自动回滚。'
+      : '默认关闭。关闭时用无障碍拖动完成同页移动/交换/文件夹，不写 launcher.db；跨页操作才需要打开它。';
     box.addEventListener('change', function () {
       if (box.checked) {
         var ok = window.confirm('实验性数据库写入会直接修改 ColorOS 桌面数据库。\n每次操作前会自动备份 launcher.db，失败会尝试回滚，但仍可能导致桌面重启或位置错乱。\n确认开启？');
@@ -1677,8 +1715,8 @@
       var on = result === '1';
       box.checked = on;
       if (note) note.textContent = on
-        ? '已开启。每次移动/交换/文件夹都会先备份 launcher.db，写入后重启桌面校验，失败自动回滚。'
-        : '默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。';
+        ? '已开启。移动/交换/文件夹优先写 launcher.db：每次先备份，写完重启桌面校验，失败自动回滚。'
+        : '默认关闭。关闭时用无障碍拖动完成同页移动/交换/文件夹，不写 launcher.db；跨页操作才需要打开它。';
       if (result === 'backup-failed') toast('备份 launcher.db 失败，开关没有开启；请先扫描桌面并确认 Root。', true);
       else toast(on ? '实验性数据库写入已开启，已完成 launcher.db 备份。' : '实验性数据库写入已关闭。', !on);
     });

@@ -181,7 +181,7 @@
         <input type="search" id="desktopSearch" placeholder="搜索应用名或包名" autocomplete="off">
         <label class="dm-db-toggle"><input type="checkbox" id="launcherDbSwitch"> 实验性数据库写入</label>
        </div>
-       <p class="dm-db-note" id="desktopDbNote">默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。</p>
+       <p class="dm-db-note" id="desktopDbNote">默认关闭。关闭时用无障碍拖动完成同页移动/交换/文件夹，不写 launcher.db；跨页操作才需要打开实验写入。</p>
        <div class="dm-page-tabs" id="desktopPageTabs"></div>
        <div class="dm-grid" id="desktopIconList"></div>
        <div class="dm-empty" id="desktopEmpty" hidden>没有匹配的应用</div>
@@ -200,7 +200,7 @@
        </div>
        <div class="dm-action-out" id="desktopActionOut" hidden></div>
        <details class="dm-diag"><summary>诊断信息</summary><div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div></details>
-       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。移动/交换/文件夹默认关闭数据库写入。</p>
+       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。桌面管家默认用无障碍拖动，不写数据库；实验开关只给跨页和兜底用。</p>
 
        <div class="dm-modal" id="desktopTargetModal" hidden>
         <div class="dm-modal-card">
@@ -208,7 +208,7 @@
          <p class="dm-modal-note">行列从 1 开始；绿色为空位，金色为已有文件夹，灰色为已占用应用。</p>
          <div class="dm-page-tabs" id="desktopTargetPageTabs"></div>
          <div class="dm-target-grid" id="desktopTargetGrid"></div>
-         <label class="dm-folder-name" id="desktopFolderNameWrap" hidden>文件夹名 <input type="text" id="desktopFolderName" placeholder="留空自动命名"></label>
+         <label class="dm-folder-name" id="desktopFolderNameWrap" hidden>文件夹名 <input type="text" id="desktopFolderName" placeholder="留空自动命名（自定义名仅数据库实验模式）"></label>
          <p class="dm-target-hint" id="desktopTargetHint">点一个空位</p>
         </div>
        </div>
@@ -319,7 +319,7 @@
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
 <script src="js/spirit-core.js?v=15"></script>
-<script src="js/jingling.js?v=34"></script>
+<script src="js/jingling.js?v=35"></script>
 <script src="js/spirit-growth.js" defer></script>
 </body>
 </html>

@@ -298,7 +298,14 @@ public class MainActivity extends BridgeActivity {
 
         @JavascriptInterface
         public String desktopAction(String action, String payload) {
-            return LauncherDbOps.start(act, action, payload);
+            if (LauncherDbOps.isEnabled(act)) {
+                return LauncherDbOps.start(act, action, payload);
+            }
+            if (!SpiritAccessibilityService.isReady()) {
+                openAccessibility();
+                return "accessibility-off";
+            }
+            return SpiritAccessibilityService.startDesktopAction(action, payload);
         }
 
         @JavascriptInterface
