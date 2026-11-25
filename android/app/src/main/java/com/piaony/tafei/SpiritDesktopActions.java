@@ -373,7 +373,7 @@ final class SpiritDesktopActions {
                 Rect icon = iconRect(service, bounds);
                 final int[] to = cellPoint(service, target, icon, host.cellX, host.cellY,
                     target.row, target.col);
-                dragFolderStep(service, items, 0, to[0], to[1]);
+                dragFolderStep(service, items, target, 0, to[0], to[1]);
             }
 
             @Override
@@ -384,7 +384,7 @@ final class SpiritDesktopActions {
     }
 
     private static void dragFolderStep(SpiritAccessibilityService service, List<ActionItem> items,
-                                       int index, int tx, int ty) {
+                                       ActionTarget target, int index, int tx, int ty) {
         if (index >= items.size()) {
             finish("folder", items.get(0).label, "access-folder", tx, ty, items.get(0).pkg);
             return;
@@ -393,7 +393,7 @@ final class SpiritDesktopActions {
         locate(service, item.label, new FindCallback() {
             @Override
             public void found(Rect bounds) {
-                Rect icon = iconRect(service, bounds);
+                Rect icon = bounds;
                 drag(service, icon.centerX(), icon.centerY(), tx, ty, new DragCallback() {
                     @Override
                     public void done(boolean ok) {
@@ -407,7 +407,7 @@ final class SpiritDesktopActions {
                                 if (index == 0 && items.size() > 1) {
                                     verifyFolder(service, items, target, tx, ty);
                                 } else {
-                                    dragFolderStep(service, items, index + 1, tx, ty);
+                                    dragFolderStep(service, items, target, index + 1, tx, ty);
                                 }
                             }
                         }, 1150L);
@@ -448,7 +448,7 @@ final class SpiritDesktopActions {
                 MAIN.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (ok) dragFolderStep(service, items, 1, tx, ty);
+                        if (ok) dragFolderStep(service, items, target, 1, tx, ty);
                         else fail("folder", items.get(0).label, "access-folder-not-created", tx, ty);
                     }
                 });
