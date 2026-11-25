@@ -103,7 +103,7 @@
   function loggedOut() {
     UID = ''; TOKEN = '';
     elNick.textContent = '未登录';
-    elMeta.textContent = '点右侧「立即登录」，登录后自动同步昵称、头像和额度';
+    elMeta.textContent = '点「立即登录」，用账号登录后同步收藏、进度和额度';
     btn.textContent = '立即登录';
     btn.style.background = '';
     btn.style.color = '';
@@ -121,7 +121,9 @@
     TOKEN = session.access_token || '';
     var name = ss ? ss.nickname(session) : (user.email || '').split('@')[0];
     elNick.textContent = name;
-    elMeta.textContent = (user.email ? String(user.email) : '已登录') + ' · 账号已同步';
+    var mail = (user.email || '');
+    var isSynthetic = /@tafei\.local$/i.test(mail);
+    elMeta.textContent = (isSynthetic ? '已登录' : (mail || '已登录')) + ' · 账号已同步';
     btn.textContent = '退出登录';
     btn.style.background = 'transparent';
     btn.style.color = 'var(--muted)';
@@ -219,7 +221,19 @@
     if (UID) {
       if (S()) S().clear();
       loggedOut();
-      toast('已退出登录，可在社区页重新登录');
+      toast('已退出登录');
+      return;
+    }
+    if (window.TafeiAuth) {
+      window.TafeiAuth.open('login');
+      return;
+    }
+    if (!document.querySelector('script[data-tf-auth]')) {
+      var sc = document.createElement('script');
+      sc.src = 'js/tafei-auth.js?v=43';
+      sc.setAttribute('data-tf-auth', '1');
+      sc.onload = function () { if (window.TafeiAuth) window.TafeiAuth.open('login'); };
+      document.head.appendChild(sc);
       return;
     }
     location.href = 'index.html#community';

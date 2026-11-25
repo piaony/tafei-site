@@ -1,0 +1,80 @@
+/* TAFEI 登录弹窗 · v1 */
+.tfa-mask{
+ position:fixed;inset:0;z-index:100060;display:flex;align-items:center;justify-content:center;padding:18px;
+ background:rgba(4,9,20,.66);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+ opacity:0;pointer-events:none;transition:opacity .2s ease;
+}
+.tfa-mask.on{opacity:1;pointer-events:auto}
+body.light .tfa-mask{background:rgba(17,30,52,.42)}
+
+.tfa-card{
+ width:min(400px,100%);max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;
+ padding:20px 18px 16px;border-radius:22px;
+ background:linear-gradient(165deg,rgba(30,54,104,.97),rgba(13,22,44,.99));
+ border:1px solid var(--line2,rgba(130,170,255,.34));
+ box-shadow:0 26px 64px rgba(2,7,18,.62);color:var(--txt,#eef4ff);
+ transform:translateY(16px) scale(.985);transition:transform .24s cubic-bezier(.2,.8,.3,1);
+}
+body.light .tfa-card{background:linear-gradient(165deg,#fff,#f2f6fd)}
+.tfa-mask.on .tfa-card{transform:none}
+
+.tfa-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.tfa-head h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.tfa-head p{margin:4px 0 0;font-size:11.5px;color:var(--muted,#9aaccb);line-height:1.55}
+.tfa-x{
+ flex:0 0 auto;width:30px;height:30px;border-radius:10px;border:1px solid var(--line,rgba(130,170,255,.18));
+ background:transparent;color:var(--muted,#9aaccb);font-size:16px;line-height:1;cursor:pointer
+}
+.tfa-x:active{transform:scale(.94)}
+
+.tfa-tabs{display:flex;gap:8px;margin:16px 0 14px;padding:4px;border-radius:14px;
+ background:rgba(8,16,32,.4);border:1px solid var(--line,rgba(130,170,255,.18))}
+body.light .tfa-tabs{background:rgba(238,243,253,.9)}
+.tfa-tab{
+ flex:1;padding:9px 0;border-radius:11px;border:0;background:transparent;cursor:pointer;
+ color:var(--muted,#9aaccb);font:800 13px/1 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+ transition:background .18s ease,color .18s ease
+}
+.tfa-tab.on{color:#06101f;background:linear-gradient(120deg,#53ddff,#728cff 62%,#b28cff)}
+
+.tfa-field{margin-bottom:11px}
+.tfa-field label{display:block;margin:0 0 5px;font-size:11px;letter-spacing:.06em;color:var(--muted,#9aaccb)}
+.tfa-input{
+ display:block;width:100%;padding:11px 13px;border-radius:12px;font-size:14px;
+ color:var(--txt,#eef4ff);background:rgba(9,18,36,.66);
+ border:1px solid var(--line,rgba(130,170,255,.18));outline:none;
+ font-family:inherit;transition:border-color .18s ease,background .18s ease
+}
+body.light .tfa-input{background:#f7faff}
+.tfa-input::placeholder{color:rgba(154,172,203,.66)}
+.tfa-input:focus{border-color:rgba(100,232,255,.62);background:rgba(11,24,46,.86)}
+
+.tfa-cap{display:flex;align-items:center;gap:10px}
+.tfa-cap .tfa-input{flex:1;min-width:0;letter-spacing:.16em;font-weight:800}
+.tfa-cap canvas{
+ flex:0 0 auto;width:96px;height:40px;border-radius:12px;cursor:pointer;
+ border:1px solid var(--line2,rgba(130,170,255,.34));background:#0d1a33;touch-action:manipulation
+}
+.tfa-cap-tip{font-size:10.5px;color:var(--muted,#9aaccb);margin-top:4px}
+
+.tfa-hint{margin:2px 0 12px;font-size:11px;color:var(--muted,#9aaccb);line-height:1.55}
+.tfa-msg{
+ margin:10px 0 0;padding:9px 11px;border-radius:11px;font-size:12px;line-height:1.5;display:none;
+ background:rgba(255,120,150,.12);border:1px solid rgba(255,120,150,.3);color:#ffb9c6
+}
+.tfa-msg.on{display:block}
+.tfa-msg.ok{background:rgba(100,232,255,.12);border-color:rgba(100,232,255,.34);color:#a8f0ff}
+
+.tfa-submit{
+ display:block;width:100%;margin-top:12px;padding:13px 0;border:0;border-radius:14px;cursor:pointer;
+ font:800 15px/1 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#06101f;
+ background:linear-gradient(120deg,#53ddff,#728cff 60%,#b28cff);
+ box-shadow:0 10px 26px rgba(60,130,255,.34);
+ transition:opacity .18s ease,transform .12s ease
+}
+.tfa-submit:disabled{opacity:.62}
+.tfa-submit:active{transform:scale(.985)}
+
+.tfa-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.tfa-link{border:0;background:transparent;padding:0;cursor:pointer;font-size:11.5px;color:var(--cyan,#64e8ff)}
+.tfa-link.sub{color:var(--muted,#9aaccb)}
