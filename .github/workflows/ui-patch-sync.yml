@@ -15,32 +15,24 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Fetch assets
+      - name: Download v131 patch
         run: |
           set -e
           mkdir -p patches
-          PATCH=patches/v129-eat-effect.patch
-          if [ -f android/app/src/main/java/com/piaony/tafei/EatEffectView.java ]; then
-            echo "v129 source already present"
-            exit 0
-          fi
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/szmafPDpkm" -o "$PATCH"
-          wc -c "$PATCH"
-          if ! git apply --check -p1 "$PATCH"; then
-            echo "::error::v129 eat effect patch cannot apply"
-            exit 1
-          fi
-          echo "v129 patch check ok"
+            "https://aka.doubaocdn.com/s/kAGvK7nUEG" -o patches/v131-desktop-manager.patch
+          wc -c patches/v131-desktop-manager.patch
+          git apply --check -p1 patches/v131-desktop-manager.patch
+          echo "v131 patch check ok"
 
-      - name: Commit and push
+      - name: Commit and push patch
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/v129-eat-effect.patch
+          git add patches/v131-desktop-manager.patch
           if git diff --cached --quiet; then
             echo "no change"
           else
-            git commit -m "chore(ci): add v129 eat effect patch"
+            git commit -m "chore(ci): add v131 desktop manager patch"
             git push origin HEAD:app/capacitor-setup
           fi
