@@ -20,7 +20,7 @@ jobs:
           set -e
           target="android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java"
           count=$(grep -c "Rect icon = bounds;" "$target" 2>/dev/null || true)
-          if [ "$count" -ge 2 ]; then
+          if [ "$count" -ge 3 ]; then
             echo "v145c folder icon fix already present"
             exit 0
           fi
