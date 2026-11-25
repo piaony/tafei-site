@@ -26,16 +26,23 @@ jobs:
             echo "::error::patch 无法应用，请检查基线"
             exit 1
           fi
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://aka.doubaocdn.com/s/UoAahzcUOH" -o patches/v62-shop-feed.patch
+          wc -c patches/v62-shop-feed.patch
+          if ! git apply --check -p1 patches/v62-shop-feed.patch; then
+            echo "::error::v62 补丁无法应用，请检查基线"
+            exit 1
+          fi
           echo "patch check ok"
 
       - name: Commit and push
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/v54-redesign.patch
+          git add patches/v54-redesign.patch patches/v62-shop-feed.patch
           if git diff --cached --quiet; then
             echo "no change"
           else
-            git commit -m "chore(ci): site redesign patch"
+            git commit -m "chore(ci): site redesign + shop feed patch"
             git push origin HEAD:app/capacitor-setup
           fi
