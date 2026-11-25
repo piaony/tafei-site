@@ -1,6 +1,6 @@
 {
-  "code": 92,
-  "name": "1.0.92",
+  "code": 94,
+  "name": "1.0.94",
   "notes": "桌面探测的诊断信息现在会完整显示，用来定位 ColorOS 16 的系统桌面数据库为什么没被读到。\n1. 无论数据库读取成功还是失败，都会显示「诊断」；\n2. 列出候选 databases 目录、目录项和逐个 db 文件的读取结果；\n3. 输出框加高，原因和诊断不再被裁掉；\n4. 仍然只读，不删除、不移动、不写数据库；\n5. Root 已确认正常，重点确认 launcher.db 的路径、文件名与 favorites 表。",
   "url": "https://github.com/Piaony/tafei-site/releases/latest/download/app-release.apk"
 }
