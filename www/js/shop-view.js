@@ -178,9 +178,11 @@
     const modal = $('svModal');
     if (!modal) return;
     const box = modal.querySelector('.sv-modal-img');
-    if (box) box.innerHTML = product.image_url
-      ? '<img src="' + esc(product.image_url) + '" alt="' + esc(product.name) + '">'
-      : '<span aria-hidden="true">📦</span>';
+    if (box) {
+      const hasImage = !!product.image_url;
+      box.hidden = !hasImage;
+      box.innerHTML = hasImage ? '<img src="' + esc(product.image_url) + '" alt="' + esc(product.name) + '">' : '';
+    }
     const cat = modal.querySelector('.sv-modal-cat');
     if (cat) cat.textContent = product.category || '未分类';
     const title = modal.querySelector('.sv-modal-title');
