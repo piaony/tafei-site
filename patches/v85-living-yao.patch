@@ -1,0 +1,803 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/DoodleView.java b/android/app/src/main/java/com/piaony/tafei/DoodleView.java
+new file mode 100644
+index 0000000..cae4372
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/DoodleView.java
+@@ -0,0 +1,143 @@
++package com.piaony.tafei;
++
++import android.content.Context;
++import android.graphics.Canvas;
++import android.graphics.Color;
++import android.graphics.Paint;
++import android.graphics.Path;
++import android.os.SystemClock;
++import android.view.View;
++
++import java.util.ArrayList;
++import java.util.Iterator;
++import java.util.List;
++import java.util.Random;
++
++/**
++ * 桌面涂鸦层：精灵偶尔会在自己旁边画一颗小星星 / 爱心 / 螺旋线，
++ * 画完停留几秒后淡出。整层是全屏透明、不可触摸的，不会挡住桌面操作。
++ */
++public class DoodleView extends View {
++
++    private static class Doodle {
++        Path path;
++        Path brush;
++        float x;
++        float y;
++        long startedAt;
++        long duration;
++        int color;
++        int kind;
++    }
++
++    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Path scratch = new Path();
++    private final List<Doodle> doodles = new ArrayList<>();
++    private final Random random = new Random();
++    private boolean yao = false;
++
++    public DoodleView(Context context) {
++        super(context);
++    }
++
++    public void setYao(boolean isYao) {
++        yao = isYao;
++    }
++
++    public void doodle(float x, float y) {
++        Doodle d = new Doodle();
++        d.x = x;
++        d.y = y;
++        d.duration = 3800 + random.nextInt(1300);
++        d.startedAt = SystemClock.uptimeMillis();
++        d.kind = random.nextInt(yao ? 3 : 2);
++        d.color = yao
++            ? (random.nextBoolean() ? Color.parseColor("#C7A6FF") : Color.parseColor("#FFD36E"))
++            : (random.nextBoolean() ? Color.parseColor("#FFD36E") : Color.parseColor("#8CE8FF"));
++        d.path = makeShape(d.kind, dp(8 + random.nextInt(5)));
++        d.brush = makeBrush(dp(28 + random.nextInt(20)));
++        doodles.add(d);
++        if (doodles.size() > 3) doodles.remove(0);
++        invalidate();
++    }
++
++    public void clear() {
++        doodles.clear();
++        invalidate();
++    }
++
++    @Override
++    protected void onDraw(Canvas canvas) {
++        super.onDraw(canvas);
++        long now = SystemClock.uptimeMillis();
++        Iterator<Doodle> it = doodles.iterator();
++        while (it.hasNext()) {
++            Doodle d = it.next();
++            float progress = (now - d.startedAt) / (float) d.duration;
++            if (progress >= 1f) {
++                it.remove();
++                continue;
++            }
++            float appear = Math.min(1f, progress * 4f);
++            float fade = progress < 0.7f ? 1f : (1f - progress) / 0.3f;
++            int alpha = (int) (255 * Math.max(0f, fade) * 0.8f);
++            float scale = 0.45f + Math.min(1f, appear) * 0.55f;
++            canvas.save();
++            canvas.translate(d.x, d.y);
++            canvas.scale(scale, scale);
++            paint.setStyle(Paint.Style.STROKE);
++            paint.setStrokeWidth(dp(1.4f));
++            paint.setColor(d.color);
++            paint.setAlpha((int) (alpha * 0.35f));
++            canvas.drawPath(d.brush, paint);
++            paint.setStyle(Paint.Style.FILL);
++            paint.setAlpha(alpha);
++            canvas.drawPath(d.path, paint);
++            canvas.restore();
++        }
++        if (!doodles.isEmpty() && isShown()) postInvalidateDelayed(30);
++    }
++
++    private Path makeShape(int kind, float r) {
++        Path path = new Path();
++        if (kind == 0) {
++            // 四角星
++            path.moveTo(0, -r * 1.8f);
++            path.lineTo(r * 0.5f, -r * 0.45f);
++            path.lineTo(r * 1.8f, 0);
++            path.lineTo(r * 0.5f, r * 0.45f);
++            path.lineTo(0, r * 1.8f);
++            path.lineTo(-r * 0.5f, r * 0.45f);
++            path.lineTo(-r * 1.8f, 0);
++            path.lineTo(-r * 0.5f, -r * 0.45f);
++            path.close();
++        } else if (kind == 1) {
++            // 爱心
++            path.moveTo(0, r * 1.4f);
++            path.cubicTo(-r * 2.2f, r * 0.1f, -r * 1.2f, -r * 1.6f, 0, -r * 0.65f);
++            path.cubicTo(r * 1.2f, -r * 1.6f, r * 2.2f, r * 0.1f, 0, r * 1.4f);
++            path.close();
++        } else {
++            // 瑶的蝴蝶结 / 双翼
++            path.moveTo(0, 0);
++            path.cubicTo(-r * 2.1f, -r * 1.6f, -r * 2.3f, r * 1.2f, 0, r * 0.25f);
++            path.cubicTo(r * 2.3f, r * 1.2f, r * 2.1f, -r * 1.6f, 0, 0);
++            path.close();
++            Path loop = new Path();
++            loop.addCircle(0, 0, r * 0.28f, Path.Direction.CW);
++            path.addPath(loop);
++        }
++        return path;
++    }
++
++    private Path makeBrush(float r) {
++        scratch.reset();
++        scratch.moveTo(-r, r * 0.8f);
++        scratch.quadTo(-r * 0.2f, -r * 0.9f, r, -r * 0.1f);
++        return new Path(scratch);
++    }
++
++    private float dp(float value) {
++        return value * getResources().getDisplayMetrics().density;
++    }
++}
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index e037288..fb75aa9 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -292,6 +292,32 @@ public class MainActivity extends BridgeActivity {
+             SpiritOverlayService.updatePrefs(act);
+         }
+ 
++        @JavascriptInterface
++        public String overlayAutonomy() {
++            return act.getSharedPreferences("tafei_app", 0)
++                .getBoolean("overlay_autonomy", true) ? "1" : "0";
++        }
++
++        @JavascriptInterface
++        public String overlayDoodle() {
++            return act.getSharedPreferences("tafei_app", 0)
++                .getBoolean("overlay_doodle", true) ? "1" : "0";
++        }
++
++        @JavascriptInterface
++        public void setOverlayAutonomy(int on) {
++            act.getSharedPreferences("tafei_app", 0).edit()
++                .putBoolean("overlay_autonomy", on != 0).apply();
++            SpiritOverlayService.updatePrefs(act);
++        }
++
++        @JavascriptInterface
++        public void setOverlayDoodle(int on) {
++            act.getSharedPreferences("tafei_app", 0).edit()
++                .putBoolean("overlay_doodle", on != 0).apply();
++            SpiritOverlayService.updatePrefs(act);
++        }
++
+         @JavascriptInterface
+         public void setOverlaySpirit(String id) {
+             String safe = (id == null) ? "xiaota" : id.replaceAll("[^a-zA-Z0-9_-]", "");
+diff --git a/android/app/src/main/java/com/piaony/tafei/ParticleView.java b/android/app/src/main/java/com/piaony/tafei/ParticleView.java
+index f1ad498..e96fc3f 100644
+--- a/android/app/src/main/java/com/piaony/tafei/ParticleView.java
++++ b/android/app/src/main/java/com/piaony/tafei/ParticleView.java
+@@ -13,10 +13,15 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Random;
+ 
+-/** 桌面精灵周围的金色 / 青色粒子，以及触摸时的爆发特效。 */
++/**
++ * 桌面精灵周围的粒子层。
++ * 瑶的悬浮形态会使用紫、金、粉、青四种星辉，并出现小蝴蝶 / 四角星；
++ * 其他伙伴保持金色和青色的轻盈粒子。
++ */
+ public class ParticleView extends View {
+ 
+-    private static final int AMBIENT_MAX = 9;
++    private static final int YAO_MAX = 15;
++    private static final int DEFAULT_MAX = 9;
+ 
+     private static class Particle {
+         float x;
+@@ -27,42 +32,82 @@ public class ParticleView extends View {
+         float life;
+         float maxLife;
+         int color;
+-        boolean diamond;
++        int kind;
++        float angle;
++        float spin;
+     }
+ 
+     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+-    private final Path diamond = new Path();
++    private final Path shape = new Path();
+     private final List<Particle> particles = new ArrayList<>();
+     private final Random random = new Random();
++    private final int[] yaoColors = new int[]{
++        Color.parseColor("#C7A6FF"),
++        Color.parseColor("#FFD36E"),
++        Color.parseColor("#FF9AC4"),
++        Color.parseColor("#8CE8FF")
++    };
++    private final int[] normalColors = new int[]{
++        Color.parseColor("#FFD36E"),
++        Color.parseColor("#6EE7FF"),
++        Color.parseColor("#FF9AC4")
++    };
+     private long lastFrameAt = SystemClock.uptimeMillis();
++    private boolean yao = false;
+ 
+     public ParticleView(Context context) {
+         super(context);
+         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+     }
+ 
++    public void setYao(boolean isYao) {
++        yao = isYao;
++        invalidate();
++    }
++
+     public void burst(int count) {
+         float cx = getWidth() / 2f;
+         float cy = getHeight() / 2f;
+         for (int i = 0; i < count; i++) {
+             Particle p = new Particle();
+             double angle = random.nextDouble() * Math.PI * 2;
+-            float speed = dp(0.8f) + random.nextFloat() * dp(1.8f);
+-            p.x = cx + (float) Math.cos(angle) * dp(8);
+-            p.y = cy + (float) Math.sin(angle) * dp(8);
++            float speed = dp(0.7f) + random.nextFloat() * dp(1.9f);
++            p.x = cx + (float) Math.cos(angle) * dp(7);
++            p.y = cy + (float) Math.sin(angle) * dp(7);
+             p.vx = (float) Math.cos(angle) * speed;
+-            p.vy = (float) Math.sin(angle) * speed - dp(0.5f);
+-            p.size = dp(1.6f) + random.nextFloat() * dp(2.2f);
+-            p.maxLife = 700 + random.nextInt(500);
++            p.vy = (float) Math.sin(angle) * speed - dp(0.45f);
++            p.size = dp(1.5f) + random.nextFloat() * dp(2.4f);
++            p.maxLife = 650 + random.nextInt(650);
+             p.life = p.maxLife;
+-            p.color = random.nextInt(3) == 0 ? Color.parseColor("#FF9AC4")
+-                : (random.nextInt(2) == 0 ? Color.parseColor("#FFD36E") : Color.parseColor("#6EE7FF"));
+-            p.diamond = random.nextBoolean();
++            p.color = pickColor();
++            p.kind = yao ? random.nextInt(4) : random.nextInt(2);
++            p.angle = random.nextFloat() * 360f;
++            p.spin = (random.nextFloat() - 0.5f) * (yao ? 18f : 6f);
+             particles.add(p);
+         }
+         invalidate();
+     }
+ 
++    /** 拖动时在身后撒一串很轻的星屑。 */
++    public void trail() {
++        if (getWidth() <= 0 || getHeight() <= 0) return;
++        for (int i = 0; i < 2; i++) {
++            Particle p = new Particle();
++            p.x = getWidth() / 2f + (random.nextFloat() - 0.5f) * dp(12);
++            p.y = getHeight() * 0.72f + random.nextFloat() * dp(8);
++            p.vx = (random.nextFloat() - 0.5f) * dp(0.35f);
++            p.vy = -dp(0.2f) - random.nextFloat() * dp(0.5f);
++            p.size = dp(1f) + random.nextFloat() * dp(1.4f);
++            p.maxLife = 600 + random.nextInt(500);
++            p.life = p.maxLife;
++            p.color = pickColor();
++            p.kind = yao ? 2 + random.nextInt(2) : 0;
++            p.angle = random.nextFloat() * 360f;
++            p.spin = 0f;
++            particles.add(p);
++        }
++    }
++
+     @Override
+     protected void onDraw(Canvas canvas) {
+         super.onDraw(canvas);
+@@ -70,7 +115,8 @@ public class ParticleView extends View {
+         float dt = Math.min(80f, now - lastFrameAt);
+         lastFrameAt = now;
+ 
+-        if (particles.size() < AMBIENT_MAX && random.nextInt(3) == 0) {
++        int ambientMax = yao ? YAO_MAX : DEFAULT_MAX;
++        if (particles.size() < ambientMax && random.nextInt(3) == 0) {
+             particles.add(ambient());
+         }
+ 
+@@ -84,9 +130,10 @@ public class ParticleView extends View {
+             }
+             p.x += p.vx * dt / 16f;
+             p.y += p.vy * dt / 16f;
+-            p.vy += dp(0.025f) * dt / 16f;
++            p.vy += dp(0.018f) * dt / 16f;
++            p.angle += p.spin * dt / 16f;
+             float progress = 1f - p.life / p.maxLife;
+-            int alpha = (int) (255 * Math.min(1f, (1f - progress) * 1.35f));
++            int alpha = (int) (255 * Math.min(1f, (1f - progress) * 1.4f));
+             if (p.y < -dp(4)) {
+                 p.y = getHeight() + dp(3);
+                 p.x = random.nextFloat() * Math.max(1, getWidth());
+@@ -101,31 +148,67 @@ public class ParticleView extends View {
+         Particle p = new Particle();
+         p.x = dp(5) + random.nextFloat() * Math.max(1, getWidth() - dp(10));
+         p.y = getHeight() - dp(3) + random.nextFloat() * dp(10);
+-        p.vx = (random.nextFloat() - 0.5f) * dp(0.28f);
+-        p.vy = -dp(0.35f) - random.nextFloat() * dp(0.75f);
+-        p.size = dp(1.2f) + random.nextFloat() * dp(1.8f);
++        p.vx = (random.nextFloat() - 0.5f) * dp(0.3f);
++        p.vy = -dp(0.28f) - random.nextFloat() * dp(0.75f);
++        p.size = (yao ? dp(1.2f) : dp(1f)) + random.nextFloat() * dp(1.9f);
+         p.maxLife = 1500 + random.nextInt(1200);
+         p.life = p.maxLife;
+-        p.color = random.nextInt(3) == 0 ? Color.parseColor("#6EE7FF") : Color.parseColor("#FFD36E");
+-        p.diamond = random.nextInt(4) == 0;
++        p.color = pickColor();
++        p.kind = yao ? random.nextInt(4) : random.nextInt(2);
++        p.angle = random.nextFloat() * 360f;
++        p.spin = (random.nextFloat() - 0.5f) * (yao ? 12f : 3f);
+         return p;
+     }
+ 
++    private int pickColor() {
++        int[] colors = yao ? yaoColors : normalColors;
++        return colors[random.nextInt(colors.length)];
++    }
++
+     private void drawParticle(Canvas canvas, Particle p, int alpha) {
+         paint.setStyle(Paint.Style.FILL);
+         paint.setColor(p.color);
+         paint.setAlpha(alpha);
+-        if (p.diamond) {
+-            diamond.reset();
+-            diamond.moveTo(p.x, p.y - p.size * 1.8f);
+-            diamond.lineTo(p.x + p.size, p.y);
+-            diamond.lineTo(p.x, p.y + p.size * 1.8f);
+-            diamond.lineTo(p.x - p.size, p.y);
+-            diamond.close();
+-            canvas.drawPath(diamond, paint);
++        paint.setStrokeWidth(Math.max(dp(0.8f), p.size * 0.8f));
++
++        // 外圈柔光，让粒子在深色桌面上更像星辉。
++        paint.setAlpha((int) (alpha * 0.2f));
++        canvas.drawCircle(p.x, p.y, p.size * 2.2f, paint);
++        paint.setAlpha(alpha);
++
++        if (p.kind == 1) {
++            shape.reset();
++            shape.moveTo(p.x, p.y - p.size * 1.8f);
++            shape.lineTo(p.x + p.size, p.y);
++            shape.lineTo(p.x, p.y + p.size * 1.8f);
++            shape.lineTo(p.x - p.size, p.y);
++            shape.close();
++            canvas.drawPath(shape, paint);
++        } else if (p.kind == 2) {
++            canvas.save();
++            canvas.rotate(p.angle, p.x, p.y);
++            shape.reset();
++            shape.moveTo(p.x, p.y - p.size * 2.3f);
++            shape.lineTo(p.x + p.size * 0.65f, p.y);
++            shape.lineTo(p.x, p.y + p.size * 2.3f);
++            shape.lineTo(p.x - p.size * 0.65f, p.y);
++            shape.close();
++            canvas.drawPath(shape, paint);
++            canvas.restore();
++        } else if (p.kind == 3) {
++            // 两只小翅膀，像一只很轻的蝴蝶。
++            canvas.save();
++            canvas.rotate(p.angle, p.x, p.y);
++            paint.setAlpha((int) (alpha * 0.72f));
++            canvas.drawCircle(p.x - p.size * 0.9f, p.y - p.size * 0.35f, p.size * 0.9f, paint);
++            canvas.drawCircle(p.x + p.size * 0.9f, p.y - p.size * 0.35f, p.size * 0.9f, paint);
++            paint.setAlpha(alpha);
++            canvas.drawCircle(p.x, p.y, p.size * 0.45f, paint);
++            canvas.restore();
+         } else {
+             canvas.drawCircle(p.x, p.y, p.size, paint);
+         }
++        paint.setAlpha(255);
+     }
+ 
+     private float dp(float value) {
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+index 921adaf..8a45936 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -60,6 +60,8 @@ public class SpiritOverlayService extends Service {
+     private static final String PREF_SIZE = "overlay_size";
+     private static final String PREF_OPACITY = "overlay_opacity";
+     private static final String PREF_SPIRIT = "overlay_spirit";
++    private static final String PREF_AUTONOMY = "overlay_autonomy";
++    private static final String PREF_DOODLE = "overlay_doodle";
+ 
+     private static volatile boolean appForeground = true;
+     private static volatile SpiritOverlayService instance;
+@@ -71,9 +73,18 @@ public class SpiritOverlayService extends Service {
+     private ParticleView particleView;
+     private ImageView sprite;
+     private TextView bubble;
++    private DoodleView doodleView;
++    private WindowManager.LayoutParams doodleParams;
+     private final Map<String, Bitmap> frameCache = new HashMap<>();
+     private final Random random = new Random();
+     private final Handler handler = new Handler(Looper.getMainLooper());
++    private final String[] yaoLines = new String[]{
++        "瑶在森林里替你看着风的方向。",
++        "这片桌面，也有一点像森林呢。",
++        "我把星光放在你手边。",
++        "累了就靠过来，我不走。",
++        "鹿灵会记得你今天来过。"
++    };
+     private final String[] lines = new String[]{
+         "今天也要一起收集糖霜吗？",
+         "我在这儿，切回挞飞就能继续玩。",
+@@ -88,6 +99,15 @@ public class SpiritOverlayService extends Service {
+     private float lastDownY = 0f;
+     private boolean moved = false;
+     private boolean longPressFired = false;
++    private boolean dragging = false;
++    private boolean pickupShown = false;
++    private boolean autonomyEnabled = true;
++    private boolean doodleEnabled = true;
++    private int wanderStep = 0;
++    private int wanderStartX = 0;
++    private int wanderStartY = 0;
++    private int wanderTargetX = 0;
++    private int wanderTargetY = 0;
+     private int scalePercent = 100;
+ 
+     public static void start(Context context) {
+@@ -125,7 +145,12 @@ public class SpiritOverlayService extends Service {
+     public static void updatePrefs(Context context) {
+         SpiritOverlayService svc = instance;
+         if (svc != null) {
+-            svc.applyPrefs();
++            svc.handler.post(new Runnable() {
++                @Override
++                public void run() {
++                    svc.applyPrefs();
++                }
++            });
+             return;
+         }
+         SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
+@@ -145,6 +170,8 @@ public class SpiritOverlayService extends Service {
+                 public void run() {
+                     if (svc.sprite == null) return;
+                     svc.frameCache.clear();
++                    if (svc.particleView != null) svc.particleView.setYao(svc.isYao());
++                    if (svc.doodleView != null) svc.doodleView.setYao(svc.isYao());
+                     Bitmap art = svc.spiritBitmap();
+                     if (art != null) svc.sprite.setImageBitmap(art);
+                 }
+@@ -202,6 +229,12 @@ public class SpiritOverlayService extends Service {
+     @Override
+     public void onDestroy() {
+         handler.removeCallbacksAndMessages(null);
++        if (doodleView != null && windowManager != null) {
++            try {
++                windowManager.removeView(doodleView);
++            } catch (Exception ignored) {
++            }
++        }
+         if (root != null && windowManager != null) {
+             try {
+                 windowManager.removeView(root);
+@@ -215,6 +248,8 @@ public class SpiritOverlayService extends Service {
+         particleView = null;
+         sprite = null;
+         bubble = null;
++        doodleView = null;
++        doodleParams = null;
+         if (instance == this) instance = null;
+         super.onDestroy();
+     }
+@@ -299,6 +334,7 @@ public class SpiritOverlayService extends Service {
+ 
+         stage = new FrameLayout(this);
+         particleView = new ParticleView(this);
++        particleView.setYao(isYao());
+         stage.addView(particleView, new FrameLayout.LayoutParams(
+             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+ 
+@@ -336,7 +372,11 @@ public class SpiritOverlayService extends Service {
+                         lastRawY = event.getRawY();
+                         lastDownY = event.getY();
+                         moved = false;
++                        dragging = false;
++                        pickupShown = false;
+                         longPressFired = false;
++                        wanderStep = 0;
++                        handler.removeCallbacks(autonomyTask);
+                         handler.postDelayed(longPressTask, 520L);
+                         return true;
+                     case MotionEvent.ACTION_MOVE:
+@@ -347,6 +387,12 @@ public class SpiritOverlayService extends Service {
+                             handler.removeCallbacks(longPressTask);
+                         }
+                         if (moved) {
++                            dragging = true;
++                            if (!pickupShown) {
++                                pickupShown = true;
++                                showFrame("action-upgrade", 0);
++                                showBubble("要带我去哪里呀？");
++                            }
+                             params.x += (int) dx;
+                             params.y += (int) dy;
+                             lastRawX = event.getRawX();
+@@ -356,11 +402,22 @@ public class SpiritOverlayService extends Service {
+                                 windowManager.updateViewLayout(root, params);
+                             } catch (Exception ignored) {
+                             }
++                            if (particleView != null) particleView.trail();
+                         }
+                         return true;
+                     case MotionEvent.ACTION_UP:
+                         handler.removeCallbacks(longPressTask);
+-                        if (!moved && !longPressFired) handleTap(lastDownY);
++                        if (!moved && !longPressFired) {
++                            handleTap(lastDownY);
++                        } else if (moved) {
++                            dragging = false;
++                            wanderStep = 0;
++                            showFrame("main", 0);
++                            if (pickupShown) showBubble("放我下来啦。");
++                            pickupShown = false;
++                            if (particleView != null) particleView.burst(7);
++                            scheduleAutonomy(3200L);
++                        }
+                         return true;
+                     case MotionEvent.ACTION_CANCEL:
+                         handler.removeCallbacks(longPressTask);
+@@ -371,6 +428,7 @@ public class SpiritOverlayService extends Service {
+             }
+         });
+ 
++        ensureDoodleWindow();
+         try {
+             windowManager.addView(root, params);
+         } catch (Exception e) {
+@@ -394,6 +452,31 @@ public class SpiritOverlayService extends Service {
+         });
+     }
+ 
++    private void ensureDoodleWindow() {
++        if (doodleView != null || windowManager == null) return;
++        doodleView = new DoodleView(this);
++        doodleView.setYao(isYao());
++        int type = Build.VERSION.SDK_INT >= 26
++            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
++            : WindowManager.LayoutParams.TYPE_PHONE;
++        doodleParams = new WindowManager.LayoutParams(
++            WindowManager.LayoutParams.MATCH_PARENT,
++            WindowManager.LayoutParams.MATCH_PARENT,
++            type,
++            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
++                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
++                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
++                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
++            PixelFormat.TRANSLUCENT);
++        doodleParams.gravity = Gravity.TOP | Gravity.START;
++        try {
++            windowManager.addView(doodleView, doodleParams);
++        } catch (Exception e) {
++            doodleView = null;
++            doodleParams = null;
++        }
++    }
++
+     private void handleTap(float localY) {
+         long now = System.currentTimeMillis();
+         if (now - lastTapAt < 360L) {
+@@ -484,8 +567,11 @@ public class SpiritOverlayService extends Service {
+     }
+ 
+     private void applyPrefs() {
+-        scalePercent = getSharedPreferences(PREFS, 0).getInt(PREF_SIZE, 100);
+-        int opacity = getSharedPreferences(PREFS, 0).getInt(PREF_OPACITY, 100);
++        SharedPreferences sp = getSharedPreferences(PREFS, 0);
++        scalePercent = sp.getInt(PREF_SIZE, 100);
++        autonomyEnabled = sp.getBoolean(PREF_AUTONOMY, true);
++        doodleEnabled = sp.getBoolean(PREF_DOODLE, true);
++        int opacity = sp.getInt(PREF_OPACITY, 100);
+         if (root != null) {
+             root.setAlpha(Math.max(0.4f, Math.min(1f, opacity / 100f)));
+         }
+@@ -496,6 +582,13 @@ public class SpiritOverlayService extends Service {
+             lp.height = size;
+             stage.setLayoutParams(lp);
+         }
++        if (particleView != null) particleView.setYao(isYao());
++        if (doodleView != null) doodleView.setYao(isYao());
++        if (autonomyEnabled && root != null && !appForeground) {
++            scheduleAutonomy(1800L);
++        } else {
++            handler.removeCallbacks(autonomyTask);
++        }
+         if (root != null && params != null) {
+             try {
+                 windowManager.updateViewLayout(root, params);
+@@ -504,6 +597,103 @@ public class SpiritOverlayService extends Service {
+         }
+     }
+ 
++    private boolean isYao() {
++        return spiritFolder().startsWith("yao-");
++    }
++
++    private void scheduleAutonomy(long delayMs) {
++        handler.removeCallbacks(autonomyTask);
++        if (autonomyEnabled && root != null && !appForeground) {
++            handler.postDelayed(autonomyTask, Math.max(800L, delayMs));
++        }
++    }
++
++    private final Runnable autonomyTask = new Runnable() {
++        @Override
++        public void run() {
++            if (root == null) return;
++            if (!autonomyEnabled || appForeground || dragging) {
++                handler.postDelayed(this, 1300L);
++                return;
++            }
++            int roll = random.nextInt(100);
++            if (roll < 22) {
++                wander();
++            } else if (roll < 38) {
++                if (doodleEnabled) drawDoodle();
++                else showQuietFrame("emotion-happy", 1300);
++            } else if (roll < 54) {
++                showQuietFrame(isYao() ? "action-sit" : "emotion-sleepy", 1800);
++            } else if (roll < 66) {
++                showBubble(randomLine());
++            } else if (roll < 78) {
++                showQuietFrame("action-idle", 1300);
++                if (particleView != null) particleView.burst(4);
++            } else {
++                showQuietFrame("emotion-happy", 1200);
++            }
++            handler.postDelayed(this, 2600L + random.nextInt(4200));
++        }
++    };
++
++    private void showQuietFrame(String frame, int durationMs) {
++        showFrame(frame, durationMs);
++    }
++
++    private String randomLine() {
++        String[] pool = isYao() ? yaoLines : lines;
++        return pool[random.nextInt(pool.length)];
++    }
++
++    private void drawDoodle() {
++        if (doodleView == null || root == null || params == null) return;
++        float cx = params.x + root.getWidth() / 2f;
++        float cy = params.y + root.getHeight() * 0.52f;
++        cx += (random.nextFloat() - 0.5f) * dp(120);
++        cy += (random.nextFloat() - 0.5f) * dp(90);
++        cx = Math.max(dp(24), Math.min(screenWidth() - dp(24), cx));
++        cy = Math.max(dp(80), Math.min(screenHeight() - dp(40), cy));
++        doodleView.doodle(cx, cy);
++        if (particleView != null) particleView.burst(5);
++        showBubble(isYao() ? "给你画一颗会发光的星星。" : "画个小记号，别弄丢我。");
++    }
++
++    private void wander() {
++        if (root == null || params == null || wanderStep > 0 || dragging || appForeground) return;
++        wanderStartX = params.x;
++        wanderStartY = params.y;
++        wanderTargetX = params.x + (random.nextInt(2) == 0 ? 1 : -1) * dp(30 + random.nextInt(55));
++        wanderTargetY = params.y + (random.nextInt(2) == 0 ? 1 : -1) * dp(18 + random.nextInt(50));
++        wanderStep = 1;
++        handler.post(wanderTask);
++    }
++
++    private final Runnable wanderTask = new Runnable() {
++        @Override
++        public void run() {
++            if (root == null || params == null || dragging || appForeground) {
++                wanderStep = 0;
++                return;
++            }
++            if (wanderStep <= 10) {
++                float t = wanderStep / 10f;
++                float ease = t * t * (3f - 2f * t);
++                params.x = Math.round(wanderStartX + (wanderTargetX - wanderStartX) * ease);
++                params.y = Math.round(wanderStartY + (wanderTargetY - wanderStartY) * ease);
++                clampPosition();
++                try {
++                    windowManager.updateViewLayout(root, params);
++                } catch (Exception ignored) {
++                }
++                if (particleView != null) particleView.trail();
++                wanderStep++;
++                handler.postDelayed(this, 55L);
++            } else {
++                wanderStep = 0;
++            }
++        }
++    };
++
+     private String spiritFolder() {
+         String id = getSharedPreferences(PREFS, 0).getString(PREF_SPIRIT, "xiaota");
+         if (id == null || id.isEmpty()) id = "xiaota";
+@@ -559,8 +749,18 @@ public class SpiritOverlayService extends Service {
+ 
+     private void updateVisibility() {
+         if (root == null) return;
+-        root.setVisibility(appForeground ? View.GONE : View.VISIBLE);
+-        if (!appForeground && particleView != null) particleView.invalidate();
++        int visibility = appForeground ? View.GONE : View.VISIBLE;
++        root.setVisibility(visibility);
++        if (doodleView != null) doodleView.setVisibility(visibility);
++        if (appForeground) {
++            handler.removeCallbacks(autonomyTask);
++            handler.removeCallbacks(wanderTask);
++            wanderStep = 0;
++            if (doodleView != null) doodleView.clear();
++        } else {
++            if (particleView != null) particleView.invalidate();
++            scheduleAutonomy(1800L);
++        }
+     }
+ 
+     private void clampPosition() {
+diff --git a/www/jingling.html b/www/jingling.html
+index bd8239c..9279774 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -96,6 +96,10 @@
+       <div class="ws-head"><b>桌面精灵</b><span>仅在 App 内生效</span></div>
+       <label class="ws-range">大小 <input type="range" id="noSize" min="70" max="130" step="5" value="100"><em id="noSizeVal">100%</em></label>
+       <label class="ws-range">透明度 <input type="range" id="noOpacity" min="50" max="100" step="5" value="100"><em id="noOpacityVal">100%</em></label>
++      <div class="ws-toggles native-behavior-toggles">
++       <label><input type="checkbox" id="noAutonomy"> 自主活动</label>
++       <label><input type="checkbox" id="noDoodle"> 桌面涂鸦</label>
++      </div>
+       <p class="ws-note">只影响退出 App 后的桌面悬浮精灵，不改变页面里的全站挂件。</p>
+      </div>
+ 
+@@ -267,7 +271,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=24"></script>
++<script src="js/jingling.js?v=25"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 1109852..cfaf813 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1053,6 +1053,10 @@
+       var opacityVal = $('noOpacityVal');
+       if (opacityVal) opacityVal.textContent = opacity.value + '%';
+     }
++    var autonomy = $('noAutonomy');
++    if (autonomy) autonomy.checked = String(nativeOverlayCall('overlayAutonomy', '1')) !== '0';
++    var doodle = $('noDoodle');
++    if (doodle) doodle.checked = String(nativeOverlayCall('overlayDoodle', '1')) !== '0';
+     refreshNativeOverlay();
+   }
+ 
+@@ -1077,6 +1081,14 @@
+     else toast('开启失败，请稍后再试。', true);
+   });
+ 
++  [['noAutonomy', 'setOverlayAutonomy'], ['noDoodle', 'setOverlayDoodle']].forEach(function (row) {
++    var box = $(row[0]);
++    if (!box) return;
++    box.addEventListener('change', function () {
++      nativeOverlayCall(row[1], null, box.checked ? 1 : 0);
++    });
++  });
++
+   [['noSize', 'setOverlaySize', 'noSizeVal'], ['noOpacity', 'setOverlayOpacity', 'noOpacityVal']].forEach(function (row) {
+     var input = $(row[0]);
+     if (!input) return;
