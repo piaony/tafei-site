@@ -1070,6 +1070,8 @@
       return;
     }
     var lines = [];
+    var diagLines = data.diag || [];
+    if (!Array.isArray(diagLines)) diagLines = String(diagLines).split(/\r?\n/);
     lines.push('系统：Android ' + (data.android || '?') + '（SDK ' + (data.sdk || '?') + '）');
     if (data.coloros) lines.push('ColorOS：' + data.coloros);
     if (data.model) lines.push('机型：' + data.model);
@@ -1096,9 +1098,9 @@
       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
       lines.push('');
       lines.push('诊断：');
-      if (data.diag && data.diag.length) {
-        data.diag.slice(0, 10).forEach(function (line, index) {
-          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
+      if (diagLines.length) {
+        diagLines.slice(0, 30).forEach(function (line, index) {
+          lines.push((index + 1) + '. ' + String(line).slice(0, 320));
         });
       } else {
         lines.push('（没有诊断数据，请重新检测）');
@@ -1108,9 +1110,9 @@
       lines.push('原因：' + (data.dbError || '未知'));
       lines.push('');
       lines.push('诊断：');
-      if (data.diag && data.diag.length) {
-        data.diag.slice(0, 10).forEach(function (line, index) {
-          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
+      if (diagLines.length) {
+        diagLines.slice(0, 30).forEach(function (line, index) {
+          lines.push((index + 1) + '. ' + String(line).slice(0, 320));
         });
       } else {
         lines.push('（没有诊断数据，请重新检测）');

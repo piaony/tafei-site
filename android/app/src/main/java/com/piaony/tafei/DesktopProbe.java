@@ -38,6 +38,7 @@ public final class DesktopProbe {
 
     public static String probe(Context context) {
         JSONObject out = new JSONObject();
+        JSONArray diag = new JSONArray();
         try {
             out.put("ok", true);
             out.put("readOnly", true);
@@ -84,7 +85,10 @@ public final class DesktopProbe {
             out.put("root", rootGranted ? "granted" : (root.attempted ? "denied" : "no-su"));
             out.put("rootOutput", trim(root.output, 120));
 
+            addDiag(diag, "su：exit=" + root.exitCode + "，" + trim(root.output, 120));
+
             if (!rootGranted) {
+                out.put("diag", diag);
                 out.put("dbError", "需要先在 KernelSU 里给挞飞授予超级用户权限");
                 out.put("samples", new JSONArray());
                 out.put("columns", new JSONArray());
@@ -97,6 +101,9 @@ public final class DesktopProbe {
                 return out.toString();
             }
 
+            addDiag(diag, "数据目录：" + trim(RootBridge.run("ls -la /data/user/0/com.android.launcher").output, 360));
+            addDiag(diag, "db 查找：" + trim(RootBridge.run("find /data/user/0/com.android.launcher -maxdepth 3 -name '*.db'").output, 320));
+
             List<String> packages = new ArrayList<>();
             add(packages, launcherPackage);
             String pmOut = RootBridge.run("pm list packages").output;
@@ -105,16 +112,17 @@ public final class DesktopProbe {
                 String pkg = line.substring("package:".length()).trim();
                 String low = pkg.toLowerCase();
                 if (low.contains("launcher") || low.contains("home")) add(packages, pkg);
-                if (packages.size() >= 12) break;
+                if (packages.size() >= 6) break;
             }
             add(packages, "com.oppo.launcher");
             add(packages, "com.coloros.launcher");
             add(packages, "com.oplus.launcher");
             add(packages, "com.android.launcher3");
             add(packages, "com.android.launcher");
+            addDiag(diag, "候选包：" + trim(join(packages), 300));
 
             String dirsOut = findDatabasesDirs(packages);
-            JSONArray diag = new JSONArray();
+            addDiag(diag, "候选目录数：" + uniqueLines(dirsOut).size());
             JSONObject selected = null;
             for (String dir : uniqueLines(dirsOut)) {
                 JSONObject db = tryOpenLauncherDatabase(context, dir, diag);
@@ -127,6 +135,7 @@ public final class DesktopProbe {
             if (selected == null) {
                 out.put("dbError", "没有找到可读的 launcher.db / favorites 表；可能被加密或桌面包名不同");
                 out.put("diag", diag);
+                out.put("desktopMode", "unknown");
                 out.put("samples", new JSONArray());
                 out.put("columns", new JSONArray());
                 out.put("containers", new JSONObject());
@@ -149,6 +158,7 @@ public final class DesktopProbe {
         } catch (Throwable t) {
             try {
                 out.put("ok", false);
+                out.put("diag", diag);
                 out.put("dbError", "探测异常：" + String.valueOf(t.getMessage()));
             } catch (Exception ignored) {
             }
@@ -269,18 +279,15 @@ public final class DesktopProbe {
     }
 
     private static String findDatabasesDirs(List<String> packages) {
-        StringBuilder list = new StringBuilder();
+        // 不再依赖 shell 的 for/if，直接枚举所有候选路径；目录不存在也会在 diag 里留下 ls 错误。
+        StringBuilder result = new StringBuilder();
         for (String pkg : packages) {
             String safe = pkg.replaceAll("[^a-zA-Z0-9._-]", "");
             if (safe.isEmpty()) continue;
-            if (list.length() > 0) list.append(' ');
-            list.append(safe);
+            result.append("/data/user/0/").append(safe).append("/databases\n");
+            result.append("/data/user_de/0/").append(safe).append("/databases\n");
         }
-        if (list.length() == 0) return "";
-        String cmd = "for p in " + list + "; do "
-            + "for d in /data/data/$p/databases /data/user/0/$p/databases /data/user_de/0/$p/databases; do "
-            + "if [ -d \"$d\" ]; then echo \"$d\"; fi; done; done";
-        return RootBridge.run(cmd).output;
+        return result.toString();
     }
 
     private static String resolveLabel(Context context, String pkg, String title) {
@@ -357,6 +364,15 @@ public final class DesktopProbe {
             if (!value.isEmpty() && !lines.contains(value)) lines.add(value);
         }
         return lines;
+    }
+
+    private static String join(List<String> values) {
+        StringBuilder out = new StringBuilder();
+        for (String value : values) {
+            if (out.length() > 0) out.append(' ');
+            out.append(value);
+        }
+        return out.toString();
     }
 
     private static String firstNonEmpty(String... values) {
