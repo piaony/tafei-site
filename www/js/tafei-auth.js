@@ -7,11 +7,12 @@
   var ORIGIN = 'https://kwkewmhmxyjmzdjyutwa.supabase.co';
   var KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
   var SUFFIX = '@tafei.local';
+  var OFFICIAL_EMAIL = '3659229103@qq.com';
   var SETTINGS_URL = 'https://piaony.github.io/tafei-site/';
 
   var st = { mode: 'login', code: '', busy: false };
-  var mask = null, card = null, tabLogin = null, tabReg = null;
-  var formLogin = null, formReg = null, msgEl = null, canvasEl = null, toastEl = null;
+  var mask = null, card = null, tabLogin = null, tabReg = null, tabOff = null;
+  var formLogin = null, formReg = null, formOff = null, msgEl = null, canvasEl = null, toastEl = null;
   var inputs = {};
 
   function el(tag, cls, html) {
@@ -94,7 +95,7 @@
     if (document.querySelector('link[data-tfa-css]')) return;
     var hrefs = document.querySelectorAll('link[rel="stylesheet"]');
     for (var i = 0; i < hrefs.length; i++) {
-      if (/tafei-auth\\.css/.test(hrefs[i].getAttribute('href') || '')) return;
+      if (/tafei-auth\.css/.test(hrefs[i].getAttribute('href') || '')) return;
     }
     var link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -114,7 +115,8 @@
       + '<button class="tfa-x" type="button" aria-label="关闭">✕</button>'
       + '</div>'
       + '<div class="tfa-tabs"><button class="tfa-tab on" type="button" data-tab="login">登录</button>'
-      + '<button class="tfa-tab" type="button" data-tab="register">注册</button></div>'
+      + '<button class="tfa-tab" type="button" data-tab="register">注册</button>'
+      + '<button class="tfa-tab" type="button" data-tab="official">官方</button></div>'
       + '<form class="tfa-form" id="tfaLoginForm" autocomplete="on">'
       + '<div class="tfa-field"><label>账号</label>'
       + '<input class="tfa-input" id="tfaLoginUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" placeholder="例如 piaony"></div>'
@@ -146,6 +148,20 @@
       + '<div class="tfa-foot"><button class="tfa-link sub" type="button" data-act="forgot">忘记密码</button>'
       + '<button class="tfa-link" type="button" data-act="to-login">已有账号？去登录</button></div>'
       + '</form>'
+      + '<form class="tfa-form" id="tfaOffForm" hidden>'
+      + '<div class="tfa-field"><label>官方账号</label>'
+      + '<input class="tfa-input" id="tfaOffUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" placeholder="3659229103 或完整邮箱"></div>'
+      + '<div class="tfa-field"><label>密码</label>'
+      + '<input class="tfa-input" id="tfaOffPass" type="password" autocomplete="current-password" placeholder="官方账号密码"></div>'
+      + '<div class="tfa-field"><label>验证码</label>'
+      + '<div class="tfa-cap"><input class="tfa-input" id="tfaOffCap" type="text" inputmode="numeric" maxlength="4" placeholder="4 位数字">'
+      + '<canvas class="tfa-canvas" id="tfaOffCanvas" width="96" height="40" title="点一下换一张"></canvas></div>'
+      + '<div class="tfa-cap-tip">看不清？点右侧图片换一张</div></div>'
+      + '<div class="tfa-hint">仅站长本人使用。登录后「我的」会出现官方账号标识与管理员后台入口。</div>'
+      + '<button class="tfa-submit" type="submit">登录官方账号</button>'
+      + '<div class="tfa-foot"><button class="tfa-link sub" type="button" data-act="forgot">忘记密码</button>'
+      + '<button class="tfa-link" type="button" data-act="to-login">用普通账号登录</button></div>'
+      + '</form>'
       + '<div class="tfa-msg" id="tfaMsg"></div>';
     mask.appendChild(card);
     document.body.appendChild(mask);
@@ -153,8 +169,10 @@
     msgEl = card.querySelector('#tfaMsg');
     formLogin = card.querySelector('#tfaLoginForm');
     formReg = card.querySelector('#tfaRegForm');
+    formOff = card.querySelector('#tfaOffForm');
     tabLogin = card.querySelector('[data-tab="login"]');
     tabReg = card.querySelector('[data-tab="register"]');
+    tabOff = card.querySelector('[data-tab="official"]');
     inputs = {
       user: card.querySelector('#tfaLoginUser'),
       pass: card.querySelector('#tfaLoginPass'),
@@ -163,19 +181,24 @@
       rpass: card.querySelector('#tfaRegPass'),
       rpass2: card.querySelector('#tfaRegPass2'),
       rmail: card.querySelector('#tfaRegMail'),
-      rcap: card.querySelector('#tfaRegCap')
+      rcap: card.querySelector('#tfaRegCap'),
+      ouser: card.querySelector('#tfaOffUser'),
+      opass: card.querySelector('#tfaOffPass'),
+      ocap: card.querySelector('#tfaOffCap')
     };
 
     card.querySelector('.tfa-x').addEventListener('click', close);
     mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
     tabLogin.addEventListener('click', function () { setMode('login'); });
     tabReg.addEventListener('click', function () { setMode('register'); });
+    tabOff.addEventListener('click', function () { setMode('official'); });
     card.addEventListener('click', function (e) {
       var t = e.target.closest('[data-act]');
       if (!t) return;
       var act = t.getAttribute('data-act');
       if (act === 'to-register') setMode('register');
       if (act === 'to-login') setMode('login');
+      if (act === 'to-official') setMode('official');
       if (act === 'forgot') forgot();
     });
     card.querySelectorAll('.tfa-canvas').forEach(function (cv) {
@@ -183,26 +206,30 @@
     });
     formLogin.addEventListener('submit', submitLogin);
     formReg.addEventListener('submit', submitRegister);
+    formOff.addEventListener('submit', submitOfficial);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && mask && mask.classList.contains('on')) close();
     });
   }
 
   function setMode(mode) {
-    st.mode = mode === 'register' ? 'register' : 'login';
+    st.mode = (mode === 'register' || mode === 'official') ? mode : 'login';
     var isReg = st.mode === 'register';
-    formLogin.hidden = isReg;
+    var isOff = st.mode === 'official';
+    formLogin.hidden = isReg || isOff;
     formReg.hidden = !isReg;
-    tabLogin.classList.toggle('on', !isReg);
+    formOff.hidden = !isOff;
+    tabLogin.classList.toggle('on', !isReg && !isOff);
     tabReg.classList.toggle('on', isReg);
-    card.querySelector('#tfaTitle').textContent = isReg ? '注册挞飞账号' : '登录挞飞';
+    tabOff.classList.toggle('on', isOff);
+    card.querySelector('#tfaTitle').textContent = isReg ? '注册挞飞账号' : (isOff ? '官方账号登录' : '登录挞飞');
     card.querySelector('#tfaSub').textContent = isReg
       ? '自定义账号即可，不需要邮箱验证'
-      : '登录后同步收藏、浏览记录和伙伴进度';
+      : (isOff ? '站长专属入口，登录后可进管理员后台' : '登录后同步收藏、浏览记录和伙伴进度');
     msg('');
     drawCaptcha();
     setTimeout(function () {
-      var f = isReg ? inputs.ruser : inputs.user;
+      var f = isReg ? inputs.ruser : (isOff ? inputs.ouser : inputs.user);
       if (f) { try { f.focus(); } catch (e) {} }
     }, 60);
   }
@@ -288,7 +315,44 @@
     st.busy = on;
     card.querySelectorAll('.tfa-submit').forEach(function (b) {
       b.disabled = on;
-      b.textContent = on ? '请稍候…' : (st.mode === 'register' ? '创建账号' : '登录');
+      b.textContent = on ? '请稍候…' : (st.mode === 'register' ? '创建账号' : (st.mode === 'official' ? '登录官方账号' : '登录'));
+    });
+  }
+
+  function officialEmail(raw) {
+    var v = String(raw || '').trim().toLowerCase();
+    if (!v) return '';
+    if (v.indexOf('@') > 0) return v;
+    if (/^\d{5,12}$/.test(v)) return v + '@qq.com';
+    return v + SUFFIX;
+  }
+
+  function submitOfficial(e) {
+    e.preventDefault();
+    if (st.busy) return;
+    var email = officialEmail(inputs.ouser.value);
+    var p = inputs.opass.value;
+    var c = inputs.ocap.value.trim();
+    if (!email || email.indexOf('@') < 1) { msg('请填写官方账号（QQ 号或完整邮箱）'); return; }
+    if (!p) { msg('请输入密码'); return; }
+    if (c !== st.code) { msg('验证码不对，已换一张'); drawCaptcha(); inputs.ocap.value = ''; return; }
+
+    lock(true);
+    msg('正在验证官方账号…', true);
+    api('/token?grant_type=password', { email: email, password: p }).then(function (data) {
+      if (!saveSession(data)) throw new Error('登录状态保存失败，请重试');
+      var mail = ((data.user && data.user.email) || email).toLowerCase();
+      try {
+        if (mail === OFFICIAL_EMAIL && data.access_token) sessionStorage.setItem('tafei-console-token', data.access_token);
+      } catch (e2) {}
+      lock(false);
+      close();
+      showToast(mail === OFFICIAL_EMAIL ? '官方账号已登录，去「我的」进管理员后台' : '已登录：' + mail);
+    }).catch(function (err) {
+      lock(false);
+      msg(err.message || '登录失败，请重试');
+      drawCaptcha();
+      inputs.ocap.value = '';
     });
   }
 
@@ -363,6 +427,8 @@
   window.TafeiAuth = {
     open: open,
     close: close,
+    official: function () { open('official'); },
+    isOfficial: function (mail) { return String(mail || '').toLowerCase() === OFFICIAL_EMAIL; },
     isOpen: function () { return !!(mask && mask.classList.contains('on')); },
     message: function (text) { buildUI(); open('login'); msg(text, true); }
   };

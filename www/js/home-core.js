@@ -918,7 +918,8 @@ $id('tafeiGuestForm').addEventListener('submit', async event => {
 
   const username = $id('tafeiSignupUsername').value.trim();
   const nickname = $id('tafeiSignupNickname').value.trim();
-  const email = $id('tafeiSignupEmail').value.trim();
+  const bindMail = $id('tafeiSignupEmail').value.trim();
+  const email = username.toLowerCase() + '@tafei.local';
   const password = $id('tafeiSignupPassword').value;
   const confirm = $id('tafeiSignupPasswordConfirm').value;
 
@@ -956,7 +957,7 @@ $id('tafeiGuestForm').addEventListener('submit', async event => {
     const result = await authRequest('/signup', {
       email,
       password,
-      data: { username, nickname, agreed_at: new Date().toISOString() }
+      data: { username, nickname, email_bind: bindMail, agreed_at: new Date().toISOString() }
     });
 
     if (result.access_token && result.user) {
@@ -976,7 +977,8 @@ $id('tafeiGuestForm').addEventListener('submit', async event => {
 $id('tafeiLoginForm').addEventListener('submit', async event => {
   event.preventDefault();
 
-  const email = $id('tafeiLoginEmail').value.trim();
+  const rawLogin = $id('tafeiLoginEmail').value.trim();
+  const email = rawLogin.indexOf('@') > 0 ? rawLogin.toLowerCase() : rawLogin.toLowerCase() + '@tafei.local';
   const password = $id('tafeiLoginPassword').value;
   const button = event.submitter;
 

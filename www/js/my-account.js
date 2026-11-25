@@ -7,7 +7,10 @@
   window.__tafeiMyAccount = true;
 
   var REST = 'https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1';
+  var OFFICIAL = '3659229103@qq.com';
   var UID = '', TOKEN = '';
+
+  function isOfficial(mail) { return String(mail || '').toLowerCase() === OFFICIAL; }
 
   var elAvatar = document.getElementById('avatar');
   var elNick = document.getElementById('nickname');
@@ -76,6 +79,50 @@
 
   function S() { return window.TafeiSession || null; }
 
+  /* 官方账号：管理员后台入口 + 登录入口（未登录时） */
+  var adminRow = null, officialBtn = null;
+  function ensureEntries() {
+    var lists = document.querySelectorAll('.list');
+    var appList = null;
+    for (var i = 0; i < lists.length; i++) {
+      if (lists[i].querySelector('a[href="jingling.html"]')) { appList = lists[i]; break; }
+    }
+    if (appList && !adminRow) {
+      adminRow = document.createElement('a');
+      adminRow.className = 'row';
+      adminRow.id = 'mcAdminRow';
+      adminRow.href = 'admin-center.html';
+      adminRow.hidden = true;
+      adminRow.innerHTML = '<span class="l"><span class="dot" data-ti="about"></span><span>管理员后台</span></span>'
+        + '<span class="r">官方专享 · 进后台 ›</span>';
+      appList.insertBefore(adminRow, appList.firstChild);
+    }
+    if (!officialBtn && elMeta.parentNode) {
+      officialBtn = document.createElement('button');
+      officialBtn.type = 'button';
+      officialBtn.id = 'mcOfficialBtn';
+      officialBtn.style.cssText = 'margin-top:6px;padding:0;background:none;border:0;color:#4aa3ff;font:inherit;font-size:12px;cursor:pointer';
+      officialBtn.textContent = '官方账号登录 ›';
+      officialBtn.addEventListener('click', function () {
+        if (window.TafeiAuth) window.TafeiAuth.official();
+        else toast('登录模块还没加载好，稍后再试');
+      });
+      elMeta.parentNode.appendChild(officialBtn);
+    }
+  }
+
+  function paintOfficial(session) {
+    ensureEntries();
+    var mail = ((session && session.user && session.user.email) || '').toLowerCase();
+    var on = isOfficial(mail);
+    if (adminRow) adminRow.hidden = !on;
+    if (officialBtn) officialBtn.hidden = on;
+    if (on && session && session.access_token) {
+      try { sessionStorage.setItem('tafei-console-token', session.access_token); } catch (e) {}
+    }
+    return on;
+  }
+
   function headers(token) {
     var key = (S() && S().apikey) || 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
     return { apikey: key, Authorization: 'Bearer ' + (token || key) };
@@ -109,6 +156,7 @@
     btn.style.color = '';
     btn.style.border = '';
     setAvatar('', '访');
+    paintOfficial(null);
     if (elStats) elStats.textContent = '—';
     if (statDm) statDm.textContent = '—';
     if (statCredit) statCredit.textContent = '—';
@@ -123,7 +171,10 @@
     elNick.textContent = name;
     var mail = (user.email || '');
     var isSynthetic = /@tafei\.local$/i.test(mail);
-    elMeta.textContent = (isSynthetic ? '已登录' : (mail || '已登录')) + ' · 账号已同步';
+    var official = paintOfficial(session);
+    elMeta.textContent = official
+      ? '官方账号 · 站长'
+      : ((isSynthetic ? '已登录' : (mail || '已登录')) + ' · 账号已同步');
     btn.textContent = '退出登录';
     btn.style.background = 'transparent';
     btn.style.color = 'var(--muted)';
