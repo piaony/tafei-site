@@ -177,4 +177,14 @@
   } else {
     document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 300); });
   }
+
+  /* 第二阶段：把成长引擎挂到有挂件的页面 */
+  try {
+    if (!window.TafeiGrowth && !document.querySelector('script[data-tf-growth]')) {
+      var gr = document.createElement('script');
+      gr.src = 'js/spirit-growth.js';
+      gr.setAttribute('data-tf-growth', '1');
+      document.head.appendChild(gr);
+    }
+  } catch (e) {}
 })();
