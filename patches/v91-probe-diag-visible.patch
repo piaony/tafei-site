@@ -1,0 +1,13 @@
+diff --git a/www/jingling.html b/www/jingling.html
+index b582122..729a314 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -278,7 +278,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=27"></script>
++<script src="js/jingling.js?v=28"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
