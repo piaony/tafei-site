@@ -65,6 +65,16 @@
     bindCards();
   }
 
+  function renderAll() {
+    var list = (DATA.articles || []).slice().sort(byDateDesc);
+    var head = '<div class="af-group-head"><div><div class="kicker">ALL POSTS</div>'
+      + '<h2>全部文章</h2></div><p>综合、手机权限、高中资料，按时间倒序。</p></div>';
+    host.innerHTML = head + (list.length
+      ? '<div class="af-grid">' + list.map(cardHtml).join('') + '</div>'
+      : '<div class="empty-state">还没有文章。</div>');
+    bindCards();
+  }
+
   function renderReader(a) {
     var col = colOf(a.column);
     var tags = (a.tags || []).map(function (t) { return '<span class="af-tag">' + esc(t) + '</span>'; }).join('');
@@ -111,7 +121,7 @@
   function show(colId) {
     cur = colId;
     host.hidden = false;
-    load(function () { renderList(colId); });
+    load(function () { colId === 'all' ? renderAll() : renderList(colId); });
   }
 
   function hide() {
@@ -121,4 +131,5 @@
   }
 
   window.TAFEICommFeed = { show: show, hide: hide, openArticle: openArticle };
+  load(function () { if (!cur) show('all'); });
 })();

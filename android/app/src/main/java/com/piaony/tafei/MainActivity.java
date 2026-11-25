@@ -1,5 +1,6 @@
 package com.piaony.tafei;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ public class MainActivity extends BridgeActivity {
     private long lastBackAt = 0L;
     private long lastBackCallAt = 0L;
     private boolean firstCheckDone = false;
+    private String pendingPage = null;
+    private boolean pageHandled = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,8 @@ public class MainActivity extends BridgeActivity {
 
         webView.setBackgroundColor(Color.parseColor(BG));
         webView.addJavascriptInterface(new NativeBridge(this), "TafeiNative");
+        NotificationHelper.ensureChannel(this);
+        readPageIntent(getIntent());
 
         ViewCompat.setOnApplyWindowInsetsListener(webView, new OnApplyWindowInsetsListener() {
             @Override
@@ -70,6 +75,42 @@ public class MainActivity extends BridgeActivity {
         super.onResume();
         /* 切回前台时再检查一次（内部有 12 小时节流，不会频繁请求） */
         if (firstCheckDone) UpdateChecker.maybeCheck(this);
+        openPendingPage();
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        readPageIntent(intent);
+        openPendingPage();
+    }
+
+    private void readPageIntent(Intent intent) {
+        if (intent == null) return;
+        String page = intent.getStringExtra("tafei_page");
+        if (page != null && !page.isEmpty()) {
+            pendingPage = page;
+            pageHandled = false;
+        }
+    }
+
+    /** 从通知点进来后，等网页加载好再切到社区页。 */
+    private void openPendingPage() {
+        if (pendingPage == null || pageHandled) return;
+        pageHandled = true;
+        final String page = pendingPage;
+        pendingPage = null;
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                WebView webView = (MainActivity.this.bridge != null) ? MainActivity.this.bridge.getWebView() : null;
+                if (webView == null) return;
+                String js = "(function(){try{if(window.TAFEIViews&&TAFEIViews.showPage){TAFEIViews.showPage('"
+                        + page.replace("'", "") + "');}return 1;}catch(e){return 0;}})()";
+                webView.evaluateJavascript(js, null);
+            }
+        }, 900L);
     }
 
     @Override
@@ -132,6 +173,26 @@ public class MainActivity extends BridgeActivity {
                     UpdateChecker.maybeCheck(act);
                 }
             });
+        }
+
+        @JavascriptInterface
+        public void notifyMessage(String title, String body, String page) {
+            NotificationHelper.show(act, title, body, page);
+        }
+
+        @JavascriptInterface
+        public void requestNotifyPermission() {
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    NotificationHelper.requestPermission(act);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public String notificationsAllowed() {
+            return NotificationHelper.hasPermission(act) ? "1" : "0";
         }
 
         @JavascriptInterface

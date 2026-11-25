@@ -189,3 +189,10 @@ body.light .tf3-code{background:rgba(232,240,255,.9);color:#0f2a48}
   .tf3-readall{order:2;margin-left:auto}
   .tf3-msgs{max-height:min(46vh,380px)}
 }
+
+/* 未登录：站长默认会话置顶 */
+.tf3-guest-chat{padding:12px;display:flex;flex-direction:column;gap:10px}
+.tf3-guest-chat .tf3-threadhead{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tf-text,#eef4ff)}
+.tf3-pin{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(100,232,255,.16);color:var(--tf-cyan,#64e8ff)}
+.tf3-guest-hint{margin:0;padding:10px 12px;border-radius:12px;background:rgba(100,232,255,.07);font-size:12.5px;line-height:1.7}
+.tf3-guest-chat .tf3-cta{align-self:flex-start}

@@ -94,6 +94,15 @@ body:not(.light) #shop .sv-cart-head span b{color:#64e8ff}
 #shop .sv-cart-acts .btn{padding:8px 12px;font-size:12px}
 #shop .sv-cart-hint{margin:0;font-size:11.5px;line-height:1.6;color:#8fa2c6}
 @media(max-width:860px){#shop .sv-grid{gap:8px}}
+/* 社区：消息/聊天置顶，文章下沉 */
+.comm-articles{margin-top:26px;padding-top:6px}
+.comm-articles .comm-tabs{margin-top:14px}
+.comm-articles .comm-feed{margin-top:16px}
+.comm-articles .af-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+@media(max-width:620px){.comm-articles .af-grid{grid-template-columns:minmax(0,1fr)}}
+.comm-articles .af-group-head{margin-bottom:12px}
+#community #info{margin-top:22px}
+
 /* 就地搜索 */
 .hv-search input{flex:1;min-width:0;background:none;border:0;outline:none;color:inherit;font:inherit;font-size:13px}
 .hv-search input::placeholder{color:var(--tf-muted,#8fa2c6)}
@@ -321,12 +330,6 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
 
 
 <section id="community" class="reveal">
- <div class="comm-tabs" id="commTabs" role="tablist" aria-label="社区栏目">
- <button class="on" type="button" data-ctab="all" role="tab" aria-selected="true">综合</button>
- <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
- <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
-</div>
-<div class="comm-feed" id="commFeed" hidden></div>
 <div class="community-hub" id="communityHub">
   <div class="community-me" id="communityMe">
    <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
@@ -370,6 +373,61 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
    </button>
   </div>
  </div>
+
+ <section id="info" class="community-block">
+ <div class="section-head">
+  <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
+  <p>系统通知、公告和私信都在这里；站长官方会话默认置顶。</p>
+ </div>
+
+ <div class="tf3" id="tf3Inbox">
+  <div class="tf3-bar">
+   <div class="tf3-tabs" role="tablist" aria-label="信息中心分类">
+    <button type="button" class="tf3-tab is-active" role="tab" aria-selected="true" data-pane="system">
+     系统通知<span class="tf3-badge" data-badge="system" hidden>0</span>
+    </button>
+    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="notice">
+     公告通知<span class="tf3-badge" data-badge="notice" hidden>0</span>
+    </button>
+    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="dm">
+     私信<span class="tf3-badge" data-badge="dm" hidden>0</span>
+    </button>
+   </div>
+   <button type="button" class="tf3-readall" id="tf3ReadAll">全部标为已读</button>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="system" role="tabpanel">
+   <div class="tf3-list" id="tf3SystemList">
+    <div class="tf3-hint">正在读取系统通知…</div>
+   </div>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="notice" role="tabpanel" hidden>
+   <div class="tf3-list" id="tf3NoticeList">
+    <div class="tf3-hint">正在读取公告…</div>
+   </div>
+  </div>
+
+  <div class="tf3-pane" data-pane-body="dm" role="tabpanel" hidden>
+   <div class="tf3-list" id="tf3DmWrap">
+    <div class="tf3-hint">正在检查私信状态…</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+ <section class="community-block comm-articles" id="commArticles">
+  <div class="section-head">
+   <div><div class="kicker">TAFEI COLUMNS</div><h2>文章与资料</h2></div>
+   <p>综合、手机权限、高中资料放在消息和聊天下面，点栏目就地展开。</p>
+  </div>
+ <div class="comm-tabs" id="commTabs" role="tablist" aria-label="社区栏目">
+ <button class="on" type="button" data-ctab="all" role="tab" aria-selected="true">综合</button>
+ <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
+ <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
+</div>
+<div class="comm-feed" id="commFeed" hidden></div>
+ </section>
 
  <section class="task-center" id="taskCenter" hidden aria-labelledby="taskCenterTitle">
   <div class="task-center-head">
@@ -455,52 +513,7 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
   </div>
  </section>
 
- <section id="info" class="community-block">
- <div class="section-head">
-  <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
-  <p>系统通知、公告和私信都在这里；站长官方会话默认置顶。</p>
- </div>
-
- <div class="tf3" id="tf3Inbox">
-  <div class="tf3-bar">
-   <div class="tf3-tabs" role="tablist" aria-label="信息中心分类">
-    <button type="button" class="tf3-tab is-active" role="tab" aria-selected="true" data-pane="system">
-     系统通知<span class="tf3-badge" data-badge="system" hidden>0</span>
-    </button>
-    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="notice">
-     公告通知<span class="tf3-badge" data-badge="notice" hidden>0</span>
-    </button>
-    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="dm">
-     私信<span class="tf3-badge" data-badge="dm" hidden>0</span>
-    </button>
-   </div>
-   <button type="button" class="tf3-readall" id="tf3ReadAll">全部标为已读</button>
-  </div>
-
-  <div class="tf3-pane" data-pane-body="system" role="tabpanel">
-   <div class="tf3-list" id="tf3SystemList">
-    <div class="tf3-hint">正在读取系统通知…</div>
-   </div>
-  </div>
-
-  <div class="tf3-pane" data-pane-body="notice" role="tabpanel" hidden>
-   <div class="tf3-list" id="tf3NoticeList">
-    <div class="tf3-hint">正在读取公告…</div>
-   </div>
-  </div>
-
-  <div class="tf3-pane" data-pane-body="dm" role="tabpanel" hidden>
-   <div class="tf3-list" id="tf3DmWrap">
-    <div class="tf3-hint">正在检查私信状态…</div>
-   </div>
-  </div>
- </div>
-</section>
-
-
-
-
- <div class="community-profile-wrap" id="communityProfileWrap" hidden>
+<div class="community-profile-wrap" id="communityProfileWrap" hidden>
   <div class="community-profile-top">
    <span>账户与个人资料</span>
    <button type="button" id="communityProfileClose">收起 ↑</button>
@@ -796,14 +809,15 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
 <script src="js/community-hub.js?v=2"></script>
 <script src="js/shop-view.js?v=7"></script>
 <script src="js/articles.js?v=2"></script>
-<script src="js/community-feed.js?v=1"></script>
+<script src="js/community-feed.js?v=2"></script>
 <script src="js/home-search.js?v=1"></script>
 <script src="js/community-help.js?v=4"></script>
 
 <script src="announcement.js?v=2"></script>
 <script src="js/tafei-ui.js?v=8" defer></script>
 <script src="js/tafei-features.js?v=5" defer></script>
-<script src="js/tafei-inbox.js?v=7" defer></script>
+<script src="js/tafei-inbox.js?v=10" defer></script>
+<script src="js/tafei-notify.js?v=1" defer></script>
 <script src="js/spirit-chat.js?v=2" defer></script>
 <script src="js/spirit-widget.js?v=21" defer></script>
 <script src="js/spirit-extra.js?v=44"></script>
@@ -834,12 +848,6 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
         x.setAttribute('aria-selected', on ? 'true' : 'false');
       });
       var feed = window.TAFEICommFeed;
-      if (key === 'all') {
-        if (feed) feed.hide();
-        if (hub) hub.hidden = false;
-        return;
-      }
-      if (hub) hub.hidden = true;
       if (feed) feed.show(key);
     });
   }

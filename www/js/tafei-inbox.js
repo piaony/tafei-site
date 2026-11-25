@@ -389,8 +389,11 @@
     if (!box) return;
 
     if (!token()) {
-      box.innerHTML = '<div class="tf3-empty">登录后才能收发私信。<br>未登录也可以正常浏览其他内容。'
-        + '<br><button type="button" class="tf3-cta" data-role="go-login">去登录 / 注册</button></div>';
+      box.innerHTML = '<div class="tf3-guest-chat">'
+        + '<div class="tf3-threadhead"><b>站长 · 官方会话</b><span class="tf3-pin">默认置顶</span></div>'
+        + '<div class="tf3-msgs"><div class="tf3-msg tf3-official-msg">' + esc(OWNER_WELCOME) + '</div></div>'
+        + '<div class="tf3-empty tf3-guest-hint">未登录也能看到站长的默认会话。登录后可以直接回复；和其他用户发起对话需要账号。</div>'
+        + '<button type="button" class="tf3-cta" data-role="go-login">登录后继续对话</button></div>';
       var btn = $('[data-role="go-login"]', box);
       if (btn) btn.addEventListener('click', function () {
         var toggle = document.getElementById('communityProfileToggle');
