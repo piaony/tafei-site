@@ -20,10 +20,10 @@ jobs:
           set -e
           mkdir -p patches
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/zcNtSl8Fma" -o patches/v89-desktop-diag.patch
-          wc -c patches/v89-desktop-diag.patch
-          if ! git apply --check -p1 patches/v89-desktop-diag.patch; then
-            echo "::error::v89 desktop diag patch cannot apply"
+            "https://aka.doubaocdn.com/s/aTT4gRombA" -o patches/v91-probe-diag-visible.patch
+          wc -c patches/v91-probe-diag-visible.patch
+          if ! git apply --check -p1 patches/v91-probe-diag-visible.patch; then
+            echo "::error::v91 probe diag patch cannot apply"
             exit 1
           fi
           echo "patch check ok"
@@ -32,10 +32,10 @@ jobs:
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/v89-desktop-diag.patch
+          git add patches/v91-probe-diag-visible.patch
           if git diff --cached --quiet; then
             echo "no change"
           else
-            git commit -m "chore(ci): v89 desktop database diagnostics"
+            git commit -m "chore(ci): fix v91 probe diag patch"
             git push origin HEAD:app/capacitor-setup
           fi
