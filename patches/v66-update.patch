@@ -20,3 +20,4 @@ index 3339ffb..f58b74e 100644
 +                    Log.w(TAG, "api failed: " + t);
                  }
                  running = false;
+ 
