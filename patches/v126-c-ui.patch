@@ -1,0 +1,217 @@
+diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
+index a623746..c71d6b9 100644
+--- a/www/css/spirit-house.css
++++ b/www/css/spirit-house.css
+@@ -320,6 +320,15 @@ body.spirit-memorial-open{overflow:hidden}
+ .desktop-probe-actions .desktop-probe-btn{margin-top:0}
+ .desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:520px;overflow:auto}
+ .desktop-probe-out b{color:var(--ang-text);font-weight:500}
++.desktop-icon-picker{margin-top:8px}
++.desktop-icon-picker[hidden]{display:none!important}
++.desktop-icon-picker-head{display:flex;align-items:baseline;justify-content:space-between;gap:9px;margin-bottom:5px;color:var(--ang-text);font-size:10.5px}
++.desktop-icon-picker-head span{color:var(--ang-muted);font-size:9.5px}
++.desktop-icon-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:230px;overflow:auto;padding:2px;overscroll-behavior:contain}
++.desktop-icon-item{display:block;min-width:0;padding:7px 8px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.025);color:var(--ang-text);font:inherit;text-align:left;cursor:pointer}
++.desktop-icon-item b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:500}
++.desktop-icon-item small{display:block;margin-top:2px;color:var(--ang-muted);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++.desktop-icon-item.is-selected{border-color:rgba(110,231,255,.55);background:rgba(110,231,255,.13);box-shadow:0 0 0 1px rgba(110,231,255,.12) inset}
+ @media(max-width:620px){
+   .widget-settings{padding:10px;gap:8px}
+   .ws-toggles{grid-template-columns:1fr 1fr;gap:7px 8px}
+diff --git a/www/jingling.html b/www/jingling.html
+index b4eb7fe..84f9a21 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -8,7 +8,7 @@
+ <meta name="robots" content="noindex,follow">
+ <link rel="stylesheet" href="css/angela.css?v=4">
+ <link rel="stylesheet" href="css/jingling.css?v=2">
+-<link rel="stylesheet" href="css/spirit-house.css?v=20">
++<link rel="stylesheet" href="css/spirit-house.css?v=21">
+ <link rel="stylesheet" href="css/app-shell.css?v=2">
+ <script src="js/app-shell.js?v=2" defer></script>
+ </head>
+@@ -105,10 +105,14 @@
+        <div class="ws-head"><b>桌面互动探测</b><span>只读 + 试吃 · 应用保留</span></div>
+        <p class="ws-note">先确认 ColorOS 16 的桌面包名、数据库和图标坐标；试吃只走系统「移除」，应用仍保留在抽屉。</p>
+        <button type="button" class="desktop-probe-btn" id="desktopProbeBtn">检测环境</button>
++       <div class="desktop-icon-picker" id="desktopIconPicker" hidden>
++        <div class="desktop-icon-picker-head"><b>选择要吃的图标</b><span id="desktopIconCount">0 个</span></div>
++        <div class="desktop-icon-list" id="desktopIconList"></div>
++       </div>
+        <div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div>
+        <div class="desktop-probe-actions">
+         <button type="button" class="desktop-probe-btn" id="desktopAccessBtn">开启无障碍</button>
+-        <button type="button" class="desktop-probe-btn" id="desktopEatBtn" disabled>试吃第一个图标</button>
++        <button type="button" class="desktop-probe-btn" id="desktopEatBtn" disabled>吃掉选中图标</button>
+        </div>
+        <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。</p>
+       </div>
+@@ -128,7 +132,7 @@
+     <div class="partner-skins" id="partnerSkins" aria-label="皮肤选择">
+      <div class="partner-skins-head"><span>皮肤</span><em id="partnerSkinMeta">1 款</em></div>
+      <div class="partner-skin-list" id="partnerSkinList"></div>
+-     <p class="partner-fx-hint">点 1 下摸头，点身体会害羞，连点 2 下换开心表情，连点 3 下会惊讶；瑶停 10 秒会坐下、20 秒会犯困。拖到边缘会撞墙，快速晃动会眩晕，长按 2 秒会害羞。</p>
++     <p class="partner-fx-hint">点 1 下摸头，点身体会害羞，连点 2 下换开心表情，连点 3 下会惊讶；长按只摸头，拖动才移动，两套动作不会互相触发。瑶停 10 秒会坐下、20 秒会犯困；拖到边缘会撞墙，快速晃动会眩晕。</p>
+     </div>
+    </div>
+   </div>
+@@ -282,7 +286,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=30"></script>
++<script src="js/jingling.js?v=31"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 3caf83b..136c810 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1071,6 +1071,7 @@
+       return;
+     }
+     window.__tafeiLastProbe = data;
++    renderDesktopIconList(data);
+     updateDesktopProbeActions(data);
+     var lines = [];
+     var diagLines = data.diag || [];
+@@ -1095,7 +1096,7 @@
+       if (keys.length) lines.push('容器分布：' + keys.map(function (k) { return k + '×' + containers[k]; }).join('  '));
+       lines.push('');
+       lines.push('样例：');
+-      (data.samples || []).forEach(function (item, index) {
++      (data.samples || []).slice(0, 12).forEach(function (item, index) {
+         lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
+       });
+       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
+@@ -1124,12 +1125,84 @@
+     out.textContent = lines.join('\n');
+   }
+ 
++  function renderDesktopIconList(data) {
++    var picker = $('desktopIconPicker');
++    var list = $('desktopIconList');
++    var count = $('desktopIconCount');
++    if (!picker || !list) return;
++    var icons = (data && data.samples) || [];
++    picker.hidden = !icons.length;
++    if (count) count.textContent = icons.length + ' 个';
++    if (!icons.length) {
++      list.innerHTML = '';
++      window.__tafeiSelectedIconIndex = 0;
++      return;
++    }
++    if (typeof window.__tafeiSelectedIconIndex !== 'number'
++        || window.__tafeiSelectedIconIndex < 0
++        || window.__tafeiSelectedIconIndex >= icons.length) {
++      window.__tafeiSelectedIconIndex = 0;
++    }
++    var html = [];
++    icons.forEach(function (item, index) {
++      var selected = index === window.__tafeiSelectedIconIndex ? ' is-selected' : '';
++      html.push('<button type="button" class="desktop-icon-item' + selected + '" data-icon-index="' + index + '">'
++        + '<b>' + esc(item.label || item.package || '未命名') + '</b>'
++        + '<small>屏' + item.screen + ' · (' + item.cellX + ',' + item.cellY + ')</small>'
++        + '</button>');
++    });
++    list.innerHTML = html.join('');
++  }
++
++  function selectedDesktopIcon() {
++    var data = window.__tafeiLastProbe;
++    var icons = (data && data.samples) || [];
++    var index = window.__tafeiSelectedIconIndex || 0;
++    if (!icons.length) return null;
++    if (index < 0 || index >= icons.length) index = 0;
++    return icons[index];
++  }
++
+   function updateDesktopProbeActions(data) {
+     var eat = $('desktopEatBtn');
+     if (!eat) return;
+-    var samples = (data && data.samples) || [];
+-    eat.disabled = !samples.length;
+-    eat.textContent = samples.length ? ('试吃「' + (samples[0].label || samples[0].package || '第一个') + '」') : '试吃第一个图标';
++    var icons = (data && data.samples) || [];
++    var item = selectedDesktopIcon();
++    eat.disabled = !item;
++    eat.textContent = item ? ('吃掉「' + (item.label || item.package || '这个图标') + '」') : '吃掉选中图标';
++  }
++
++  function pollDesktopEat(item) {
++    var eat = $('desktopEatBtn');
++    var startedAt = Date.now();
++    if (eat) eat.disabled = true;
++    var timer = setInterval(function () {
++      var raw = String(nativeOverlayCall('desktopEatStatus', 'idle||'));
++      var parts = raw.split('|');
++      var state = parts[0] || 'idle';
++      if (state === 'success') {
++        clearInterval(timer);
++        if (eat) eat.disabled = false;
++        toast('已吃掉「' + (item.label || item.package) + '」，应用还在抽屉里。');
++        var data = window.__tafeiLastProbe;
++        if (data && Array.isArray(data.samples)) {
++          var index = window.__tafeiSelectedIconIndex || 0;
++          data.samples.splice(index, 1);
++          window.__tafeiSelectedIconIndex = Math.max(0, Math.min(index, data.samples.length - 1));
++          renderDesktopIconList(data);
++          updateDesktopProbeActions(data);
++        }
++      } else if (state === 'failed') {
++        clearInterval(timer);
++        if (eat) eat.disabled = false;
++        var detail = parts[2] || '';
++        toast('吃掉失败：' + (detail || '请重试'), true);
++      } else if (Date.now() - startedAt > 20000) {
++        clearInterval(timer);
++        if (eat) eat.disabled = false;
++        toast('操作超时，请确认桌面弹窗状态。', true);
++      }
++    }, 400);
+   }
+ 
+   function initDesktopProbe() {
+@@ -1153,21 +1226,35 @@
+       nativeOverlayCall('openAccessibility', null);
+       toast('请在系统设置里找到「挞飞桌面互动」并开启；首次可能需要先允许受限设置。');
+     });
++    var list = $('desktopIconList');
++    if (list) list.addEventListener('click', function (event) {
++      var target = event.target;
++      while (target && target !== list && !target.getAttribute('data-icon-index')) {
++        target = target.parentElement;
++      }
++      if (!target || target === list) return;
++      var index = parseInt(target.getAttribute('data-icon-index'), 10);
++      if (isNaN(index)) return;
++      window.__tafeiSelectedIconIndex = index;
++      renderDesktopIconList(window.__tafeiLastProbe);
++      updateDesktopProbeActions(window.__tafeiLastProbe);
++    });
+     var eat = $('desktopEatBtn');
+     if (eat) eat.addEventListener('click', function () {
+-      var data = window.__tafeiLastProbe;
+-      var item = data && data.samples && data.samples[0];
++      var item = selectedDesktopIcon();
+       if (!item) { toast('请先检测一次桌面。', true); return; }
+       if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
+         nativeOverlayCall('openAccessibility', null);
+         toast('无障碍还没连接，请先开启「挞飞桌面互动」。', true);
+         return;
+       }
+-      if (!window.confirm('试吃「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
++      if (!window.confirm('吃掉「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
+       var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
+       if (result === 'accessibility-off') toast('请先开启无障碍服务。', true);
+-      else if (result === 'started') toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
+-      else toast('试吃启动失败：' + result, true);
++      else if (result === 'started') {
++        toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
++        pollDesktopEat(item);
++      } else toast('吃掉启动失败：' + result, true);
+     });
+   }
+ 

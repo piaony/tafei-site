@@ -1,0 +1,81 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+index 8a45936..de02dd2 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -380,19 +380,21 @@ public class SpiritOverlayService extends Service {
+                         handler.postDelayed(longPressTask, 520L);
+                         return true;
+                     case MotionEvent.ACTION_MOVE:
++                        if (longPressFired) {
++                            // 长按已经进入摸头，后续移动不再转成拖拽，避免两套特效打架。
++                            return true;
++                        }
+                         float dx = event.getRawX() - lastRawX;
+                         float dy = event.getRawY() - lastRawY;
+-                        if (Math.abs(dx) > dp(4) || Math.abs(dy) > dp(4)) {
++                        if (!dragging && (Math.abs(dx) > dp(10) || Math.abs(dy) > dp(10))) {
+                             moved = true;
++                            dragging = true;
+                             handler.removeCallbacks(longPressTask);
++                            pickupShown = true;
++                            showFrame("action-upgrade", 0);
++                            showBubble("要带我去哪里呀？");
+                         }
+-                        if (moved) {
+-                            dragging = true;
+-                            if (!pickupShown) {
+-                                pickupShown = true;
+-                                showFrame("action-upgrade", 0);
+-                                showBubble("要带我去哪里呀？");
+-                            }
++                        if (dragging) {
+                             params.x += (int) dx;
+                             params.y += (int) dy;
+                             lastRawX = event.getRawX();
+@@ -407,20 +409,31 @@ public class SpiritOverlayService extends Service {
+                         return true;
+                     case MotionEvent.ACTION_UP:
+                         handler.removeCallbacks(longPressTask);
+-                        if (!moved && !longPressFired) {
+-                            handleTap(lastDownY);
+-                        } else if (moved) {
++                        if (longPressFired) {
++                            // 只结束摸头，不触发拖拽落地，也不打开面板。
++                            longPressFired = false;
++                            moved = false;
++                            dragging = false;
++                            scheduleAutonomy(2500L);
++                        } else if (dragging) {
+                             dragging = false;
++                            moved = false;
+                             wanderStep = 0;
+                             showFrame("main", 0);
+                             if (pickupShown) showBubble("放我下来啦。");
+                             pickupShown = false;
+                             if (particleView != null) particleView.burst(7);
+                             scheduleAutonomy(3200L);
++                        } else if (!moved) {
++                            handleTap(lastDownY);
+                         }
+                         return true;
+                     case MotionEvent.ACTION_CANCEL:
+                         handler.removeCallbacks(longPressTask);
++                        moved = false;
++                        dragging = false;
++                        pickupShown = false;
++                        longPressFired = false;
+                         return true;
+                     default:
+                         return false;
+@@ -502,9 +515,9 @@ public class SpiritOverlayService extends Service {
+     private final Runnable longPressTask = new Runnable() {
+         @Override
+         public void run() {
+-            if (moved || root == null) return;
++            if (moved || dragging || root == null) return;
+             longPressFired = true;
+-            moved = true;
++            // 长按只触发摸头；不再把 moved 置 true，否则后续 MOVE 会被误判成拖拽。
+             showReaction("action-pet", "呼噜呼噜……再摸一会儿。", 16);
+         }
+     };
