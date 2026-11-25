@@ -11,6 +11,10 @@ index b582122..729a314 100644
  <script src="js/spirit-growth.js" defer></script>
  </body>
  </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index e26732d..4be202a 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
 @@ -1094,16 +1094,27 @@
          lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
        });
