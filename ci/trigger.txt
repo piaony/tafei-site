@@ -1,1 +1,1 @@
-real formal build: 2026-11-25T04:38Z pass secret restored
+trigger v44 login+spirit 2026-11-25
