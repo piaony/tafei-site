@@ -1,0 +1,38 @@
+--- a/www/js/my-account.js
++++ b/www/js/my-account.js
+@@ -167,11 +167,11 @@
+     var ss = S();
+     UID = user.id || '';
+     TOKEN = session.access_token || '';
+-    var name = ss ? ss.nickname(session) : (user.email || '').split('@')[0];
+-    elNick.textContent = name;
+     var mail = (user.email || '');
+     var isSynthetic = /@tafei\.local$/i.test(mail);
+     var official = paintOfficial(session);
++    var name = official ? '站长' : (ss ? ss.nickname(session) : mail.split('@')[0]);
++    elNick.textContent = name;
+     elMeta.textContent = official
+       ? '官方账号 · 站长'
+       : ((isSynthetic ? '已登录' : (mail || '已登录')) + ' · 账号已同步');
+--- a/www/js/app-shell.js
++++ b/www/js/app-shell.js
+@@ -218,7 +218,7 @@
+     /* 「我的」页额外挂上账号同步与问题反馈 */
+     if (/my\.html($|[?#])/.test(location.pathname + location.search) && !document.querySelector('script[data-tf-account]')) {
+       var ac = document.createElement('script');
+-      ac.src = 'js/my-account.js?v=20261124b';
++      ac.src = 'js/my-account.js?v=20261125a';
+       ac.setAttribute('data-tf-account', '1');
+       document.head.appendChild(ac);
+     }
+--- a/www/my.html
++++ b/www/my.html
+@@ -79,7 +79,7 @@
+ <link rel="stylesheet" href="css/tafei-ico.css?v=34">
+ <link rel="stylesheet" href="css/tafei-auth.css?v=43">
+ <script src="js/tafei-icons.js?v=34" defer></script>
+-<script src="js/app-shell.js?v=3" defer></script>
++<script src="js/app-shell.js?v=4" defer></script>
+ <script src="js/tafei-auth.js?v=43" defer></script>
+ </head>
+ <body>
