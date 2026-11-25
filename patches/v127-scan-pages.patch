@@ -47,19 +47,18 @@ index 97c9c15..b4a7b05 100644
 -                        doEatAttempt(label, screen, attempt + 1);
 +                        scanForTarget(label, screen);
 +                    }
-                 }, 520L);
-                 return;
-             }
-         }
-         if (target == null && scanRight < scanLimit * 2) {
-             if (swipeRight()) {
-                 scanRight++;
-                 navOffset--;
-                 toast("向右找「" + label + "」· 第" + scanRight + "页");
-                 handler.postDelayed(new Runnable() {
-                     @Override
-                     public void run() {
--                        doEatAttempt(label, screen, attempt + 1);
++                }, 520L);
++                return;
++            }
++        }
++        if (target == null && scanRight < scanLimit * 2) {
++            if (swipeRight()) {
++                scanRight++;
++                navOffset--;
++                toast("向右找「" + label + "」· 第" + scanRight + "页");
++                handler.postDelayed(new Runnable() {
++                    @Override
++                    public void run() {
 +                        scanForTarget(label, screen);
                      }
                  }, 520L);
