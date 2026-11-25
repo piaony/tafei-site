@@ -15,20 +15,24 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Apply v132 UI patch
+      - name: Apply v141 desktop actions
         run: |
           set -e
-          if grep -q "desktopManagerSection" www/jingling.html 2>/dev/null; then
-            echo "v132 UI already present"
+          if grep -q "SpiritDesktopActions" android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java 2>/dev/null; then
+            echo "v141 desktop actions already present"
             exit 0
           fi
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/2dsXvDALBU" -o /tmp/v132-ui.patch
-          wc -c /tmp/v132-ui.patch
-          git apply --check -p1 /tmp/v132-ui.patch
-          git apply -p1 /tmp/v132-ui.patch
+            "https://aka.doubaocdn.com/s/zWK8Uddu5b" -o /tmp/v141.patch
+          wc -c /tmp/v141.patch
+          git apply --check -p1 /tmp/v141.patch
+          git apply -p1 /tmp/v141.patch
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add www/jingling.html www/css/spirit-house.css www/js/jingling.js
-          git commit -m "feat(app): v132 desktop manager visible"
+          git add android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java \
+            android/app/src/main/java/com/piaony/tafei/MainActivity.java \
+            android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java \
+            android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java \
+            www/jingling.html www/js/jingling.js
+          git commit -m "feat(app): desktop manager accessibility actions"
           git push origin HEAD:app/capacitor-setup
