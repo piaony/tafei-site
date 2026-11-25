@@ -297,7 +297,7 @@ public final class DesktopProbe {
                         int cellY = intValue(rows, "cellY", -1);
                         if (screen < 0 || cellX < 0 || cellY < 0) continue;
                         appShortcutCount++;
-                        if (samples.length() >= 12) continue;
+                        if (samples.length() >= 200) continue;
                         String intent = stringValue(rows, "intent");
                         String component = componentOf(intent);
                         String pkg = component == null ? "" : component.split("/")[0];

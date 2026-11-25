@@ -1071,6 +1071,7 @@
       return;
     }
     window.__tafeiLastProbe = data;
+    renderDesktopIconList(data);
     updateDesktopProbeActions(data);
     var lines = [];
     var diagLines = data.diag || [];
@@ -1095,7 +1096,7 @@
       if (keys.length) lines.push('容器分布：' + keys.map(function (k) { return k + '×' + containers[k]; }).join('  '));
       lines.push('');
       lines.push('样例：');
-      (data.samples || []).forEach(function (item, index) {
+      (data.samples || []).slice(0, 12).forEach(function (item, index) {
         lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
       });
       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
@@ -1124,12 +1125,84 @@
     out.textContent = lines.join('\n');
   }
 
+  function renderDesktopIconList(data) {
+    var picker = $('desktopIconPicker');
+    var list = $('desktopIconList');
+    var count = $('desktopIconCount');
+    if (!picker || !list) return;
+    var icons = (data && data.samples) || [];
+    picker.hidden = !icons.length;
+    if (count) count.textContent = icons.length + ' 个';
+    if (!icons.length) {
+      list.innerHTML = '';
+      window.__tafeiSelectedIconIndex = 0;
+      return;
+    }
+    if (typeof window.__tafeiSelectedIconIndex !== 'number'
+        || window.__tafeiSelectedIconIndex < 0
+        || window.__tafeiSelectedIconIndex >= icons.length) {
+      window.__tafeiSelectedIconIndex = 0;
+    }
+    var html = [];
+    icons.forEach(function (item, index) {
+      var selected = index === window.__tafeiSelectedIconIndex ? ' is-selected' : '';
+      html.push('<button type="button" class="desktop-icon-item' + selected + '" data-icon-index="' + index + '">'
+        + '<b>' + esc(item.label || item.package || '未命名') + '</b>'
+        + '<small>屏' + item.screen + ' · (' + item.cellX + ',' + item.cellY + ')</small>'
+        + '</button>');
+    });
+    list.innerHTML = html.join('');
+  }
+
+  function selectedDesktopIcon() {
+    var data = window.__tafeiLastProbe;
+    var icons = (data && data.samples) || [];
+    var index = window.__tafeiSelectedIconIndex || 0;
+    if (!icons.length) return null;
+    if (index < 0 || index >= icons.length) index = 0;
+    return icons[index];
+  }
+
   function updateDesktopProbeActions(data) {
     var eat = $('desktopEatBtn');
     if (!eat) return;
-    var samples = (data && data.samples) || [];
-    eat.disabled = !samples.length;
-    eat.textContent = samples.length ? ('试吃「' + (samples[0].label || samples[0].package || '第一个') + '」') : '试吃第一个图标';
+    var icons = (data && data.samples) || [];
+    var item = selectedDesktopIcon();
+    eat.disabled = !item;
+    eat.textContent = item ? ('吃掉「' + (item.label || item.package || '这个图标') + '」') : '吃掉选中图标';
+  }
+
+  function pollDesktopEat(item) {
+    var eat = $('desktopEatBtn');
+    var startedAt = Date.now();
+    if (eat) eat.disabled = true;
+    var timer = setInterval(function () {
+      var raw = String(nativeOverlayCall('desktopEatStatus', 'idle||'));
+      var parts = raw.split('|');
+      var state = parts[0] || 'idle';
+      if (state === 'success') {
+        clearInterval(timer);
+        if (eat) eat.disabled = false;
+        toast('已吃掉「' + (item.label || item.package) + '」，应用还在抽屉里。');
+        var data = window.__tafeiLastProbe;
+        if (data && Array.isArray(data.samples)) {
+          var index = window.__tafeiSelectedIconIndex || 0;
+          data.samples.splice(index, 1);
+          window.__tafeiSelectedIconIndex = Math.max(0, Math.min(index, data.samples.length - 1));
+          renderDesktopIconList(data);
+          updateDesktopProbeActions(data);
+        }
+      } else if (state === 'failed') {
+        clearInterval(timer);
+        if (eat) eat.disabled = false;
+        var detail = parts[2] || '';
+        toast('吃掉失败：' + (detail || '请重试'), true);
+      } else if (Date.now() - startedAt > 20000) {
+        clearInterval(timer);
+        if (eat) eat.disabled = false;
+        toast('操作超时，请确认桌面弹窗状态。', true);
+      }
+    }, 400);
   }
 
   function initDesktopProbe() {
@@ -1153,21 +1226,35 @@
       nativeOverlayCall('openAccessibility', null);
       toast('请在系统设置里找到「挞飞桌面互动」并开启；首次可能需要先允许受限设置。');
     });
+    var list = $('desktopIconList');
+    if (list) list.addEventListener('click', function (event) {
+      var target = event.target;
+      while (target && target !== list && !target.getAttribute('data-icon-index')) {
+        target = target.parentElement;
+      }
+      if (!target || target === list) return;
+      var index = parseInt(target.getAttribute('data-icon-index'), 10);
+      if (isNaN(index)) return;
+      window.__tafeiSelectedIconIndex = index;
+      renderDesktopIconList(window.__tafeiLastProbe);
+      updateDesktopProbeActions(window.__tafeiLastProbe);
+    });
     var eat = $('desktopEatBtn');
     if (eat) eat.addEventListener('click', function () {
-      var data = window.__tafeiLastProbe;
-      var item = data && data.samples && data.samples[0];
+      var item = selectedDesktopIcon();
       if (!item) { toast('请先检测一次桌面。', true); return; }
       if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
         nativeOverlayCall('openAccessibility', null);
         toast('无障碍还没连接，请先开启「挞飞桌面互动」。', true);
         return;
       }
-      if (!window.confirm('试吃「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
+      if (!window.confirm('吃掉「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
       var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
       if (result === 'accessibility-off') toast('请先开启无障碍服务。', true);
-      else if (result === 'started') toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
-      else toast('试吃启动失败：' + result, true);
+      else if (result === 'started') {
+        toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
+        pollDesktopEat(item);
+      } else toast('吃掉启动失败：' + result, true);
     });
   }
 
