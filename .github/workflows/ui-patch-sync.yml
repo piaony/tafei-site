@@ -19,11 +19,11 @@ jobs:
         run: |
           set -e
           mkdir -p patches www/js
-          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/Brc64pV0UQ" -o patches/v48-spirit-growth.patch
-          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/kwrqxxtU0p" -o www/js/spirit-growth.js
-          wc -c patches/v48-spirit-growth.patch www/js/spirit-growth.js
-          node --check www/js/spirit-growth.js
-          if ! git apply --check -p1 patches/v48-spirit-growth.patch; then
+          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/u6tvwNXe2r" -o patches/v50-stage3.patch
+          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/psw0EySXfV" -o www/js/spirit-stage3.js
+          wc -c patches/v50-stage3.patch www/js/spirit-stage3.js
+          node --check www/js/spirit-stage3.js
+          if ! git apply --check -p1 patches/v50-stage3.patch; then
             echo "::error::patch 无法应用，请检查基线"
             exit 1
           fi
@@ -33,10 +33,10 @@ jobs:
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/v48-spirit-growth.patch www/js/spirit-growth.js
+          git add patches/v50-stage3.patch www/js/spirit-stage3.js
           if git diff --cached --quiet; then
             echo "no change"
           else
-            git commit -m "chore(ci): spirit growth stage 2"
+            git commit -m "chore(ci): spirit stage 3 default yao"
             git push origin HEAD:app/capacitor-setup
           fi
