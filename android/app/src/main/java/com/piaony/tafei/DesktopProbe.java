@@ -240,27 +240,36 @@ public final class DesktopProbe {
                 }
                 tables.close();
                 tables = null;
-                if (!tableNames.contains("favorites")) {
-                    addDiag(diag, name + "：没有 favorites 表；表=" + trim(join(tableNames), 420));
+                JSONObject result = new JSONObject();
+                JSONArray columnArray = new JSONArray();
+                String itemsTable = null;
+                Set<String> columnNames = new LinkedHashSet<>();
+                for (String table : tableNames) {
+                    Cursor cols = null;
+                    try {
+                        cols = db.rawQuery("PRAGMA table_info(" + table + ")", null);
+                        Set<String> names = new LinkedHashSet<>();
+                        while (cols.moveToNext()) {
+                            String col = cols.getString(cols.getColumnIndex("name"));
+                            if (col != null) names.add(col);
+                        }
+                        if (names.contains("intent") && names.contains("cellX") && names.contains("cellY")) {
+                            itemsTable = table;
+                            columnNames = names;
+                            break;
+                        }
+                    } catch (Throwable ignored) {
+                    } finally {
+                        if (cols != null) cols.close();
+                    }
+                }
+                if (itemsTable == null) {
+                    addDiag(diag, name + "：没有桌面图标表；表=" + trim(join(tableNames), 420));
                     if (name.equals("launcher.db")) dumpTables(db, name, diag);
                     continue;
                 }
-
-                JSONObject result = new JSONObject();
-                JSONArray columnArray = new JSONArray();
-                Set<String> columnNames = new LinkedHashSet<>();
-                columns = db.rawQuery("PRAGMA table_info(favorites)", null);
-                while (columns.moveToNext()) {
-                    String col = columns.getString(columns.getColumnIndex("name"));
-                    columnNames.add(col);
-                    columnArray.put(col);
-                }
-                columns.close();
-                columns = null;
-                if (!columnNames.contains("intent")) {
-                    addDiag(diag, name + "：favorites 缺少 intent 字段");
-                    continue;
-                }
+                for (String col : columnNames) columnArray.put(col);
+                addDiag(diag, name + " 使用表：" + itemsTable);
 
                 JSONObject containers = new JSONObject();
                 JSONArray samples = new JSONArray();
@@ -271,7 +280,7 @@ public final class DesktopProbe {
                 try {
                     String order = columnNames.contains("screen") && columnNames.contains("cellY") && columnNames.contains("cellX")
                         ? "screen, cellY, cellX" : null;
-                    rows = db.rawQuery("SELECT * FROM favorites" + (order == null ? "" : " ORDER BY " + order), null);
+                    rows = db.rawQuery("SELECT * FROM " + itemsTable + (order == null ? "" : " ORDER BY " + order), null);
                     while (rows.moveToNext()) {
                         totalRows++;
                         int itemType = intValue(rows, "itemType", -1);
@@ -303,6 +312,7 @@ public final class DesktopProbe {
 
                 result.put("path", remotePath);
                 result.put("file", name);
+                result.put("table", itemsTable);
                 result.put("columns", columnArray);
                 result.put("containers", containers);
                 result.put("appShortcutCount", appShortcutCount);
