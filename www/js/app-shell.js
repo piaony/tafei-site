@@ -218,7 +218,7 @@
     /* 「我的」页额外挂上账号同步与问题反馈 */
     if (/my\.html($|[?#])/.test(location.pathname + location.search) && !document.querySelector('script[data-tf-account]')) {
       var ac = document.createElement('script');
-      ac.src = 'js/my-account.js?v=20261124b';
+      ac.src = 'js/my-account.js?v=20261125a';
       ac.setAttribute('data-tf-account', '1');
       document.head.appendChild(ac);
     }

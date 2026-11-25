@@ -167,11 +167,11 @@
     var ss = S();
     UID = user.id || '';
     TOKEN = session.access_token || '';
-    var name = ss ? ss.nickname(session) : (user.email || '').split('@')[0];
-    elNick.textContent = name;
     var mail = (user.email || '');
     var isSynthetic = /@tafei\.local$/i.test(mail);
     var official = paintOfficial(session);
+    var name = official ? '站长' : (ss ? ss.nickname(session) : mail.split('@')[0]);
+    elNick.textContent = name;
     elMeta.textContent = official
       ? '官方账号 · 站长'
       : ((isSynthetic ? '已登录' : (mail || '已登录')) + ' · 账号已同步');
