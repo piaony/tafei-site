@@ -2,7 +2,7 @@ diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
 index 224e19d..5ab9ce7 100644
 --- a/www/css/spirit-house.css
 +++ b/www/css/spirit-house.css
-@@ -359,6 +359,12 @@ body.spirit-memorial-open{overflow:hidden}
+@@ -359,5 +359,11 @@ body.spirit-memorial-open{overflow:hidden}
  .spirit-gallery-head .spirit-modal-close{flex:0 0 auto}
  .spirit-gallery-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 18px;overscroll-behavior:contain}
  .spirit-gallery-body .spirit-grid{margin:0}
