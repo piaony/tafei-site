@@ -20,16 +20,21 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
+import android.view.HapticFeedbackConstants;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -62,8 +67,12 @@ public class SpiritOverlayService extends Service {
     private WindowManager windowManager;
     private WindowManager.LayoutParams params;
     private LinearLayout root;
+    private FrameLayout stage;
+    private ParticleView particleView;
     private ImageView sprite;
     private TextView bubble;
+    private final Map<String, Bitmap> frameCache = new HashMap<>();
+    private final Random random = new Random();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final String[] lines = new String[]{
         "今天也要一起收集糖霜吗？",
@@ -76,7 +85,9 @@ public class SpiritOverlayService extends Service {
     private long lastTapAt = 0L;
     private float lastRawX = 0f;
     private float lastRawY = 0f;
+    private float lastDownY = 0f;
     private boolean moved = false;
+    private boolean longPressFired = false;
     private int scalePercent = 100;
 
     public static void start(Context context) {
@@ -129,8 +140,15 @@ public class SpiritOverlayService extends Service {
     public static void updateSpirit(Context context) {
         SpiritOverlayService svc = instance;
         if (svc != null && svc.sprite != null) {
-            Bitmap art = svc.spiritBitmap();
-            if (art != null) svc.sprite.setImageBitmap(art);
+            svc.handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (svc.sprite == null) return;
+                    svc.frameCache.clear();
+                    Bitmap art = svc.spiritBitmap();
+                    if (art != null) svc.sprite.setImageBitmap(art);
+                }
+            });
             return;
         }
         SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
@@ -190,7 +208,13 @@ public class SpiritOverlayService extends Service {
             } catch (Exception ignored) {
             }
         }
+        if (sprite != null) sprite.animate().cancel();
+        frameCache.clear();
         root = null;
+        stage = null;
+        particleView = null;
+        sprite = null;
+        bubble = null;
         if (instance == this) instance = null;
         super.onDestroy();
     }
@@ -273,14 +297,21 @@ public class SpiritOverlayService extends Service {
         bubbleLp.bottomMargin = dp(5);
         root.addView(bubble, bubbleLp);
 
+        stage = new FrameLayout(this);
+        particleView = new ParticleView(this);
+        stage.addView(particleView, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
         sprite = new ImageView(this);
-        sprite.setAdjustViewBounds(true);
         sprite.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Bitmap art = spiritBitmap();
         if (art != null) sprite.setImageBitmap(art);
         else sprite.setImageResource(R.mipmap.ic_launcher);
-        LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(dp(104), dp(104));
-        root.addView(sprite, imageLp);
+        stage.addView(sprite, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+        LinearLayout.LayoutParams stageLp = new LinearLayout.LayoutParams(dp(104), dp(104));
+        root.addView(stage, stageLp);
 
         int type = Build.VERSION.SDK_INT >= 26
             ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -303,12 +334,18 @@ public class SpiritOverlayService extends Service {
                     case MotionEvent.ACTION_DOWN:
                         lastRawX = event.getRawX();
                         lastRawY = event.getRawY();
+                        lastDownY = event.getY();
                         moved = false;
+                        longPressFired = false;
+                        handler.postDelayed(longPressTask, 520L);
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         float dx = event.getRawX() - lastRawX;
                         float dy = event.getRawY() - lastRawY;
-                        if (Math.abs(dx) > dp(4) || Math.abs(dy) > dp(4)) moved = true;
+                        if (Math.abs(dx) > dp(4) || Math.abs(dy) > dp(4)) {
+                            moved = true;
+                            handler.removeCallbacks(longPressTask);
+                        }
                         if (moved) {
                             params.x += (int) dx;
                             params.y += (int) dy;
@@ -322,7 +359,11 @@ public class SpiritOverlayService extends Service {
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if (!moved) handleTap();
+                        handler.removeCallbacks(longPressTask);
+                        if (!moved && !longPressFired) handleTap(lastDownY);
+                        return true;
+                    case MotionEvent.ACTION_CANCEL:
+                        handler.removeCallbacks(longPressTask);
                         return true;
                     default:
                         return false;
@@ -353,20 +394,67 @@ public class SpiritOverlayService extends Service {
         });
     }
 
-    private void handleTap() {
+    private void handleTap(float localY) {
         long now = System.currentTimeMillis();
         if (now - lastTapAt < 360L) {
             lastTapAt = 0L;
             hideBubble();
+            handler.removeCallbacks(revertFrameTask);
             Intent open = new Intent(this, MainActivity.class);
             open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(open);
             return;
         }
         lastTapAt = now;
-        showBubble(lines[lineIndex % lines.length]);
-        lineIndex++;
+        if (stage != null && localY < stage.getHeight() * 0.58f) {
+            showReaction("emotion-happy", "摸头成功，头发要乱啦。", 13);
+        } else {
+            int roll = random.nextInt(5);
+            if (roll == 0) showReaction("emotion-shy", "别、别一直戳我……", 11);
+            else if (roll == 1) showReaction("emotion-angry", "再戳就要生气了！", 9);
+            else showReaction("emotion-surprised", "诶？突然戳我一下。", 13);
+        }
     }
+
+    private final Runnable longPressTask = new Runnable() {
+        @Override
+        public void run() {
+            if (moved || root == null) return;
+            longPressFired = true;
+            moved = true;
+            showReaction("action-pet", "呼噜呼噜……再摸一会儿。", 16);
+        }
+    };
+
+    private void showReaction(String frame, String text, int particles) {
+        showFrame(frame, 1500);
+        if (particleView != null) particleView.burst(particles);
+        if (sprite != null) {
+            sprite.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            sprite.animate().cancel();
+            sprite.setScaleX(1f);
+            sprite.setScaleY(1f);
+            sprite.animate()
+                .scaleX(1.1f).scaleY(1.1f).setDuration(110)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (sprite == null) return;
+                        sprite.animate().scaleX(1f).scaleY(1f).setDuration(180).start();
+                    }
+                }).start();
+        }
+        showBubble(text);
+    }
+
+    private final Runnable revertFrameTask = new Runnable() {
+        @Override
+        public void run() {
+            if (sprite == null) return;
+            Bitmap art = frameBitmap("main");
+            if (art != null) sprite.setImageBitmap(art);
+        }
+    };
 
     private void showBubble(String text) {
         if (bubble == null) return;
@@ -401,12 +489,12 @@ public class SpiritOverlayService extends Service {
         if (root != null) {
             root.setAlpha(Math.max(0.4f, Math.min(1f, opacity / 100f)));
         }
-        if (sprite != null) {
+        if (stage != null) {
             int size = dp((int) Math.round(104 * scalePercent / 100.0));
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) sprite.getLayoutParams();
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) stage.getLayoutParams();
             lp.width = size;
             lp.height = size;
-            sprite.setLayoutParams(lp);
+            stage.setLayoutParams(lp);
         }
         if (root != null && params != null) {
             try {
@@ -416,24 +504,40 @@ public class SpiritOverlayService extends Service {
         }
     }
 
-    private Bitmap spiritBitmap() {
+    private String spiritFolder() {
         String id = getSharedPreferences(PREFS, 0).getString(PREF_SPIRIT, "xiaota");
         if (id == null || id.isEmpty()) id = "xiaota";
         id = id.replaceAll("[^a-zA-Z0-9-]", "");
         if (id.isEmpty()) id = "xiaota";
-        String folder = id + "-v23";
+        return id + "-v23";
+    }
+
+    private Bitmap spiritBitmap() {
+        return frameBitmap("main");
+    }
+
+    private Bitmap frameBitmap(String name) {
+        String folder = spiritFolder();
+        String key = folder + "/" + name;
+        Bitmap cached = frameCache.get(key);
+        if (cached != null) return cached;
+        Bitmap art = readAsset("public/assets/spirits/" + folder + "/" + name + ".webp");
+        if (art == null && !"xiaota-v23".equals(folder)) {
+            art = readAsset("public/assets/spirits/xiaota-v23/" + name + ".webp");
+        }
+        if (art == null && !"main".equals(name)) {
+            art = readAsset("public/assets/spirits/" + folder + "/main.webp");
+        }
+        if (art != null) frameCache.put(key, art);
+        return art;
+    }
+
+    private Bitmap readAsset(String path) {
         InputStream input = null;
         try {
-            input = getAssets().open("public/assets/spirits/" + folder + "/main.webp");
+            input = getAssets().open(path);
             return BitmapFactory.decodeStream(input);
-        } catch (Exception e) {
-            if (!"xiaota".equals(id)) {
-                try {
-                    input = getAssets().open("public/assets/spirits/xiaota-v23/main.webp");
-                    return BitmapFactory.decodeStream(input);
-                } catch (Exception ignored) {
-                }
-            }
+        } catch (Exception ignored) {
             return null;
         } finally {
             if (input != null) {
@@ -445,9 +549,18 @@ public class SpiritOverlayService extends Service {
         }
     }
 
+    private void showFrame(String name, int durationMs) {
+        if (sprite == null) return;
+        Bitmap art = frameBitmap(name);
+        if (art != null) sprite.setImageBitmap(art);
+        handler.removeCallbacks(revertFrameTask);
+        if (durationMs > 0) handler.postDelayed(revertFrameTask, durationMs);
+    }
+
     private void updateVisibility() {
         if (root == null) return;
         root.setVisibility(appForeground ? View.GONE : View.VISIBLE);
+        if (!appForeground && particleView != null) particleView.invalidate();
     }
 
     private void clampPosition() {
