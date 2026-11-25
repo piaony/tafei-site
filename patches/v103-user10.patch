@@ -1,0 +1,19 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+index 4766745..2eb3e64 100644
+--- a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
++++ b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+@@ -104,6 +104,14 @@ public final class DesktopProbe {
+             diagCmd(diag, "data 列表", "ls -la /data", 320);
+             diagCmd(diag, "data/user/0 列表", "ls -la /data/user/0", 460);
+             diagCmd(diag, "data/user_de/0 列表", "ls -la /data/user_de/0", 460);
++            diagCmd(diag, "data/user 列表", "ls -la /data/user", 480);
++            diagCmd(diag, "当前用户", "am get-current-user", 100);
++            diagCmd(diag, "用户列表", "pm list users", 480);
++            diagCmd(diag, "user10 数据目录", "ls -la /data/user/10/com.android.launcher", 560);
++            diagCmd(diag, "user10 databases", "ls -la /data/user/10/com.android.launcher/databases", 520);
++            diagCmd(diag, "user10 db 查找", "find -L /data/user/10/com.android.launcher -maxdepth 4 -name '*.db'", 640);
++            diagCmd(diag, "user_de/10 数据目录", "ls -la /data/user_de/10/com.android.launcher", 560);
++            diagCmd(diag, "user_de/10 db 查找", "find -L /data/user_de/10/com.android.launcher -maxdepth 4 -name '*.db'", 640);
+             diagCmd(diag, "boot 数据目录", "ls -la /data/user_de/0/com.android.launcher", 560);
+             diagCmd(diag, "boot databases", "ls -la /data/user_de/0/com.android.launcher/databases", 520);
+             diagCmd(diag, "boot db 查找", "find -L /data/user_de/0/com.android.launcher -maxdepth 4 -name '*.db'", 640);
