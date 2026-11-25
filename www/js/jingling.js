@@ -1364,6 +1364,12 @@
     if (detail.indexOf('access-not-found') >= 0) return '当前页没扫到这个应用，请先把桌面滑到它所在页';
     if (detail.indexOf('access-drag-failed') >= 0) return '拖动没有完成，桌面可能没变化';
     if (detail.indexOf('access-folder-drag-failed') >= 0) return '文件夹拖动没有完成';
+    if (detail.indexOf('access-folder-not-created') >= 0) return '文件夹没有真的建出来，已停止，桌面应该没变';
+    if (detail.indexOf('access-wrong-cell') >= 0) return '拖动命令执行了，但图标没到目标格；没有写数据库';
+    if (detail.indexOf('access-move-not-visible') >= 0) return '目标页没找到图标，可能已进文件夹；请重新扫描';
+    if (detail.indexOf('access-swap-first-not-moved') >= 0) return '交换已中止：第一个图标没有移动，桌面应该没变';
+    if (detail.indexOf('access-swap-second-not-moved') >= 0) return '交换已中止：第二个图标没有移动，桌面应该没变';
+    if (detail.indexOf('access-swap-wrong-cell') >= 0) return '交换后位置校验没通过，请重新扫描确认';
     if (detail.indexOf('no-empty-cell') >= 0) return '这一页没有空位做交换中转，请先腾一个空位';
     if (detail.indexOf('busy') >= 0) return '上一项操作还在执行';
     if (detail.indexOf('not-folder') >= 0) return '目标不是文件夹';
@@ -1570,7 +1576,7 @@
     });
     if (action === 'move' && item) { toast('这个位置已有应用，请选空位。', true); return; }
     if (action === 'folder' && item && item.itemType !== 2) { toast('这个位置是应用，不是文件夹；请选空位或已有文件夹。', true); return; }
-    var target = {screen: screen, cellX: cellX, cellY: cellY, folderId: item && item.itemType === 2 ? item.rowId : -1, title: item && item.itemType === 2 ? item.title : ''};
+    var target = {screen: screen, cellX: cellX, cellY: cellY, folderId: item && item.itemType === 2 ? item.rowId : -1, title: item && item.itemType === 2 ? dmLabel(item) : ''};
     var nameInput = $('desktopFolderName');
     var name = nameInput ? nameInput.value.trim() : '';
     if (name) target.name = name;

@@ -866,6 +866,10 @@ public class SpiritOverlayService extends Service {
         if (detail.startsWith("db-verify-failed")) return "写完后校验没通过，已经回滚。";
         if (detail.startsWith("db-rollback-failed")) return "回滚也失败了，先别动桌面，告诉我。";
         if (detail.startsWith("db-")) return "数据库操作没完成，桌面已尽量恢复。";
+        if ("access-wrong-cell".equals(detail)) return "图标没到目标格，桌面没有写数据库。";
+        if ("access-folder-not-created".equals(detail)) return "文件夹没有真的建出来。";
+        if ("access-swap-first-not-moved".equals(detail)) return "第一个图标没动，交换已中止。";
+        if ("access-swap-second-not-moved".equals(detail)) return "第二个图标没动，交换已中止。";
         if (detail.startsWith("access-")) return "无障碍拖动没完成，桌面可能没变化。";
         if ("cross-page-needs-db".equals(detail)) return "跨页操作需要先开启实验性数据库写入。";
         if (detail.startsWith("access-not-found")) return "当前页没扫到它，先把桌面滑到目标那一页再试。";

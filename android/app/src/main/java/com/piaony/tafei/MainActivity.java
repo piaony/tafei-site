@@ -305,7 +305,27 @@ public class MainActivity extends BridgeActivity {
                 openAccessibility();
                 return "accessibility-off";
             }
-            return SpiritAccessibilityService.startDesktopAction(action, payload);
+            final String actionArg = action;
+            final String payloadArg = payload;
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Intent home = new Intent(Intent.ACTION_MAIN);
+                        home.addCategory(Intent.CATEGORY_HOME);
+                        home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        act.startActivity(home);
+                    } catch (Throwable ignored) {
+                    }
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            SpiritAccessibilityService.startDesktopAction(actionArg, payloadArg);
+                        }
+                    }, 900L);
+                }
+            });
+            return "started";
         }
 
         @JavascriptInterface
