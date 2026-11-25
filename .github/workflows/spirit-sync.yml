@@ -1,0 +1,26 @@
+name: Sync spirit delist fix
+
+on:
+  push:
+    paths:
+      - .github/workflows/spirit-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: |
+          curl -fsSL --retry 3 "https://aka.doubaocdn.com/s/VUvYLXMdLg" -o /tmp/spirit.patch
+          git apply -p1 /tmp/spirit.patch
+      - name: Commit
+        run: |
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add index.html jingling.html js/spirit-core.js js/jingling.js js/pet-hub.js
+          git commit -m "fix: honor spirit delist state in spirit house"
+          git push origin HEAD:main
