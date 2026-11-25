@@ -1,0 +1,190 @@
+diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
+index e86ddde..55647cd 100644
+--- a/www/css/spirit-house.css
++++ b/www/css/spirit-house.css
+@@ -336,3 +336,43 @@ body.spirit-memorial-open{overflow:hidden}
+   .cs-grid b{font-size:16px}
+   .cs-badge{font-size:9px}
+ }
++
++/* 伙伴图鉴：默认收纳为一条入口，点开后在窗口里展示全部角色 */
++.spirit-gallery-entry{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--sp-line);border-radius:18px;background:linear-gradient(135deg,rgba(23,32,56,.9),rgba(13,19,36,.86));color:#eaf2ff;box-shadow:0 14px 34px rgba(0,0,0,.18)}
++.gallery-entry-face{flex:0 0 48px;width:48px;height:48px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,211,110,.3);background:rgba(255,211,110,.07)}
++.gallery-entry-face img{width:100%;height:100%;object-fit:cover;display:block}
++.gallery-entry-copy{min-width:0;flex:1 1 150px}
++.gallery-entry-copy h2{margin:0;font-size:18px;line-height:1.3}
++.gallery-entry-copy p{margin:2px 0 0;color:var(--ang-muted);font-size:11.5px;line-height:1.5}
++.gallery-entry-copy b{color:var(--sp-gold);font-size:14px}
++.gallery-entry-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
++.gallery-open-btn{min-height:36px;padding:0 15px;border:1px solid rgba(255,211,110,.42);border-radius:11px;background:rgba(255,211,110,.12);color:var(--sp-gold);font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
++.gallery-open-btn:active{transform:translateY(1px)}
++
++.spirit-gallery-modal{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:16px;background:rgba(3,7,17,.84);backdrop-filter:blur(12px)}
++.spirit-gallery-modal[hidden]{display:none!important}
++.spirit-gallery-card{display:flex;flex-direction:column;width:min(960px,100%);max-height:min(88vh,900px);border:1px solid rgba(255,211,110,.2);border-radius:24px;overflow:hidden;background:linear-gradient(155deg,#111a31,#0a1020 58%,#140f22);color:#eaf2ff;--ang-text:#eaf2ff;--ang-muted:rgba(231,238,251,.62);box-shadow:0 30px 90px rgba(0,0,0,.5)}
++.spirit-gallery-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--sp-line)}
++.gallery-kicker{display:block;color:var(--sp-cyan);font-size:9.5px;letter-spacing:.18em}
++.spirit-gallery-head h2{margin:2px 0 0;font-size:22px;line-height:1.2}
++.spirit-gallery-head p{margin:4px 0 0;color:var(--ang-muted);font-size:11.5px}
++.spirit-gallery-head .spirit-modal-close{flex:0 0 auto}
++.spirit-gallery-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 18px;overscroll-behavior:contain}
++.spirit-gallery-body .spirit-grid{margin:0}
++.spirit-gallery-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--sp-line);color:var(--ang-muted);font-size:10.5px}
++.spirit-gallery-foot button{min-height:32px;padding:0 12px;border:1px solid var(--sp-line);border-radius:9px;background:rgba(255,255,255,.05);color:var(--ang-text);font-size:11.5px;cursor:pointer;white-space:nowrap}
++
++@media(max-width:620px){
++ .spirit-gallery-entry{padding:11px 12px;gap:10px}
++ .gallery-entry-face{flex-basis:44px;width:44px;height:44px;border-radius:12px}
++ .gallery-entry-copy h2{font-size:16px}
++ .gallery-entry-copy p{font-size:10.5px}
++ .gallery-open-btn{min-height:34px;padding:0 12px;font-size:11.5px}
++ .spirit-gallery-modal{padding:0;align-items:flex-end;background:rgba(3,7,17,.9)}
++ .spirit-gallery-card{width:100%;max-height:90vh;border-radius:20px 20px 0 0;border-bottom:0}
++ .spirit-gallery-head{padding:14px 14px 10px}
++ .spirit-gallery-head h2{font-size:19px}
++ .spirit-gallery-body{padding:12px 12px 4px}
++ .spirit-gallery-foot{padding:9px 14px calc(9px + env(safe-area-inset-bottom))}
++ .spirit-gallery-foot span{max-width:62%;line-height:1.35}
++}
+diff --git a/www/jingling.html b/www/jingling.html
+index 09c888f..97ee50b 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -8,7 +8,7 @@
+ <meta name="robots" content="noindex,follow">
+ <link rel="stylesheet" href="css/angela.css?v=4">
+ <link rel="stylesheet" href="css/jingling.css?v=2">
+-<link rel="stylesheet" href="css/spirit-house.css?v=13">
++<link rel="stylesheet" href="css/spirit-house.css?v=14">
+ <link rel="stylesheet" href="css/app-shell.css?v=2">
+ <script src="js/app-shell.js?v=2" defer></script>
+ </head>
+@@ -152,14 +152,18 @@
+  </section>
+ 
+  <section class="spirit-section" aria-labelledby="spiritGridTitle">
+-  <div class="section-heading">
+-   <div><h2 id="spiritGridTitle">伙伴图鉴</h2><p>9 款伙伴都会展示；点「设为全站伙伴」后，首页魔法伙伴和全站伙伴会同步切换。</p></div>
+-   <div class="heading-tools">
++  <div class="spirit-gallery-entry">
++   <span class="gallery-entry-face"><img id="galleryFace" src="assets/spirits/xiaota-v23/main.png" alt="" width="96" height="96" loading="lazy" decoding="async"></span>
++   <div class="gallery-entry-copy">
++    <h2 id="spiritGridTitle">伙伴图鉴</h2>
++    <p><b id="galleryCount">4</b> 位伙伴可获取 · 在窗口里查看全部</p>
++   </div>
++   <div class="gallery-entry-actions">
+     <span class="wallet-pill demo" id="gridWallet" hidden>演示额度 120</span>
+     <button type="button" class="mini-btn" id="demoTopup" hidden>补充测试额度 +100</button>
++    <button type="button" class="gallery-open-btn" id="galleryOpen">展开图鉴</button>
+    </div>
+   </div>
+-  <div class="spirit-grid" id="spiritGrid" aria-label="精灵小屋角色列表"></div>
+  </section>
+ 
+  <section class="spirit-shop" id="spiritShop" aria-labelledby="shopTitle">
+@@ -190,6 +194,19 @@
+  <div style="margin-top:10px"><a href="index.html#community">回挞飞社区</a> · <a href="service.html">看看技术服务</a> · <a href="index.html">回首页</a></div>
+ </footer>
+ 
++<div class="spirit-gallery-modal" id="spiritGalleryModal" hidden>
++ <div class="spirit-gallery-card" role="dialog" aria-modal="true" aria-labelledby="galleryModalTitle">
++  <div class="spirit-gallery-head">
++   <div><span class="gallery-kicker">SPIRIT HOUSE</span><h2 id="galleryModalTitle">伙伴图鉴</h2><p id="galleryModalCount">4 位伙伴可获取</p></div>
++   <button class="spirit-modal-close" id="galleryClose" type="button" aria-label="关闭图鉴">×</button>
++  </div>
++  <div class="spirit-gallery-body" id="spiritGalleryBody">
++   <div class="spirit-grid" id="spiritGrid" aria-label="精灵小屋角色列表"></div>
++  </div>
++  <div class="spirit-gallery-foot"><span>已拥有但被下架的伙伴仍保留在小屋</span><button type="button" id="galleryCloseBottom">收起图鉴</button></div>
++ </div>
++</div>
++
+ <div class="spirit-modal" id="spiritModal" hidden>
+  <div class="spirit-modal-card" role="dialog" aria-modal="true" aria-labelledby="spiritModalName">
+   <div class="spirit-modal-head"><span>SPIRIT HOUSE</span><button class="spirit-modal-close" id="spiritModalClose" type="button" aria-label="关闭">×</button></div>
+@@ -234,7 +251,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=22"></script>
++<script src="js/jingling.js?v=23"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 2d2d491..7dfe088 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -11,6 +11,7 @@
+   var foodGrid = $('foodGrid');
+   var toyGrid = $('toyGrid');
+   var modal = $('spiritModal');
++  var galleryModal = $('spiritGalleryModal');
+   var toastTimer = 0;
+   var currentModal = null;
+   var busy = false;
+@@ -360,6 +361,17 @@
+         + cardButton(spirit, unlocked, isSelected)
+         + '</div></article>';
+     }).join('');
++    var countText = list.length + ' 位伙伴可获取';
++    var countNode = $('galleryCount');
++    if (countNode) countNode.textContent = String(list.length);
++    var modalCount = $('galleryModalCount');
++    if (modalCount) modalCount.textContent = countText;
++    var faceNode = $('galleryFace');
++    var faceSpirit = (selected && core.spiritById(selected)) || list[0];
++    if (faceNode && faceSpirit) {
++      var faceSkin = core.skinsOf(faceSpirit.id)[0];
++      if (faceSkin) faceNode.src = webpGrid(faceSkin.img);
++    }
+     Array.prototype.forEach.call(grid.querySelectorAll('img[data-fallback]'), function (img) {
+       img.addEventListener('error', function () {
+         if (img.dataset.fallbackApplied) return;
+@@ -463,7 +475,20 @@
+     $('spiritPlay').textContent = toyCount ? '玩玩具 · ' + toyCount + ' 种' : '玩玩具';
+   }
+ 
++  function openGallery() {
++    if (!galleryModal) return;
++    galleryModal.hidden = false;
++    document.body.classList.add('spirit-modal-open');
++    renderGrid();
++  }
++  function closeGallery() {
++    if (!galleryModal) return;
++    galleryModal.hidden = true;
++    if (!modal || modal.hidden) document.body.classList.remove('spirit-modal-open');
++  }
++
+   function openSpirit(id) {
++    closeGallery();
+     currentModal = id;
+     modal.hidden = false;
+     document.body.classList.add('spirit-modal-open');
+@@ -837,11 +862,16 @@
+     }
+   });
+ 
++  $('galleryOpen')?.addEventListener('click', openGallery);
++  $('galleryClose')?.addEventListener('click', closeGallery);
++  $('galleryCloseBottom')?.addEventListener('click', closeGallery);
++  galleryModal?.addEventListener('click', function (event) { if (event.target === galleryModal) closeGallery(); });
+   $('spiritModalClose')?.addEventListener('click', closeModal);
+   modal?.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
+   document.addEventListener('keydown', function (event) {
+     if (event.key === 'Escape') {
+       if (!$('memorialModal')?.hidden) closeMemorial();
++      else if (galleryModal && !galleryModal.hidden) closeGallery();
+       else if (!$('spiritModal')?.hidden) closeModal();
+     }
+   });
+@@ -904,7 +934,7 @@
+   $('widgetToggle')?.addEventListener('click', function () {
+     if (!core.current()) {
+       toast('先在图鉴里免费领取小挞飞，再放出全站挂件。');
+-      document.getElementById('spiritGrid')?.scrollIntoView({behavior: 'smooth', block: 'start'});
++      openGallery();
+       return;
+     }
+     var nextOn = !core.state().widget.on;
