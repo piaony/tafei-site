@@ -370,7 +370,7 @@ final class SpiritDesktopActions {
         locate(service, host.label, new FindCallback() {
             @Override
             public void found(Rect bounds) {
-                Rect icon = iconRect(service, bounds);
+                Rect icon = bounds;
                 final int[] to = cellPoint(service, target, icon, host.cellX, host.cellY,
                     target.row, target.col);
                 dragFolderStep(service, items, target, 0, to[0], to[1]);
