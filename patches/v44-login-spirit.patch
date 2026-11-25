@@ -1,0 +1,726 @@
+diff --git a/www/angela.html b/www/angela.html
+index 55df287..6cee5aa 100644
+--- a/www/angela.html
++++ b/www/angela.html
+@@ -325,5 +325,6 @@
+ <script src="js/angela-pet.js?v=3"></script>
+ <script src="js/spirit-core.js?v=14"></script>
+ <script src="js/spirit-widget.js?v=21"></script>
++<script src="js/spirit-extra.js?v=43"></script>
+ </body>
+ </html>
+diff --git a/www/css/tafei-auth.css b/www/css/tafei-auth.css
+new file mode 100644
+index 0000000..9b53425
+--- /dev/null
++++ b/www/css/tafei-auth.css
+@@ -0,0 +1,80 @@
++/* TAFEI 登录弹窗 · v1 */
++.tfa-mask{
++ position:fixed;inset:0;z-index:100060;display:flex;align-items:center;justify-content:center;padding:18px;
++ background:rgba(4,9,20,.66);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
++ opacity:0;pointer-events:none;transition:opacity .2s ease;
++}
++.tfa-mask.on{opacity:1;pointer-events:auto}
++body.light .tfa-mask{background:rgba(17,30,52,.42)}
++
++.tfa-card{
++ width:min(400px,100%);max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;
++ padding:20px 18px 16px;border-radius:22px;
++ background:linear-gradient(165deg,rgba(30,54,104,.97),rgba(13,22,44,.99));
++ border:1px solid var(--line2,rgba(130,170,255,.34));
++ box-shadow:0 26px 64px rgba(2,7,18,.62);color:var(--txt,#eef4ff);
++ transform:translateY(16px) scale(.985);transition:transform .24s cubic-bezier(.2,.8,.3,1);
++}
++body.light .tfa-card{background:linear-gradient(165deg,#fff,#f2f6fd)}
++.tfa-mask.on .tfa-card{transform:none}
++
++.tfa-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
++.tfa-head h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
++.tfa-head p{margin:4px 0 0;font-size:11.5px;color:var(--muted,#9aaccb);line-height:1.55}
++.tfa-x{
++ flex:0 0 auto;width:30px;height:30px;border-radius:10px;border:1px solid var(--line,rgba(130,170,255,.18));
++ background:transparent;color:var(--muted,#9aaccb);font-size:16px;line-height:1;cursor:pointer
++}
++.tfa-x:active{transform:scale(.94)}
++
++.tfa-tabs{display:flex;gap:8px;margin:16px 0 14px;padding:4px;border-radius:14px;
++ background:rgba(8,16,32,.4);border:1px solid var(--line,rgba(130,170,255,.18))}
++body.light .tfa-tabs{background:rgba(238,243,253,.9)}
++.tfa-tab{
++ flex:1;padding:9px 0;border-radius:11px;border:0;background:transparent;cursor:pointer;
++ color:var(--muted,#9aaccb);font:800 13px/1 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
++ transition:background .18s ease,color .18s ease
++}
++.tfa-tab.on{color:#06101f;background:linear-gradient(120deg,#53ddff,#728cff 62%,#b28cff)}
++
++.tfa-field{margin-bottom:11px}
++.tfa-field label{display:block;margin:0 0 5px;font-size:11px;letter-spacing:.06em;color:var(--muted,#9aaccb)}
++.tfa-input{
++ display:block;width:100%;padding:11px 13px;border-radius:12px;font-size:14px;
++ color:var(--txt,#eef4ff);background:rgba(9,18,36,.66);
++ border:1px solid var(--line,rgba(130,170,255,.18));outline:none;
++ font-family:inherit;transition:border-color .18s ease,background .18s ease
++}
++body.light .tfa-input{background:#f7faff}
++.tfa-input::placeholder{color:rgba(154,172,203,.66)}
++.tfa-input:focus{border-color:rgba(100,232,255,.62);background:rgba(11,24,46,.86)}
++
++.tfa-cap{display:flex;align-items:center;gap:10px}
++.tfa-cap .tfa-input{flex:1;min-width:0;letter-spacing:.16em;font-weight:800}
++.tfa-cap canvas{
++ flex:0 0 auto;width:96px;height:40px;border-radius:12px;cursor:pointer;
++ border:1px solid var(--line2,rgba(130,170,255,.34));background:#0d1a33;touch-action:manipulation
++}
++.tfa-cap-tip{font-size:10.5px;color:var(--muted,#9aaccb);margin-top:4px}
++
++.tfa-hint{margin:2px 0 12px;font-size:11px;color:var(--muted,#9aaccb);line-height:1.55}
++.tfa-msg{
++ margin:10px 0 0;padding:9px 11px;border-radius:11px;font-size:12px;line-height:1.5;display:none;
++ background:rgba(255,120,150,.12);border:1px solid rgba(255,120,150,.3);color:#ffb9c6
++}
++.tfa-msg.on{display:block}
++.tfa-msg.ok{background:rgba(100,232,255,.12);border-color:rgba(100,232,255,.34);color:#a8f0ff}
++
++.tfa-submit{
++ display:block;width:100%;margin-top:12px;padding:13px 0;border:0;border-radius:14px;cursor:pointer;
++ font:800 15px/1 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#06101f;
++ background:linear-gradient(120deg,#53ddff,#728cff 60%,#b28cff);
++ box-shadow:0 10px 26px rgba(60,130,255,.34);
++ transition:opacity .18s ease,transform .12s ease
++}
++.tfa-submit:disabled{opacity:.62}
++.tfa-submit:active{transform:scale(.985)}
++
++.tfa-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
++.tfa-link{border:0;background:transparent;padding:0;cursor:pointer;font-size:11.5px;color:var(--cyan,#64e8ff)}
++.tfa-link.sub{color:var(--muted,#9aaccb)}
+diff --git a/www/index.html b/www/index.html
+index 3ca12d8..772a053 100644
+--- a/www/index.html
++++ b/www/index.html
+@@ -716,5 +716,6 @@
+ <script src="js/tafei-inbox.js?v=7" defer></script>
+ <script src="js/spirit-chat.js?v=2" defer></script>
+ <script src="js/spirit-widget.js?v=21" defer></script>
++<script src="js/spirit-extra.js?v=43"></script>
+ </body>
+ </html>
+diff --git a/www/js/my-account.js b/www/js/my-account.js
+index 0654086..8cdb061 100644
+--- a/www/js/my-account.js
++++ b/www/js/my-account.js
+@@ -103,7 +103,7 @@
+   function loggedOut() {
+     UID = ''; TOKEN = '';
+     elNick.textContent = '未登录';
+-    elMeta.textContent = '点右侧「立即登录」，登录后自动同步昵称、头像和额度';
++    elMeta.textContent = '点「立即登录」，用账号登录后同步收藏、进度和额度';
+     btn.textContent = '立即登录';
+     btn.style.background = '';
+     btn.style.color = '';
+@@ -121,7 +121,9 @@
+     TOKEN = session.access_token || '';
+     var name = ss ? ss.nickname(session) : (user.email || '').split('@')[0];
+     elNick.textContent = name;
+-    elMeta.textContent = (user.email ? String(user.email) : '已登录') + ' · 账号已同步';
++    var mail = (user.email || '');
++    var isSynthetic = /@tafei\.local$/i.test(mail);
++    elMeta.textContent = (isSynthetic ? '已登录' : (mail || '已登录')) + ' · 账号已同步';
+     btn.textContent = '退出登录';
+     btn.style.background = 'transparent';
+     btn.style.color = 'var(--muted)';
+@@ -219,7 +221,19 @@
+     if (UID) {
+       if (S()) S().clear();
+       loggedOut();
+-      toast('已退出登录，可在社区页重新登录');
++      toast('已退出登录');
++      return;
++    }
++    if (window.TafeiAuth) {
++      window.TafeiAuth.open('login');
++      return;
++    }
++    if (!document.querySelector('script[data-tf-auth]')) {
++      var sc = document.createElement('script');
++      sc.src = 'js/tafei-auth.js?v=43';
++      sc.setAttribute('data-tf-auth', '1');
++      sc.onload = function () { if (window.TafeiAuth) window.TafeiAuth.open('login'); };
++      document.head.appendChild(sc);
+       return;
+     }
+     location.href = 'index.html#community';
+diff --git a/www/js/spirit-extra.js b/www/js/spirit-extra.js
+new file mode 100644
+index 0000000..87826c9
+--- /dev/null
++++ b/www/js/spirit-extra.js
+@@ -0,0 +1,180 @@
++/* TAFEI 精灵扩充 · 场景台词 / 点击互动 / 陪伴经验（v1）
++   依赖 spirit-core.js（window.TafeiSpirits）与 spirit-widget.js（#spiritWidget）
++   不改动原挂件逻辑，只在旁边补一层气泡与被动成长 */
++(function () {
++  'use strict';
++
++  var SP = window.TafeiSpirits;
++  if (!SP) return;
++
++  var KEY = 'tafei-spirit-usage';
++  var root = null, extra = null;
++  var SPEECH = ['swSpeech', '#swSpeech'];
++
++  var LINES = {
++    greet: ['你来了，今天想先做哪件事？', '我一直在这儿，别急。', '刚刚把你上次的进度记住了。'],
++    night: ['都快半夜了，早点睡吧。', '夜深了，明天的课还等着你呢。', '再刷十分钟就休息，好不好？'],
++    click: ['诶？', '别戳我啦，痒。', '叫我做什么？', '今天心情不错嘛。', '你手气挺好。', '我在想晚饭吃什么。'],
++    comfort: ['没事的，页面出个错而已。', '别慌，刷新一下就好。', '我陪你再试一次。'],
++    growth: ['我们一起待了 %m 分钟，羁绊 +1。', '又靠近了一点，%m 分钟了。', '今天的陪伴也有记录哦。']
++  };
++
++  function loadUsage() {
++    try {
++      var raw = localStorage.getItem(KEY);
++      var o = raw ? JSON.parse(raw) : null;
++      if (!o || o.day !== dayKey()) return { day: dayKey(), seconds: 0, gain: 0 };
++      return o;
++    } catch (e) { return { day: dayKey(), seconds: 0, gain: 0 }; }
++  }
++
++  function dayKey() { return (SP.todayKey && SP.todayKey()) || new Date().toDateString(); }
++
++  function saveUsage(u) {
++    try { localStorage.setItem(KEY, JSON.stringify(u)); } catch (e) {}
++  }
++
++  var usage = loadUsage();
++
++  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
++
++  function speechBusy() {
++    var s = document.getElementById('swSpeech');
++    return !!(s && s.classList.contains('show'));
++  }
++
++  function ensureExtra() {
++    root = document.getElementById('spiritWidget');
++    if (!root) return false;
++    if (!extra || !extra.parentNode) {
++      extra = document.createElement('span');
++      extra.id = 'swExtra';
++      extra.setAttribute('aria-hidden', 'true');
++      extra.style.cssText = 'position:absolute;left:50%;bottom:calc(100% - 2px);transform:translateX(-50%);'
++        + 'max-width:190px;padding:7px 11px;border-radius:12px;font-size:11.5px;line-height:1.45;'
++        + 'text-align:center;color:#eef4ff;background:rgba(13,26,48,.92);'
++        + 'border:1px solid rgba(130,170,255,.38);box-shadow:0 8px 20px rgba(3,9,22,.42);'
++        + 'opacity:0;transition:opacity .26s ease,transform .26s ease;pointer-events:none;z-index:5;'
++        + 'white-space:normal;word-break:break-word';
++      root.appendChild(extra);
++    }
++    return true;
++  }
++
++  var bubbleTimer = 0, pendingTimer = 0, bubbleTries = 0;
++  function bubble(text, ms) {
++    if (!text) return;
++    if (!ensureExtra()) return;
++    if (!root || root.hidden) return;
++    if (speechBusy()) {
++      /* 原生台词还在播，等它说完再插一句，最多等 8 轮 */
++      if (bubbleTries >= 8) return;
++      bubbleTries++;
++      clearTimeout(pendingTimer);
++      pendingTimer = setTimeout(function () { bubble(text, ms); }, 700);
++      return;
++    }
++    bubbleTries = 0;
++    extra.textContent = text;
++    extra.style.opacity = '1';
++    extra.style.transform = 'translateX(-50%) translateY(-4px)';
++    clearTimeout(bubbleTimer);
++    bubbleTimer = setTimeout(function () {
++      extra.style.opacity = '0';
++      extra.style.transform = 'translateX(-50%)';
++    }, ms || 3600);
++  }
++
++  function currentSpirit() {
++    try {
++      var s = SP.current && SP.current();
++      return s || null;
++    } catch (e) { return null; }
++  }
++
++  function spiritName() {
++    var s = currentSpirit();
++    return (s && (s.short || s.name)) || '伙伴';
++  }
++
++  /* ---------- 场景一：深夜提醒（原生开场白说完再补） ---------- */
++  var nightDone = false, nightTries = 0;
++  function nightTip() {
++    if (nightDone) return;
++    var h = new Date().getHours();
++    if (h < 23 && h >= 5) { nightDone = true; return; }
++    if (!root || root.hidden) { nightDone = true; return; }
++    if (nightTries >= 12) { nightDone = true; return; }
++    if (speechBusy()) { nightTries++; setTimeout(nightTip, 3500); return; }
++    nightDone = true;
++    bubble(pick(LINES.night), 4200);
++  }
++
++  /* ---------- 场景二：点击补一句 ---------- */
++  function bindClick() {
++    if (!root) return false;
++    var body = root.querySelector('.sw-body');
++    if (!body) return false;
++    if (root.dataset.extraBound) return true;
++    root.dataset.extraBound = '1';
++    body.addEventListener('click', function () {
++      if (Math.random() > 0.7) return;
++      setTimeout(function () { bubble(pick(LINES.click), 3000); }, 900);
++    });
++  }
++
++  /* ---------- 场景三：出错时安慰 ---------- */
++  var comforts = 0;
++  function comfort() {
++    if (comforts >= 3) return;
++    comforts++;
++    setTimeout(function () { bubble(pick(LINES.comfort), 3000); }, 300);
++  }
++  window.addEventListener('error', comfort, true);
++  window.addEventListener('unhandledrejection', comfort);
++
++  /* ---------- 场景四：陪伴时长 → 羁绊 ---------- */
++  var tick = 0;
++  function heartbeat() {
++    if (document.hidden) return;
++    if (!nightDone) nightTip();
++    usage.seconds += 1;
++    tick += 1;
++    if (tick >= 60) {
++      tick = 0;
++      saveUsage(usage);
++    }
++    if (usage.gain >= 4) return;
++    if (usage.seconds % 900 !== 0) return;   /* 每 15 分钟一次，每天最多 4 次 */
++    usage.gain += 1;
++    saveUsage(usage);
++    try {
++      var s = currentSpirit();
++      SP.adjustBond(s ? s.id : undefined, 1);
++    } catch (e) {}
++    bubble(pick(LINES.growth).replace('%m', '15'), 3600);
++  }
++
++  document.addEventListener('visibilitychange', function () {
++    if (document.hidden) saveUsage(usage);
++  });
++
++  var booted = false;
++  function boot() {
++    if (!ensureExtra()) {
++      setTimeout(boot, 400);
++      return;
++    }
++    if (!bindClick()) setTimeout(boot, 400);
++    if (booted) return;
++    booted = true;
++    setTimeout(nightTip, 6000);
++    setInterval(heartbeat, 1000);
++  }
++
++  if (document.readyState === 'complete' || document.readyState === 'interactive') {
++    setTimeout(boot, 300);
++  } else {
++    document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 300); });
++  }
++})();
+diff --git a/www/js/tafei-auth.js b/www/js/tafei-auth.js
+new file mode 100644
+index 0000000..5692506
+--- /dev/null
++++ b/www/js/tafei-auth.js
+@@ -0,0 +1,355 @@
++/* TAFEI 登录弹窗 · v1
++   我的页 / 任意页面共用：window.TafeiAuth.open('login'|'register')
++   账号体系 = 自定义账号 + 密码（内部映射为 账号@tafei.local），4 位数字验证码，可选绑定邮箱 */
++(function () {
++  'use strict';
++
++  var ORIGIN = 'https://kwkewmhmxyjmzdjyutwa.supabase.co';
++  var KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
++  var SUFFIX = '@tafei.local';
++  var SETTINGS_URL = 'https://piaony.github.io/tafei-site/';
++
++  var st = { mode: 'login', code: '', busy: false };
++  var mask = null, card = null, tabLogin = null, tabReg = null;
++  var formLogin = null, formReg = null, msgEl = null, canvasEl = null, toastEl = null;
++  var inputs = {};
++
++  function el(tag, cls, html) {
++    var n = document.createElement(tag);
++    if (cls) n.className = cls;
++    if (html != null) n.innerHTML = html;
++    return n;
++  }
++
++  function msg(text, ok) {
++    if (!msgEl) return;
++    msgEl.textContent = text || '';
++    msgEl.classList.toggle('on', !!text);
++    msgEl.classList.toggle('ok', !!ok);
++  }
++
++  var toastTimer = 0;
++  function showToast(text) {
++    if (!toastEl) {
++      toastEl = el('div', 'mc-toast');
++      toastEl.style.cssText = 'position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));'
++        + 'transform:translateX(-50%);max-width:80vw;padding:10px 16px;border-radius:14px;z-index:100070;'
++        + 'background:rgba(12,24,44,.94);border:1px solid rgba(130,170,255,.34);color:#eef4ff;'
++        + 'font-size:13px;text-align:center;opacity:0;transition:opacity .22s ease;pointer-events:none';
++      document.body.appendChild(toastEl);
++    }
++    toastEl.textContent = text;
++    toastEl.style.opacity = '1';
++    clearTimeout(toastTimer);
++    toastTimer = setTimeout(function () { toastEl.style.opacity = '0'; }, 2200);
++  }
++
++  /* ---------- 验证码 ---------- */
++  function drawCaptcha() {
++    var digits = '';
++    for (var i = 0; i < 4; i++) digits += String(Math.floor(Math.random() * 10));
++    st.code = digits;
++    var list = card ? card.querySelectorAll('.tfa-canvas') : [];
++    for (var n = 0; n < list.length; n++) paintCaptcha(list[n], digits);
++  }
++
++  function paintCaptcha(canvasEl, digits) {
++    if (!canvasEl) return;
++    var dpr = Math.min(3, window.devicePixelRatio || 1);
++    var w = 96, h = 40;
++    canvasEl.width = w * dpr;
++    canvasEl.height = h * dpr;
++    var c = canvasEl.getContext('2d');
++    if (!c) return;
++    c.setTransform(dpr, 0, 0, dpr, 0, 0);
++    var g = c.createLinearGradient(0, 0, w, h);
++    g.addColorStop(0, '#132a4f');
++    g.addColorStop(1, '#1d1a3d');
++    c.fillStyle = g;
++    c.fillRect(0, 0, w, h);
++    for (var k = 0; k < 26; k++) {
++      c.strokeStyle = 'rgba(' + (90 + Math.random() * 120 | 0) + ',' + (150 + Math.random() * 90 | 0) + ',255,' + (0.1 + Math.random() * 0.22).toFixed(2) + ')';
++      c.lineWidth = 0.6 + Math.random();
++      c.beginPath();
++      c.moveTo(Math.random() * w, Math.random() * h);
++      c.lineTo(Math.random() * w, Math.random() * h);
++      c.stroke();
++    }
++    var colors = ['#64e8ff', '#a9c2ff', '#e7bbff', '#8ef0d0'];
++    for (var j = 0; j < 4; j++) {
++      c.save();
++      var x = 12 + j * 21 + Math.random() * 4;
++      var y = 27 + (Math.random() * 6 - 3);
++      c.translate(x, y);
++      c.rotate((Math.random() * 0.5 - 0.25));
++      c.font = '800 ' + (20 + Math.random() * 3).toFixed(0) + 'px -apple-system,"PingFang SC",Arial,sans-serif';
++      c.fillStyle = colors[j % colors.length];
++      c.fillText(digits[j], 0, 0);
++      c.restore();
++    }
++  }
++
++  /* ---------- UI ---------- */
++  function buildUI() {
++    if (mask) return;
++    mask = el('div', 'tfa-mask');
++    card = el('div', 'tfa-card');
++    card.innerHTML =
++      '<div class="tfa-head">'
++      + '<div><h2 id="tfaTitle">登录挞飞</h2><p id="tfaSub">账号登录，进度、收藏和伙伴一起带走</p></div>'
++      + '<button class="tfa-x" type="button" aria-label="关闭">✕</button>'
++      + '</div>'
++      + '<div class="tfa-tabs"><button class="tfa-tab on" type="button" data-tab="login">登录</button>'
++      + '<button class="tfa-tab" type="button" data-tab="register">注册</button></div>'
++      + '<form class="tfa-form" id="tfaLoginForm" autocomplete="on">'
++      + '<div class="tfa-field"><label>账号</label>'
++      + '<input class="tfa-input" id="tfaLoginUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" placeholder="例如 piaony"></div>'
++      + '<div class="tfa-field"><label>密码</label>'
++      + '<input class="tfa-input" id="tfaLoginPass" type="password" autocomplete="current-password" placeholder="输入密码"></div>'
++      + '<div class="tfa-field"><label>验证码</label>'
++      + '<div class="tfa-cap"><input class="tfa-input" id="tfaLoginCap" type="text" inputmode="numeric" maxlength="4" placeholder="4 位数字">'
++      + '<canvas class="tfa-canvas" id="tfaCanvas" width="96" height="40" title="点一下换一张"></canvas></div>'
++      + '<div class="tfa-cap-tip">看不清？点右侧图片换一张</div></div>'
++      + '<button class="tfa-submit" type="submit">登录</button>'
++      + '<div class="tfa-foot"><button class="tfa-link sub" type="button" data-act="forgot">忘记密码</button>'
++      + '<button class="tfa-link" type="button" data-act="to-register">没有账号？去注册</button></div>'
++      + '</form>'
++      + '<form class="tfa-form" id="tfaRegForm" hidden>'
++      + '<div class="tfa-field"><label>账号</label>'
++      + '<input class="tfa-input" id="tfaRegUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" placeholder="3–16 位，字母/数字/下划线"></div>'
++      + '<div class="tfa-field"><label>密码</label>'
++      + '<input class="tfa-input" id="tfaRegPass" type="password" autocomplete="new-password" placeholder="至少 8 位"></div>'
++      + '<div class="tfa-field"><label>确认密码</label>'
++      + '<input class="tfa-input" id="tfaRegPass2" type="password" autocomplete="new-password" placeholder="再输一次"></div>'
++      + '<div class="tfa-field"><label>邮箱（选填，用于找回密码）</label>'
++      + '<input class="tfa-input" id="tfaRegMail" type="email" autocapitalize="off" placeholder="不填也能正常使用"></div>'
++      + '<div class="tfa-field"><label>验证码</label>'
++      + '<div class="tfa-cap"><input class="tfa-input" id="tfaRegCap" type="text" inputmode="numeric" maxlength="4" placeholder="4 位数字">'
++      + '<canvas class="tfa-canvas" id="tfaRegCanvas" width="96" height="40" title="点一下换一张"></canvas></div>'
++      + '<div class="tfa-cap-tip">看不清？点右侧图片换一张</div></div>'
++      + '<div class="tfa-hint">注册即表示同意《社区规范》。账号仅支持字母、数字、下划线，昵称可注册后修改。</div>'
++      + '<button class="tfa-submit" type="submit">创建账号</button>'
++      + '<div class="tfa-foot"><button class="tfa-link sub" type="button" data-act="forgot">忘记密码</button>'
++      + '<button class="tfa-link" type="button" data-act="to-login">已有账号？去登录</button></div>'
++      + '</form>'
++      + '<div class="tfa-msg" id="tfaMsg"></div>';
++    mask.appendChild(card);
++    document.body.appendChild(mask);
++
++    msgEl = card.querySelector('#tfaMsg');
++    formLogin = card.querySelector('#tfaLoginForm');
++    formReg = card.querySelector('#tfaRegForm');
++    tabLogin = card.querySelector('[data-tab="login"]');
++    tabReg = card.querySelector('[data-tab="register"]');
++    inputs = {
++      user: card.querySelector('#tfaLoginUser'),
++      pass: card.querySelector('#tfaLoginPass'),
++      cap: card.querySelector('#tfaLoginCap'),
++      ruser: card.querySelector('#tfaRegUser'),
++      rpass: card.querySelector('#tfaRegPass'),
++      rpass2: card.querySelector('#tfaRegPass2'),
++      rmail: card.querySelector('#tfaRegMail'),
++      rcap: card.querySelector('#tfaRegCap')
++    };
++
++    card.querySelector('.tfa-x').addEventListener('click', close);
++    mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
++    tabLogin.addEventListener('click', function () { setMode('login'); });
++    tabReg.addEventListener('click', function () { setMode('register'); });
++    card.addEventListener('click', function (e) {
++      var t = e.target.closest('[data-act]');
++      if (!t) return;
++      var act = t.getAttribute('data-act');
++      if (act === 'to-register') setMode('register');
++      if (act === 'to-login') setMode('login');
++      if (act === 'forgot') forgot();
++    });
++    card.querySelectorAll('.tfa-canvas').forEach(function (cv) {
++      cv.addEventListener('click', function () { drawCaptcha(); msg(''); });
++    });
++    formLogin.addEventListener('submit', submitLogin);
++    formReg.addEventListener('submit', submitRegister);
++    document.addEventListener('keydown', function (e) {
++      if (e.key === 'Escape' && mask && mask.classList.contains('on')) close();
++    });
++  }
++
++  function setMode(mode) {
++    st.mode = mode === 'register' ? 'register' : 'login';
++    var isReg = st.mode === 'register';
++    formLogin.hidden = isReg;
++    formReg.hidden = !isReg;
++    tabLogin.classList.toggle('on', !isReg);
++    tabReg.classList.toggle('on', isReg);
++    card.querySelector('#tfaTitle').textContent = isReg ? '注册挞飞账号' : '登录挞飞';
++    card.querySelector('#tfaSub').textContent = isReg
++      ? '自定义账号即可，不需要邮箱验证'
++      : '登录后同步收藏、浏览记录和伙伴进度';
++    msg('');
++    drawCaptcha();
++    setTimeout(function () {
++      var f = isReg ? inputs.ruser : inputs.user;
++      if (f) { try { f.focus(); } catch (e) {} }
++    }, 60);
++  }
++
++  function forgot() {
++    msg('忘记密码：注册时填了邮箱的，把账号 + 邮箱发到 QQ 3659229103（或 Telegram @piaopiaony），'
++      + '核验后帮你重置；没填邮箱的账号暂不支持自助找回。', true);
++  }
++
++  function open(mode) {
++    buildUI();
++    mask.classList.add('on');
++    document.body.style.overflow = 'hidden';
++    setMode(mode || 'login');
++  }
++
++  function close() {
++    if (!mask) return;
++    mask.classList.remove('on');
++    document.body.style.overflow = '';
++  }
++
++  /* ---------- 网络 ---------- */
++  function normalizeUser(v) {
++    return String(v || '').trim().toLowerCase();
++  }
++
++  function validUser(u) {
++    return /^[a-z0-9_]{3,16}$/.test(u);
++  }
++
++  function api(path, body, token) {
++    var headers = { 'apikey': KEY, 'Content-Type': 'application/json' };
++    if (token) headers.Authorization = 'Bearer ' + token;
++    return fetch(ORIGIN + '/auth/v1' + path, {
++      method: 'POST',
++      headers: headers,
++      body: JSON.stringify(body || {})
++    }).then(function (r) {
++      return r.text().then(function (txt) {
++        var data = {};
++        try { data = JSON.parse(txt); } catch (e) {}
++        if (!r.ok) {
++          var m = data.msg || data.message || data.error_description || data.error || ('请求失败（' + r.status + '）');
++          var err = new Error(friendly(m));
++          err.status = r.status;
++          throw err;
++        }
++        return data;
++      });
++    });
++  }
++
++  function friendly(m) {
++    var s = String(m || '');
++    if (/Invalid login credentials/i.test(s)) return '账号或密码不正确';
++    if (/already registered|already been registered|User already exists/i.test(s)) return '这个账号已经被注册了，换一个或直接登录';
++    if (/Password should be at least/i.test(s)) return '密码太短，至少要 8 位';
++    if (/Email address .* is invalid/i.test(s)) return '账号格式不对，只能用字母、数字、下划线';
++    if (/For security purposes/i.test(s)) return '操作太快了，等几秒再试';
++    if (/Failed to fetch|NetworkError|Load failed/i.test(s)) return '网络不太稳定，检查一下网络再试';
++    return s;
++  }
++
++  function saveSession(data) {
++    if (!data || !data.access_token) return false;
++    var ss = window.TafeiSession;
++    if (!ss) return false;
++    ss.save({
++      access_token: data.access_token,
++      refresh_token: data.refresh_token || '',
++      expires_at: data.expires_at || (Math.floor(Date.now() / 1000) + (data.expires_in || 3600)),
++      expires_in: data.expires_in || 3600,
++      token_type: data.token_type || 'bearer',
++      user: data.user || null
++    });
++    try { if (ss.broadcast) ss.broadcast(); } catch (e) {}
++    try { window.dispatchEvent(new CustomEvent('tafei-auth-done', { detail: { session: data } })); } catch (e) {}
++    return true;
++  }
++
++  function lock(on) {
++    st.busy = on;
++    card.querySelectorAll('.tfa-submit').forEach(function (b) {
++      b.disabled = on;
++      b.textContent = on ? '请稍候…' : (st.mode === 'register' ? '创建账号' : '登录');
++    });
++  }
++
++  function submitLogin(e) {
++    e.preventDefault();
++    if (st.busy) return;
++    var u = normalizeUser(inputs.user.value);
++    var p = inputs.pass.value;
++    var c = inputs.cap.value.trim();
++    if (!validUser(u)) { msg('账号是 3–16 位字母、数字或下划线'); return; }
++    if (!p) { msg('请输入密码'); return; }
++    if (c !== st.code) { msg('验证码不对，已换一张'); drawCaptcha(); inputs.cap.value = ''; return; }
++
++    lock(true);
++    msg('正在登录…', true);
++    api('/token?grant_type=password', { email: u + SUFFIX, password: p }).then(function (data) {
++      if (!saveSession(data)) throw new Error('登录状态保存失败，请重试');
++      lock(false);
++      close();
++      showToast('登录成功，欢迎回来');
++    }).catch(function (err) {
++      lock(false);
++      msg(err.message || '登录失败，请重试');
++      drawCaptcha();
++      inputs.cap.value = '';
++    });
++  }
++
++  function submitRegister(e) {
++    e.preventDefault();
++    if (st.busy) return;
++    var u = normalizeUser(inputs.ruser.value);
++    var p = inputs.rpass.value;
++    var p2 = inputs.rpass2.value;
++    var mail = String(inputs.rmail.value || '').trim();
++    var c = inputs.rcap.value.trim();
++    if (!validUser(u)) { msg('账号是 3–16 位字母、数字或下划线'); return; }
++    if (p.length < 8) { msg('密码至少 8 位'); return; }
++    if (p !== p2) { msg('两次输入的密码不一致'); return; }
++    if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { msg('邮箱格式看着不太对，也可以留空'); return; }
++    if (c !== st.code) { msg('验证码不对，已换一张'); drawCaptcha(); inputs.rcap.value = ''; return; }
++
++    lock(true);
++    msg('正在创建账号…', true);
++    api('/signup', {
++      email: u + SUFFIX,
++      password: p,
++      data: { username: u, nickname: u, email_bind: mail, agreed_at: new Date().toISOString() }
++    }).then(function (data) {
++      if (!data || !data.access_token) {
++        throw new Error('这个账号可能已被注册，试试直接登录');
++      }
++      if (!saveSession(data)) throw new Error('登录状态保存失败，请重试');
++      if (mail) {
++        fetch(ORIGIN + '/auth/v1/user', {
++          method: 'PUT',
++          headers: { 'apikey': KEY, 'Content-Type': 'application/json', Authorization: 'Bearer ' + data.access_token },
++          body: JSON.stringify({ data: { username: u, nickname: u, email_bind: mail } })
++        }).catch(function () {});
++      }
++      lock(false);
++      close();
++      showToast('账号已创建，已帮你登录');
++    }).catch(function (err) {
++      lock(false);
++      msg(err.message || '注册失败，请重试');
++      drawCaptcha();
++      inputs.rcap.value = '';
++    });
++  }
++
++  window.TafeiAuth = {
++    open: open,
++    close: close,
++    isOpen: function () { return !!(mask && mask.classList.contains('on')); },
++    message: function (text) { buildUI(); open('login'); msg(text, true); }
++  };
++})();
+diff --git a/www/my.html b/www/my.html
+index 13eaec8..4b29f86 100644
+--- a/www/my.html
++++ b/www/my.html
+@@ -77,8 +77,10 @@ body.light{--bg:#f3f6fc;--panel:rgba(255,255,255,.92);--line:rgba(55,91,160,.16)
+ </style>
+ <link rel="stylesheet" href="css/app-shell.css?v=3">
+ <link rel="stylesheet" href="css/tafei-ico.css?v=34">
++<link rel="stylesheet" href="css/tafei-auth.css?v=43">
+ <script src="js/tafei-icons.js?v=34" defer></script>
+ <script src="js/app-shell.js?v=3" defer></script>
++<script src="js/tafei-auth.js?v=43" defer></script>
+ </head>
+ <body>
+ 
+diff --git a/www/xiaota.html b/www/xiaota.html
+index 840c3ef..1ddf121 100644
+--- a/www/xiaota.html
++++ b/www/xiaota.html
+@@ -252,5 +252,6 @@
+ <script src="js/xiaota-pet.js?v=2"></script>
+ <script src="js/spirit-core.js?v=14"></script>
+ <script src="js/spirit-widget.js?v=21"></script>
++<script src="js/spirit-extra.js?v=43"></script>
+ </body>
+ </html>
