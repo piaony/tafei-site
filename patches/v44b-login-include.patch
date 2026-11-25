@@ -1,0 +1,14 @@
+diff --git a/www/my.html b/www/my.html
+index 13eaec8..4b29f86 100644
+--- a/www/my.html
++++ b/www/my.html
+@@ -77,8 +77,10 @@ body.light{--bg:#f3f6fc;--panel:rgba(255,255,255,.92);--line:rgba(55,91,160,.16)
+ </style>
+ <link rel="stylesheet" href="css/app-shell.css?v=3">
+ <link rel="stylesheet" href="css/tafei-ico.css?v=34">
++<link rel="stylesheet" href="css/tafei-auth.css?v=43">
+ <script src="js/tafei-icons.js?v=34" defer></script>
+ <script src="js/app-shell.js?v=3" defer></script>
++<script src="js/tafei-auth.js?v=43" defer></script>
+ </head>
+ <body>

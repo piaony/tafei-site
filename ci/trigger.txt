@@ -1,1 +1,1 @@
-trigger v44 login+spirit 2026-11-25
+trigger v44b login include 2026-11-25
