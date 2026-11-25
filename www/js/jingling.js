@@ -11,6 +11,7 @@
   var foodGrid = $('foodGrid');
   var toyGrid = $('toyGrid');
   var modal = $('spiritModal');
+  var galleryModal = $('spiritGalleryModal');
   var toastTimer = 0;
   var currentModal = null;
   var busy = false;
@@ -360,6 +361,17 @@
         + cardButton(spirit, unlocked, isSelected)
         + '</div></article>';
     }).join('');
+    var countText = list.length + ' 位伙伴可获取';
+    var countNode = $('galleryCount');
+    if (countNode) countNode.textContent = String(list.length);
+    var modalCount = $('galleryModalCount');
+    if (modalCount) modalCount.textContent = countText;
+    var faceNode = $('galleryFace');
+    var faceSpirit = (selected && core.spiritById(selected)) || list[0];
+    if (faceNode && faceSpirit) {
+      var faceSkin = core.skinsOf(faceSpirit.id)[0];
+      if (faceSkin) faceNode.src = webpGrid(faceSkin.img);
+    }
     Array.prototype.forEach.call(grid.querySelectorAll('img[data-fallback]'), function (img) {
       img.addEventListener('error', function () {
         if (img.dataset.fallbackApplied) return;
@@ -463,7 +475,20 @@
     $('spiritPlay').textContent = toyCount ? '玩玩具 · ' + toyCount + ' 种' : '玩玩具';
   }
 
+  function openGallery() {
+    if (!galleryModal) return;
+    galleryModal.hidden = false;
+    document.body.classList.add('spirit-modal-open');
+    renderGrid();
+  }
+  function closeGallery() {
+    if (!galleryModal) return;
+    galleryModal.hidden = true;
+    if (!modal || modal.hidden) document.body.classList.remove('spirit-modal-open');
+  }
+
   function openSpirit(id) {
+    closeGallery();
     currentModal = id;
     modal.hidden = false;
     document.body.classList.add('spirit-modal-open');
@@ -837,11 +862,16 @@
     }
   });
 
+  $('galleryOpen')?.addEventListener('click', openGallery);
+  $('galleryClose')?.addEventListener('click', closeGallery);
+  $('galleryCloseBottom')?.addEventListener('click', closeGallery);
+  galleryModal?.addEventListener('click', function (event) { if (event.target === galleryModal) closeGallery(); });
   $('spiritModalClose')?.addEventListener('click', closeModal);
   modal?.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       if (!$('memorialModal')?.hidden) closeMemorial();
+      else if (galleryModal && !galleryModal.hidden) closeGallery();
       else if (!$('spiritModal')?.hidden) closeModal();
     }
   });
@@ -904,7 +934,7 @@
   $('widgetToggle')?.addEventListener('click', function () {
     if (!core.current()) {
       toast('先在图鉴里免费领取小挞飞，再放出全站挂件。');
-      document.getElementById('spiritGrid')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+      openGallery();
       return;
     }
     var nextOn = !core.state().widget.on;
