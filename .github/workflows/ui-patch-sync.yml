@@ -18,12 +18,12 @@ jobs:
       - name: Fetch assets
         run: |
           set -e
-          mkdir -p patches www/js
+          mkdir -p patches
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/HVOUFsMwlg" -o patches/v79-overlay.patch
-          wc -c patches/v79-overlay.patch
-          if ! git apply --check -p1 patches/v79-overlay.patch; then
-            echo "::error::v79 overlay patch cannot apply"
+            "https://aka.doubaocdn.com/s/bprpuL6CPH" -o patches/v83-effects.patch
+          wc -c patches/v83-effects.patch
+          if ! git apply --check -p1 patches/v83-effects.patch; then
+            echo "::error::v83 effects patch cannot apply"
             exit 1
           fi
           echo "patch check ok"
@@ -32,10 +32,10 @@ jobs:
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/v79-overlay.patch
+          git add patches/v83-effects.patch
           if git diff --cached --quiet; then
             echo "no change"
           else
-            git commit -m "chore(ci): v79 desktop spirit overlay patch"
+            git commit -m "chore(ci): v83 overlay effects and layout patch"
             git push origin HEAD:app/capacitor-setup
           fi
