@@ -1,6 +1,6 @@
 {
-  "code": 88,
-  "name": "1.0.88",
-  "notes": "给桌面精灵加一个只读的「桌面互动探测」：先摸清 ColorOS 16 + KernelSU 的桌面包名、launcher.db 和图标坐标，不改动任何桌面图标。\n1. 精灵页「桌面精灵」设置新增「桌面互动探测」，点击「检测环境」即可读取；\n2. 显示 Android / ColorOS 版本、默认桌面包名、Root 授权状态、无障碍状态；\n3. 读取桌面的 launcher.db / favorites 表，显示字段、容器分布、快捷方式数量和前 12 个图标样例；\n4. 本版只读，不删除、不移动、不写数据库；无障碍服务只注册占位，供下一版使用；\n5. 首次检测可能触发 KernelSU 授权弹窗，拒绝后不会做任何改动。",
+  "code": 90,
+  "name": "1.0.90",
+  "notes": "桌面探测继续升级：这一版会列出 ColorOS 16 桌面的数据库目录、候选 db 文件、favorites 表状态和打开失败原因，方便定位数据库读取问题。\n1. 探测卡片新增「诊断」输出，显示 launcher 数据库目录与目录项；\n2. 逐个尝试候选 db 文件，记录 cat 读取失败、favorites 缺失、intent 字段缺失或 SQLite 打开失败；\n3. 增加输出区域高度，原因不会再被裁掉；\n4. 仍然只读，不删除、不移动、不写数据库；\n5. Root 已确认正常（KernelSU / uid=0），本版重点排查数据库路径、加密或 SELinux 访问。",
   "url": "https://github.com/Piaony/tafei-site/releases/latest/download/app-release.apk"
 }
