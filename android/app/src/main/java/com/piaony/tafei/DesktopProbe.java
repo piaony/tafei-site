@@ -103,6 +103,10 @@ public final class DesktopProbe {
 
             diagCmd(diag, "data 列表", "ls -la /data", 320);
             diagCmd(diag, "data/user/0 列表", "ls -la /data/user/0", 460);
+            diagCmd(diag, "data/user_de/0 列表", "ls -la /data/user_de/0", 460);
+            diagCmd(diag, "boot 数据目录", "ls -la /data/user_de/0/com.android.launcher", 560);
+            diagCmd(diag, "boot databases", "ls -la /data/user_de/0/com.android.launcher/databases", 520);
+            diagCmd(diag, "boot db 查找", "find -L /data/user_de/0/com.android.launcher -maxdepth 4 -name '*.db'", 640);
             diagCmd(diag, "包数据目录", "ls -la /data/data/com.android.launcher", 360);
             diagCmd(diag, "包 databases", "ls -la /data/data/com.android.launcher/databases", 360);
             diagCmd(diag, "launcher.db 全盘查找", "find /data/data /data/user/0 /data/user_de/0 -maxdepth 3 -name launcher.db", 420);
