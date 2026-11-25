@@ -1,6 +1,6 @@
 {
-  "code": 103,
-  "name": "1.0.103",
-  "notes": "v103 核查第二个用户：dumpsys 同时给出了 /data/user_de/0 和 /data/user_de/10 两个桌面包数据目录，v103 直接检查 /data/user/10 和 /data/user_de/10，并读取当前用户和用户列表。\n1. 判断桌面是否运行在 user 10；\n2. 直接列 user10 的桌面数据目录；\n3. 在 user10 下查找所有 .db；\n4. 同时保留 user0 的路径结果；\n5. 仍然只读，不删除、不移动、不写数据库。",
+  "code": 105,
+  "name": "1.0.105",
+  "notes": "v105 用正在运行的桌面进程直接找数据库：读取 launcher 的 pid，检查它打开的文件描述符里有没有 .db / launcher / favorite，再查 user10 根目录和全盘 launcher.db。\n1. 桌面进程的打开文件里会暴露真实数据库路径；\n2. 同时列出 user10 与 user_de/10 根目录；\n3. 全局 find launcher.db 覆盖 data/system、data/oppo；\n4. 仍然只读，不删除、不移动、不写数据库；\n5. 如果 fd 里没有数据库，说明 ColorOS 桌面不是标准 SQLite，改走无障碍。",
   "url": "https://github.com/Piaony/tafei-site/releases/latest/download/app-release.apk"
 }
