@@ -1,6 +1,7 @@
 package com.piaony.tafei;
 
 import android.accessibilityservice.GestureDescription;
+import android.content.Intent;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -59,6 +60,13 @@ final class SpiritDesktopActions {
             final String type = action == null ? "move" : action;
             final String label = items.get(0).label;
             SpiritAccessibilityService.publishActionAt("running", label, "start", 0, 0, items.get(0).pkg);
+            try {
+                Intent home = new Intent(Intent.ACTION_MAIN);
+                home.addCategory(Intent.CATEGORY_HOME);
+                home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                service.startActivity(home);
+            } catch (Throwable ignored) {
+            }
             MAIN.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -71,7 +79,7 @@ final class SpiritDesktopActions {
                         fail(type, label, "access-error:" + t.getMessage(), 0, 0);
                     }
                 }
-            }, 650L);
+            }, 1100L);
             return "started";
         } catch (Throwable t) {
             running = false;
