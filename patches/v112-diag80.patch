@@ -1,0 +1,22 @@
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 4c6b042..9c0c26b 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1099,7 +1099,7 @@
+       lines.push('');
+       lines.push('诊断：');
+       if (diagLines.length) {
+-        diagLines.slice(0, 30).forEach(function (line, index) {
++        diagLines.slice(0, 80).forEach(function (line, index) {
+           lines.push((index + 1) + '. ' + String(line).slice(0, 320));
+         });
+       } else {
+@@ -1111,7 +1111,7 @@
+       lines.push('');
+       lines.push('诊断：');
+       if (diagLines.length) {
+-        diagLines.slice(0, 30).forEach(function (line, index) {
++        diagLines.slice(0, 80).forEach(function (line, index) {
+           lines.push((index + 1) + '. ' + String(line).slice(0, 320));
+         });
+       } else {
