@@ -316,7 +316,7 @@ body.spirit-memorial-open{overflow:hidden}
 .desktop-probe[hidden]{display:none!important}
 .desktop-probe-btn{width:100%;min-height:32px;margin-top:8px;border:1px solid rgba(110,231,255,.3);border-radius:9px;background:rgba(110,231,255,.1);color:var(--sp-cyan);font:inherit;font-size:11px;cursor:pointer}
 .desktop-probe-btn:disabled{opacity:.55;cursor:default}
-.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:230px;overflow:auto}
+.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:360px;overflow:auto}
 .desktop-probe-out b{color:var(--ang-text);font-weight:500}
 @media(max-width:620px){
   .widget-settings{padding:10px;gap:8px}

@@ -1094,6 +1094,13 @@
         lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
       });
       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
+      if (data.diag && data.diag.length) {
+        lines.push('');
+        lines.push('诊断：');
+        data.diag.slice(0, 10).forEach(function (line, index) {
+          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
+        });
+      }
     } else {
       lines.push('数据库：未读取');
       lines.push('原因：' + (data.dbError || '未知'));

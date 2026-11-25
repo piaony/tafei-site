@@ -114,9 +114,10 @@ public final class DesktopProbe {
             add(packages, "com.android.launcher");
 
             String dirsOut = findDatabasesDirs(packages);
+            JSONArray diag = new JSONArray();
             JSONObject selected = null;
             for (String dir : uniqueLines(dirsOut)) {
-                JSONObject db = tryOpenLauncherDatabase(context, dir);
+                JSONObject db = tryOpenLauncherDatabase(context, dir, diag);
                 if (db != null) {
                     selected = db;
                     break;
@@ -125,6 +126,7 @@ public final class DesktopProbe {
 
             if (selected == null) {
                 out.put("dbError", "没有找到可读的 launcher.db / favorites 表；可能被加密或桌面包名不同");
+                out.put("diag", diag);
                 out.put("samples", new JSONArray());
                 out.put("columns", new JSONArray());
                 out.put("containers", new JSONObject());
@@ -134,6 +136,7 @@ public final class DesktopProbe {
                 out.put("dbFile", "");
             } else {
                 out.put("dbError", "");
+                out.put("diag", diag);
                 out.put("dbPath", selected.optString("path"));
                 out.put("dbFile", selected.optString("file"));
                 out.put("columns", selected.optJSONArray("columns"));
@@ -153,11 +156,13 @@ public final class DesktopProbe {
         return out.toString();
     }
 
-    private static JSONObject tryOpenLauncherDatabase(Context context, String remoteDir) {
+    private static JSONObject tryOpenLauncherDatabase(Context context, String remoteDir, JSONArray diag) {
         List<String> names = new ArrayList<>();
-        RootBridge.Result ls = RootBridge.run("ls -1 " + quote(remoteDir));
+        addDiag(diag, "目录：" + remoteDir);
+        RootBridge.Result ls = RootBridge.run("ls -la " + quote(remoteDir));
+        addDiag(diag, "目录项：" + trim(ls.output, 900));
         for (String name : uniqueLines(ls.output)) {
-            if (name.endsWith(".db") && (name.contains("launcher") || name.equals("launcher.db"))) {
+            if (name.endsWith(".db") && !name.endsWith("-wal") && !name.endsWith("-shm")) {
                 names.add(name);
             }
         }
@@ -167,7 +172,10 @@ public final class DesktopProbe {
             if (!cache.exists() && !cache.mkdirs()) continue;
             File localDb = new File(cache, "launcher_probe.db");
             String remotePath = remoteDir + "/" + name;
-            if (!RootBridge.copyToFile(remotePath, localDb)) continue;
+            if (!RootBridge.copyToFile(remotePath, localDb)) {
+                addDiag(diag, "跳过 " + name + "：cat 读取失败（文件权限或路径问题）");
+                continue;
+            }
             // WAL 不能漏；只读打开时也要把 -wal/-shm 带上。
             RootBridge.copyToFile(remotePath + "-wal", new File(localDb.getAbsolutePath() + "-wal"));
             RootBridge.copyToFile(remotePath + "-shm", new File(localDb.getAbsolutePath() + "-shm"));
@@ -178,7 +186,10 @@ public final class DesktopProbe {
             try {
                 db = SQLiteDatabase.openDatabase(localDb.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
                 tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='favorites'", null);
-                if (!tables.moveToFirst()) continue;
+                if (!tables.moveToFirst()) {
+                    addDiag(diag, name + "：没有 favorites 表");
+                    continue;
+                }
                 tables.close();
                 tables = null;
 
@@ -193,7 +204,10 @@ public final class DesktopProbe {
                 }
                 columns.close();
                 columns = null;
-                if (!columnNames.contains("intent")) continue;
+                if (!columnNames.contains("intent")) {
+                    addDiag(diag, name + "：favorites 缺少 intent 字段");
+                    continue;
+                }
 
                 JSONObject containers = new JSONObject();
                 JSONArray samples = new JSONArray();
@@ -242,8 +256,8 @@ public final class DesktopProbe {
                 result.put("totalRows", totalRows);
                 result.put("samples", samples);
                 return result;
-            } catch (Throwable ignored) {
-                // 换下一个候选数据库
+            } catch (Throwable t) {
+                addDiag(diag, name + "：打开失败 " + String.valueOf(t.getMessage()));
             } finally {
                 if (columns != null) columns.close();
                 if (tables != null) tables.close();
@@ -356,6 +370,13 @@ public final class DesktopProbe {
         if (value == null) return "";
         String oneLine = value.replace('\n', ' ').trim();
         return oneLine.length() <= max ? oneLine : oneLine.substring(0, max) + "…";
+    }
+
+    private static void addDiag(JSONArray diag, String text) {
+        try {
+            diag.put(text);
+        } catch (Exception ignored) {
+        }
     }
 
     private static String quote(String value) {
