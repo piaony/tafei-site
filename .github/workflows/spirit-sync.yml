@@ -15,12 +15,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Apply patch
         run: |
-          curl -fsSL --retry 3 "https://aka.doubaocdn.com/s/eMVWVLjIJD" -o /tmp/spirit.patch
+          curl -fsSL --retry 3 "https://aka.doubaocdn.com/s/BS82BBt0ID" -o /tmp/spirit.patch
           git apply -p1 /tmp/spirit.patch
       - name: Commit
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add jingling.html
-          git commit -m "chore: bump spirit house css cache version"
+          git add css/spirit-house.css
+          git commit -m "feat: compact spirit cards inside gallery window"
           git push origin HEAD:main
