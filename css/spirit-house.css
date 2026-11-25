@@ -382,3 +382,17 @@ body.spirit-memorial-open{overflow:hidden}
  .spirit-gallery-foot{padding:9px 14px calc(9px + env(safe-area-inset-bottom))}
  .spirit-gallery-foot span{max-width:62%;line-height:1.35}
 }
+
+/* v83：窄屏兜底。伙伴坞和首屏强制单列，避免被右侧状态栏挤成竖排单字。 */
+.spirit-hero{grid-template-columns:minmax(0,1fr)}
+.spirit-side{max-width:320px}
+.partner-dock{grid-template-columns:minmax(0,1fr)}
+.partner-main,.partner-status,.partner-copy,.partner-actions{min-width:0}
+@media(max-width:1200px){
+ .spirit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+ .bond-levels{display:flex;grid-template-columns:none;overflow-x:auto;gap:6px;padding-bottom:6px}
+ .bond-chip{flex:0 0 94px;min-width:94px}
+ .partner-actions a,.partner-actions button{white-space:normal;line-height:1.35}
+}
