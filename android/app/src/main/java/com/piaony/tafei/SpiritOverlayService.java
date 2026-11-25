@@ -424,12 +424,12 @@ public class SpiritOverlayService extends Service {
         String folder = id + "-v23";
         InputStream input = null;
         try {
-            input = getAssets().open("public/assets/spirits/" + folder + "/main.png");
+            input = getAssets().open("public/assets/spirits/" + folder + "/main.webp");
             return BitmapFactory.decodeStream(input);
         } catch (Exception e) {
             if (!"xiaota".equals(id)) {
                 try {
-                    input = getAssets().open("public/assets/spirits/xiaota-v23/main.png");
+                    input = getAssets().open("public/assets/spirits/xiaota-v23/main.webp");
                     return BitmapFactory.decodeStream(input);
                 } catch (Exception ignored) {
                 }
