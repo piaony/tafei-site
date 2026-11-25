@@ -51,7 +51,7 @@
       extra.id = 'swExtra';
       extra.setAttribute('aria-hidden', 'true');
       extra.style.cssText = 'position:absolute;left:50%;bottom:calc(100% - 2px);transform:translateX(-50%);'
-        + 'max-width:190px;padding:7px 11px;border-radius:12px;font-size:11.5px;line-height:1.45;'
+        + 'width:max-content;max-width:min(210px,58vw);padding:7px 11px;border-radius:12px;font-size:11.5px;line-height:1.45;'
         + 'text-align:center;color:#eef4ff;background:rgba(13,26,48,.92);'
         + 'border:1px solid rgba(130,170,255,.38);box-shadow:0 8px 20px rgba(3,9,22,.42);'
         + 'opacity:0;transition:opacity .26s ease,transform .26s ease;pointer-events:none;z-index:5;'
