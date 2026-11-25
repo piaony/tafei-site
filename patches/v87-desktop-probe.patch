@@ -1,0 +1,780 @@
+diff --git a/android/app/src/main/AndroidManifest.xml b/android/app/src/main/AndroidManifest.xml
+index c57e6a4..03c7765 100644
+--- a/android/app/src/main/AndroidManifest.xml
++++ b/android/app/src/main/AndroidManifest.xml
+@@ -1,6 +1,17 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ 
++    <queries>
++        <intent>
++            <action android:name="android.intent.action.MAIN" />
++            <category android:name="android.intent.category.HOME" />
++        </intent>
++        <intent>
++            <action android:name="android.intent.action.MAIN" />
++            <category android:name="android.intent.category.LAUNCHER" />
++        </intent>
++    </queries>
++
+     <application
+         android:allowBackup="true"
+         android:icon="@mipmap/ic_launcher"
+@@ -34,6 +45,19 @@
+                 android:value="desktop companion overlay" />
+         </service>
+ 
++        <service
++            android:name=".SpiritAccessibilityService"
++            android:exported="true"
++            android:label="@string/accessibility_service_label"
++            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
++            <intent-filter>
++                <action android:name="android.accessibilityservice.AccessibilityService" />
++            </intent-filter>
++            <meta-data
++                android:name="android.accessibilityservice"
++                android:resource="@xml/accessibility_service_config" />
++        </service>
++
+         <receiver
+             android:name=".SpiritOverlayBootReceiver"
+             android:enabled="true"
+diff --git a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+new file mode 100644
+index 0000000..d048d62
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+@@ -0,0 +1,373 @@
++package com.piaony.tafei;
++
++import android.content.ComponentName;
++import android.content.Context;
++import android.content.Intent;
++import android.content.pm.ApplicationInfo;
++import android.content.pm.PackageInfo;
++import android.content.pm.PackageManager;
++import android.content.pm.ResolveInfo;
++import android.database.Cursor;
++import android.database.sqlite.SQLiteDatabase;
++import android.os.Build;
++import android.provider.Settings;
++
++import org.json.JSONArray;
++import org.json.JSONObject;
++
++import java.io.ByteArrayOutputStream;
++import java.io.File;
++import java.io.InputStream;
++import java.nio.charset.StandardCharsets;
++import java.util.ArrayList;
++import java.util.LinkedHashSet;
++import java.util.List;
++import java.util.Set;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/**
++ * ColorOS 桌面环境只读探测。
++ * 不写 launcher.db，不删除/移动任何图标；只把包名、数据库和字段结构报给网页。
++ */
++public final class DesktopProbe {
++
++    private static final Pattern COMPONENT = Pattern.compile("component=([^;]+)");
++
++    private DesktopProbe() {}
++
++    public static String probe(Context context) {
++        JSONObject out = new JSONObject();
++        try {
++            out.put("ok", true);
++            out.put("readOnly", true);
++            out.put("android", Build.VERSION.RELEASE);
++            out.put("sdk", Build.VERSION.SDK_INT);
++            out.put("display", Build.DISPLAY);
++            out.put("model", (Build.MANUFACTURER + " " + Build.MODEL).trim());
++
++            String colorOs = firstNonEmpty(
++                getProp("ro.build.version.oplusrom"),
++                getProp("ro.build.version.opporom"),
++                getProp("ro.build.version.realmeui")
++            );
++            out.put("coloros", colorOs);
++
++            String launcherPackage = null;
++            String launcherVersion = "";
++            String launcherLabel = "";
++            try {
++                Intent home = new Intent(Intent.ACTION_MAIN);
++                home.addCategory(Intent.CATEGORY_HOME);
++                ResolveInfo ri = context.getPackageManager().resolveActivity(home, PackageManager.MATCH_DEFAULT_ONLY);
++                if (ri != null && ri.activityInfo != null) {
++                    launcherPackage = ri.activityInfo.packageName;
++                    launcherLabel = String.valueOf(ri.loadLabel(context.getPackageManager()));
++                    try {
++                        PackageInfo pi = context.getPackageManager().getPackageInfo(launcherPackage, 0);
++                        launcherVersion = pi.versionName == null ? "" : pi.versionName;
++                    } catch (Exception ignored) {
++                    }
++                }
++            } catch (Exception ignored) {
++            }
++            out.put("launcherPackage", launcherPackage == null ? "" : launcherPackage);
++            out.put("launcherVersion", launcherVersion);
++            out.put("launcherLabel", launcherLabel);
++
++            boolean accessibilityEnabled = isAccessibilityEnabled(context);
++            out.put("accessibility", accessibilityEnabled ? "on" : "off");
++            out.put("accessibilityService", new ComponentName(context, SpiritAccessibilityService.class).flattenToString());
++
++            RootBridge.Result root = RootBridge.run("id");
++            boolean rootGranted = root.attempted && root.output != null && root.output.contains("uid=0");
++            out.put("root", rootGranted ? "granted" : (root.attempted ? "denied" : "no-su"));
++            out.put("rootOutput", trim(root.output, 120));
++
++            if (!rootGranted) {
++                out.put("dbError", "需要先在 KernelSU 里给挞飞授予超级用户权限");
++                out.put("samples", new JSONArray());
++                out.put("columns", new JSONArray());
++                out.put("containers", new JSONObject());
++                out.put("appShortcutCount", 0);
++                out.put("totalRows", 0);
++                out.put("dbPath", "");
++                out.put("dbFile", "");
++                out.put("desktopMode", "unknown");
++                return out.toString();
++            }
++
++            List<String> packages = new ArrayList<>();
++            add(packages, launcherPackage);
++            String pmOut = RootBridge.run("pm list packages").output;
++            for (String line : pmOut.split("\\r?\\n")) {
++                if (!line.startsWith("package:")) continue;
++                String pkg = line.substring("package:".length()).trim();
++                String low = pkg.toLowerCase();
++                if (low.contains("launcher") || low.contains("home")) add(packages, pkg);
++                if (packages.size() >= 12) break;
++            }
++            add(packages, "com.oppo.launcher");
++            add(packages, "com.coloros.launcher");
++            add(packages, "com.oplus.launcher");
++            add(packages, "com.android.launcher3");
++            add(packages, "com.android.launcher");
++
++            String dirsOut = findDatabasesDirs(packages);
++            JSONObject selected = null;
++            for (String dir : uniqueLines(dirsOut)) {
++                JSONObject db = tryOpenLauncherDatabase(context, dir);
++                if (db != null) {
++                    selected = db;
++                    break;
++                }
++            }
++
++            if (selected == null) {
++                out.put("dbError", "没有找到可读的 launcher.db / favorites 表；可能被加密或桌面包名不同");
++                out.put("samples", new JSONArray());
++                out.put("columns", new JSONArray());
++                out.put("containers", new JSONObject());
++                out.put("appShortcutCount", 0);
++                out.put("totalRows", 0);
++                out.put("dbPath", "");
++                out.put("dbFile", "");
++            } else {
++                out.put("dbError", "");
++                out.put("dbPath", selected.optString("path"));
++                out.put("dbFile", selected.optString("file"));
++                out.put("columns", selected.optJSONArray("columns"));
++                out.put("containers", selected.optJSONObject("containers"));
++                out.put("appShortcutCount", selected.optInt("appShortcutCount"));
++                out.put("totalRows", selected.optInt("totalRows"));
++                out.put("samples", selected.optJSONArray("samples"));
++                out.put("desktopMode", "unknown");
++            }
++        } catch (Throwable t) {
++            try {
++                out.put("ok", false);
++                out.put("dbError", "探测异常：" + String.valueOf(t.getMessage()));
++            } catch (Exception ignored) {
++            }
++        }
++        return out.toString();
++    }
++
++    private static JSONObject tryOpenLauncherDatabase(Context context, String remoteDir) {
++        List<String> names = new ArrayList<>();
++        RootBridge.Result ls = RootBridge.run("ls -1 " + quote(remoteDir));
++        for (String name : uniqueLines(ls.output)) {
++            if (name.endsWith(".db") && (name.contains("launcher") || name.equals("launcher.db"))) {
++                names.add(name);
++            }
++        }
++        for (String name : names) {
++            File cache = new File(context.getCacheDir(), "desktop_probe");
++            deleteTree(cache);
++            if (!cache.exists() && !cache.mkdirs()) continue;
++            File localDb = new File(cache, "launcher_probe.db");
++            String remotePath = remoteDir + "/" + name;
++            if (!RootBridge.copyToFile(remotePath, localDb)) continue;
++            // WAL 不能漏；只读打开时也要把 -wal/-shm 带上。
++            RootBridge.copyToFile(remotePath + "-wal", new File(localDb.getAbsolutePath() + "-wal"));
++            RootBridge.copyToFile(remotePath + "-shm", new File(localDb.getAbsolutePath() + "-shm"));
++
++            SQLiteDatabase db = null;
++            Cursor tables = null;
++            Cursor columns = null;
++            try {
++                db = SQLiteDatabase.openDatabase(localDb.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
++                tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='favorites'", null);
++                if (!tables.moveToFirst()) continue;
++                tables.close();
++                tables = null;
++
++                JSONObject result = new JSONObject();
++                JSONArray columnArray = new JSONArray();
++                Set<String> columnNames = new LinkedHashSet<>();
++                columns = db.rawQuery("PRAGMA table_info(favorites)", null);
++                while (columns.moveToNext()) {
++                    String col = columns.getString(columns.getColumnIndex("name"));
++                    columnNames.add(col);
++                    columnArray.put(col);
++                }
++                columns.close();
++                columns = null;
++                if (!columnNames.contains("intent")) continue;
++
++                JSONObject containers = new JSONObject();
++                JSONArray samples = new JSONArray();
++                int appShortcutCount = 0;
++                int totalRows = 0;
++
++                Cursor rows = null;
++                try {
++                    String order = columnNames.contains("screen") && columnNames.contains("cellY") && columnNames.contains("cellX")
++                        ? "screen, cellY, cellX" : null;
++                    rows = db.rawQuery("SELECT * FROM favorites" + (order == null ? "" : " ORDER BY " + order), null);
++                    while (rows.moveToNext()) {
++                        totalRows++;
++                        int itemType = intValue(rows, "itemType", -1);
++                        String container = stringValue(rows, "container");
++                        if (container != null) {
++                            int count = containers.optInt(container, 0) + 1;
++                            containers.put(container, count);
++                        }
++                        if (itemType != 0) continue;
++                        appShortcutCount++;
++                        if (samples.length() >= 12) continue;
++                        String intent = stringValue(rows, "intent");
++                        String component = componentOf(intent);
++                        String pkg = component == null ? "" : component.split("/")[0];
++                        String title = stringValue(rows, "title");
++                        String label = resolveLabel(context, pkg, title);
++                        JSONObject item = new JSONObject();
++                        item.put("label", label == null ? "" : label);
++                        item.put("package", pkg);
++                        item.put("component", component == null ? "" : component);
++                        item.put("screen", intValue(rows, "screen", -1));
++                        item.put("cellX", intValue(rows, "cellX", -1));
++                        item.put("cellY", intValue(rows, "cellY", -1));
++                        samples.put(item);
++                    }
++                } finally {
++                    if (rows != null) rows.close();
++                }
++
++                result.put("path", remotePath);
++                result.put("file", name);
++                result.put("columns", columnArray);
++                result.put("containers", containers);
++                result.put("appShortcutCount", appShortcutCount);
++                result.put("totalRows", totalRows);
++                result.put("samples", samples);
++                return result;
++            } catch (Throwable ignored) {
++                // 换下一个候选数据库
++            } finally {
++                if (columns != null) columns.close();
++                if (tables != null) tables.close();
++                if (db != null) db.close();
++                deleteTree(cache);
++            }
++        }
++        return null;
++    }
++
++    private static String findDatabasesDirs(List<String> packages) {
++        StringBuilder list = new StringBuilder();
++        for (String pkg : packages) {
++            String safe = pkg.replaceAll("[^a-zA-Z0-9._-]", "");
++            if (safe.isEmpty()) continue;
++            if (list.length() > 0) list.append(' ');
++            list.append(safe);
++        }
++        if (list.length() == 0) return "";
++        String cmd = "for p in " + list + "; do "
++            + "for d in /data/data/$p/databases /data/user/0/$p/databases /data/user_de/0/$p/databases; do "
++            + "if [ -d \"$d\" ]; then echo \"$d\"; fi; done; done";
++        return RootBridge.run(cmd).output;
++    }
++
++    private static String resolveLabel(Context context, String pkg, String title) {
++        if (title != null && !title.isEmpty()) return title;
++        if (pkg == null || pkg.isEmpty()) return "";
++        try {
++            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(pkg, 0);
++            return String.valueOf(ai.loadLabel(context.getPackageManager()));
++        } catch (Exception ignored) {
++            return pkg;
++        }
++    }
++
++    private static boolean isAccessibilityEnabled(Context context) {
++        try {
++            int enabled = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, 0);
++            if (enabled != 1) return false;
++            String services = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
++            if (services == null) return false;
++            String pkg = context.getPackageName();
++            String cls = SpiritAccessibilityService.class.getName();
++            String shortName = pkg + "/." + SpiritAccessibilityService.class.getSimpleName();
++            return services.contains(pkg + "/" + cls)
++                || services.contains(shortName)
++                || services.contains(new ComponentName(context, SpiritAccessibilityService.class).flattenToString());
++        } catch (Exception ignored) {
++            return false;
++        }
++    }
++
++    private static String getProp(String key) {
++        Process process = null;
++        try {
++            process = new ProcessBuilder("getprop", key).redirectErrorStream(true).start();
++            InputStream in = process.getInputStream();
++            ByteArrayOutputStream out = new ByteArrayOutputStream();
++            byte[] buffer = new byte[512];
++            int n;
++            while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n);
++            process.waitFor();
++            return new String(out.toByteArray(), StandardCharsets.UTF_8).trim();
++        } catch (Exception ignored) {
++            return "";
++        } finally {
++            if (process != null) process.destroy();
++        }
++    }
++
++    private static String componentOf(String intent) {
++        if (intent == null) return null;
++        Matcher m = COMPONENT.matcher(intent);
++        return m.find() ? m.group(1) : null;
++    }
++
++    private static String stringValue(Cursor cursor, String column) {
++        int index = cursor.getColumnIndex(column);
++        return index < 0 || cursor.isNull(index) ? null : cursor.getString(index);
++    }
++
++    private static int intValue(Cursor cursor, String column, int fallback) {
++        int index = cursor.getColumnIndex(column);
++        return index < 0 || cursor.isNull(index) ? fallback : cursor.getInt(index);
++    }
++
++    private static void add(List<String> list, String value) {
++        if (value != null && !value.isEmpty() && !list.contains(value)) list.add(value);
++    }
++
++    private static List<String> uniqueLines(String text) {
++        List<String> lines = new ArrayList<>();
++        if (text == null) return lines;
++        for (String line : text.split("\\r?\\n")) {
++            String value = line.trim();
++            if (!value.isEmpty() && !lines.contains(value)) lines.add(value);
++        }
++        return lines;
++    }
++
++    private static String firstNonEmpty(String... values) {
++        for (String value : values) {
++            if (value != null && !value.isEmpty()) return value;
++        }
++        return "";
++    }
++
++    private static String trim(String value, int max) {
++        if (value == null) return "";
++        String oneLine = value.replace('\n', ' ').trim();
++        return oneLine.length() <= max ? oneLine : oneLine.substring(0, max) + "…";
++    }
++
++    private static String quote(String value) {
++        return "'" + value.replace("'", "'\\''") + "'";
++    }
++
++    private static void deleteTree(File file) {
++        if (file == null || !file.exists()) return;
++        if (file.isDirectory()) {
++            File[] children = file.listFiles();
++            if (children != null) for (File child : children) deleteTree(child);
++        }
++        file.delete();
++    }
++}
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index fb75aa9..c9286de 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -207,6 +207,16 @@ public class MainActivity extends BridgeActivity {
+             return NotificationHelper.hasPermission(act) ? "1" : "0";
+         }
+ 
++        @JavascriptInterface
++        public String desktopProbeSupported() {
++            return "1";
++        }
++
++        @JavascriptInterface
++        public String desktopProbe() {
++            return DesktopProbe.probe(act);
++        }
++
+         @JavascriptInterface
+         public String overlaySupported() {
+             return Build.VERSION.SDK_INT >= 23 ? "1" : "0";
+diff --git a/android/app/src/main/java/com/piaony/tafei/RootBridge.java b/android/app/src/main/java/com/piaony/tafei/RootBridge.java
+new file mode 100644
+index 0000000..471b3d9
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/RootBridge.java
+@@ -0,0 +1,155 @@
++package com.piaony.tafei;
++
++import java.io.ByteArrayOutputStream;
++import java.io.File;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.InputStream;
++import java.nio.charset.StandardCharsets;
++
++/** 极简 Root shell 封装：只走 KernelSU/Magisk 的 su，不把 root 逻辑放进主进程。 */
++public final class RootBridge {
++
++    public static final class Result {
++        public final boolean attempted;
++        public final boolean granted;
++        public final int exitCode;
++        public final String output;
++
++        Result(boolean attempted, boolean granted, int exitCode, String output) {
++            this.attempted = attempted;
++            this.granted = granted;
++            this.exitCode = exitCode;
++            this.output = output == null ? "" : output;
++        }
++    }
++
++    private static final String[] SU_CANDIDATES = new String[]{
++        "/system/bin/su", "/system/xbin/su", "/sbin/su", "/debug_ramdisk/su", "su"
++    };
++
++    private RootBridge() {}
++
++    public static Result run(String command) {
++        String su = findSu();
++        if (su == null) return new Result(false, false, -1, "no su binary");
++        Process process = null;
++        try {
++            ProcessBuilder pb = new ProcessBuilder(su, "-c", command);
++            pb.redirectErrorStream(true);
++            process = pb.start();
++            final Process p = process;
++            Thread watchdog = new Thread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        Thread.sleep(7000L);
++                    } catch (InterruptedException ignored) {
++                    }
++                    if (p.isAlive()) p.destroy();
++                }
++            });
++            watchdog.setDaemon(true);
++            watchdog.start();
++            String output = readText(process.getInputStream());
++            int code = process.waitFor();
++            boolean granted = output.contains("uid=0");
++            return new Result(true, granted, code, output);
++        } catch (Exception e) {
++            if (process != null) process.destroy();
++            return new Result(true, false, -1, "su failed: " + e.getMessage());
++        }
++    }
++
++    public static boolean isGranted() {
++        Result r = run("id");
++        return r.attempted && r.granted && r.output.contains("uid=0");
++    }
++
++    public static boolean fileExists(String path) {
++        if (path == null || path.contains("\n")) return false;
++        Result r = run("test -f " + quote(path) + " && echo yes");
++        return r.exitCode == 0 && r.output.contains("yes");
++    }
++
++    public static byte[] readBytes(String path) {
++        if (path == null || path.contains("\n")) return null;
++        String su = findSu();
++        if (su == null) return null;
++        Process process = null;
++        try {
++            ProcessBuilder pb = new ProcessBuilder(su, "-c", "cat " + quote(path));
++            pb.redirectErrorStream(true);
++            process = pb.start();
++            final Process p = process;
++            Thread watchdog = new Thread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        Thread.sleep(7000L);
++                    } catch (InterruptedException ignored) {
++                    }
++                    if (p.isAlive()) p.destroy();
++                }
++            });
++            watchdog.setDaemon(true);
++            watchdog.start();
++            ByteArrayOutputStream out = new ByteArrayOutputStream();
++            InputStream in = process.getInputStream();
++            byte[] buffer = new byte[8192];
++            int n;
++            while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n);
++            int code = process.waitFor();
++            if (code != 0) return null;
++            return out.toByteArray();
++        } catch (Exception e) {
++            if (process != null) process.destroy();
++            return null;
++        }
++    }
++
++    public static boolean copyToFile(String remotePath, File localFile) {
++        byte[] data = readBytes(remotePath);
++        if (data == null || data.length == 0) return false;
++        FileOutputStream out = null;
++        try {
++            File parent = localFile.getParentFile();
++            if (parent != null && !parent.exists()) parent.mkdirs();
++            out = new FileOutputStream(localFile);
++            out.write(data);
++            out.flush();
++            return true;
++        } catch (IOException e) {
++            return false;
++        } finally {
++            if (out != null) {
++                try {
++                    out.close();
++                } catch (IOException ignored) {
++                }
++            }
++        }
++    }
++
++    private static String findSu() {
++        for (String path : SU_CANDIDATES) {
++            if (path.equals("su") || new File(path).exists()) return path;
++        }
++        return "su";
++    }
++
++    private static String readText(InputStream in) {
++        ByteArrayOutputStream out = new ByteArrayOutputStream();
++        byte[] buffer = new byte[4096];
++        int n;
++        try {
++            while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n);
++        } catch (IOException ignored) {
++        }
++        return new String(out.toByteArray(), StandardCharsets.UTF_8);
++    }
++
++    private static String quote(String value) {
++        return "'" + value.replace("'", "'\\''") + "'";
++    }
++}
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+new file mode 100644
+index 0000000..55222d5
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+@@ -0,0 +1,18 @@
++package com.piaony.tafei;
++
++import android.accessibilityservice.AccessibilityService;
++import android.view.accessibility.AccessibilityEvent;
++
++/**
++ * 桌面互动用的无障碍服务占位。
++ * v87 只用于环境探测；真正长按/移除逻辑在 v88 接入，避免首次版本就动桌面。
++ */
++public class SpiritAccessibilityService extends AccessibilityService {
++    @Override
++    public void onAccessibilityEvent(AccessibilityEvent event) {
++    }
++
++    @Override
++    public void onInterrupt() {
++    }
++}
+diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+index 3871864..c2a33c6 100644
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -4,4 +4,6 @@
+     <string name="title_activity_main">挞飞</string>
+     <string name="package_name">com.piaony.tafei</string>
+     <string name="custom_url_scheme">com.piaony.tafei</string>
++    <string name="accessibility_service_label">挞飞桌面互动</string>
++    <string name="accessibility_service_description">用于读取桌面图标位置，并在你确认后执行长按或移除快捷方式。默认关闭，不会自动删除图标。</string>
+ </resources>
+diff --git a/android/app/src/main/res/xml/accessibility_service_config.xml b/android/app/src/main/res/xml/accessibility_service_config.xml
+new file mode 100644
+index 0000000..cacc74e
+--- /dev/null
++++ b/android/app/src/main/res/xml/accessibility_service_config.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
++    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
++    android:accessibilityFeedbackType="feedbackGeneric"
++    android:notificationTimeout="100"
++    android:canRetrieveWindowContent="true"
++    android:description="@string/accessibility_service_description" />
+diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
+index cd74562..1f4a924 100644
+--- a/www/css/spirit-house.css
++++ b/www/css/spirit-house.css
+@@ -312,6 +312,12 @@ body.spirit-memorial-open{overflow:hidden}
+ .ws-toggles label{display:flex;align-items:center;gap:6px;cursor:pointer}
+ .ws-toggles input{accent-color:var(--sp-cyan);cursor:pointer}
+ .ws-note{margin:0;color:var(--ang-muted);font-size:10px;line-height:1.55;opacity:.8}
++.desktop-probe{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(199,166,255,.24)}
++.desktop-probe[hidden]{display:none!important}
++.desktop-probe-btn{width:100%;min-height:32px;margin-top:8px;border:1px solid rgba(110,231,255,.3);border-radius:9px;background:rgba(110,231,255,.1);color:var(--sp-cyan);font:inherit;font-size:11px;cursor:pointer}
++.desktop-probe-btn:disabled{opacity:.55;cursor:default}
++.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:230px;overflow:auto}
++.desktop-probe-out b{color:var(--ang-text);font-weight:500}
+ @media(max-width:620px){
+   .widget-settings{padding:10px;gap:8px}
+   .ws-toggles{grid-template-columns:1fr 1fr;gap:7px 8px}
+diff --git a/www/jingling.html b/www/jingling.html
+index 9279774..d3f05f9 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -8,7 +8,7 @@
+ <meta name="robots" content="noindex,follow">
+ <link rel="stylesheet" href="css/angela.css?v=4">
+ <link rel="stylesheet" href="css/jingling.css?v=2">
+-<link rel="stylesheet" href="css/spirit-house.css?v=17">
++<link rel="stylesheet" href="css/spirit-house.css?v=18">
+ <link rel="stylesheet" href="css/app-shell.css?v=2">
+ <script src="js/app-shell.js?v=2" defer></script>
+ </head>
+@@ -101,6 +101,13 @@
+        <label><input type="checkbox" id="noDoodle"> 桌面涂鸦</label>
+       </div>
+       <p class="ws-note">只影响退出 App 后的桌面悬浮精灵，不改变页面里的全站挂件。</p>
++      <div class="desktop-probe" id="desktopProbe" hidden>
++       <div class="ws-head"><b>桌面互动探测</b><span>只读 · 不改桌面</span></div>
++       <p class="ws-note">先确认 ColorOS 16 的桌面包名、数据库和图标坐标；这一版不会删除或移动任何图标。</p>
++       <button type="button" class="desktop-probe-btn" id="desktopProbeBtn">检测环境</button>
++       <div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div>
++       <p class="ws-note">需要 KernelSU 授权；无障碍服务可在系统设置里开启，用于下一版长按/移除。</p>
++      </div>
+      </div>
+ 
+     <div class="widget-switch-card native-overlay-card" id="nativeOverlayCard" hidden>
+@@ -271,7 +278,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=25"></script>
++<script src="js/jingling.js?v=26"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index cfaf813..42cbcb1 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1060,6 +1060,65 @@
+     refreshNativeOverlay();
+   }
+ 
++  function renderDesktopProbe(raw) {
++    var out = $('desktopProbeOut');
++    if (!out) return;
++    var data = null;
++    try { data = JSON.parse(raw || '{}'); } catch (e) { data = null; }
++    if (!data || !data.ok) {
++      out.textContent = '探测失败：' + ((data && data.dbError) || '没有拿到原生返回。');
++      return;
++    }
++    var lines = [];
++    lines.push('系统：Android ' + (data.android || '?') + '（SDK ' + (data.sdk || '?') + '）');
++    if (data.coloros) lines.push('ColorOS：' + data.coloros);
++    if (data.model) lines.push('机型：' + data.model);
++    if (data.display) lines.push('版本号：' + data.display);
++    lines.push('');
++    lines.push('桌面：' + (data.launcherPackage || '未识别') + (data.launcherVersion ? ' · ' + data.launcherVersion : ''));
++    if (data.launcherLabel) lines.push('名称：' + data.launcherLabel);
++    lines.push('Root：' + ({granted: '已授权', denied: '未授权 / 被拒绝', 'no-su': '没有找到 su'}[data.root] || data.root || '未知'));
++    if (data.rootOutput) lines.push('Root 返回：' + data.rootOutput);
++    lines.push('无障碍：' + (data.accessibility === 'on' ? '已开启' : '未开启'));
++    lines.push('');
++    if (data.dbPath) {
++      lines.push('数据库：' + data.dbPath);
++      lines.push('字段：' + (data.columns || []).join(', '));
++      lines.push('快捷方式：' + (data.appShortcutCount || 0) + ' 个 / 总记录 ' + (data.totalRows || 0));
++      var containers = data.containers || {};
++      var keys = Object.keys(containers);
++      if (keys.length) lines.push('容器分布：' + keys.map(function (k) { return k + '×' + containers[k]; }).join('  '));
++      lines.push('');
++      lines.push('样例：');
++      (data.samples || []).forEach(function (item, index) {
++        lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
++      });
++      if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
++    } else {
++      lines.push('数据库：未读取');
++      lines.push('原因：' + (data.dbError || '未知'));
++    }
++    out.textContent = lines.join('\n');
++  }
++
++  function initDesktopProbe() {
++    var box = $('desktopProbe');
++    var button = $('desktopProbeBtn');
++    if (!box || !button) return;
++    if (String(nativeOverlayCall('desktopProbeSupported', '0')) !== '1') return;
++    box.hidden = false;
++    button.addEventListener('click', function () {
++      var out = $('desktopProbeOut');
++      button.disabled = true;
++      if (out) out.textContent = '正在读取桌面环境…\n首次检测可能会在 KernelSU 里弹出授权。';
++      setTimeout(function () {
++        var raw = String(nativeOverlayCall('desktopProbe', ''));
++        renderDesktopProbe(raw);
++        button.disabled = false;
++      }, 120);
++    });
++  }
++
+   $('nativeOverlayToggle')?.addEventListener('click', function () {
+     var status = String(nativeOverlayCall('overlayStatus', 'off'));
+     if (status === 'on') {
+@@ -1126,4 +1185,5 @@
+   renderAll();
+   primeWidget();
+   initNativeOverlay();
++  initDesktopProbe();
+ })();
