@@ -1180,6 +1180,14 @@
       var raw = String(nativeOverlayCall('desktopEatStatus', 'idle||'));
       var parts = raw.split('|');
       var state = parts[0] || 'idle';
+      var eventRaw = String(nativeOverlayCall('desktopEatEvent', 'idle|||||0'));
+      var eventParts = eventRaw.split('|');
+      var phase = eventParts[0] || '';
+      if (eat && state === 'running') {
+        if (phase === 'scan') eat.textContent = '瑶正在扫桌面…';
+        else if (phase === 'found' || phase === 'removing') eat.textContent = '正在移除「' + (item.label || item.package || '图标') + '」…';
+        else eat.textContent = '瑶正在动手…';
+      }
       if (state === 'success') {
         clearInterval(timer);
         if (eat) eat.disabled = false;
@@ -1195,11 +1203,19 @@
       } else if (state === 'failed') {
         clearInterval(timer);
         if (eat) eat.disabled = false;
+        updateDesktopProbeActions(window.__tafeiLastProbe);
         var detail = parts[2] || '';
-        toast('吃掉失败：' + (detail || '请重试'), true);
+        var failureText = detail;
+        if (detail.indexOf('not-found') === 0) failureText = '没扫到目标，请手动滑到那一页再试';
+        else if (detail === 'not-launcher') failureText = '请先回到桌面再试';
+        else if (detail === 'no-root') failureText = '桌面还没准备好，请稍后重试';
+        else if (detail === 'long-press-failed') failureText = '长按发送失败，请重试';
+        else if (detail === 'root-still-open') failureText = '移除弹窗没有关闭，请重试';
+        toast('吃掉失败：' + (failureText || '请重试'), true);
       } else if (Date.now() - startedAt > 20000) {
         clearInterval(timer);
         if (eat) eat.disabled = false;
+        updateDesktopProbeActions(window.__tafeiLastProbe);
         toast('操作超时，请确认桌面弹窗状态。', true);
       }
     }, 400);

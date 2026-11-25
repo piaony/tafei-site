@@ -241,6 +241,11 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public String desktopEatEvent() {
+            return SpiritAccessibilityService.lastEvent();
+        }
+
+        @JavascriptInterface
         public String eatDesktopIcon(String label, String pkg, int screen, int cellX, int cellY) {
             if (!SpiritAccessibilityService.isReady()) {
                 openAccessibility();

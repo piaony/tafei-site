@@ -24,15 +24,47 @@ public class SpiritAccessibilityService extends AccessibilityService {
 
     private static SpiritAccessibilityService instance;
     private static String lastResult = "idle|";
+    private static volatile String lastEventPhase = "idle";
+    private static volatile String lastEventLabel = "";
+    private static volatile String lastEventDetail = "";
+    private static volatile String lastEventPackage = "";
+    private static volatile int lastEventX = 0;
+    private static volatile int lastEventY = 0;
+    private static volatile long lastEventId = 0L;
 
     public static String lastResult() {
         return lastResult;
+    }
+
+    /** 给桌面悬浮层轮询：phase|label|detail|x|y|package|eventId */
+    public static String lastEvent() {
+        return lastEventPhase + "|" + lastEventLabel + "|" + lastEventDetail + "|"
+            + lastEventX + "|" + lastEventY + "|" + lastEventPackage + "|" + lastEventId;
+    }
+
+    public static long lastEventId() {
+        return lastEventId;
     }
 
     private static void report(String state, String label, String detail) {
         String safeLabel = label == null ? "" : label.replace("|", " ");
         String safeDetail = detail == null ? "" : detail.replace("|", " ");
         lastResult = state + "|" + safeLabel + "|" + safeDetail;
+        lastEventLabel = safeLabel;
+        lastEventDetail = safeDetail;
+        lastEventPhase = phaseOf(state, safeDetail);
+        lastEventId++;
+    }
+
+    private static String phaseOf(String state, String detail) {
+        if ("success".equals(state)) return "success";
+        if ("failed".equals(state)) return "failed";
+        if ("found".equals(detail)) return "found";
+        if (detail != null && detail.startsWith("scan-")) return "scan";
+        if (detail != null && (detail.startsWith("long-press")
+            || detail.startsWith("remove") || detail.startsWith("root-tap"))) return "removing";
+        if ("start".equals(detail)) return "start";
+        return "running";
     }
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -69,6 +101,9 @@ public class SpiritAccessibilityService extends AccessibilityService {
         SpiritAccessibilityService service = instance;
         if (service == null) return "no-service";
         final String safeLabel = (label == null) ? "" : label;
+        lastEventPackage = (pkg == null) ? "" : pkg.replace("|", " ");
+        lastEventX = 0;
+        lastEventY = 0;
         report("running", safeLabel, "start");
         service.handler.postDelayed(new Runnable() {
             @Override
@@ -105,6 +140,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
             if (swipeLeft()) {
                 scanLeft++;
                 navOffset++;
+                report("running", label, "scan-left-" + scanLeft);
                 toast("向左找「" + label + "」· 第" + scanLeft + "页");
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -119,6 +155,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
             if (swipeRight()) {
                 scanRight++;
                 navOffset--;
+                report("running", label, "scan-right-" + scanRight);
                 toast("向右找「" + label + "」· 第" + scanRight + "页");
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -130,23 +167,29 @@ public class SpiritAccessibilityService extends AccessibilityService {
             }
         }
         if (target == null) {
-            returnToOrigin();
             report("failed", label, "not-found-" + screen);
+            returnAfter(1000L);
             toast("没扫到「" + label + "」，目标约在屏" + screen + "；请手动滑到该屏再试");
             return;
         }
         Rect bounds = new Rect();
         target.getBoundsInScreen(bounds);
         if (bounds.width() < 20 || bounds.height() < 20) {
+            report("failed", label, "invalid-bounds");
             toast("图标坐标无效");
             return;
         }
-        boolean ok = longPress(bounds.centerX(), bounds.centerY());
+        lastEventX = bounds.centerX();
+        lastEventY = bounds.centerY();
+        report("running", label, "found");
+        boolean ok = longPress(lastEventX, lastEventY);
         if (!ok) {
             report("failed", label, "long-press-failed");
+            returnAfter(900L);
             toast("长按手势发送失败");
             return;
         }
+        report("running", label, "long-press");
         toast("长按「" + label + "」…");
         handler.postDelayed(new Runnable() {
             @Override
@@ -176,6 +219,16 @@ public class SpiritAccessibilityService extends AccessibilityService {
             .addStroke(stroke)
             .build();
         return dispatchGesture(gesture, null, null);
+    }
+
+    private void returnAfter(long delayMs) {
+        if (navOffset == 0) return;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                returnToOrigin();
+            }
+        }, delayMs);
     }
 
     private void returnToOrigin() {
@@ -255,7 +308,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
             public void run() {
                 if (findRemoveNode() == null) {
                     report("success", label, "accessibility");
-                    returnToOrigin();
+                    returnAfter(1000L);
                     toast("已移除「" + label + "」，应用还在抽屉里");
                 } else if (next < 3) {
                     clickRemove(label, next);
@@ -290,10 +343,11 @@ public class SpiritAccessibilityService extends AccessibilityService {
                         public void run() {
                             if (findRemoveNode() == null) {
                                 report("success", label, "root");
-                                returnToOrigin();
+                                returnAfter(1000L);
                                 toast("已移除「" + label + "」");
                             } else {
                                 report("failed", label, "root-still-open");
+                                returnAfter(900L);
                             }
                         }
                     }, 1000L);

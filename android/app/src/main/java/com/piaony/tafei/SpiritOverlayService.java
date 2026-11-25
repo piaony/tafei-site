@@ -11,7 +11,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -71,12 +74,21 @@ public class SpiritOverlayService extends Service {
     private LinearLayout root;
     private FrameLayout stage;
     private ParticleView particleView;
+    private EatEffectView eatEffectView;
+    private WindowManager.LayoutParams eatParams;
     private ImageView sprite;
     private TextView bubble;
     private DoodleView doodleView;
     private WindowManager.LayoutParams doodleParams;
     private final Map<String, Bitmap> frameCache = new HashMap<>();
+    private final Map<String, Bitmap> appIconCache = new HashMap<>();
     private final Random random = new Random();
+    private long lastEatEventId = 0L;
+    private boolean eatFoundShown = false;
+    private String eatLabel = "";
+    private String eatPkg = "";
+    private int eatX = 0;
+    private int eatY = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final String[] yaoLines = new String[]{
         "瑶在森林里替你看着风的方向。",
@@ -199,6 +211,8 @@ public class SpiritOverlayService extends Service {
             return;
         }
         startForegroundCompat();
+        lastEatEventId = SpiritAccessibilityService.lastEventId();
+        handler.postDelayed(eatPollTask, 220L);
     }
 
     @Override
@@ -229,6 +243,12 @@ public class SpiritOverlayService extends Service {
     @Override
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        if (eatEffectView != null && windowManager != null) {
+            try {
+                windowManager.removeView(eatEffectView);
+            } catch (Exception ignored) {
+            }
+        }
         if (doodleView != null && windowManager != null) {
             try {
                 windowManager.removeView(doodleView);
@@ -243,9 +263,12 @@ public class SpiritOverlayService extends Service {
         }
         if (sprite != null) sprite.animate().cancel();
         frameCache.clear();
+        appIconCache.clear();
         root = null;
         stage = null;
         particleView = null;
+        eatEffectView = null;
+        eatParams = null;
         sprite = null;
         bubble = null;
         doodleView = null;
@@ -450,6 +473,7 @@ public class SpiritOverlayService extends Service {
             stopSelf();
             return;
         }
+        ensureEatEffectWindow();
         root.post(new Runnable() {
             @Override
             public void run() {
@@ -463,6 +487,31 @@ public class SpiritOverlayService extends Service {
                 }
             }
         });
+    }
+
+    private void ensureEatEffectWindow() {
+        if (eatEffectView != null || windowManager == null) return;
+        eatEffectView = new EatEffectView(this);
+        eatEffectView.setVisibility(View.GONE);
+        int type = Build.VERSION.SDK_INT >= 26
+            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            : WindowManager.LayoutParams.TYPE_PHONE;
+        eatParams = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT);
+        eatParams.gravity = Gravity.TOP | Gravity.START;
+        try {
+            windowManager.addView(eatEffectView, eatParams);
+        } catch (Exception e) {
+            eatEffectView = null;
+            eatParams = null;
+        }
     }
 
     private void ensureDoodleWindow() {
@@ -707,6 +756,147 @@ public class SpiritOverlayService extends Service {
         }
     };
 
+    private final Runnable eatPollTask = new Runnable() {
+        @Override
+        public void run() {
+            pollEatEvent();
+            handler.postDelayed(this, 260L);
+        }
+    };
+
+    private void pollEatEvent() {
+        String raw = SpiritAccessibilityService.lastEvent();
+        String[] p = raw.split("\\|", -1);
+        if (p.length < 7) return;
+        long id;
+        int x = 0;
+        int y = 0;
+        try {
+            id = Long.parseLong(p[6]);
+            x = Integer.parseInt(p[3]);
+            y = Integer.parseInt(p[4]);
+        } catch (Exception e) {
+            return;
+        }
+        if (id == lastEatEventId) return;
+        lastEatEventId = id;
+        String phase = p[0];
+        String label = p[1];
+        String detail = p[2];
+        String pkg = p[5];
+
+        if ("start".equals(phase)) {
+            eatFoundShown = false;
+            eatLabel = label;
+            eatPkg = pkg;
+            eatX = 0;
+            eatY = 0;
+            if (eatEffectView != null) eatEffectView.clear();
+            return;
+        }
+        if ("scan".equals(phase)) return;
+        if ("found".equals(phase) || "removing".equals(phase)) {
+            if (x <= 0 || y <= 0) return;
+            if (eatFoundShown) return;
+            eatFoundShown = true;
+            eatX = x;
+            eatY = y;
+            eatLabel = label;
+            eatPkg = pkg;
+            if (!appForeground && eatEffectView != null) {
+                eatEffectView.setVisibility(View.VISIBLE);
+                eatEffectView.playFound(spiritCenterX(), spiritCenterY(), x, y, appIcon(pkg), label);
+            }
+            showFrame("action-upgrade", 700);
+            if (!appForeground) showBubble("发现「" + label + "」了。");
+            return;
+        }
+        if ("success".equals(phase)) {
+            if (eatX <= 0 || eatY <= 0) {
+                eatX = x;
+                eatY = y;
+            }
+            eatFoundShown = false;
+            if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
+                eatEffectView.setVisibility(View.VISIBLE);
+                eatEffectView.playSuccess(eatX, eatY, spiritCenterX(), spiritCenterY(), appIcon(eatPkg), eatLabel);
+            }
+            showFrame("emotion-happy", 1200);
+            if (particleView != null) particleView.burst(14);
+            if (!appForeground) showBubble("吞下去了，抽屉里还在。");
+            return;
+        }
+        if ("failed".equals(phase)) {
+            eatFoundShown = false;
+            if (!appForeground && eatEffectView != null) {
+                if (eatX > 0 && eatY > 0) {
+                    eatEffectView.setVisibility(View.VISIBLE);
+                    eatEffectView.playFailure(eatX, eatY, appIcon(eatPkg));
+                }
+            }
+            showFrame("emotion-sad", 1000);
+            shakeSprite();
+            if (!appForeground) showBubble(failureLine(detail));
+        }
+    }
+
+    private String failureLine(String detail) {
+        if (detail == null) return "没抓到，再试一次。";
+        if (detail.startsWith("not-found")) return "没扫到它，先把桌面滑到目标那一页再试。";
+        if ("not-launcher".equals(detail)) return "先回到桌面，瑶才敢伸手。";
+        if ("no-root".equals(detail)) return "桌面还没准备好，等一下再试。";
+        if ("long-press-failed".equals(detail)) return "长按没成功，再试一次。";
+        if ("root-still-open".equals(detail)) return "移除弹窗还在，再试一次。";
+        return "没抓到，再试一次。";
+    }
+
+    private void shakeSprite() {
+        if (sprite == null) return;
+        sprite.animate().cancel();
+        sprite.setTranslationX(0f);
+        sprite.animate().translationX(dp(6)).setDuration(70).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                if (sprite == null) return;
+                sprite.animate().translationX(-dp(5)).setDuration(80).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (sprite == null) return;
+                        sprite.animate().translationX(0f).setDuration(100).start();
+                    }
+                }).start();
+            }
+        }).start();
+    }
+
+    private float spiritCenterX() {
+        if (root == null || params == null) return screenWidth() / 2f;
+        return params.x + root.getWidth() / 2f;
+    }
+
+    private float spiritCenterY() {
+        if (root == null || params == null) return screenHeight() / 2f;
+        return params.y + root.getHeight() * 0.62f;
+    }
+
+    private Bitmap appIcon(String pkg) {
+        if (pkg == null || pkg.isEmpty()) return null;
+        Bitmap cached = appIconCache.get(pkg);
+        if (cached != null) return cached;
+        try {
+            Drawable drawable = getPackageManager().getApplicationIcon(pkg);
+            int size = dp(52);
+            Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, size, size);
+            drawable.draw(canvas);
+            appIconCache.put(pkg, bitmap);
+            return bitmap;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private String spiritFolder() {
         String id = getSharedPreferences(PREFS, 0).getString(PREF_SPIRIT, "xiaota");
         if (id == null || id.isEmpty()) id = "xiaota";
@@ -765,6 +955,10 @@ public class SpiritOverlayService extends Service {
         int visibility = appForeground ? View.GONE : View.VISIBLE;
         root.setVisibility(visibility);
         if (doodleView != null) doodleView.setVisibility(visibility);
+        if (eatEffectView != null) {
+            eatEffectView.setVisibility(visibility);
+            if (appForeground) eatEffectView.clear();
+        }
         if (appForeground) {
             handler.removeCallbacks(autonomyTask);
             handler.removeCallbacks(wanderTask);
