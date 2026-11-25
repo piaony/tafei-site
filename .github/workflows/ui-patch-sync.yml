@@ -17,17 +17,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch v131 desktop manager patch
+      - name: Fetch v132 desktop manager patch
         run: |
           set -e
           mkdir -p patches
-          PATCH=patches/v131-desktop-manager.patch
-          if grep -q "playDesktopAction" android/app/src/main/java/com/piaony/tafei/EatEffectView.java 2>/dev/null; then
-            echo "v131 final source already present"
+          PATCH=patches/v132-desktop-manager.patch
+          if grep -q "playDesktopAction" android/app/src/main/java/com/piaony/tafei/EatEffectView.java 2>/dev/null \
+             && grep -q "desktopManagerSection" www/jingling.html 2>/dev/null; then
+            echo "v132 final source already present"
             exit 0
           fi
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/3RYIrNkPZu" -o "$PATCH"
+            "https://aka.doubaocdn.com/s/7mUTfFujbv" -o "$PATCH"
           wc -c "$PATCH"
           BASE=eabe0b6329a798b850ed05ea8e38cdf9b9261a7f
           git checkout "$BASE" -- \
@@ -42,21 +43,22 @@ jobs:
             www/js/jingling.js
           rm -f android/app/src/main/java/com/piaony/tafei/LauncherDbOps.java
           if ! git apply --check -p1 "$PATCH"; then
-            echo "::error::v131 desktop manager patch cannot apply"
+            echo "::error::v132 desktop manager patch cannot apply"
             exit 1
           fi
-          echo "v131 patch check ok"
+          echo "v132 patch check ok"
 
       - name: Apply and commit
         run: |
           set -e
-          if grep -q "playDesktopAction" android/app/src/main/java/com/piaony/tafei/EatEffectView.java 2>/dev/null; then
-            echo "v131 final source already present"
+          if grep -q "playDesktopAction" android/app/src/main/java/com/piaony/tafei/EatEffectView.java 2>/dev/null \
+             && grep -q "desktopManagerSection" www/jingling.html 2>/dev/null; then
+            echo "v132 final source already present"
             exit 0
           fi
-          git apply -p1 patches/v131-desktop-manager.patch
+          git apply -p1 patches/v132-desktop-manager.patch
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add patches/v131-desktop-manager.patch android/app/src/main/java/com/piaony/tafei www/css/spirit-house.css www/jingling.html www/js/jingling.js
-          git commit -m "feat(app): v131 desktop manager final"
+          git add patches/v132-desktop-manager.patch android/app/src/main/java/com/piaony/tafei www/css/spirit-house.css www/jingling.html www/js/jingling.js
+          git commit -m "feat(app): v132 desktop manager visible"
           git push origin HEAD:app/capacitor-setup
