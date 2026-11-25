@@ -1,4 +1,4 @@
-name: Sync spirit delist fix
+name: Sync spirit house patch
 
 on:
   push:
@@ -15,12 +15,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Apply patch
         run: |
-          curl -fsSL --retry 3 "https://aka.doubaocdn.com/s/VUvYLXMdLg" -o /tmp/spirit.patch
+          curl -fsSL --retry 3 "https://aka.doubaocdn.com/s/PG2KUP1KZ9" -o /tmp/spirit.patch
           git apply -p1 /tmp/spirit.patch
       - name: Commit
         run: |
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add index.html jingling.html js/spirit-core.js js/jingling.js js/pet-hub.js
-          git commit -m "fix: honor spirit delist state in spirit house"
+          git add jingling.html css/spirit-house.css js/jingling.js
+          git commit -m "feat: collapse spirit gallery into modal"
           git push origin HEAD:main
