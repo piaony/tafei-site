@@ -1,21 +1,33 @@
 diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
-index e7e40e6..16d2b76 100644
+index 45cabf7..548841e 100644
 --- a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
 +++ b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
-@@ -8,6 +8,9 @@ import android.os.Looper;
+@@ -8,8 +8,11 @@ import android.os.Handler;
+ import android.os.Looper;
  import android.view.accessibility.AccessibilityEvent;
  import android.view.accessibility.AccessibilityNodeInfo;
 +import android.view.accessibility.AccessibilityWindowInfo;
  import android.widget.Toast;
-+
-+import java.util.List;
  
++import java.util.List;
++
  /**
   * 桌面互动用的无障碍服务。
-@@ -104,31 +107,67 @@ public class SpiritAccessibilityService extends AccessibilityService {
-                 clickRemove(label, 0);
+  * 当前版本只做一件事：长按桌面图标，点击 ColorOS 官方「移除」。
+@@ -88,9 +91,9 @@ public class SpiritAccessibilityService extends AccessibilityService {
+         handler.postDelayed(new Runnable() {
+             @Override
+             public void run() {
+-                clickRemove(label);
++                clickRemove(label, 0);
              }
-         }, 1400L);
+-        }, 900L);
++        }, 1400L);
+     }
+ 
+     private boolean longPress(int x, int y) {
+@@ -104,29 +107,69 @@ public class SpiritAccessibilityService extends AccessibilityService {
+         return dispatchGesture(gesture, null, null);
      }
  
 -    private void clickRemove(String label) {
@@ -25,26 +37,10 @@ index e7e40e6..16d2b76 100644
 -            return;
 -        }
 -        AccessibilityNodeInfo remove = findText(root, "移除", 0);
--        if (remove == null) {
--            toast("没有找到「移除」菜单");
--            return;
--        }
--        AccessibilityNodeInfo clickable = remove;
--        for (int i = 0; i < 6 && clickable != null; i++) {
--            if (clickable.isClickable()) break;
--            clickable = clickable.getParent();
--        }
--        boolean ok = clickable != null && clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK);
--        if (!ok) {
--            Rect bounds = new Rect();
--            remove.getBoundsInScreen(bounds);
--            ok = longPress(bounds.centerX(), bounds.centerY());
--        }
--        toast(ok ? "已移除「" + label + "」，应用还在抽屉里" : "移除失败，请重试");
--    }
 +    private void clickRemove(final String label, final int attempt) {
 +        AccessibilityNodeInfo remove = findRemoveNode();
-+        if (remove == null) {
+         if (remove == null) {
+-            toast("没有找到「移除」菜单");
 +            if (attempt < 3) {
 +                handler.postDelayed(new Runnable() {
 +                    @Override
@@ -55,16 +51,24 @@ index e7e40e6..16d2b76 100644
 +            } else {
 +                toast("菜单里没有找到「移除」，请手动点一下");
 +            }
-+            return;
-+        }
+             return;
+         }
+-        AccessibilityNodeInfo clickable = remove;
+-        for (int i = 0; i < 6 && clickable != null; i++) {
+-            if (clickable.isClickable()) break;
+-            clickable = clickable.getParent();
 +        Rect bounds = new Rect();
 +        remove.getBoundsInScreen(bounds);
 +        if (bounds.width() < 10 || bounds.height() < 10) {
 +            toast("「移除」按钮坐标无效");
 +            return;
-+        }
+         }
+-        boolean ok = clickable != null && clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK);
 +        boolean ok = tap(bounds.centerX(), bounds.centerY());
-+        if (!ok) {
+         if (!ok) {
+-            Rect bounds = new Rect();
+-            remove.getBoundsInScreen(bounds);
+-            ok = longPress(bounds.centerX(), bounds.centerY());
 +            AccessibilityNodeInfo clickable = remove;
 +            for (int i = 0; i < 6 && clickable != null; i++) {
 +                if (clickable.isClickable()) break;
@@ -78,14 +82,12 @@ index e7e40e6..16d2b76 100644
 +    private AccessibilityNodeInfo findRemoveNode() {
 +        String[] labels = {"从桌面移除", "移除", "删除"};
 +        List<AccessibilityWindowInfo> windows = getWindows();
-+        if (windows != null) {
-+            for (AccessibilityWindowInfo window : windows) {
-+                AccessibilityNodeInfo root = window.getRoot();
-+                if (root == null) continue;
-+                for (String label : labels) {
-+                    AccessibilityNodeInfo node = findText(root, label, 0);
-+                    if (node != null) return node;
-+                }
++        for (AccessibilityWindowInfo window : windows) {
++            AccessibilityNodeInfo root = window.getRoot();
++            if (root == null) continue;
++            for (String label : labels) {
++                AccessibilityNodeInfo node = findText(root, label, 0);
++                if (node != null) return node;
 +            }
 +        }
 +        AccessibilityNodeInfo active = getRootInActiveWindow();
@@ -94,7 +96,8 @@ index e7e40e6..16d2b76 100644
 +                AccessibilityNodeInfo node = findText(active, label, 0);
 +                if (node != null) return node;
 +            }
-+        }
+         }
+-        toast(ok ? "已移除「" + label + "」，应用还在抽屉里" : "移除失败，请重试");
 +        return null;
 +    }
 +
@@ -107,7 +110,6 @@ index e7e40e6..16d2b76 100644
 +            .addStroke(stroke)
 +            .build();
 +        return dispatchGesture(gesture, null, null);
-+    }
+     }
  
      private AccessibilityNodeInfo findLabel(AccessibilityNodeInfo node, String label, int depth) {
-         if (node == null || depth > 12) return null;
