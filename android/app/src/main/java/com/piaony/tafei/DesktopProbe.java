@@ -101,8 +101,12 @@ public final class DesktopProbe {
                 return out.toString();
             }
 
-            addDiag(diag, "数据目录：" + trim(RootBridge.run("ls -la /data/user/0/com.android.launcher").output, 360));
-            addDiag(diag, "db 查找：" + trim(RootBridge.run("find /data/user/0/com.android.launcher -maxdepth 3 -name '*.db'").output, 320));
+            diagCmd(diag, "data 列表", "ls -la /data", 320);
+            diagCmd(diag, "data/user/0 列表", "ls -la /data/user/0", 460);
+            diagCmd(diag, "包数据目录", "ls -la /data/data/com.android.launcher", 360);
+            diagCmd(diag, "包 databases", "ls -la /data/data/com.android.launcher/databases", 360);
+            diagCmd(diag, "launcher.db 全盘查找", "find /data/data /data/user/0 /data/user_de/0 -maxdepth 3 -name launcher.db", 420);
+            addDataDirDiag(diag, "com.android.launcher");
 
             List<String> packages = new ArrayList<>();
             add(packages, launcherPackage);
@@ -276,6 +280,26 @@ public final class DesktopProbe {
             }
         }
         return null;
+    }
+
+    private static void diagCmd(JSONArray diag, String label, String command, int max) {
+        RootBridge.Result result = RootBridge.run(command);
+        String output = result.output == null ? "" : result.output.trim();
+        addDiag(diag, label + " [exit=" + result.exitCode + "] " + (output.isEmpty() ? "(空)" : trim(output, max)));
+    }
+
+    private static void addDataDirDiag(JSONArray diag, String pkg) {
+        RootBridge.Result result = RootBridge.run("dumpsys package " + pkg);
+        String output = result.output == null ? "" : result.output;
+        boolean found = false;
+        for (String line : output.split("\\r?\\n")) {
+            String value = line.trim();
+            if (value.contains("dataDir=") || value.contains("codePath=")) {
+                addDiag(diag, "package：" + value);
+                found = true;
+            }
+        }
+        if (!found) addDiag(diag, "package：dumpsys 没有 dataDir（exit=" + result.exitCode + "）");
     }
 
     private static String findDatabasesDirs(List<String> packages) {
