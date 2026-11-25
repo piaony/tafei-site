@@ -1,0 +1,791 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/EatEffectView.java b/android/app/src/main/java/com/piaony/tafei/EatEffectView.java
+new file mode 100644
+index 0000000..a37cd84
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/EatEffectView.java
+@@ -0,0 +1,296 @@
++package com.piaony.tafei;
++
++import android.content.Context;
++import android.graphics.Bitmap;
++import android.graphics.Canvas;
++import android.graphics.Color;
++import android.graphics.Paint;
++import android.graphics.Path;
++import android.graphics.RectF;
++import android.os.SystemClock;
++import android.view.View;
++
++import java.util.Random;
++
++/**
++ * 吃掉桌面图标的整屏特效层。
++ * 只负责画星链、锁定环、飞向瑶的光球和星屑；全屏透明且不可触摸。
++ */
++public class EatEffectView extends View {
++
++    private static final int MODE_NONE = 0;
++    private static final int MODE_FOUND = 1;
++    private static final int MODE_SUCCESS = 2;
++    private static final int MODE_FAIL = 3;
++    private static final int BIT_COUNT = 26;
++
++    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
++    private final Path path = new Path();
++    private final Path star = new Path();
++    private final RectF dst = new RectF();
++    private final Random random = new Random();
++
++    private int mode = MODE_NONE;
++    private long startedAt = 0L;
++    private float spiritX;
++    private float spiritY;
++    private float targetX;
++    private float targetY;
++    private Bitmap icon;
++    private String label = "";
++
++    private float[] bitAngles;
++    private float[] bitSpeeds;
++    private int[] bitColors;
++
++    private final int[] colors = new int[]{
++        Color.parseColor("#FFD36E"),
++        Color.parseColor("#C7A6FF"),
++        Color.parseColor("#FF9AC4"),
++        Color.parseColor("#8CE8FF")
++    };
++
++    public EatEffectView(Context context) {
++        super(context);
++        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
++    }
++
++    public void playFound(float sx, float sy, float tx, float ty, Bitmap appIcon, String name) {
++        mode = MODE_FOUND;
++        startedAt = SystemClock.uptimeMillis();
++        spiritX = sx;
++        spiritY = sy;
++        targetX = tx;
++        targetY = ty;
++        icon = appIcon;
++        label = name == null ? "" : name;
++        bitAngles = null;
++        invalidate();
++    }
++
++    public void playSuccess(float tx, float ty, float mx, float my, Bitmap appIcon, String name) {
++        mode = MODE_SUCCESS;
++        startedAt = SystemClock.uptimeMillis();
++        targetX = tx;
++        targetY = ty;
++        spiritX = mx;
++        spiritY = my;
++        icon = appIcon;
++        label = name == null ? "" : name;
++        makeBits();
++        invalidate();
++    }
++
++    public void playFailure(float tx, float ty, Bitmap appIcon) {
++        mode = MODE_FAIL;
++        startedAt = SystemClock.uptimeMillis();
++        targetX = tx;
++        targetY = ty;
++        icon = appIcon;
++        bitAngles = null;
++        invalidate();
++    }
++
++    public void clear() {
++        mode = MODE_NONE;
++        icon = null;
++        bitAngles = null;
++        invalidate();
++    }
++
++    @Override
++    protected void onDraw(Canvas canvas) {
++        super.onDraw(canvas);
++        if (mode == MODE_NONE) return;
++        float elapsed = (SystemClock.uptimeMillis() - startedAt) / 1000f;
++        if (mode == MODE_FOUND) {
++            drawFound(canvas, elapsed);
++            if (elapsed < 0.85f) postInvalidateDelayed(30);
++            else mode = MODE_NONE;
++        } else if (mode == MODE_SUCCESS) {
++            drawSuccess(canvas, elapsed);
++            if (elapsed < 1.15f) postInvalidateDelayed(30);
++            else mode = MODE_NONE;
++        } else {
++            drawFailure(canvas, elapsed);
++            if (elapsed < 0.95f) postInvalidateDelayed(30);
++            else mode = MODE_NONE;
++        }
++    }
++
++    private void drawFound(Canvas canvas, float elapsed) {
++        float p = Math.min(1f, elapsed / 0.72f);
++        float ease = 1f - (float) Math.pow(1f - p, 3f);
++
++        // 瑶到图标的金色星链。
++        path.reset();
++        path.moveTo(spiritX, spiritY);
++        float midX = (spiritX + targetX) / 2f;
++        float midY = (spiritY + targetY) / 2f - dp(34);
++        path.quadTo(midX, midY, targetX, targetY);
++        paint.setStyle(Paint.Style.STROKE);
++        paint.setStrokeWidth(dp(1.7f));
++        paint.setColor(Color.parseColor("#FFD36E"));
++        paint.setAlpha((int) (190 * ease));
++        canvas.drawPath(path, paint);
++
++        // 星链上的流动光点。
++        paint.setStyle(Paint.Style.FILL);
++        for (int i = 0; i < 7; i++) {
++            float u = (p * 0.85f + i * 0.145f) % 1f;
++            float x = quad(spiritX, midX, targetX, u);
++            float y = quad(spiritY, midY, targetY, u);
++            int alpha = i % 2 == 0 ? 245 : 145;
++            paint.setColor(i % 2 == 0 ? Color.parseColor("#FFF2BF") : Color.parseColor("#C7A6FF"));
++            paint.setAlpha((int) (alpha * ease));
++            canvas.drawCircle(x, y, dp(i % 2 == 0 ? 2.2f : 1.5f), paint);
++        }
++
++        // 目标锁定环。
++        float pulse = (float) (0.5f + 0.5f * Math.sin(elapsed * 10f));
++        paint.setStyle(Paint.Style.STROKE);
++        paint.setStrokeWidth(dp(2f));
++        paint.setColor(Color.parseColor("#FFD36E"));
++        paint.setAlpha((int) (220 * (1f - 0.25f * p)));
++        canvas.drawCircle(targetX, targetY, dp(23) + dp(5) * pulse, paint);
++        paint.setStrokeWidth(dp(1f));
++        paint.setAlpha((int) (140 * (1f - p)));
++        canvas.drawCircle(targetX, targetY, dp(31) + dp(9) * p, paint);
++
++        drawIcon(canvas, targetX, targetY, 0.78f + 0.22f * ease, 255, false);
++    }
++
++    private void drawSuccess(Canvas canvas, float elapsed) {
++        float fly = Math.min(1f, elapsed / 0.52f);
++        float ease = 1f - (float) Math.pow(1f - fly, 3f);
++        float midX = (targetX + spiritX) / 2f + dp(26);
++        float midY = (targetY + spiritY) / 2f - dp(46);
++        float x = quad(targetX, midX, spiritX, ease);
++        float y = quad(targetY, midY, spiritY, ease);
++
++        if (elapsed < 0.62f) {
++            // 飞行拖尾。
++            paint.setStyle(Paint.Style.FILL);
++            for (int i = 0; i < 8; i++) {
++                float u = Math.max(0f, ease - i * 0.055f);
++                float px = quad(targetX, midX, spiritX, u);
++                float py = quad(targetY, midY, spiritY, u);
++                paint.setColor(colors[i % colors.length]);
++                paint.setAlpha(Math.max(0, 170 - i * 18));
++                canvas.drawCircle(px, py, dp(2.4f - i * 0.16f), paint);
++            }
++            drawIcon(canvas, x, y, 1f - 0.18f * ease, 255, true);
++        }
++
++        float burst = Math.max(0f, (elapsed - 0.5f) / 0.55f);
++        if (burst > 0f && burst < 1.25f) {
++            float bt = Math.min(1f, burst);
++            paint.setStyle(Paint.Style.FILL);
++            for (int i = 0; i < BIT_COUNT; i++) {
++                float radius = dp(10) + dp(78) * bitSpeeds[i] * bt;
++                float bx = spiritX + (float) Math.cos(bitAngles[i]) * radius;
++                float by = spiritY + (float) Math.sin(bitAngles[i]) * radius + dp(12) * bt * bt;
++                int alpha = (int) (255 * (1f - bt));
++                if (i % 4 == 0) drawStar(canvas, bx, by, dp(2.3f + bitSpeeds[i] * 2.2f), bitColors[i], alpha);
++                else {
++                    paint.setColor(bitColors[i]);
++                    paint.setAlpha(alpha);
++                    canvas.drawCircle(bx, by, dp(1.2f + bitSpeeds[i] * 1.7f), paint);
++                }
++            }
++            paint.setStyle(Paint.Style.STROKE);
++            paint.setStrokeWidth(dp(1.8f));
++            paint.setColor(Color.parseColor("#FFD36E"));
++            paint.setAlpha((int) (150 * (1f - bt)));
++            canvas.drawCircle(spiritX, spiritY, dp(24) + dp(56) * bt, paint);
++        }
++    }
++
++    private void drawFailure(Canvas canvas, float elapsed) {
++        float p = Math.min(1f, elapsed / 0.7f);
++        float ease = 1f - (float) Math.pow(1f - p, 3f);
++        paint.setStyle(Paint.Style.STROKE);
++        paint.setStrokeWidth(dp(2f));
++        paint.setColor(Color.parseColor("#9A9AAE"));
++        paint.setAlpha((int) (180 * (1f - p)));
++        canvas.drawCircle(targetX, targetY, dp(20) + dp(22) * p, paint);
++
++        drawIcon(canvas, targetX, targetY + dp(18) * ease, 1f - 0.12f * p, (int) (210 * (1f - p)), false);
++
++        paint.setStyle(Paint.Style.FILL);
++        paint.setColor(Color.parseColor("#B7B7C6"));
++        paint.setAlpha((int) (200 * (1f - p)));
++        float s = dp(7);
++        canvas.drawLine(targetX - s, targetY - s, targetX + s, targetY + s, paint);
++        canvas.drawLine(targetX + s, targetY - s, targetX - s, targetY + s, paint);
++    }
++
++    private void drawIcon(Canvas canvas, float cx, float cy, float scale, int alpha, boolean trail) {
++        if (alpha <= 0) return;
++        if (icon != null && !icon.isRecycled()) {
++            float size = dp(44) * scale;
++            dst.set(cx - size / 2f, cy - size / 2f, cx + size / 2f, cy + size / 2f);
++            paint.setStyle(Paint.Style.FILL);
++            paint.setAlpha(alpha);
++            canvas.drawBitmap(icon, null, dst, paint);
++            paint.setStyle(Paint.Style.STROKE);
++            paint.setStrokeWidth(dp(1.4f));
++            paint.setColor(trail ? Color.parseColor("#FFF2BF") : Color.parseColor("#FFD36E"));
++            paint.setAlpha(Math.min(255, alpha));
++            canvas.drawRoundRect(dst, dp(9), dp(9), paint);
++            return;
++        }
++        float r = dp(14) * scale;
++        star.reset();
++        star.moveTo(cx, cy - r * 1.8f);
++        star.lineTo(cx + r * 0.55f, cy - r * 0.5f);
++        star.lineTo(cx + r * 1.8f, cy);
++        star.lineTo(cx + r * 0.55f, cy + r * 0.5f);
++        star.lineTo(cx, cy + r * 1.8f);
++        star.lineTo(cx - r * 0.55f, cy + r * 0.5f);
++        star.lineTo(cx - r * 1.8f, cy);
++        star.lineTo(cx - r * 0.55f, cy - r * 0.5f);
++        star.close();
++        paint.setStyle(Paint.Style.FILL);
++        paint.setColor(Color.parseColor("#FFD36E"));
++        paint.setAlpha(alpha);
++        canvas.drawPath(star, paint);
++    }
++
++    private void drawStar(Canvas canvas, float cx, float cy, float r, int color, int alpha) {
++        star.reset();
++        star.moveTo(cx, cy - r * 1.7f);
++        star.lineTo(cx + r * 0.45f, cy - r * 0.45f);
++        star.lineTo(cx + r * 1.7f, cy);
++        star.lineTo(cx + r * 0.45f, cy + r * 0.45f);
++        star.lineTo(cx, cy + r * 1.7f);
++        star.lineTo(cx - r * 0.45f, cy + r * 0.45f);
++        star.lineTo(cx - r * 1.7f, cy);
++        star.lineTo(cx - r * 0.45f, cy - r * 0.45f);
++        star.close();
++        paint.setStyle(Paint.Style.FILL);
++        paint.setColor(color);
++        paint.setAlpha(alpha);
++        canvas.drawPath(star, paint);
++    }
++
++    private void makeBits() {
++        bitAngles = new float[BIT_COUNT];
++        bitSpeeds = new float[BIT_COUNT];
++        bitColors = new int[BIT_COUNT];
++        for (int i = 0; i < BIT_COUNT; i++) {
++            bitAngles[i] = (float) (random.nextDouble() * Math.PI * 2);
++            bitSpeeds[i] = 0.45f + random.nextFloat() * 0.95f;
++            bitColors[i] = colors[random.nextInt(colors.length)];
++        }
++    }
++
++    private float quad(float a, float b, float c, float t) {
++        float mt = 1f - t;
++        return mt * mt * a + 2f * mt * t * b + t * t * c;
++    }
++
++    private float dp(float value) {
++        return value * getResources().getDisplayMetrics().density;
++    }
++}
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index 92e8383..d4353da 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -240,6 +240,11 @@ public class MainActivity extends BridgeActivity {
+             return SpiritAccessibilityService.lastResult();
+         }
+ 
++        @JavascriptInterface
++        public String desktopEatEvent() {
++            return SpiritAccessibilityService.lastEvent();
++        }
++
+         @JavascriptInterface
+         public String eatDesktopIcon(String label, String pkg, int screen, int cellX, int cellY) {
+             if (!SpiritAccessibilityService.isReady()) {
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+index b4a7b05..1c06370 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+@@ -24,15 +24,47 @@ public class SpiritAccessibilityService extends AccessibilityService {
+ 
+     private static SpiritAccessibilityService instance;
+     private static String lastResult = "idle|";
++    private static volatile String lastEventPhase = "idle";
++    private static volatile String lastEventLabel = "";
++    private static volatile String lastEventDetail = "";
++    private static volatile String lastEventPackage = "";
++    private static volatile int lastEventX = 0;
++    private static volatile int lastEventY = 0;
++    private static volatile long lastEventId = 0L;
+ 
+     public static String lastResult() {
+         return lastResult;
+     }
+ 
++    /** 给桌面悬浮层轮询：phase|label|detail|x|y|package|eventId */
++    public static String lastEvent() {
++        return lastEventPhase + "|" + lastEventLabel + "|" + lastEventDetail + "|"
++            + lastEventX + "|" + lastEventY + "|" + lastEventPackage + "|" + lastEventId;
++    }
++
++    public static long lastEventId() {
++        return lastEventId;
++    }
++
+     private static void report(String state, String label, String detail) {
+         String safeLabel = label == null ? "" : label.replace("|", " ");
+         String safeDetail = detail == null ? "" : detail.replace("|", " ");
+         lastResult = state + "|" + safeLabel + "|" + safeDetail;
++        lastEventLabel = safeLabel;
++        lastEventDetail = safeDetail;
++        lastEventPhase = phaseOf(state, safeDetail);
++        lastEventId++;
++    }
++
++    private static String phaseOf(String state, String detail) {
++        if ("success".equals(state)) return "success";
++        if ("failed".equals(state)) return "failed";
++        if ("found".equals(detail)) return "found";
++        if (detail != null && detail.startsWith("scan-")) return "scan";
++        if (detail != null && (detail.startsWith("long-press")
++            || detail.startsWith("remove") || detail.startsWith("root-tap"))) return "removing";
++        if ("start".equals(detail)) return "start";
++        return "running";
+     }
+ 
+     private final Handler handler = new Handler(Looper.getMainLooper());
+@@ -69,6 +101,9 @@ public class SpiritAccessibilityService extends AccessibilityService {
+         SpiritAccessibilityService service = instance;
+         if (service == null) return "no-service";
+         final String safeLabel = (label == null) ? "" : label;
++        lastEventPackage = (pkg == null) ? "" : pkg.replace("|", " ");
++        lastEventX = 0;
++        lastEventY = 0;
+         report("running", safeLabel, "start");
+         service.handler.postDelayed(new Runnable() {
+             @Override
+@@ -105,6 +140,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
+             if (swipeLeft()) {
+                 scanLeft++;
+                 navOffset++;
++                report("running", label, "scan-left-" + scanLeft);
+                 toast("向左找「" + label + "」· 第" + scanLeft + "页");
+                 handler.postDelayed(new Runnable() {
+                     @Override
+@@ -119,6 +155,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
+             if (swipeRight()) {
+                 scanRight++;
+                 navOffset--;
++                report("running", label, "scan-right-" + scanRight);
+                 toast("向右找「" + label + "」· 第" + scanRight + "页");
+                 handler.postDelayed(new Runnable() {
+                     @Override
+@@ -130,23 +167,29 @@ public class SpiritAccessibilityService extends AccessibilityService {
+             }
+         }
+         if (target == null) {
+-            returnToOrigin();
+             report("failed", label, "not-found-" + screen);
++            returnAfter(1000L);
+             toast("没扫到「" + label + "」，目标约在屏" + screen + "；请手动滑到该屏再试");
+             return;
+         }
+         Rect bounds = new Rect();
+         target.getBoundsInScreen(bounds);
+         if (bounds.width() < 20 || bounds.height() < 20) {
++            report("failed", label, "invalid-bounds");
+             toast("图标坐标无效");
+             return;
+         }
+-        boolean ok = longPress(bounds.centerX(), bounds.centerY());
++        lastEventX = bounds.centerX();
++        lastEventY = bounds.centerY();
++        report("running", label, "found");
++        boolean ok = longPress(lastEventX, lastEventY);
+         if (!ok) {
+             report("failed", label, "long-press-failed");
++            returnAfter(900L);
+             toast("长按手势发送失败");
+             return;
+         }
++        report("running", label, "long-press");
+         toast("长按「" + label + "」…");
+         handler.postDelayed(new Runnable() {
+             @Override
+@@ -178,6 +221,16 @@ public class SpiritAccessibilityService extends AccessibilityService {
+         return dispatchGesture(gesture, null, null);
+     }
+ 
++    private void returnAfter(long delayMs) {
++        if (navOffset == 0) return;
++        handler.postDelayed(new Runnable() {
++            @Override
++            public void run() {
++                returnToOrigin();
++            }
++        }, delayMs);
++    }
++
+     private void returnToOrigin() {
+         if (navOffset > 0) {
+             if (swipeRight()) {
+@@ -255,7 +308,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
+             public void run() {
+                 if (findRemoveNode() == null) {
+                     report("success", label, "accessibility");
+-                    returnToOrigin();
++                    returnAfter(1000L);
+                     toast("已移除「" + label + "」，应用还在抽屉里");
+                 } else if (next < 3) {
+                     clickRemove(label, next);
+@@ -290,10 +343,11 @@ public class SpiritAccessibilityService extends AccessibilityService {
+                         public void run() {
+                             if (findRemoveNode() == null) {
+                                 report("success", label, "root");
+-                                returnToOrigin();
++                                returnAfter(1000L);
+                                 toast("已移除「" + label + "」");
+                             } else {
+                                 report("failed", label, "root-still-open");
++                                returnAfter(900L);
+                             }
+                         }
+                     }, 1000L);
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+index de02dd2..8165a33 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -11,7 +11,10 @@ import android.content.SharedPreferences;
+ import android.content.pm.ServiceInfo;
+ import android.graphics.Bitmap;
+ import android.graphics.BitmapFactory;
++import android.graphics.Canvas;
+ import android.graphics.Color;
++import android.graphics.drawable.Drawable;
++import android.content.pm.PackageManager;
+ import android.graphics.PixelFormat;
+ import android.graphics.Typeface;
+ import android.graphics.drawable.GradientDrawable;
+@@ -71,12 +74,21 @@ public class SpiritOverlayService extends Service {
+     private LinearLayout root;
+     private FrameLayout stage;
+     private ParticleView particleView;
++    private EatEffectView eatEffectView;
++    private WindowManager.LayoutParams eatParams;
+     private ImageView sprite;
+     private TextView bubble;
+     private DoodleView doodleView;
+     private WindowManager.LayoutParams doodleParams;
+     private final Map<String, Bitmap> frameCache = new HashMap<>();
++    private final Map<String, Bitmap> appIconCache = new HashMap<>();
+     private final Random random = new Random();
++    private long lastEatEventId = 0L;
++    private boolean eatFoundShown = false;
++    private String eatLabel = "";
++    private String eatPkg = "";
++    private int eatX = 0;
++    private int eatY = 0;
+     private final Handler handler = new Handler(Looper.getMainLooper());
+     private final String[] yaoLines = new String[]{
+         "瑶在森林里替你看着风的方向。",
+@@ -199,6 +211,8 @@ public class SpiritOverlayService extends Service {
+             return;
+         }
+         startForegroundCompat();
++        lastEatEventId = SpiritAccessibilityService.lastEventId();
++        handler.postDelayed(eatPollTask, 220L);
+     }
+ 
+     @Override
+@@ -229,6 +243,12 @@ public class SpiritOverlayService extends Service {
+     @Override
+     public void onDestroy() {
+         handler.removeCallbacksAndMessages(null);
++        if (eatEffectView != null && windowManager != null) {
++            try {
++                windowManager.removeView(eatEffectView);
++            } catch (Exception ignored) {
++            }
++        }
+         if (doodleView != null && windowManager != null) {
+             try {
+                 windowManager.removeView(doodleView);
+@@ -243,9 +263,12 @@ public class SpiritOverlayService extends Service {
+         }
+         if (sprite != null) sprite.animate().cancel();
+         frameCache.clear();
++        appIconCache.clear();
+         root = null;
+         stage = null;
+         particleView = null;
++        eatEffectView = null;
++        eatParams = null;
+         sprite = null;
+         bubble = null;
+         doodleView = null;
+@@ -450,6 +473,7 @@ public class SpiritOverlayService extends Service {
+             stopSelf();
+             return;
+         }
++        ensureEatEffectWindow();
+         root.post(new Runnable() {
+             @Override
+             public void run() {
+@@ -465,6 +489,31 @@ public class SpiritOverlayService extends Service {
+         });
+     }
+ 
++    private void ensureEatEffectWindow() {
++        if (eatEffectView != null || windowManager == null) return;
++        eatEffectView = new EatEffectView(this);
++        eatEffectView.setVisibility(View.GONE);
++        int type = Build.VERSION.SDK_INT >= 26
++            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
++            : WindowManager.LayoutParams.TYPE_PHONE;
++        eatParams = new WindowManager.LayoutParams(
++            WindowManager.LayoutParams.MATCH_PARENT,
++            WindowManager.LayoutParams.MATCH_PARENT,
++            type,
++            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
++                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
++                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
++                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
++            PixelFormat.TRANSLUCENT);
++        eatParams.gravity = Gravity.TOP | Gravity.START;
++        try {
++            windowManager.addView(eatEffectView, eatParams);
++        } catch (Exception e) {
++            eatEffectView = null;
++            eatParams = null;
++        }
++    }
++
+     private void ensureDoodleWindow() {
+         if (doodleView != null || windowManager == null) return;
+         doodleView = new DoodleView(this);
+@@ -707,6 +756,147 @@ public class SpiritOverlayService extends Service {
+         }
+     };
+ 
++    private final Runnable eatPollTask = new Runnable() {
++        @Override
++        public void run() {
++            pollEatEvent();
++            handler.postDelayed(this, 260L);
++        }
++    };
++
++    private void pollEatEvent() {
++        String raw = SpiritAccessibilityService.lastEvent();
++        String[] p = raw.split("\\|", -1);
++        if (p.length < 7) return;
++        long id;
++        int x = 0;
++        int y = 0;
++        try {
++            id = Long.parseLong(p[6]);
++            x = Integer.parseInt(p[3]);
++            y = Integer.parseInt(p[4]);
++        } catch (Exception e) {
++            return;
++        }
++        if (id == lastEatEventId) return;
++        lastEatEventId = id;
++        String phase = p[0];
++        String label = p[1];
++        String detail = p[2];
++        String pkg = p[5];
++
++        if ("start".equals(phase)) {
++            eatFoundShown = false;
++            eatLabel = label;
++            eatPkg = pkg;
++            eatX = 0;
++            eatY = 0;
++            if (eatEffectView != null) eatEffectView.clear();
++            return;
++        }
++        if ("scan".equals(phase)) return;
++        if ("found".equals(phase) || "removing".equals(phase)) {
++            if (x <= 0 || y <= 0) return;
++            if (eatFoundShown) return;
++            eatFoundShown = true;
++            eatX = x;
++            eatY = y;
++            eatLabel = label;
++            eatPkg = pkg;
++            if (!appForeground && eatEffectView != null) {
++                eatEffectView.setVisibility(View.VISIBLE);
++                eatEffectView.playFound(spiritCenterX(), spiritCenterY(), x, y, appIcon(pkg), label);
++            }
++            showFrame("action-upgrade", 700);
++            if (!appForeground) showBubble("发现「" + label + "」了。");
++            return;
++        }
++        if ("success".equals(phase)) {
++            if (eatX <= 0 || eatY <= 0) {
++                eatX = x;
++                eatY = y;
++            }
++            eatFoundShown = false;
++            if (!appForeground && eatEffectView != null && eatX > 0 && eatY > 0) {
++                eatEffectView.setVisibility(View.VISIBLE);
++                eatEffectView.playSuccess(eatX, eatY, spiritCenterX(), spiritCenterY(), appIcon(eatPkg), eatLabel);
++            }
++            showFrame("emotion-happy", 1200);
++            if (particleView != null) particleView.burst(14);
++            if (!appForeground) showBubble("吞下去了，抽屉里还在。");
++            return;
++        }
++        if ("failed".equals(phase)) {
++            eatFoundShown = false;
++            if (!appForeground && eatEffectView != null) {
++                if (eatX > 0 && eatY > 0) {
++                    eatEffectView.setVisibility(View.VISIBLE);
++                    eatEffectView.playFailure(eatX, eatY, appIcon(eatPkg));
++                }
++            }
++            showFrame("emotion-sad", 1000);
++            shakeSprite();
++            if (!appForeground) showBubble(failureLine(detail));
++        }
++    }
++
++    private String failureLine(String detail) {
++        if (detail == null) return "没抓到，再试一次。";
++        if (detail.startsWith("not-found")) return "没扫到它，先把桌面滑到目标那一页再试。";
++        if ("not-launcher".equals(detail)) return "先回到桌面，瑶才敢伸手。";
++        if ("no-root".equals(detail)) return "桌面还没准备好，等一下再试。";
++        if ("long-press-failed".equals(detail)) return "长按没成功，再试一次。";
++        if ("root-still-open".equals(detail)) return "移除弹窗还在，再试一次。";
++        return "没抓到，再试一次。";
++    }
++
++    private void shakeSprite() {
++        if (sprite == null) return;
++        sprite.animate().cancel();
++        sprite.setTranslationX(0f);
++        sprite.animate().translationX(dp(6)).setDuration(70).withEndAction(new Runnable() {
++            @Override
++            public void run() {
++                if (sprite == null) return;
++                sprite.animate().translationX(-dp(5)).setDuration(80).withEndAction(new Runnable() {
++                    @Override
++                    public void run() {
++                        if (sprite == null) return;
++                        sprite.animate().translationX(0f).setDuration(100).start();
++                    }
++                }).start();
++            }
++        }).start();
++    }
++
++    private float spiritCenterX() {
++        if (root == null || params == null) return screenWidth() / 2f;
++        return params.x + root.getWidth() / 2f;
++    }
++
++    private float spiritCenterY() {
++        if (root == null || params == null) return screenHeight() / 2f;
++        return params.y + root.getHeight() * 0.62f;
++    }
++
++    private Bitmap appIcon(String pkg) {
++        if (pkg == null || pkg.isEmpty()) return null;
++        Bitmap cached = appIconCache.get(pkg);
++        if (cached != null) return cached;
++        try {
++            Drawable drawable = getPackageManager().getApplicationIcon(pkg);
++            int size = dp(52);
++            Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
++            Canvas canvas = new Canvas(bitmap);
++            drawable.setBounds(0, 0, size, size);
++            drawable.draw(canvas);
++            appIconCache.put(pkg, bitmap);
++            return bitmap;
++        } catch (Exception e) {
++            return null;
++        }
++    }
++
+     private String spiritFolder() {
+         String id = getSharedPreferences(PREFS, 0).getString(PREF_SPIRIT, "xiaota");
+         if (id == null || id.isEmpty()) id = "xiaota";
+@@ -765,6 +955,10 @@ public class SpiritOverlayService extends Service {
+         int visibility = appForeground ? View.GONE : View.VISIBLE;
+         root.setVisibility(visibility);
+         if (doodleView != null) doodleView.setVisibility(visibility);
++        if (eatEffectView != null) {
++            eatEffectView.setVisibility(visibility);
++            if (appForeground) eatEffectView.clear();
++        }
+         if (appForeground) {
+             handler.removeCallbacks(autonomyTask);
+             handler.removeCallbacks(wanderTask);
+diff --git a/www/jingling.html b/www/jingling.html
+index 84f9a21..bf4d4c0 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -286,7 +286,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=31"></script>
++<script src="js/jingling.js?v=32"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 136c810..2e2fabe 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1180,6 +1180,14 @@
+       var raw = String(nativeOverlayCall('desktopEatStatus', 'idle||'));
+       var parts = raw.split('|');
+       var state = parts[0] || 'idle';
++      var eventRaw = String(nativeOverlayCall('desktopEatEvent', 'idle|||||0'));
++      var eventParts = eventRaw.split('|');
++      var phase = eventParts[0] || '';
++      if (eat && state === 'running') {
++        if (phase === 'scan') eat.textContent = '瑶正在扫桌面…';
++        else if (phase === 'found' || phase === 'removing') eat.textContent = '正在移除「' + (item.label || item.package || '图标') + '」…';
++        else eat.textContent = '瑶正在动手…';
++      }
+       if (state === 'success') {
+         clearInterval(timer);
+         if (eat) eat.disabled = false;
+@@ -1195,11 +1203,19 @@
+       } else if (state === 'failed') {
+         clearInterval(timer);
+         if (eat) eat.disabled = false;
++        updateDesktopProbeActions(window.__tafeiLastProbe);
+         var detail = parts[2] || '';
+-        toast('吃掉失败：' + (detail || '请重试'), true);
++        var failureText = detail;
++        if (detail.indexOf('not-found') === 0) failureText = '没扫到目标，请手动滑到那一页再试';
++        else if (detail === 'not-launcher') failureText = '请先回到桌面再试';
++        else if (detail === 'no-root') failureText = '桌面还没准备好，请稍后重试';
++        else if (detail === 'long-press-failed') failureText = '长按发送失败，请重试';
++        else if (detail === 'root-still-open') failureText = '移除弹窗没有关闭，请重试';
++        toast('吃掉失败：' + (failureText || '请重试'), true);
+       } else if (Date.now() - startedAt > 20000) {
+         clearInterval(timer);
+         if (eat) eat.disabled = false;
++        updateDesktopProbeActions(window.__tafeiLastProbe);
+         toast('操作超时，请确认桌面弹窗状态。', true);
+       }
+     }, 400);
