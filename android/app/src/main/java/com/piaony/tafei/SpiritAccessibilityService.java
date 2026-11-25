@@ -12,6 +12,8 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 桌面互动用的无障碍服务。
@@ -108,9 +110,9 @@ public class SpiritAccessibilityService extends AccessibilityService {
     }
 
     private void clickRemove(final String label, final int attempt) {
-        AccessibilityNodeInfo remove = findRemoveNode();
+        final AccessibilityNodeInfo remove = findRemoveNode();
         if (remove == null) {
-            if (attempt < 3) {
+            if (attempt < 2) {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -118,7 +120,8 @@ public class SpiritAccessibilityService extends AccessibilityService {
                     }
                 }, 450L);
             } else {
-                toast("菜单里没有找到「移除」，请手动点一下");
+                toast("无障碍没找到「移除」，改用 root 坐标");
+                rootTapRemove(label);
             }
             return;
         }
@@ -138,6 +141,64 @@ public class SpiritAccessibilityService extends AccessibilityService {
             ok = clickable != null && clickable.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         }
         toast(ok ? "正在自动点「移除」…" : "自动点击失败，请手动点一下");
+        final int next = attempt + 1;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (findRemoveNode() == null) {
+                    toast("已移除「" + label + "」，应用还在抽屉里");
+                } else if (next < 3) {
+                    clickRemove(label, next);
+                } else {
+                    toast("无障碍点击无效，改用 root 坐标");
+                    rootTapRemove(label);
+                }
+            }
+        }, 700L);
+    }
+
+    private void rootTapRemove(final String label) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                RootBridge.run("rm -f /data/local/tmp/tafei_ui.xml; uiautomator dump --compressed /data/local/tmp/tafei_ui.xml", 20000L);
+                RootBridge.Result cat = RootBridge.run("cat /data/local/tmp/tafei_ui.xml", 5000L);
+                String xml = cat.output == null ? "" : cat.output;
+                int[] point = findRemoveBounds(xml, "移除");
+                if (point == null) point = findRemoveBounds(xml, "从桌面移除");
+                if (point == null) {
+                    toast("root 兜底没找到「移除」");
+                    return;
+                }
+                boolean ok = tap(point[0], point[1]);
+                toast(ok ? "root 坐标已点「移除」" : "root 点击失败");
+            }
+        }).start();
+    }
+
+    private int[] findRemoveBounds(String xml, String needle) {
+        if (xml == null || xml.isEmpty()) return null;
+        Pattern pattern = Pattern.compile("bounds=\"\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]\"");
+        int start = 0;
+        while ((start = xml.indexOf("<node", start)) >= 0) {
+            int end = xml.indexOf(">", start);
+            if (end < 0) break;
+            String node = xml.substring(start, end);
+            boolean match = node.contains("text=\"" + needle + "\"")
+                || node.contains("content-desc=\"" + needle + "\"");
+            if (match) {
+                Matcher matcher = pattern.matcher(node);
+                if (matcher.find()) {
+                    int x1 = Integer.parseInt(matcher.group(1));
+                    int y1 = Integer.parseInt(matcher.group(2));
+                    int x2 = Integer.parseInt(matcher.group(3));
+                    int y2 = Integer.parseInt(matcher.group(4));
+                    return new int[]{(x1 + x2) / 2, (y1 + y2) / 2};
+                }
+            }
+            start = end + 1;
+        }
+        return null;
     }
 
     private AccessibilityNodeInfo findRemoveNode() {

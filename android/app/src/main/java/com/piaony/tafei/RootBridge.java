@@ -31,6 +31,10 @@ public final class RootBridge {
     private RootBridge() {}
 
     public static Result run(String command) {
+        return run(command, 7000L);
+    }
+
+    public static Result run(String command, long timeoutMs) {
         String su = findSu();
         if (su == null) return new Result(false, false, -1, "no su binary");
         Process process = null;
@@ -43,7 +47,7 @@ public final class RootBridge {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(7000L);
+                        Thread.sleep(timeoutMs);
                     } catch (InterruptedException ignored) {
                     }
                     if (p.isAlive()) p.destroy();
