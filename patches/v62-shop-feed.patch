@@ -1,0 +1,828 @@
+diff --git a/www/index.html b/www/index.html
+index 384bc32..1933b7d 100644
+--- a/www/index.html
++++ b/www/index.html
+@@ -39,6 +39,79 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+ .cl-toggle{width:100%;padding:11px;border:1px dashed rgba(130,170,255,.25);border-radius:13px;background:transparent;color:var(--tf-muted,#8fa2c6);font:inherit;font-size:12px;cursor:pointer}
+ .cl-toggle b{color:#64e8ff;font-weight:800}
+ .changelog-mod.open .cl-toggle span{display:inline-block;transform:rotate(180deg)}
++/* 商城：4 列网格 + 加号 + 汇总栏 */
++#shop .sv-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
++#shop .sv-card{position:relative;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;border-radius:14px}
++#shop .sv-vis{display:block;width:100%;padding:0;border:0;background:linear-gradient(150deg,rgba(58,110,220,.30),rgba(120,90,220,.16));aspect-ratio:1/1;height:auto;cursor:pointer;overflow:hidden}
++#shop .sv-vis img{width:100%;height:100%;object-fit:cover}
++#shop .sv-vis span{display:grid;place-items:center;width:100%;height:100%;font-size:26px}
++#shop .sv-body{padding:8px 9px 9px;display:grid;gap:6px}
++#shop .sv-name{margin:0;font-size:12px;line-height:1.35;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;min-height:32px}
++#shop .sv-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
++#shop .sv-price{font-size:12px;font-weight:800;color:#64e8ff}
++#shop .sv-plus{flex:none;width:22px;height:22px;border-radius:50%;border:1px solid rgba(130,170,255,.42);background:linear-gradient(135deg,#53ddff,#728cff);color:#06101f;font-size:13px;font-weight:900;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
++#shop .sv-qty{position:absolute;top:6px;right:6px;z-index:2;font-size:10px;line-height:1.5;color:#eaf3ff;background:rgba(8,16,32,.78);border:1px solid rgba(130,170,255,.45);border-radius:20px;padding:0 6px}
++#shop .sv-cartbar{position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:600;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:16px;border:1px solid rgba(130,170,255,.32);background:rgba(10,18,34,.94);box-shadow:0 12px 30px rgba(3,9,22,.5);backdrop-filter:blur(10px)}
++#shop .sv-cartbar[hidden]{display:none!important}
++#shop .sv-cartbar{transition:opacity .25s,transform .25s}
++#shop .sv-cartbar.sv-cartbar-dock{opacity:0;transform:translateY(12px);pointer-events:none}
++#shop .sv-cartbar-info{display:flex;align-items:baseline;gap:8px;color:#eef4ff}
++#shop .sv-cartbar-info b{font-size:13px}
++#shop .sv-cartbar-info span{font-size:15px;font-weight:900;color:#64e8ff}
++#shop .sv-cartbar .btn{padding:8px 12px;font-size:12px}
++#shop .sv-modal{position:fixed;inset:0;z-index:700;display:grid;place-items:center;padding:18px;background:rgba(4,8,18,.72)}
++#shop .sv-modal[hidden]{display:none!important}
++#shop .sv-modal-box{position:relative;width:100%;max-width:360px;max-height:82vh;overflow:auto;display:grid;gap:10px;padding:16px;border-radius:20px;border:1px solid rgba(130,170,255,.28);background:#0e1729;color:#eef4ff}
++body.light #shop .sv-modal-box{background:#fff;color:#16233c}
++#shop .sv-modal-x{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;border:1px solid rgba(130,170,255,.3);background:transparent;color:inherit;font-size:13px;cursor:pointer}
++#shop .sv-modal-img{width:100%;aspect-ratio:1.5/1;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(150deg,rgba(58,110,220,.3),rgba(120,90,220,.16));font-size:34px}
++#shop .sv-modal-img img{width:100%;height:100%;object-fit:cover}
++#shop .sv-modal-cat{font-size:11px;color:#64e8ff;border:1px solid rgba(130,170,255,.3);border-radius:20px;padding:2px 9px;justify-self:start}
++#shop .sv-modal-title{margin:0;font-size:18px;line-height:1.35}
++#shop .sv-modal-desc{margin:0;font-size:13px;line-height:1.75;color:#9fb2d0}
++body.light #shop .sv-modal-desc{color:#5f7291}
++#shop .sv-modal-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
++#shop .sv-modal-price{font-size:18px;color:#64e8ff}
++#shop .sv-modal-acts{display:flex;gap:8px}
++#shop .sv-modal-acts .btn{padding:9px 12px;font-size:12.5px}
++#shop .sv-toast{position:fixed;left:50%;bottom:calc(132px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:720;max-width:78vw;padding:9px 14px;border-radius:12px;border:1px solid rgba(130,170,255,.3);background:rgba(10,18,34,.96);color:#eef4ff;font-size:12.5px;opacity:0;pointer-events:none;transition:opacity .2s}
++#shop .sv-toast.on{opacity:1}
++body.light #shop .sv-toast{background:rgba(12,22,42,.96);color:#f2f7ff;border-color:rgba(90,140,220,.4)}
++#shop .sv-cart-panel{display:grid;gap:10px;padding:14px;border-radius:16px;border:1px dashed rgba(130,170,255,.3);background:rgba(120,150,255,.06)}
++#shop .sv-cart-panel[hidden]{display:none!important}
++#shop .sv-cart-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
++#shop .sv-cart-head span{font-size:12px;color:#8fa2c6}
++#shop .sv-cart-head span b{font-size:15px;color:#2b7d9c;margin-left:2px}
++body:not(.light) #shop .sv-cart-head span b{color:#64e8ff}
++#shop .sv-cart-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
++#shop .sv-cart-item{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid rgba(130,170,255,.12)}
++#shop .sv-cart-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
++#shop .sv-cart-item em{font-style:normal;color:#8fa2c6}
++#shop .sv-cart-item strong{color:#64e8ff}
++#shop .sv-cart-del{border:0;background:transparent;color:#8fa2c6;font-size:12px;cursor:pointer;padding:0 2px}
++#shop .sv-cart-acts{display:flex;gap:8px;flex-wrap:wrap}
++#shop .sv-cart-acts .btn{padding:8px 12px;font-size:12px}
++#shop .sv-cart-hint{margin:0;font-size:11.5px;line-height:1.6;color:#8fa2c6}
++@media(max-width:860px){#shop .sv-grid{gap:8px}}
++/* 就地搜索 */
++.hv-search input{flex:1;min-width:0;background:none;border:0;outline:none;color:inherit;font:inherit;font-size:13px}
++.hv-search input::placeholder{color:var(--tf-muted,#8fa2c6)}
++.hv-search button{flex:none;padding:5px 11px;border-radius:9px;border:1px solid rgba(130,170,255,.3);background:transparent;color:#64e8ff;font:inherit;font-size:11.5px;cursor:pointer}
++.hv-sr{margin-top:10px;padding:6px;border-radius:16px;border:1px solid rgba(130,170,255,.22);background:rgba(16,26,48,.9);display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
++body.light .hv-sr{background:rgba(255,255,255,.96)}
++.hv-sr-head{padding:8px 10px 4px;font-size:10.5px;letter-spacing:.1em;color:#8fa2c6}
++.hv-sr-item{display:flex;gap:9px;align-items:flex-start;width:100%;max-width:100%;min-width:0;padding:9px 10px;border:0;border-radius:11px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;text-decoration:none;overflow:hidden}
++.hv-sr-item:hover,.hv-sr-item:active{background:rgba(104,223,255,.12)}
++.hv-sr-tag{flex:none;font-size:10.5px;color:#64e8ff;border:1px solid rgba(130,170,255,.28);border-radius:20px;padding:2px 7px;margin-top:1px}
++.hv-sr-main{min-width:0;flex:1}
++.hv-sr-main b{display:block;font-size:13.5px;line-height:1.35;white-space:normal;word-break:break-word}
++.hv-sr-main small{display:block;font-size:11.5px;color:#8fa2c6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
++.hv-sr-empty{padding:12px;font-size:12.5px;color:#8fa2c6}
++/* 社区栏目就地列表 */
++.comm-feed{display:grid;gap:16px}
++.comm-feed .af-group-head{display:block}
++.comm-feed .af-grid{grid-template-columns:1fr}
++.comm-feed[hidden]{display:none!important}
+ </style>
+ </head>
+ <body class="page-home">
+@@ -91,11 +164,12 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+  </div>
+ </div>
+ 
+-<a class="hv-search" href="search.html">
++<div class="hv-search" id="hvSearchBox" role="search">
+  <span class="hv-ic" data-ti="search"></span>
+- <span>搜索机型、故障、文章</span>
+- <i>搜索</i>
+-</a>
++ <input id="hvSearchInput" type="search" placeholder="搜索机型、故障、文章" aria-label="站内搜索" autocomplete="off">
++ <button id="hvSearchGo" type="button" aria-label="搜索">搜索</button>
++</div>
++<div class="hv-sr" id="hvSearchResults" hidden></div>
+ 
+ <div class="hv-grid">
+  <a class="hv-tile" href="fix.html" style="--grad:linear-gradient(135deg,#ff7b6b,#ffab5e);--glow:rgba(255,140,90,.3)">
+@@ -149,7 +223,7 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+    <div>
+     <div class="kicker">TAFEI SHOP · 站内直通</div>
+     <h2>商城</h2>
+-    <p>技术服务、资料包与折腾工具。看中后直接联系站长确认，站内下单、站内交付、全程留痕；不跳转、不经过第三方购物车。</p>
++    <p>技术服务、资料包与折腾工具。用卡片上的「＋」把要的项目加进清单，页尾看合计金额，再一次性把清单发给站长合并打包。</p>
+    </div>
+    <div class="sv-head-actions"><button class="btn" type="button" id="svRefresh">刷新商品</button></div>
+   </div>
+@@ -159,8 +233,35 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+   </div>
+   <div class="sv-count" id="svCount">加载中…</div>
+   <div class="sv-grid" id="svProducts"></div>
++  <div class="sv-cartbar" id="svCartBar" hidden>
++   <div class="sv-cartbar-info"><b id="svCartCount">0 件</b><span id="svCartSum">¥0</span></div>
++   <button class="btn primary" type="button" id="svCartGo">去底部打包 ↓</button>
++  </div>
++  <div class="sv-modal" id="svModal" hidden>
++   <div class="sv-modal-box" role="dialog" aria-modal="true" aria-label="商品详情">
++    <button class="sv-modal-x" type="button" aria-label="关闭">✕</button>
++    <div class="sv-modal-img" aria-hidden="true"></div>
++    <span class="sv-modal-cat"></span>
++    <h3 class="sv-modal-title"></h3>
++    <p class="sv-modal-desc"></p>
++    <div class="sv-modal-foot">
++     <strong class="sv-modal-price">¥0</strong>
++     <div class="sv-modal-acts"><button class="btn sv-modal-minus" type="button">－</button><button class="btn primary sv-modal-add" type="button">加入清单 ＋</button></div>
++    </div>
++   </div>
++  </div>
++  <div class="sv-toast" id="svToast" role="status" aria-live="polite"></div>
+   <div class="sv-contact panel">
+-   <div class="sv-contact-head"><div><div class="kicker">CONTACT</div><h3>联系站长</h3></div><p>把商品名和需求发过来，确认方案后再付款。</p></div>
++   <div class="sv-contact-head"><div><div class="kicker">CONTACT</div><h3>联系站长</h3></div><p>选好的项目已汇总在下面，复制清单后从任意渠道发我，确认方案再付款。</p></div>
++   <div class="sv-cart-panel" id="svCartPanel" hidden>
++    <div class="sv-cart-head"><b>已选清单</b><span id="svCartTip"></span></div>
++    <ul class="sv-cart-list" id="svCartList"></ul>
++    <div class="sv-cart-acts">
++     <button class="btn" type="button" data-cart-copy>复制清单</button>
++     <button class="btn" type="button" data-cart-clear>清空</button>
++    </div>
++    <p class="sv-cart-hint">复制清单后，用上面任意方式发给站长，说明机型和需求，确认方案再付款。</p>
++   </div>
+    <div class="sv-contact-grid">
+     <div><b>QQ</b><span>2026759743</span></div>
+     <div><b>Telegram</b><span>@piaopiaony</span></div>
+@@ -224,6 +325,7 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+  <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
+  <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
+ </div>
++<div class="comm-feed" id="commFeed" hidden></div>
+ <div class="community-hub" id="communityHub">
+   <div class="community-me" id="communityMe">
+    <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
+@@ -691,8 +793,10 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+ <script src="js/home-v2.js?v=34"></script>
+ <script src="js/home-views.js?v=7"></script>
+ <script src="js/community-hub.js?v=2"></script>
+-<script src="js/shop-view.js?v=2"></script>
++<script src="js/shop-view.js?v=6"></script>
+ <script src="js/articles.js?v=2"></script>
++<script src="js/community-feed.js?v=1"></script>
++<script src="js/home-search.js?v=1"></script>
+ <script src="js/community-help.js?v=4"></script>
+ 
+ <script src="announcement.js?v=2"></script>
+@@ -728,12 +832,14 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
+         x.classList.toggle('on', on);
+         x.setAttribute('aria-selected', on ? 'true' : 'false');
+       });
+-      if (key === 'all') { if (hub) hub.hidden = false; return; }
++      var feed = window.TAFEICommFeed;
++      if (key === 'all') {
++        if (feed) feed.hide();
++        if (hub) hub.hidden = false;
++        return;
++      }
+       if (hub) hub.hidden = true;
+-      var art = window.TAFEIArticles;
+-      if (art && art.openColumn) art.openColumn(key);
+-      var sec = document.getElementById('articles');
+-      if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
++      if (feed) feed.show(key);
+     });
+   }
+ })();
+diff --git a/www/js/community-feed.js b/www/js/community-feed.js
+new file mode 100644
+index 0000000..3fc6c27
+--- /dev/null
++++ b/www/js/community-feed.js
+@@ -0,0 +1,124 @@
++/* TAFEI 社区栏目：在社区页原地展开「手机权限 / 高中资料」列表，不再跳到文章区 */
++(function () {
++  'use strict';
++  var host = document.getElementById('commFeed');
++  if (!host || window.__tafeiCommFeed) return;
++  window.__tafeiCommFeed = true;
++
++  var DATA = null;
++  var pending = [];
++  var cur = null;
++
++  function esc(s) {
++    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
++      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
++    });
++  }
++  function byDateDesc(a, b) { return String(b.date).localeCompare(String(a.date)); }
++
++  function colOf(id) {
++    if (!DATA) return null;
++    var cols = DATA.columns || [];
++    for (var i = 0; i < cols.length; i++) if (cols[i].id === id) return cols[i];
++    return null;
++  }
++
++  function cardHtml(a) {
++    var col = colOf(a.column);
++    var tags = (a.tags || []).map(function (t) { return '<span class="af-tag">' + esc(t) + '</span>'; }).join('');
++    return '<article class="af-card" data-cf-id="' + esc(a.id) + '" tabindex="0" role="button" aria-label="阅读：' + esc(a.title) + '">'
++      + '<div class="af-card-meta"><span class="af-col">' + esc(col ? col.name : a.column) + '</span>'
++      + '<span class="af-date">' + esc(a.date) + '</span><span class="af-read">约 ' + a.read_min + ' 分钟</span></div>'
++      + '<h3 class="af-card-title">' + esc(a.title) + '</h3>'
++      + '<p class="af-card-summary">' + esc(a.summary) + '</p>'
++      + '<div class="af-tags">' + tags + '</div></article>';
++  }
++
++  function blockHtml(b) {
++    switch (b.type) {
++      case 'h2': return '<h2 class="af-h2">' + esc(b.text) + '</h2>';
++      case 'list': return '<ul class="af-list">' + (b.items || []).map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>';
++      case 'quote': return '<blockquote class="af-quote">' + esc(b.text) + '</blockquote>';
++      case 'code': return '<pre class="af-code"><code>' + esc(b.text) + '</code></pre>';
++      case 'tip': return '<aside class="af-tip">' + esc(b.text) + '</aside>';
++      default: return '<p class="af-p">' + esc(b.text) + '</p>';
++    }
++  }
++
++  function bindCards() {
++    Array.prototype.forEach.call(host.querySelectorAll('[data-cf-id]'), function (el) {
++      el.addEventListener('click', function () { openArticle(el.getAttribute('data-cf-id')); });
++      el.addEventListener('keydown', function (e) {
++        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openArticle(el.getAttribute('data-cf-id')); }
++      });
++    });
++  }
++
++  function renderList(colId) {
++    var col = colOf(colId);
++    var list = (DATA.articles || []).filter(function (a) { return a.column === colId; }).sort(byDateDesc);
++    var head = '<div class="af-group-head"><div><div class="kicker">' + esc(String(colId).toUpperCase()) + '</div>'
++      + '<h2>' + esc(col ? col.name : colId) + '</h2></div><p>' + esc(col ? col.tagline : '') + '</p></div>';
++    host.innerHTML = head + (list.length
++      ? '<div class="af-grid">' + list.map(cardHtml).join('') + '</div>'
++      : '<div class="empty-state">这个栏目还在整理，稍后更新。</div>');
++    bindCards();
++  }
++
++  function renderReader(a) {
++    var col = colOf(a.column);
++    var tags = (a.tags || []).map(function (t) { return '<span class="af-tag">' + esc(t) + '</span>'; }).join('');
++    host.innerHTML = '<article class="af-reader">'
++      + '<button class="textbtn af-back" type="button" data-cf-back>← 返回' + esc(col ? col.name : '栏目') + '</button>'
++      + '<div class="af-reader-meta"><span class="af-col">' + esc(col ? col.name : a.column) + '</span>'
++      + '<span class="af-date">' + esc(a.date) + '</span><span class="af-read">约 ' + a.read_min + ' 分钟</span></div>'
++      + '<h1 class="af-reader-title">' + esc(a.title) + '</h1>'
++      + '<p class="af-reader-summary">' + esc(a.summary) + '</p>'
++      + '<div class="af-tags">' + tags + '</div>'
++      + '<div class="af-body">' + (a.blocks || []).map(blockHtml).join('') + '</div>'
++      + '</article>';
++    var back = host.querySelector('[data-cf-back]');
++    if (back) back.addEventListener('click', function () { renderList(cur); });
++  }
++
++  function openArticle(id) {
++    if (!DATA) return;
++    var a = null;
++    for (var i = 0; i < DATA.articles.length; i++) if (DATA.articles[i].id === id) { a = DATA.articles[i]; break; }
++    if (!a) return;
++    renderReader(a);
++    var tabs = document.getElementById('commTabs');
++    if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
++  }
++
++  function load(cb) {
++    if (DATA) { cb(); return; }
++    pending.push(cb);
++    if (host.getAttribute('data-cf-loading')) return;
++    host.setAttribute('data-cf-loading', '1');
++    fetch('data/articles.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (json) {
++      DATA = { columns: json.columns || [], articles: json.articles || [] };
++      host.removeAttribute('data-cf-loading');
++      var q = pending.splice(0);
++      q.forEach(function (fn) { fn(); });
++    }).catch(function () {
++      host.removeAttribute('data-cf-loading');
++      host.innerHTML = '<div class="empty-state">内容加载失败，请稍后重试。</div>';
++      pending = [];
++    });
++  }
++
++  function show(colId) {
++    cur = colId;
++    host.hidden = false;
++    load(function () { renderList(colId); });
++  }
++
++  function hide() {
++    cur = null;
++    host.hidden = true;
++    host.innerHTML = '';
++  }
++
++  window.TAFEICommFeed = { show: show, hide: hide, openArticle: openArticle };
++})();
+diff --git a/www/js/home-search.js b/www/js/home-search.js
+new file mode 100644
+index 0000000..0d27607
+--- /dev/null
++++ b/www/js/home-search.js
+@@ -0,0 +1,137 @@
++/* TAFEI 首页搜索：就地出结果，不再跳 search.html */
++(function () {
++  'use strict';
++  var box = document.getElementById('hvSearchBox');
++  if (!box || window.__tafeiHomeSearch) return;
++  window.__tafeiHomeSearch = true;
++
++  var input = document.getElementById('hvSearchInput');
++  var panel = document.getElementById('hvSearchResults');
++  if (!input || !panel) return;
++
++  var PAGES = [
++    { t: '手机急救室', d: '按步骤自检，2 分钟出结论', h: 'fix.html', tag: '页面' },
++    { t: '技术服务预约', d: '解 BL / Root / 救砖 / 上门', h: 'service.html', tag: '页面' },
++    { t: '淘机商城', d: '资料包 · 折叠工具 · 站长定制服务', h: 'shop.html', tag: '页面' },
++    { t: '精灵小屋', d: '伙伴、皮肤与成长任务', h: 'jingling.html', tag: '页面' },
++    { t: '留言板', d: '随便聊聊，站长都会看', h: '#guestbook', tag: '页面' },
++    { t: '更新日志合集', d: '站点每次改动都在这里', h: '#changelog', tag: '页面' },
++    { t: '我的', d: '账号、额度与登录状态', h: 'my.html', tag: '页面' }
++  ];
++
++  var ARTICLES = [];
++  var DEVICES = [];
++  var loaded = false;
++  var loading = false;
++  var waiters = [];
++
++  function esc(s) {
++    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
++      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
++    });
++  }
++
++  function load(cb) {
++    if (loaded) { cb(); return; }
++    waiters.push(cb);
++    if (loading) return;
++    loading = true;
++    var one = function (url, key) {
++      return fetch(url, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { return j[key] || []; }).catch(function () { return []; });
++    };
++    Promise.all([one('data/articles.json', 'articles'), one('data/devices.json', 'devices')]).then(function (res) {
++      ARTICLES = res[0] || [];
++      DEVICES = res[1] || [];
++      loaded = true;
++      loading = false;
++      var q = waiters.splice(0);
++      q.forEach(function (fn) { fn(); });
++    });
++  }
++
++  function articleHit(a, q) {
++    var hay = [a.title, a.summary, (a.tags || []).join(' ')].join(' ').toLowerCase();
++    return hay.indexOf(q) >= 0;
++  }
++  function deviceHit(d, q) {
++    var hay = [d.name, d.brand || '', (d.aliases || []).join(' '), d.id].join(' ').toLowerCase();
++    return hay.indexOf(q) >= 0;
++  }
++
++  function hide() { panel.hidden = true; panel.innerHTML = ''; }
++
++  function row(html) { return html; }
++
++  function renderResults() {
++    var q = input.value.trim().toLowerCase();
++    if (q.length < 1) { hide(); return; }
++
++    var arts = ARTICLES.filter(function (a) { return articleHit(a, q); }).slice(0, 4);
++    var devs = DEVICES.filter(function (d) { return deviceHit(d, q); }).slice(0, 4);
++    var pages = PAGES.filter(function (p) { return (p.t + ' ' + p.d).toLowerCase().indexOf(q) >= 0; }).slice(0, 3);
++    var out = '';
++    var total = arts.length + devs.length + pages.length;
++
++    if (arts.length) {
++      out += '<div class="hv-sr-head">文章</div>';
++      arts.forEach(function (a) {
++        out += '<button type="button" class="hv-sr-item" data-sr-art="' + esc(a.id) + '">'
++          + '<span class="hv-sr-tag">' + esc(a.column === 'study' ? '高中资料' : (a.column === 'phone' ? '手机权限' : a.column)) + '</span>'
++          + '<span class="hv-sr-main"><b>' + esc(a.title) + '</b><small>' + esc(a.summary) + '</small></span></button>';
++      });
++    }
++    if (devs.length) {
++      out += '<div class="hv-sr-head">机型</div>';
++      devs.forEach(function (d) {
++        out += '<a class="hv-sr-item" href="device.html?m=' + encodeURIComponent(d.id) + '">'
++          + '<span class="hv-sr-tag">机型</span>'
++          + '<span class="hv-sr-main"><b>' + esc(d.name) + '</b><small>' + esc((d.brand ? d.brand + ' · ' : '') + (d.chip || d.soc || '参数与实测')) + '</small></span></a>';
++      });
++    }
++    if (pages.length) {
++      out += '<div class="hv-sr-head">页面</div>';
++      pages.forEach(function (p) {
++        out += '<a class="hv-sr-item" href="' + esc(p.h) + '"><span class="hv-sr-tag">' + p.tag + '</span>'
++          + '<span class="hv-sr-main"><b>' + esc(p.t) + '</b><small>' + esc(p.d) + '</small></span></a>';
++      });
++    }
++    if (!total) {
++      out = '<div class="hv-sr-empty">没找到「' + esc(input.value.trim()) + '」。试试「掉帧」「导数」「救砖」或机型名。</div>';
++    }
++    panel.innerHTML = out;
++    panel.hidden = false;
++
++    Array.prototype.forEach.call(panel.querySelectorAll('[data-sr-art]'), function (b) {
++      b.addEventListener('click', function () {
++        var id = b.getAttribute('data-sr-art');
++        input.value = '';
++        hide();
++        if (window.TAFEIArticles && window.TAFEIArticles.openArticle) window.TAFEIArticles.openArticle(id);
++      });
++    });
++    Array.prototype.forEach.call(panel.querySelectorAll('a.hv-sr-item'), function (a) {
++      a.addEventListener('click', function () { input.value = ''; hide(); });
++    });
++  }
++
++  var go = document.getElementById('hvSearchGo');
++  if (go) go.addEventListener('click', function () { load(renderResults); if (input.value.trim()) input.focus(); });
++
++  var timer = 0;
++  input.addEventListener('input', function () {
++    clearTimeout(timer);
++    timer = setTimeout(function () { load(renderResults); }, 120);
++  });
++  input.addEventListener('focus', function () { load(function () { if (input.value.trim()) renderResults(); }); });
++  input.addEventListener('keydown', function (e) {
++    if (e.key === 'Escape') { input.blur(); hide(); return; }
++    if (e.key === 'Enter') {
++      e.preventDefault();
++      var first = panel.querySelector('.hv-sr-item');
++      if (first) { if (first.click) first.click(); }
++    }
++  });
++  document.addEventListener('click', function (e) {
++    if (!box.contains(e.target) && !panel.contains(e.target)) hide();
++  });
++})();
+diff --git a/www/js/shop-view.js b/www/js/shop-view.js
+index 0bacf69..d943500 100644
+--- a/www/js/shop-view.js
++++ b/www/js/shop-view.js
+@@ -1,10 +1,11 @@
+-/* TAFEI 21.3：站内直通商城 */
++/* TAFEI 商城：4 列网格 + 加号加入清单 + 底部合并打包联系站长 */
+ (function () {
+   'use strict';
+ 
+   const API = 'https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1/tafei_products';
+   const KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
+-  const state = { products: [], category: '全部', loaded: false, loading: false };
++  const CART_KEY = 'tafei-shop-cart';
++  const state = { products: [], category: '全部', loaded: false, loading: false, cart: {} };
+ 
+   const $ = (id) => document.getElementById(id);
+   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+@@ -17,42 +18,83 @@
+     return number % 1 === 0 ? String(number) : number.toFixed(2);
+   }
+ 
+-  function orderText(product) {
+-    return '【挞飞商城】想了解这个项目：\n' + product.name +
+-      '\n分类：' + (product.category || '未分类') +
+-      '\n价格：¥' + money(product.price) +
+-      '\n我的机型/需求：';
++  async function copyText(text) {
++    try {
++      if (navigator.clipboard && navigator.clipboard.writeText) {
++        await navigator.clipboard.writeText(text);
++        return true;
++      }
++    } catch (e) {}
++    try {
++      const area = document.createElement('textarea');
++      area.value = text;
++      area.setAttribute('readonly', 'readonly');
++      area.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
++      document.body.appendChild(area);
++      area.select();
++      area.setSelectionRange(0, area.value.length);
++      const ok = document.execCommand('copy');
++      area.remove();
++      return ok;
++    } catch (e) { return false; }
+   }
+ 
+-  async function inquire(product) {
+-    const text = orderText(product);
++  function productById(id) {
++    for (let i = 0; i < state.products.length; i++) if (String(state.products[i].id) === String(id)) return state.products[i];
++    return null;
++  }
++
++  /* ---------- 清单 ---------- */
++  function loadCart() {
+     try {
+-      await navigator.clipboard.writeText(text);
+-    } catch (error) {
+-      window.prompt('请手动复制这段内容发给站长', text);
+-      return;
+-    }
+-    window.open('https://wpa.qq.com/msgrd?v=3&uin=2026759743&site=qq&menu=yes', '_blank', 'noopener');
++      const raw = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
++      state.cart = raw && typeof raw === 'object' ? raw : {};
++    } catch (e) { state.cart = {}; }
++  }
++  function saveCart() {
++    try { localStorage.setItem(CART_KEY, JSON.stringify(state.cart)); } catch (e) {}
++  }
++  function cartRows() {
++    return Object.keys(state.cart).map((id) => {
++      const p = productById(id);
++      const qty = Number(state.cart[id]) || 0;
++      return p && qty > 0 ? { product: p, qty } : null;
++    }).filter(Boolean);
++  }
++  function cartTotals() {
++    const rows = cartRows();
++    let count = 0, sum = 0;
++    rows.forEach((r) => { count += r.qty; sum += (Number(r.product.price) || 0) * r.qty; });
++    return { rows, count, sum };
+   }
+ 
+-  function renderCategories() {
+-    const box = $('svCats');
+-    if (!box) return;
+-    const categories = ['全部', ...new Set(state.products.map((item) => item.category).filter(Boolean))];
+-    if (state.category !== '全部' && categories.indexOf(state.category) === -1) state.category = '全部';
+-    box.replaceChildren();
+-    categories.forEach((name) => {
+-      const button = document.createElement('button');
+-      button.type = 'button';
+-      button.className = 'sv-cat' + (name === state.category ? ' active' : '');
+-      button.textContent = name;
+-      button.addEventListener('click', () => {
+-        state.category = name;
+-        renderCategories();
+-        renderProducts();
+-      });
+-      box.appendChild(button);
+-    });
++  function cartText() {
++    const { rows, count, sum } = cartTotals();
++    if (!rows.length) return '【挞飞商城】我想咨询，还没选具体项目。\n我的机型/需求：';
++    const lines = rows.map((r, i) => (i + 1) + '. ' + r.product.name + ' × ' + r.qty + '　¥' + money(r.product.price * r.qty));
++    return '【挞飞商城 · 合并打包】\n共 ' + count + ' 件，合计 ¥' + money(sum) + '\n' + lines.join('\n') + '\n我的机型/需求：';
++  }
++
++  function addToCart(id, qty) {
++    const n = Number(qty) || 1;
++    state.cart[id] = (Number(state.cart[id]) || 0) + n;
++    saveCart();
++    renderCart();
++    const p = productById(id);
++    toast(p ? ('已加入：' + p.name) : '已加入清单');
++  }
++
++  function setQty(id, qty) {
++    if (qty <= 0) delete state.cart[id]; else state.cart[id] = qty;
++    saveCart();
++    renderCart();
++  }
++
++  function clearCart() {
++    state.cart = {};
++    saveCart();
++    renderCart();
++    toast('清单已清空');
+   }
+ 
+   function renderProducts() {
+@@ -68,35 +110,140 @@
+       return categoryMatch && text.includes(keyword);
+     });
+ 
+-    count.textContent = list.length ? list.length + ' 个项目' : '暂无匹配';
++    count.textContent = list.length ? list.length + ' 个项目 · 点卡片看详情，加号加入清单' : '暂无匹配';
+     root.replaceChildren();
+ 
+     if (!list.length) {
+-      root.innerHTML = '<div class="sv-empty">没有找到符合条件的项目。换个关键词，或直接联系站长说明需求。</div>';
++      root.innerHTML = '<div class="sv-empty">没有找到符合条件的项目。换个关键词，或在底部把需求发给站长。</div>';
+       return;
+     }
+ 
+     list.forEach((product) => {
++      const qty = Number(state.cart[product.id]) || 0;
+       const card = document.createElement('article');
+       card.className = 'sv-card';
+       card.innerHTML =
+-        '<div class="sv-vis">' + (product.image_url
+-          ? '<img src="' + esc(product.image_url) + '" alt="' + esc(product.name) + '" loading="lazy">'
+-          : '<span aria-hidden="true">📦</span>') + '</div>' +
++        '<button class="sv-vis" type="button" aria-label="查看 ' + esc(product.name) + ' 详情">' +
++          (product.image_url
++            ? '<img src="' + esc(product.image_url) + '" alt="' + esc(product.name) + '" loading="lazy">'
++            : '<span aria-hidden="true">📦</span>') +
++        '</button>' +
+         '<div class="sv-body">' +
+-          '<span class="sv-cat-label">' + esc(product.category || '未分类') + '</span>' +
+-          '<h3>' + esc(product.name) + '</h3>' +
+-          '<p>' + esc(product.description || '') + '</p>' +
+-          '<div class="sv-foot">' +
+-            '<span class="sv-price">¥' + esc(money(product.price)) + '<small>联系确认</small></span>' +
+-            '<button class="btn primary" type="button">联系站长</button>' +
++          '<h3 class="sv-name">' + esc(product.name) + '</h3>' +
++          '<div class="sv-row">' +
++            '<span class="sv-price">¥' + esc(money(product.price)) + '</span>' +
++            '<button class="sv-plus" type="button" aria-label="加入清单">＋</button>' +
+           '</div>' +
++          (qty ? '<span class="sv-qty">已选 ' + qty + '</span>' : '') +
+         '</div>';
+-      card.querySelector('button').addEventListener('click', () => inquire(product));
++
++      card.querySelector('.sv-vis').addEventListener('click', () => openDetail(product));
++      card.querySelector('.sv-name').addEventListener('click', () => openDetail(product));
++      card.querySelector('.sv-plus').addEventListener('click', (e) => {
++        e.stopPropagation();
++        addToCart(String(product.id), 1);
++      });
+       root.appendChild(card);
+     });
+   }
+ 
++  /* ---------- 汇总栏 ---------- */
++  function renderCart() {
++    const { rows, count, sum } = cartTotals();
++    const bar = $('svCartBar');
++    const c = $('svCartCount');
++    const s = $('svCartSum');
++    if (bar) bar.hidden = count === 0;
++    if (c) c.textContent = count + ' 件';
++    if (s) s.textContent = '¥' + money(sum);
++
++    const panel = $('svCartList');
++    const tip = $('svCartTip');
++    const wrap = $('svCartPanel');
++    if (wrap) wrap.hidden = count === 0;
++    if (tip) tip.innerHTML = count ? ('共 ' + count + ' 件 · 合计 <b>¥' + money(sum) + '</b>') : '';
++    if (panel) {
++      panel.innerHTML = rows.map((r) => '<li class="sv-cart-item"><span>' + esc(r.product.name) +
++        '</span><em>× ' + r.qty + '</em><strong>¥' + money((Number(r.product.price) || 0) * r.qty) + '</strong>' +
++        '<button class="sv-cart-del" type="button" data-del="' + esc(r.product.id) + '" aria-label="移除">✕</button></li>').join('');
++      Array.prototype.forEach.call(panel.querySelectorAll('[data-del]'), (b) => {
++        b.addEventListener('click', () => setQty(b.getAttribute('data-del'), 0));
++      });
++    }
++    renderProducts();
++  }
++
++  /* ---------- 详情弹层 ---------- */
++  function openDetail(product) {
++    const modal = $('svModal');
++    if (!modal) return;
++    const box = modal.querySelector('.sv-modal-img');
++    if (box) box.innerHTML = product.image_url
++      ? '<img src="' + esc(product.image_url) + '" alt="' + esc(product.name) + '">'
++      : '<span aria-hidden="true">📦</span>';
++    const cat = modal.querySelector('.sv-modal-cat');
++    if (cat) cat.textContent = product.category || '未分类';
++    const title = modal.querySelector('.sv-modal-title');
++    if (title) title.textContent = product.name;
++    const desc = modal.querySelector('.sv-modal-desc');
++    if (desc) desc.textContent = product.description || '这个项目可以按你的机型和需求来配，具体做法在底部联系站长确认。';
++    const price = modal.querySelector('.sv-modal-price');
++    if (price) price.textContent = '¥' + money(product.price);
++    modal.hidden = false;
++    modal.setAttribute('data-pid', String(product.id));
++    const add = modal.querySelector('.sv-modal-add');
++    if (add) {
++      add.onclick = () => {
++        addToCart(String(product.id), 1);
++        closeDetail();
++      };
++    }
++    const minus = modal.querySelector('.sv-modal-minus');
++    if (minus) {
++      minus.onclick = () => {
++        const qty = Number(state.cart[String(product.id)]) || 0;
++        setQty(String(product.id), qty - 1);
++        closeDetail();
++      };
++    }
++  }
++
++  function closeDetail() {
++    const modal = $('svModal');
++    if (modal) modal.hidden = true;
++  }
++
++  /* ---------- 轻提示 ---------- */
++  let toastTimer = 0;
++  function toast(text) {
++    const el = $('svToast');
++    if (!el) return;
++    el.textContent = text;
++    el.classList.add('on');
++    clearTimeout(toastTimer);
++    toastTimer = setTimeout(() => el.classList.remove('on'), 1800);
++  }
++
++  function renderCategories() {
++    const box = $('svCats');
++    if (!box) return;
++    const categories = ['全部', ...new Set(state.products.map((item) => item.category).filter(Boolean))];
++    if (state.category !== '全部' && categories.indexOf(state.category) === -1) state.category = '全部';
++    box.replaceChildren();
++    categories.forEach((name) => {
++      const button = document.createElement('button');
++      button.type = 'button';
++      button.className = 'sv-cat' + (name === state.category ? ' active' : '');
++      button.textContent = name;
++      button.addEventListener('click', () => {
++        state.category = name;
++        renderCategories();
++        renderProducts();
++      });
++      box.appendChild(button);
++    });
++  }
++
+   async function loadProducts(force) {
+     if (state.loading) return;
+     if (state.loaded && !force) return;
+@@ -116,7 +263,7 @@
+       state.products = Array.isArray(rows) ? rows : [];
+       state.loaded = true;
+       renderCategories();
+-      renderProducts();
++      renderCart();
+     } catch (error) {
+       console.warn('商城加载失败：', error);
+       if (root) {
+@@ -131,12 +278,39 @@
+   }
+ 
+   function bind() {
++    loadCart();
++
+     const input = $('svSearch');
+     if (input) input.addEventListener('input', renderProducts);
+ 
+     const refresh = $('svRefresh');
+     if (refresh) refresh.addEventListener('click', () => loadProducts(true));
+ 
++    const go = $('svCartGo');
++    if (go) go.addEventListener('click', () => {
++      const contact = document.querySelector('.sv-contact');
++      if (contact) contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
++      setTimeout(() => toast('清单已在下方的联系站长区'), 400);
++    });
++
++    document.querySelectorAll('[data-cart-copy]').forEach((button) => {
++      button.addEventListener('click', async () => {
++        const text = cartText();
++        const ok = await copyText(text);
++        toast(ok ? '清单已复制，粘给站长就行' : '复制失败，请长按下方清单手动复制');
++      });
++    });
++    document.querySelectorAll('[data-cart-clear]').forEach((button) => {
++      button.addEventListener('click', clearCart);
++    });
++
++    const modal = $('svModal');
++    if (modal) {
++      const close = modal.querySelector('.sv-modal-x');
++      if (close) close.addEventListener('click', closeDetail);
++      modal.addEventListener('click', (e) => { if (e.target === modal) closeDetail(); });
++    }
++
+     document.querySelectorAll('[data-copy]').forEach((button) => {
+       button.addEventListener('click', async () => {
+         const text = button.dataset.copy || '';
+@@ -151,10 +325,31 @@
+       });
+     });
+ 
++    const panel = $('svCartPanel');
++    const bar = $('svCartBar');
++    if (panel && bar) {
++      const syncBar = () => {
++        if (panel.hidden) { bar.classList.remove('sv-cartbar-dock'); return; }
++        const rect = panel.getBoundingClientRect();
++        const seen = rect.top < window.innerHeight - 60 && rect.bottom > 80;
++        bar.classList.toggle('sv-cartbar-dock', seen);
++      };
++      window.addEventListener('scroll', syncBar, true);
++      document.addEventListener('scroll', syncBar, true);
++      setInterval(syncBar, 800);
++      syncBar();
++    }
++
++    renderCart();
+     loadProducts(false);
+   }
+ 
+-  window.TAFEIShop = { load: loadProducts, refresh: () => loadProducts(true) };
++  window.TAFEIShop = {
++    load: loadProducts,
++    refresh: () => loadProducts(true),
++    cart: () => cartTotals(),
++    text: cartText
++  };
+ 
+   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+   else bind();
