@@ -144,6 +144,7 @@
 
   function firstItem(kind) {
     var list = core.ITEMS.filter(function (item) {
+      if (!core.isItemEnabled(item.id) && core.inventoryOf(item.id) <= 0) return false;
       return item.kind === kind && core.inventoryOf(item.id) > 0;
     });
     return list.length ? list[0] : null;

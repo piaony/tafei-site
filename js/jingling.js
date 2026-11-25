@@ -334,12 +334,16 @@
     if (!grid) return;
     var selected = core.state().selected;
     var selectedLevel = selected ? core.bondInfo(selected).level : 0;
-    var signature = selected + '|' + selectedLevel + '|' + core.SPIRITS.map(function (spirit) {
-      return spirit.id + ':' + (core.isUnlocked(spirit.id) ? 1 : 0) + ':' + core.modeOfSpirit(spirit.id) + ':' + core.priceOfSpirit(spirit.id);
+    var list = core.SPIRITS.filter(function (spirit) {
+      return core.isSpiritEnabled(spirit.id) || core.isUnlocked(spirit.id);
+    });
+    var signature = selected + '|' + selectedLevel + '|' + list.map(function (spirit) {
+      return spirit.id + ':' + (core.isUnlocked(spirit.id) ? 1 : 0) + ':'
+        + (core.isSpiritEnabled(spirit.id) ? 1 : 0) + ':' + core.modeOfSpirit(spirit.id) + ':' + core.priceOfSpirit(spirit.id);
     }).join(',');
     if (signature === gridSig) return;
     gridSig = signature;
-    grid.innerHTML = core.SPIRITS.map(function (spirit) {
+    grid.innerHTML = list.map(function (spirit) {
       var unlocked = core.isUnlocked(spirit.id);
       var isSelected = selected === spirit.id;
       var frame = isSelected && selectedLevel >= 7 ? ' is-bond-frame' : '';
@@ -380,9 +384,10 @@
     if (core.state().selected !== spirit.id) {
       selectedSkin = (core.skinById(spirit.defaultSkin) || skins[0] || {}).id;
     }
-    forms.innerHTML = '<div class="spirit-skins-head"><span>皮肤选择</span><em>' + skins.length + ' 款 · 点选换装 · 后续可加</em></div>'
+    var listed = skins.filter(function (skin) { return core.isSkinEnabled(skin.id) || core.isSkinOwned(skin.id); });
+    forms.innerHTML = '<div class="spirit-skins-head"><span>皮肤选择</span><em>' + listed.length + ' 款 · 点选换装 · 后续可加</em></div>'
       + '<div class="spirit-skin-list">'
-      + skins.map(function (skin) { return skinOptionHtml(skin, skin.id === selectedSkin); }).join('')
+      + listed.map(function (skin) { return skinOptionHtml(skin, skin.id === selectedSkin); }).join('')
       + '</div>';
   }
 
@@ -698,12 +703,13 @@
   function renderShop() {
     var signature = core.ITEMS.map(function (item) {
       var used = item.kind === 'toy' ? (Number(core.state().today.toys[item.id]) || 0) : 0;
-      return item.id + ':' + core.inventoryOf(item.id) + ':' + used;
+      return item.id + ':' + (core.isItemEnabled(item.id) ? 1 : 0) + ':' + core.inventoryOf(item.id) + ':' + used;
     }).join(',');
     if (signature !== shopSig) {
       shopSig = signature;
-      if (foodGrid) foodGrid.innerHTML = core.ITEMS.filter(function (i) { return i.kind === 'food'; }).map(itemCard).join('');
-      if (toyGrid) toyGrid.innerHTML = core.ITEMS.filter(function (i) { return i.kind === 'toy'; }).map(itemCard).join('');
+      var shopItems = core.ITEMS.filter(function (i) { return core.isItemEnabled(i.id) || core.inventoryOf(i.id) > 0; });
+      if (foodGrid) foodGrid.innerHTML = shopItems.filter(function (i) { return i.kind === 'food'; }).map(itemCard).join('');
+      if (toyGrid) toyGrid.innerHTML = shopItems.filter(function (i) { return i.kind === 'toy'; }).map(itemCard).join('');
     }
     renderWallet();
   }
