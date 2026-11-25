@@ -1067,8 +1067,11 @@
     try { data = JSON.parse(raw || '{}'); } catch (e) { data = null; }
     if (!data || !data.ok) {
       out.textContent = '探测失败：' + ((data && data.dbError) || '没有拿到原生返回。');
+      updateDesktopProbeActions(null);
       return;
     }
+    window.__tafeiLastProbe = data;
+    updateDesktopProbeActions(data);
     var lines = [];
     var diagLines = data.diag || [];
     if (!Array.isArray(diagLines)) diagLines = String(diagLines).split(/\r?\n/);
@@ -1121,6 +1124,14 @@
     out.textContent = lines.join('\n');
   }
 
+  function updateDesktopProbeActions(data) {
+    var eat = $('desktopEatBtn');
+    if (!eat) return;
+    var samples = (data && data.samples) || [];
+    eat.disabled = !samples.length;
+    eat.textContent = samples.length ? ('试吃「' + (samples[0].label || samples[0].package || '第一个') + '」') : '试吃第一个图标';
+  }
+
   function initDesktopProbe() {
     var box = $('desktopProbe');
     var button = $('desktopProbeBtn');
@@ -1136,6 +1147,27 @@
         renderDesktopProbe(raw);
         button.disabled = false;
       }, 120);
+    });
+    var access = $('desktopAccessBtn');
+    if (access) access.addEventListener('click', function () {
+      nativeOverlayCall('openAccessibility', null);
+      toast('请在系统设置里找到「挞飞桌面互动」并开启；首次可能需要先允许受限设置。');
+    });
+    var eat = $('desktopEatBtn');
+    if (eat) eat.addEventListener('click', function () {
+      var data = window.__tafeiLastProbe;
+      var item = data && data.samples && data.samples[0];
+      if (!item) { toast('请先检测一次桌面。', true); return; }
+      if (String(nativeOverlayCall('accessibilityReady', '0')) !== '1') {
+        nativeOverlayCall('openAccessibility', null);
+        toast('无障碍还没连接，请先开启「挞飞桌面互动」。', true);
+        return;
+      }
+      if (!window.confirm('试吃「' + (item.label || item.package) + '」？\n只会从桌面移除，应用仍保留在抽屉。')) return;
+      var result = String(nativeOverlayCall('eatDesktopIcon', 'off', item.label, item.package, item.screen, item.cellX, item.cellY));
+      if (result === 'accessibility-off') toast('请先开启无障碍服务。', true);
+      else if (result === 'started') toast('正在回到桌面，长按「' + (item.label || item.package) + '」…');
+      else toast('试吃启动失败：' + result, true);
     });
   }
 
