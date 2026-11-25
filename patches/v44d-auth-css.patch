@@ -1,0 +1,27 @@
+diff --git a/www/js/tafei-auth.js b/www/js/tafei-auth.js
+index 5692506..79c5386 100644
+--- a/www/js/tafei-auth.js
++++ b/www/js/tafei-auth.js
+@@ -90,8 +90,22 @@
+   }
+ 
+   /* ---------- UI ---------- */
++  function ensureCss() {
++    if (document.querySelector('link[data-tfa-css]')) return;
++    var hrefs = document.querySelectorAll('link[rel="stylesheet"]');
++    for (var i = 0; i < hrefs.length; i++) {
++      if (/tafei-auth\\.css/.test(hrefs[i].getAttribute('href') || '')) return;
++    }
++    var link = document.createElement('link');
++    link.rel = 'stylesheet';
++    link.href = 'css/tafei-auth.css';
++    link.setAttribute('data-tfa-css', '1');
++    document.head.appendChild(link);
++  }
++
+   function buildUI() {
+     if (mask) return;
++    ensureCss();
+     mask = el('div', 'tfa-mask');
+     card = el('div', 'tfa-card');
+     card.innerHTML =
