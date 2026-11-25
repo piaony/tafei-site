@@ -440,7 +440,7 @@ body.spirit-memorial-open{overflow:hidden}
 .dm-page-tabs::-webkit-scrollbar{display:none}
 .dm-page-tab{flex:0 0 auto;min-height:28px;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:99px;background:rgba(255,255,255,.03);color:var(--ang-muted);font:inherit;font-size:10px;cursor:pointer;white-space:nowrap}
 .dm-page-tab.is-active{border-color:rgba(199,166,255,.5);background:rgba(199,166,255,.14);color:#efe7ff}
-.dm-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-height:420px;overflow:auto;padding:2px 1px 8px;overscroll-behavior:contain}
+.dm-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px 1px 8px;overscroll-behavior:contain}
 .dm-app{position:relative;display:flex;flex-direction:column;align-items:center;min-width:0;padding:8px 3px 7px;border:1px solid rgba(255,255,255,.075);border-radius:11px;background:rgba(255,255,255,.028);color:var(--ang-text);font:inherit;cursor:pointer;transition:border-color .16s,background .16s,transform .16s}
 .dm-app:active{transform:scale(.97)}
 .dm-app.is-selected{border-color:rgba(255,211,110,.75);background:rgba(255,211,110,.12);box-shadow:0 0 0 1px rgba(255,211,110,.2) inset,0 6px 18px rgba(255,211,110,.08)}

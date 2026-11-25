@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex,follow">
 <link rel="stylesheet" href="css/angela.css?v=4">
 <link rel="stylesheet" href="css/jingling.css?v=2">
-<link rel="stylesheet" href="css/spirit-house.css?v=22">
+<link rel="stylesheet" href="css/spirit-house.css?v=23">
 <link rel="stylesheet" href="css/app-shell.css?v=2">
 <script src="js/app-shell.js?v=2" defer></script>
 </head>
@@ -101,52 +101,8 @@
        <label><input type="checkbox" id="noDoodle"> 桌面涂鸦</label>
       </div>
       <p class="ws-note">只影响退出 App 后的桌面悬浮精灵，不改变页面里的全站挂件。</p>
-      <div class="desktop-probe dm-shell" id="desktopProbe" hidden>
-       <div class="dm-head">
-        <div><b>桌面管家</b><small>真实图标 · 按页整理 · 选中后直接操作</small></div>
-        <span id="desktopIconCount">0 个</span>
-       </div>
-       <div class="dm-scan-row">
-        <button type="button" class="desktop-probe-btn" id="desktopProbeBtn">扫描桌面</button>
-        <button type="button" class="desktop-probe-btn" id="desktopAccessBtn">开启无障碍</button>
-       </div>
-       <div class="dm-tools">
-        <input type="search" id="desktopSearch" placeholder="搜索应用名或包名" autocomplete="off">
-        <label class="dm-db-toggle"><input type="checkbox" id="launcherDbSwitch"> 实验性数据库写入</label>
-       </div>
-       <p class="dm-db-note" id="desktopDbNote">默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。</p>
-       <div class="dm-page-tabs" id="desktopPageTabs"></div>
-       <div class="dm-grid" id="desktopIconList"></div>
-       <div class="dm-empty" id="desktopEmpty" hidden>没有匹配的应用</div>
-       <div class="dm-dock" id="desktopActionDock">
-        <div class="dm-selection"><b id="desktopSelectionText">未选择</b><small id="desktopSelectionSub">点一个应用开始</small></div>
-        <div class="dm-actions">
-         <button type="button" class="dm-action" id="desktopEatBtn" disabled>吃掉</button>
-         <button type="button" class="dm-action" id="desktopMoveBtn" disabled>移动</button>
-         <button type="button" class="dm-action" id="desktopSwapBtn" disabled>交换</button>
-         <button type="button" class="dm-action" id="desktopFolderBtn" disabled>文件夹</button>
-        </div>
-       </div>
-       <div class="dm-command">
-        <input type="text" id="desktopCommand" placeholder="例：把微信和支付宝交换位置" autocomplete="off">
-        <button type="button" id="desktopCommandBtn">执行指令</button>
-       </div>
-       <div class="dm-action-out" id="desktopActionOut" hidden></div>
-       <details class="dm-diag"><summary>诊断信息</summary><div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div></details>
-       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。移动/交换/文件夹默认关闭数据库写入。</p>
-
-       <div class="dm-modal" id="desktopTargetModal" hidden>
-        <div class="dm-modal-card">
-         <div class="dm-modal-head"><b id="desktopTargetTitle">选择目标位置</b><button type="button" id="desktopTargetClose" aria-label="关闭">×</button></div>
-         <p class="dm-modal-note">行列从 1 开始；绿色为空位，金色为已有文件夹，灰色为已占用应用。</p>
-         <div class="dm-page-tabs" id="desktopTargetPageTabs"></div>
-         <div class="dm-target-grid" id="desktopTargetGrid"></div>
-         <label class="dm-folder-name" id="desktopFolderNameWrap" hidden>文件夹名 <input type="text" id="desktopFolderName" placeholder="留空自动命名"></label>
-         <p class="dm-target-hint" id="desktopTargetHint">点一个空位</p>
-        </div>
-       </div>
-      </div>
      </div>
+    </div>
 
     <div class="widget-switch-card native-overlay-card" id="nativeOverlayCard" hidden>
      <div class="widget-switch-copy">
@@ -210,6 +166,53 @@
    </div>
   </div>
  </section>
+
+ <section class="spirit-section dm-desktop-section" id="desktopManagerSection" hidden>
+<div class="desktop-probe dm-shell" id="desktopProbe" hidden>
+       <div class="dm-head">
+        <div><b>桌面管家</b><small>真实图标 · 按页整理 · 选中后直接操作</small></div>
+        <span id="desktopIconCount">0 个</span>
+       </div>
+       <div class="dm-scan-row">
+        <button type="button" class="desktop-probe-btn" id="desktopProbeBtn">扫描桌面</button>
+        <button type="button" class="desktop-probe-btn" id="desktopAccessBtn">开启无障碍</button>
+       </div>
+       <div class="dm-tools">
+        <input type="search" id="desktopSearch" placeholder="搜索应用名或包名" autocomplete="off">
+        <label class="dm-db-toggle"><input type="checkbox" id="launcherDbSwitch"> 实验性数据库写入</label>
+       </div>
+       <p class="dm-db-note" id="desktopDbNote">默认关闭。开启后移动、交换、文件夹才会写 launcher.db；每次写入前自动备份，校验失败自动回滚。</p>
+       <div class="dm-page-tabs" id="desktopPageTabs"></div>
+       <div class="dm-grid" id="desktopIconList"></div>
+       <div class="dm-empty" id="desktopEmpty" hidden>没有匹配的应用</div>
+       <div class="dm-dock" id="desktopActionDock">
+        <div class="dm-selection"><b id="desktopSelectionText">未选择</b><small id="desktopSelectionSub">点一个应用开始</small></div>
+        <div class="dm-actions">
+         <button type="button" class="dm-action" id="desktopEatBtn" disabled>吃掉</button>
+         <button type="button" class="dm-action" id="desktopMoveBtn" disabled>移动</button>
+         <button type="button" class="dm-action" id="desktopSwapBtn" disabled>交换</button>
+         <button type="button" class="dm-action" id="desktopFolderBtn" disabled>文件夹</button>
+        </div>
+       </div>
+       <div class="dm-command">
+        <input type="text" id="desktopCommand" placeholder="例：把微信和支付宝交换位置" autocomplete="off">
+        <button type="button" id="desktopCommandBtn">执行指令</button>
+       </div>
+       <div class="dm-action-out" id="desktopActionOut" hidden></div>
+       <details class="dm-diag"><summary>诊断信息</summary><div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div></details>
+       <p class="ws-note">需要 KernelSU 授权；无障碍首次开启要先允许「受限设置」，再打开「挞飞桌面互动」。移动/交换/文件夹默认关闭数据库写入。</p>
+
+       <div class="dm-modal" id="desktopTargetModal" hidden>
+        <div class="dm-modal-card">
+         <div class="dm-modal-head"><b id="desktopTargetTitle">选择目标位置</b><button type="button" id="desktopTargetClose" aria-label="关闭">×</button></div>
+         <p class="dm-modal-note">行列从 1 开始；绿色为空位，金色为已有文件夹，灰色为已占用应用。</p>
+         <div class="dm-page-tabs" id="desktopTargetPageTabs"></div>
+         <div class="dm-target-grid" id="desktopTargetGrid"></div>
+         <label class="dm-folder-name" id="desktopFolderNameWrap" hidden>文件夹名 <input type="text" id="desktopFolderName" placeholder="留空自动命名"></label>
+         <p class="dm-target-hint" id="desktopTargetHint">点一个空位</p>
+        </div>
+       </div>
+      </div></section>
 
  <section class="spirit-section" id="growthSection" aria-labelledby="growthTitle">
   <div class="section-heading"><h2 id="growthTitle">成长与今日任务</h2><p>陪它待着就会长大，任务每天刷新</p></div>
@@ -316,7 +319,7 @@
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
 <script src="js/spirit-core.js?v=15"></script>
-<script src="js/jingling.js?v=33"></script>
+<script src="js/jingling.js?v=34"></script>
 <script src="js/spirit-growth.js" defer></script>
 </body>
 </html>

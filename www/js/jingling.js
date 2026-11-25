@@ -1690,6 +1690,8 @@
     if (!box || !button) return;
     if (String(nativeOverlayCall('desktopProbeSupported', '0')) !== '1') return;
     box.hidden = false;
+    var section = $('desktopManagerSection');
+    if (section) section.hidden = false;
     initDesktopDbSwitch();
 
     button.addEventListener('click', scanDesktop);
