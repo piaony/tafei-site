@@ -1,0 +1,163 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+index d048d62..9bc5786 100644
+--- a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
++++ b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+@@ -114,9 +114,10 @@ public final class DesktopProbe {
+             add(packages, "com.android.launcher");
+ 
+             String dirsOut = findDatabasesDirs(packages);
++            JSONArray diag = new JSONArray();
+             JSONObject selected = null;
+             for (String dir : uniqueLines(dirsOut)) {
+-                JSONObject db = tryOpenLauncherDatabase(context, dir);
++                JSONObject db = tryOpenLauncherDatabase(context, dir, diag);
+                 if (db != null) {
+                     selected = db;
+                     break;
+@@ -125,6 +126,7 @@ public final class DesktopProbe {
+ 
+             if (selected == null) {
+                 out.put("dbError", "没有找到可读的 launcher.db / favorites 表；可能被加密或桌面包名不同");
++                out.put("diag", diag);
+                 out.put("samples", new JSONArray());
+                 out.put("columns", new JSONArray());
+                 out.put("containers", new JSONObject());
+@@ -134,6 +136,7 @@ public final class DesktopProbe {
+                 out.put("dbFile", "");
+             } else {
+                 out.put("dbError", "");
++                out.put("diag", diag);
+                 out.put("dbPath", selected.optString("path"));
+                 out.put("dbFile", selected.optString("file"));
+                 out.put("columns", selected.optJSONArray("columns"));
+@@ -153,11 +156,13 @@ public final class DesktopProbe {
+         return out.toString();
+     }
+ 
+-    private static JSONObject tryOpenLauncherDatabase(Context context, String remoteDir) {
++    private static JSONObject tryOpenLauncherDatabase(Context context, String remoteDir, JSONArray diag) {
+         List<String> names = new ArrayList<>();
+-        RootBridge.Result ls = RootBridge.run("ls -1 " + quote(remoteDir));
++        addDiag(diag, "目录：" + remoteDir);
++        RootBridge.Result ls = RootBridge.run("ls -la " + quote(remoteDir));
++        addDiag(diag, "目录项：" + trim(ls.output, 900));
+         for (String name : uniqueLines(ls.output)) {
+-            if (name.endsWith(".db") && (name.contains("launcher") || name.equals("launcher.db"))) {
++            if (name.endsWith(".db") && !name.endsWith("-wal") && !name.endsWith("-shm")) {
+                 names.add(name);
+             }
+         }
+@@ -167,7 +172,10 @@ public final class DesktopProbe {
+             if (!cache.exists() && !cache.mkdirs()) continue;
+             File localDb = new File(cache, "launcher_probe.db");
+             String remotePath = remoteDir + "/" + name;
+-            if (!RootBridge.copyToFile(remotePath, localDb)) continue;
++            if (!RootBridge.copyToFile(remotePath, localDb)) {
++                addDiag(diag, "跳过 " + name + "：cat 读取失败（文件权限或路径问题）");
++                continue;
++            }
+             // WAL 不能漏；只读打开时也要把 -wal/-shm 带上。
+             RootBridge.copyToFile(remotePath + "-wal", new File(localDb.getAbsolutePath() + "-wal"));
+             RootBridge.copyToFile(remotePath + "-shm", new File(localDb.getAbsolutePath() + "-shm"));
+@@ -178,7 +186,10 @@ public final class DesktopProbe {
+             try {
+                 db = SQLiteDatabase.openDatabase(localDb.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
+                 tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='favorites'", null);
+-                if (!tables.moveToFirst()) continue;
++                if (!tables.moveToFirst()) {
++                    addDiag(diag, name + "：没有 favorites 表");
++                    continue;
++                }
+                 tables.close();
+                 tables = null;
+ 
+@@ -193,7 +204,10 @@ public final class DesktopProbe {
+                 }
+                 columns.close();
+                 columns = null;
+-                if (!columnNames.contains("intent")) continue;
++                if (!columnNames.contains("intent")) {
++                    addDiag(diag, name + "：favorites 缺少 intent 字段");
++                    continue;
++                }
+ 
+                 JSONObject containers = new JSONObject();
+                 JSONArray samples = new JSONArray();
+@@ -242,8 +256,8 @@ public final class DesktopProbe {
+                 result.put("totalRows", totalRows);
+                 result.put("samples", samples);
+                 return result;
+-            } catch (Throwable ignored) {
+-                // 换下一个候选数据库
++            } catch (Throwable t) {
++                addDiag(diag, name + "：打开失败 " + String.valueOf(t.getMessage()));
+             } finally {
+                 if (columns != null) columns.close();
+                 if (tables != null) tables.close();
+@@ -358,6 +372,13 @@ public final class DesktopProbe {
+         return oneLine.length() <= max ? oneLine : oneLine.substring(0, max) + "…";
+     }
+ 
++    private static void addDiag(JSONArray diag, String text) {
++        try {
++            diag.put(text);
++        } catch (Exception ignored) {
++        }
++    }
++
+     private static String quote(String value) {
+         return "'" + value.replace("'", "'\\''") + "'";
+     }
+diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
+index 1f4a924..c5f67bf 100644
+--- a/www/css/spirit-house.css
++++ b/www/css/spirit-house.css
+@@ -316,7 +316,7 @@ body.spirit-memorial-open{overflow:hidden}
+ .desktop-probe[hidden]{display:none!important}
+ .desktop-probe-btn{width:100%;min-height:32px;margin-top:8px;border:1px solid rgba(110,231,255,.3);border-radius:9px;background:rgba(110,231,255,.1);color:var(--sp-cyan);font:inherit;font-size:11px;cursor:pointer}
+ .desktop-probe-btn:disabled{opacity:.55;cursor:default}
+-.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:230px;overflow:auto}
++.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:360px;overflow:auto}
+ .desktop-probe-out b{color:var(--ang-text);font-weight:500}
+ @media(max-width:620px){
+   .widget-settings{padding:10px;gap:8px}
+diff --git a/www/jingling.html b/www/jingling.html
+index d3f05f9..b582122 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -8,7 +8,7 @@
+ <meta name="robots" content="noindex,follow">
+ <link rel="stylesheet" href="css/angela.css?v=4">
+ <link rel="stylesheet" href="css/jingling.css?v=2">
+-<link rel="stylesheet" href="css/spirit-house.css?v=18">
++<link rel="stylesheet" href="css/spirit-house.css?v=19">
+ <link rel="stylesheet" href="css/app-shell.css?v=2">
+ <script src="js/app-shell.js?v=2" defer></script>
+ </head>
+@@ -278,7 +278,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=26"></script>
++<script src="js/jingling.js?v=27"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 42cbcb1..e26732d 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1094,6 +1094,13 @@
+         lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
+       });
+       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
++      if (data.diag && data.diag.length) {
++        lines.push('');
++        lines.push('诊断：');
++        data.diag.slice(0, 10).forEach(function (line, index) {
++          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
++        });
++      }
+     } else {
+       lines.push('数据库：未读取');
+       lines.push('原因：' + (data.dbError || '未知'));
