@@ -146,14 +146,24 @@ public final class DesktopProbe {
             add(packages, "com.android.launcher");
             addDiag(diag, "候选包：" + trim(join(packages), 300));
 
+            String launcherPid = firstToken(RootBridge.run("pidof com.android.launcher").output);
+            String procDatabases = launcherPid.isEmpty() ? "" : "/proc/" + launcherPid + "/root/data/user_de/0/com.android.launcher/databases";
+            JSONObject selected = null;
+            if (!procDatabases.isEmpty()) {
+                addDiag(diag, "proc databases：" + procDatabases);
+                diagCmd(diag, "proc db 文件名", "ls -1 " + procDatabases, 900);
+                selected = tryOpenLauncherDatabase(context, procDatabases, diag);
+            }
+
             String dirsOut = findDatabasesDirs(packages);
             addDiag(diag, "候选目录数：" + uniqueLines(dirsOut).size());
-            JSONObject selected = null;
-            for (String dir : uniqueLines(dirsOut)) {
-                JSONObject db = tryOpenLauncherDatabase(context, dir, diag);
-                if (db != null) {
-                    selected = db;
-                    break;
+            if (selected == null) {
+                for (String dir : uniqueLines(dirsOut)) {
+                    JSONObject db = tryOpenLauncherDatabase(context, dir, diag);
+                    if (db != null) {
+                        selected = db;
+                        break;
+                    }
                 }
             }
 
@@ -196,7 +206,9 @@ public final class DesktopProbe {
         addDiag(diag, "目录：" + remoteDir);
         RootBridge.Result ls = RootBridge.run("ls -la " + quote(remoteDir));
         addDiag(diag, "目录项：" + trim(ls.output, 900));
-        for (String name : uniqueLines(ls.output)) {
+        for (String line : uniqueLines(ls.output)) {
+            String[] fields = line.trim().split(" ");
+            String name = fields.length == 0 ? "" : fields[fields.length - 1];
             if (name.endsWith(".db") && !name.endsWith("-wal") && !name.endsWith("-shm")) {
                 names.add(name);
             }
@@ -418,6 +430,14 @@ public final class DesktopProbe {
             out.append(value);
         }
         return out.toString();
+    }
+
+    private static String firstToken(String value) {
+        if (value == null) return "";
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) return "";
+        String[] parts = trimmed.split(" ");
+        return parts.length == 0 ? "" : parts[0];
     }
 
     private static String firstNonEmpty(String... values) {
