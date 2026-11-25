@@ -1,0 +1,79 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index fec811f..e037288 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -1,6 +1,8 @@
+ package com.piaony.tafei;
+ 
++import android.Manifest;
+ import android.content.Intent;
++import android.content.pm.PackageManager;
+ import android.graphics.Color;
+ import android.net.Uri;
+ import android.os.Build;
+@@ -241,6 +243,16 @@ public class MainActivity extends BridgeActivity {
+         public String startOverlay() {
+             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) return "denied";
+             act.getSharedPreferences("tafei_app", 0).edit().putBoolean("overlay_enabled", true).apply();
++            if (Build.VERSION.SDK_INT >= 33
++                && act.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
++                act.runOnUiThread(new Runnable() {
++                    @Override
++                    public void run() {
++                        act.requestPermissions(
++                            new String[]{Manifest.permission.POST_NOTIFICATIONS}, 9201);
++                    }
++                });
++            }
+             try {
+                 SpiritOverlayService.start(act);
+                 return "on";
+ diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+ index 58ccfbb..adb1367 100644
+ --- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+ +++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+ @@ -93,7 +93,12 @@ public class SpiritOverlayService extends Service {
+          appForeground = foreground;
+          SpiritOverlayService svc = instance;
+          if (svc != null) {
+ -            svc.updateVisibility();
+ +            svc.handler.post(new Runnable() {
+ +                @Override
+ +                public void run() {
+ +                    svc.updateVisibility();
+ +                }
+ +            });
+              return;
+          }
+          SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
+ @@ -114,7 +119,12 @@ public class SpiritOverlayService extends Service {
+      public static void updatePrefs(Context context) {
+          SpiritOverlayService svc = instance;
+          if (svc != null) {
+ -            svc.applyPrefs();
+ +            svc.handler.post(new Runnable() {
+ +                @Override
+ +                public void run() {
+ +                    svc.applyPrefs();
+ +                }
+ +            });
+              return;
+          }
+          SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
+ @@ -129,8 +139,14 @@ public class SpiritOverlayService extends Service {
+      public static void updateSpirit(Context context) {
+          SpiritOverlayService svc = instance;
+          if (svc != null && svc.sprite != null) {
+ -            Bitmap art = svc.spiritBitmap();
+ -            if (art != null) svc.sprite.setImageBitmap(art);
+ +            svc.handler.post(new Runnable() {
+ +                @Override
+ +                public void run() {
+ +                    if (svc.sprite == null) return;
+ +                    Bitmap art = svc.spiritBitmap();
+ +                    if (art != null) svc.sprite.setImageBitmap(art);
+ +                }
+ +            });
+              return;
+          }
+          SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
