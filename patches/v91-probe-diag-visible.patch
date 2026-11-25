@@ -11,3 +11,33 @@ index b582122..729a314 100644
  <script src="js/spirit-growth.js" defer></script>
  </body>
  </html>
+@@ -1094,16 +1094,27 @@
+         lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
+       });
+       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
++      lines.push('');
++      lines.push('诊断：');
+       if (data.diag && data.diag.length) {
+-        lines.push('');
+-        lines.push('诊断：');
+         data.diag.slice(0, 10).forEach(function (line, index) {
+           lines.push((index + 1) + '. ' + String(line).slice(0, 180));
+         });
++      } else {
++        lines.push('（没有诊断数据，请重新检测）');
+       }
+     } else {
+       lines.push('数据库：未读取');
+       lines.push('原因：' + (data.dbError || '未知'));
++      lines.push('');
++      lines.push('诊断：');
++      if (data.diag && data.diag.length) {
++        data.diag.slice(0, 10).forEach(function (line, index) {
++          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
++        });
++      } else {
++        lines.push('（没有诊断数据，请重新检测）');
++      }
+     }
+     out.textContent = lines.join('\n');
+   }
