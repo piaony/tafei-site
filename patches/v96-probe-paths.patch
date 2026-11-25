@@ -1,0 +1,174 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+index 9bc5786..cb7ced6 100644
+--- a/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
++++ b/android/app/src/main/java/com/piaony/tafei/DesktopProbe.java
+@@ -38,6 +38,7 @@ public final class DesktopProbe {
+ 
+     public static String probe(Context context) {
+         JSONObject out = new JSONObject();
++        JSONArray diag = new JSONArray();
+         try {
+             out.put("ok", true);
+             out.put("readOnly", true);
+@@ -84,7 +85,10 @@ public final class DesktopProbe {
+             out.put("root", rootGranted ? "granted" : (root.attempted ? "denied" : "no-su"));
+             out.put("rootOutput", trim(root.output, 120));
+ 
++            addDiag(diag, "su：exit=" + root.exitCode + "，" + trim(root.output, 120));
++
+             if (!rootGranted) {
++                out.put("diag", diag);
+                 out.put("dbError", "需要先在 KernelSU 里给挞飞授予超级用户权限");
+                 out.put("samples", new JSONArray());
+                 out.put("columns", new JSONArray());
+@@ -97,6 +101,9 @@ public final class DesktopProbe {
+                 return out.toString();
+             }
+ 
++            addDiag(diag, "数据目录：" + trim(RootBridge.run("ls -la /data/user/0/com.android.launcher").output, 360));
++            addDiag(diag, "db 查找：" + trim(RootBridge.run("find /data/user/0/com.android.launcher -maxdepth 3 -name '*.db'").output, 320));
++
+             List<String> packages = new ArrayList<>();
+             add(packages, launcherPackage);
+             String pmOut = RootBridge.run("pm list packages").output;
+@@ -105,16 +112,17 @@ public final class DesktopProbe {
+                 String pkg = line.substring("package:".length()).trim();
+                 String low = pkg.toLowerCase();
+                 if (low.contains("launcher") || low.contains("home")) add(packages, pkg);
+-                if (packages.size() >= 12) break;
++                if (packages.size() >= 6) break;
+             }
+             add(packages, "com.oppo.launcher");
+             add(packages, "com.coloros.launcher");
+             add(packages, "com.oplus.launcher");
+             add(packages, "com.android.launcher3");
+             add(packages, "com.android.launcher");
++            addDiag(diag, "候选包：" + trim(join(packages), 300));
+ 
+             String dirsOut = findDatabasesDirs(packages);
+-            JSONArray diag = new JSONArray();
++            addDiag(diag, "候选目录数：" + uniqueLines(dirsOut).size());
+             JSONObject selected = null;
+             for (String dir : uniqueLines(dirsOut)) {
+                 JSONObject db = tryOpenLauncherDatabase(context, dir, diag);
+@@ -127,6 +135,7 @@ public final class DesktopProbe {
+             if (selected == null) {
+                 out.put("dbError", "没有找到可读的 launcher.db / favorites 表；可能被加密或桌面包名不同");
+                 out.put("diag", diag);
++                out.put("desktopMode", "unknown");
+                 out.put("samples", new JSONArray());
+                 out.put("columns", new JSONArray());
+                 out.put("containers", new JSONObject());
+@@ -149,6 +158,7 @@ public final class DesktopProbe {
+         } catch (Throwable t) {
+             try {
+                 out.put("ok", false);
++                out.put("diag", diag);
+                 out.put("dbError", "探测异常：" + String.valueOf(t.getMessage()));
+             } catch (Exception ignored) {
+             }
+@@ -269,18 +279,15 @@ public final class DesktopProbe {
+     }
+ 
+     private static String findDatabasesDirs(List<String> packages) {
+-        StringBuilder list = new StringBuilder();
++        // 不再依赖 shell 的 for/if，直接枚举所有候选路径；目录不存在也会在 diag 里留下 ls 错误。
++        StringBuilder result = new StringBuilder();
+         for (String pkg : packages) {
+             String safe = pkg.replaceAll("[^a-zA-Z0-9._-]", "");
+             if (safe.isEmpty()) continue;
+-            if (list.length() > 0) list.append(' ');
+-            list.append(safe);
++            result.append("/data/user/0/").append(safe).append("/databases\n");
++            result.append("/data/user_de/0/").append(safe).append("/databases\n");
+         }
+-        if (list.length() == 0) return "";
+-        String cmd = "for p in " + list + "; do "
+-            + "for d in /data/data/$p/databases /data/user/0/$p/databases /data/user_de/0/$p/databases; do "
+-            + "if [ -d \"$d\" ]; then echo \"$d\"; fi; done; done";
+-        return RootBridge.run(cmd).output;
++        return result.toString();
+     }
+ 
+     private static String resolveLabel(Context context, String pkg, String title) {
+@@ -359,6 +366,15 @@ public final class DesktopProbe {
+         return lines;
+     }
+ 
++    private static String join(List<String> values) {
++        StringBuilder out = new StringBuilder();
++        for (String value : values) {
++            if (out.length() > 0) out.append(' ');
++            out.append(value);
++        }
++        return out.toString();
++    }
++
+     private static String firstNonEmpty(String... values) {
+         for (String value : values) {
+             if (value != null && !value.isEmpty()) return value;
+diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
+index c5f67bf..ce2e7fd 100644
+--- a/www/css/spirit-house.css
++++ b/www/css/spirit-house.css
+@@ -316,7 +316,7 @@ body.spirit-memorial-open{overflow:hidden}
+ .desktop-probe[hidden]{display:none!important}
+ .desktop-probe-btn{width:100%;min-height:32px;margin-top:8px;border:1px solid rgba(110,231,255,.3);border-radius:9px;background:rgba(110,231,255,.1);color:var(--sp-cyan);font:inherit;font-size:11px;cursor:pointer}
+ .desktop-probe-btn:disabled{opacity:.55;cursor:default}
+-.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:360px;overflow:auto}
++.desktop-probe-out{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(0,0,0,.18);color:var(--ang-muted);font:10px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:520px;overflow:auto}
+ .desktop-probe-out b{color:var(--ang-text);font-weight:500}
+ @media(max-width:620px){
+   .widget-settings{padding:10px;gap:8px}
+diff --git a/www/jingling.html b/www/jingling.html
+index 729a314..a21797b 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -278,7 +278,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=28"></script>
++<script src="js/jingling.js?v=29"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 4be202a..4c6b042 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1070,6 +1070,8 @@
+       return;
+     }
+     var lines = [];
++    var diagLines = data.diag || [];
++    if (!Array.isArray(diagLines)) diagLines = String(diagLines).split(/\r?\n/);
+     lines.push('系统：Android ' + (data.android || '?') + '（SDK ' + (data.sdk || '?') + '）');
+     if (data.coloros) lines.push('ColorOS：' + data.coloros);
+     if (data.model) lines.push('机型：' + data.model);
+@@ -1096,9 +1098,9 @@
+       if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
+       lines.push('');
+       lines.push('诊断：');
+-      if (data.diag && data.diag.length) {
+-        data.diag.slice(0, 10).forEach(function (line, index) {
+-          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
++      if (diagLines.length) {
++        diagLines.slice(0, 30).forEach(function (line, index) {
++          lines.push((index + 1) + '. ' + String(line).slice(0, 320));
+         });
+       } else {
+         lines.push('（没有诊断数据，请重新检测）');
+@@ -1108,9 +1110,9 @@
+       lines.push('原因：' + (data.dbError || '未知'));
+       lines.push('');
+       lines.push('诊断：');
+-      if (data.diag && data.diag.length) {
+-        data.diag.slice(0, 10).forEach(function (line, index) {
+-          lines.push((index + 1) + '. ' + String(line).slice(0, 180));
++      if (diagLines.length) {
++        diagLines.slice(0, 30).forEach(function (line, index) {
++          lines.push((index + 1) + '. ' + String(line).slice(0, 320));
+         });
+       } else {
+         lines.push('（没有诊断数据，请重新检测）');
