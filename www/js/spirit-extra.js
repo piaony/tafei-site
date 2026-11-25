@@ -178,6 +178,8 @@
     document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 300); });
   }
 
+  try { window.TafeiSpiritSay = bubble; } catch (e) {}
+
   /* 第二阶段：把成长引擎挂到有挂件的页面 */
   try {
     if (!window.TafeiGrowth && !document.querySelector('script[data-tf-growth]')) {
@@ -185,6 +187,12 @@
       gr.src = 'js/spirit-growth.js';
       gr.setAttribute('data-tf-growth', '1');
       document.head.appendChild(gr);
+    }
+    if (!window.TafeiStage3 && !document.querySelector('script[data-tf-stage3]')) {
+      var st3 = document.createElement('script');
+      st3.src = 'js/spirit-stage3.js';
+      st3.setAttribute('data-tf-stage3', '1');
+      document.head.appendChild(st3);
     }
   } catch (e) {}
 })();
