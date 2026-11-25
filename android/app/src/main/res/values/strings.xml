@@ -4,4 +4,6 @@
     <string name="title_activity_main">挞飞</string>
     <string name="package_name">com.piaony.tafei</string>
     <string name="custom_url_scheme">com.piaony.tafei</string>
+    <string name="accessibility_service_label">挞飞桌面互动</string>
+    <string name="accessibility_service_description">用于读取桌面图标位置，并在你确认后执行长按或移除快捷方式。默认关闭，不会自动删除图标。</string>
 </resources>

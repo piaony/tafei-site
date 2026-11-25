@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex,follow">
 <link rel="stylesheet" href="css/angela.css?v=4">
 <link rel="stylesheet" href="css/jingling.css?v=2">
-<link rel="stylesheet" href="css/spirit-house.css?v=17">
+<link rel="stylesheet" href="css/spirit-house.css?v=18">
 <link rel="stylesheet" href="css/app-shell.css?v=2">
 <script src="js/app-shell.js?v=2" defer></script>
 </head>
@@ -101,6 +101,13 @@
        <label><input type="checkbox" id="noDoodle"> 桌面涂鸦</label>
       </div>
       <p class="ws-note">只影响退出 App 后的桌面悬浮精灵，不改变页面里的全站挂件。</p>
+      <div class="desktop-probe" id="desktopProbe" hidden>
+       <div class="ws-head"><b>桌面互动探测</b><span>只读 · 不改桌面</span></div>
+       <p class="ws-note">先确认 ColorOS 16 的桌面包名、数据库和图标坐标；这一版不会删除或移动任何图标。</p>
+       <button type="button" class="desktop-probe-btn" id="desktopProbeBtn">检测环境</button>
+       <div class="desktop-probe-out" id="desktopProbeOut">尚未检测</div>
+       <p class="ws-note">需要 KernelSU 授权；无障碍服务可在系统设置里开启，用于下一版长按/移除。</p>
+      </div>
      </div>
 
     <div class="widget-switch-card native-overlay-card" id="nativeOverlayCard" hidden>
@@ -271,7 +278,7 @@
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
 <script src="js/spirit-core.js?v=15"></script>
-<script src="js/jingling.js?v=25"></script>
+<script src="js/jingling.js?v=26"></script>
 <script src="js/spirit-growth.js" defer></script>
 </body>
 </html>

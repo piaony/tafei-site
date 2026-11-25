@@ -208,6 +208,16 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public String desktopProbeSupported() {
+            return "1";
+        }
+
+        @JavascriptInterface
+        public String desktopProbe() {
+            return DesktopProbe.probe(act);
+        }
+
+        @JavascriptInterface
         public String overlaySupported() {
             return Build.VERSION.SDK_INT >= 23 ? "1" : "0";
         }

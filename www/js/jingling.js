@@ -1060,6 +1060,65 @@
     refreshNativeOverlay();
   }
 
+  function renderDesktopProbe(raw) {
+    var out = $('desktopProbeOut');
+    if (!out) return;
+    var data = null;
+    try { data = JSON.parse(raw || '{}'); } catch (e) { data = null; }
+    if (!data || !data.ok) {
+      out.textContent = '探测失败：' + ((data && data.dbError) || '没有拿到原生返回。');
+      return;
+    }
+    var lines = [];
+    lines.push('系统：Android ' + (data.android || '?') + '（SDK ' + (data.sdk || '?') + '）');
+    if (data.coloros) lines.push('ColorOS：' + data.coloros);
+    if (data.model) lines.push('机型：' + data.model);
+    if (data.display) lines.push('版本号：' + data.display);
+    lines.push('');
+    lines.push('桌面：' + (data.launcherPackage || '未识别') + (data.launcherVersion ? ' · ' + data.launcherVersion : ''));
+    if (data.launcherLabel) lines.push('名称：' + data.launcherLabel);
+    lines.push('Root：' + ({granted: '已授权', denied: '未授权 / 被拒绝', 'no-su': '没有找到 su'}[data.root] || data.root || '未知'));
+    if (data.rootOutput) lines.push('Root 返回：' + data.rootOutput);
+    lines.push('无障碍：' + (data.accessibility === 'on' ? '已开启' : '未开启'));
+    lines.push('');
+    if (data.dbPath) {
+      lines.push('数据库：' + data.dbPath);
+      lines.push('字段：' + (data.columns || []).join(', '));
+      lines.push('快捷方式：' + (data.appShortcutCount || 0) + ' 个 / 总记录 ' + (data.totalRows || 0));
+      var containers = data.containers || {};
+      var keys = Object.keys(containers);
+      if (keys.length) lines.push('容器分布：' + keys.map(function (k) { return k + '×' + containers[k]; }).join('  '));
+      lines.push('');
+      lines.push('样例：');
+      (data.samples || []).forEach(function (item, index) {
+        lines.push((index + 1) + '. ' + (item.label || item.package || '未命名') + ' · ' + (item.package || '?') + ' · 屏' + item.screen + ' (' + item.cellX + ',' + item.cellY + ')');
+      });
+      if (!(data.samples || []).length) lines.push('（没有读到 itemType=0 的桌面快捷方式）');
+    } else {
+      lines.push('数据库：未读取');
+      lines.push('原因：' + (data.dbError || '未知'));
+    }
+    out.textContent = lines.join('\n');
+  }
+
+  function initDesktopProbe() {
+    var box = $('desktopProbe');
+    var button = $('desktopProbeBtn');
+    if (!box || !button) return;
+    if (String(nativeOverlayCall('desktopProbeSupported', '0')) !== '1') return;
+    box.hidden = false;
+    button.addEventListener('click', function () {
+      var out = $('desktopProbeOut');
+      button.disabled = true;
+      if (out) out.textContent = '正在读取桌面环境…\n首次检测可能会在 KernelSU 里弹出授权。';
+      setTimeout(function () {
+        var raw = String(nativeOverlayCall('desktopProbe', ''));
+        renderDesktopProbe(raw);
+        button.disabled = false;
+      }, 120);
+    });
+  }
+
   $('nativeOverlayToggle')?.addEventListener('click', function () {
     var status = String(nativeOverlayCall('overlayStatus', 'off'));
     if (status === 'on') {
@@ -1126,4 +1185,5 @@
   renderAll();
   primeWidget();
   initNativeOverlay();
+  initDesktopProbe();
 })();
