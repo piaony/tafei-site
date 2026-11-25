@@ -39,6 +39,79 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
 .cl-toggle{width:100%;padding:11px;border:1px dashed rgba(130,170,255,.25);border-radius:13px;background:transparent;color:var(--tf-muted,#8fa2c6);font:inherit;font-size:12px;cursor:pointer}
 .cl-toggle b{color:#64e8ff;font-weight:800}
 .changelog-mod.open .cl-toggle span{display:inline-block;transform:rotate(180deg)}
+/* 商城：4 列网格 + 加号 + 汇总栏 */
+#shop .sv-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#shop .sv-card{position:relative;display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;border-radius:14px}
+#shop .sv-vis{display:block;width:100%;padding:0;border:0;background:linear-gradient(150deg,rgba(58,110,220,.30),rgba(120,90,220,.16));aspect-ratio:1/1;height:auto;cursor:pointer;overflow:hidden}
+#shop .sv-vis img{width:100%;height:100%;object-fit:cover}
+#shop .sv-vis span{display:grid;place-items:center;width:100%;height:100%;font-size:26px}
+#shop .sv-body{padding:8px 9px 9px;display:grid;gap:6px}
+#shop .sv-name{margin:0;font-size:12px;line-height:1.35;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;min-height:32px}
+#shop .sv-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+#shop .sv-price{font-size:12px;font-weight:800;color:#64e8ff}
+#shop .sv-plus{flex:none;width:22px;height:22px;border-radius:50%;border:1px solid rgba(130,170,255,.42);background:linear-gradient(135deg,#53ddff,#728cff);color:#06101f;font-size:13px;font-weight:900;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+#shop .sv-qty{position:absolute;top:6px;right:6px;z-index:2;font-size:10px;line-height:1.5;color:#eaf3ff;background:rgba(8,16,32,.78);border:1px solid rgba(130,170,255,.45);border-radius:20px;padding:0 6px}
+#shop .sv-cartbar{position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:600;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:16px;border:1px solid rgba(130,170,255,.32);background:rgba(10,18,34,.94);box-shadow:0 12px 30px rgba(3,9,22,.5);backdrop-filter:blur(10px)}
+#shop .sv-cartbar[hidden]{display:none!important}
+#shop .sv-cartbar{transition:opacity .25s,transform .25s}
+#shop .sv-cartbar.sv-cartbar-dock{opacity:0;transform:translateY(12px);pointer-events:none}
+#shop .sv-cartbar-info{display:flex;align-items:baseline;gap:8px;color:#eef4ff}
+#shop .sv-cartbar-info b{font-size:13px}
+#shop .sv-cartbar-info span{font-size:15px;font-weight:900;color:#64e8ff}
+#shop .sv-cartbar .btn{padding:8px 12px;font-size:12px}
+#shop .sv-modal{position:fixed;inset:0;z-index:700;display:grid;place-items:center;padding:18px;background:rgba(4,8,18,.72)}
+#shop .sv-modal[hidden]{display:none!important}
+#shop .sv-modal-box{position:relative;width:100%;max-width:360px;max-height:82vh;overflow:auto;display:grid;gap:10px;padding:16px;border-radius:20px;border:1px solid rgba(130,170,255,.28);background:#0e1729;color:#eef4ff}
+body.light #shop .sv-modal-box{background:#fff;color:#16233c}
+#shop .sv-modal-x{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;border:1px solid rgba(130,170,255,.3);background:transparent;color:inherit;font-size:13px;cursor:pointer}
+#shop .sv-modal-img{width:100%;aspect-ratio:1.5/1;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(150deg,rgba(58,110,220,.3),rgba(120,90,220,.16));font-size:34px}
+#shop .sv-modal-img img{width:100%;height:100%;object-fit:cover}
+#shop .sv-modal-cat{font-size:11px;color:#64e8ff;border:1px solid rgba(130,170,255,.3);border-radius:20px;padding:2px 9px;justify-self:start}
+#shop .sv-modal-title{margin:0;font-size:18px;line-height:1.35}
+#shop .sv-modal-desc{margin:0;font-size:13px;line-height:1.75;color:#9fb2d0}
+body.light #shop .sv-modal-desc{color:#5f7291}
+#shop .sv-modal-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+#shop .sv-modal-price{font-size:18px;color:#64e8ff}
+#shop .sv-modal-acts{display:flex;gap:8px}
+#shop .sv-modal-acts .btn{padding:9px 12px;font-size:12.5px}
+#shop .sv-toast{position:fixed;left:50%;bottom:calc(132px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:720;max-width:78vw;padding:9px 14px;border-radius:12px;border:1px solid rgba(130,170,255,.3);background:rgba(10,18,34,.96);color:#eef4ff;font-size:12.5px;opacity:0;pointer-events:none;transition:opacity .2s}
+#shop .sv-toast.on{opacity:1}
+body.light #shop .sv-toast{background:rgba(12,22,42,.96);color:#f2f7ff;border-color:rgba(90,140,220,.4)}
+#shop .sv-cart-panel{display:grid;gap:10px;padding:14px;border-radius:16px;border:1px dashed rgba(130,170,255,.3);background:rgba(120,150,255,.06)}
+#shop .sv-cart-panel[hidden]{display:none!important}
+#shop .sv-cart-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
+#shop .sv-cart-head span{font-size:12px;color:#8fa2c6}
+#shop .sv-cart-head span b{font-size:15px;color:#2b7d9c;margin-left:2px}
+body:not(.light) #shop .sv-cart-head span b{color:#64e8ff}
+#shop .sv-cart-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+#shop .sv-cart-item{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid rgba(130,170,255,.12)}
+#shop .sv-cart-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#shop .sv-cart-item em{font-style:normal;color:#8fa2c6}
+#shop .sv-cart-item strong{color:#64e8ff}
+#shop .sv-cart-del{border:0;background:transparent;color:#8fa2c6;font-size:12px;cursor:pointer;padding:0 2px}
+#shop .sv-cart-acts{display:flex;gap:8px;flex-wrap:wrap}
+#shop .sv-cart-acts .btn{padding:8px 12px;font-size:12px}
+#shop .sv-cart-hint{margin:0;font-size:11.5px;line-height:1.6;color:#8fa2c6}
+@media(max-width:860px){#shop .sv-grid{gap:8px}}
+/* 就地搜索 */
+.hv-search input{flex:1;min-width:0;background:none;border:0;outline:none;color:inherit;font:inherit;font-size:13px}
+.hv-search input::placeholder{color:var(--tf-muted,#8fa2c6)}
+.hv-search button{flex:none;padding:5px 11px;border-radius:9px;border:1px solid rgba(130,170,255,.3);background:transparent;color:#64e8ff;font:inherit;font-size:11.5px;cursor:pointer}
+.hv-sr{margin-top:10px;padding:6px;border-radius:16px;border:1px solid rgba(130,170,255,.22);background:rgba(16,26,48,.9);display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
+body.light .hv-sr{background:rgba(255,255,255,.96)}
+.hv-sr-head{padding:8px 10px 4px;font-size:10.5px;letter-spacing:.1em;color:#8fa2c6}
+.hv-sr-item{display:flex;gap:9px;align-items:flex-start;width:100%;max-width:100%;min-width:0;padding:9px 10px;border:0;border-radius:11px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;text-decoration:none;overflow:hidden}
+.hv-sr-item:hover,.hv-sr-item:active{background:rgba(104,223,255,.12)}
+.hv-sr-tag{flex:none;font-size:10.5px;color:#64e8ff;border:1px solid rgba(130,170,255,.28);border-radius:20px;padding:2px 7px;margin-top:1px}
+.hv-sr-main{min-width:0;flex:1}
+.hv-sr-main b{display:block;font-size:13.5px;line-height:1.35;white-space:normal;word-break:break-word}
+.hv-sr-main small{display:block;font-size:11.5px;color:#8fa2c6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hv-sr-empty{padding:12px;font-size:12.5px;color:#8fa2c6}
+/* 社区栏目就地列表 */
+.comm-feed{display:grid;gap:16px}
+.comm-feed .af-group-head{display:block}
+.comm-feed .af-grid{grid-template-columns:1fr}
+.comm-feed[hidden]{display:none!important}
 </style>
 </head>
 <body class="page-home">
@@ -91,11 +164,12 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
  </div>
 </div>
 
-<a class="hv-search" href="search.html">
+<div class="hv-search" id="hvSearchBox" role="search">
  <span class="hv-ic" data-ti="search"></span>
- <span>搜索机型、故障、文章</span>
- <i>搜索</i>
-</a>
+ <input id="hvSearchInput" type="search" placeholder="搜索机型、故障、文章" aria-label="站内搜索" autocomplete="off">
+ <button id="hvSearchGo" type="button" aria-label="搜索">搜索</button>
+</div>
+<div class="hv-sr" id="hvSearchResults" hidden></div>
 
 <div class="hv-grid">
  <a class="hv-tile" href="fix.html" style="--grad:linear-gradient(135deg,#ff7b6b,#ffab5e);--glow:rgba(255,140,90,.3)">
@@ -149,7 +223,7 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
    <div>
     <div class="kicker">TAFEI SHOP · 站内直通</div>
     <h2>商城</h2>
-    <p>技术服务、资料包与折腾工具。看中后直接联系站长确认，站内下单、站内交付、全程留痕；不跳转、不经过第三方购物车。</p>
+    <p>技术服务、资料包与折腾工具。用卡片上的「＋」把要的项目加进清单，页尾看合计金额，再一次性把清单发给站长合并打包。</p>
    </div>
    <div class="sv-head-actions"><button class="btn" type="button" id="svRefresh">刷新商品</button></div>
   </div>
@@ -159,8 +233,35 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
   </div>
   <div class="sv-count" id="svCount">加载中…</div>
   <div class="sv-grid" id="svProducts"></div>
+  <div class="sv-cartbar" id="svCartBar" hidden>
+   <div class="sv-cartbar-info"><b id="svCartCount">0 件</b><span id="svCartSum">¥0</span></div>
+   <button class="btn primary" type="button" id="svCartGo">去底部打包 ↓</button>
+  </div>
+  <div class="sv-modal" id="svModal" hidden>
+   <div class="sv-modal-box" role="dialog" aria-modal="true" aria-label="商品详情">
+    <button class="sv-modal-x" type="button" aria-label="关闭">✕</button>
+    <div class="sv-modal-img" aria-hidden="true"></div>
+    <span class="sv-modal-cat"></span>
+    <h3 class="sv-modal-title"></h3>
+    <p class="sv-modal-desc"></p>
+    <div class="sv-modal-foot">
+     <strong class="sv-modal-price">¥0</strong>
+     <div class="sv-modal-acts"><button class="btn sv-modal-minus" type="button">－</button><button class="btn primary sv-modal-add" type="button">加入清单 ＋</button></div>
+    </div>
+   </div>
+  </div>
+  <div class="sv-toast" id="svToast" role="status" aria-live="polite"></div>
   <div class="sv-contact panel">
-   <div class="sv-contact-head"><div><div class="kicker">CONTACT</div><h3>联系站长</h3></div><p>把商品名和需求发过来，确认方案后再付款。</p></div>
+   <div class="sv-contact-head"><div><div class="kicker">CONTACT</div><h3>联系站长</h3></div><p>选好的项目已汇总在下面，复制清单后从任意渠道发我，确认方案再付款。</p></div>
+   <div class="sv-cart-panel" id="svCartPanel" hidden>
+    <div class="sv-cart-head"><b>已选清单</b><span id="svCartTip"></span></div>
+    <ul class="sv-cart-list" id="svCartList"></ul>
+    <div class="sv-cart-acts">
+     <button class="btn" type="button" data-cart-copy>复制清单</button>
+     <button class="btn" type="button" data-cart-clear>清空</button>
+    </div>
+    <p class="sv-cart-hint">复制清单后，用上面任意方式发给站长，说明机型和需求，确认方案再付款。</p>
+   </div>
    <div class="sv-contact-grid">
     <div><b>QQ</b><span>2026759743</span></div>
     <div><b>Telegram</b><span>@piaopiaony</span></div>
@@ -224,6 +325,7 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
  <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
  <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
 </div>
+<div class="comm-feed" id="commFeed" hidden></div>
 <div class="community-hub" id="communityHub">
   <div class="community-me" id="communityMe">
    <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
@@ -691,8 +793,10 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
 <script src="js/home-v2.js?v=34"></script>
 <script src="js/home-views.js?v=7"></script>
 <script src="js/community-hub.js?v=2"></script>
-<script src="js/shop-view.js?v=2"></script>
+<script src="js/shop-view.js?v=6"></script>
 <script src="js/articles.js?v=2"></script>
+<script src="js/community-feed.js?v=1"></script>
+<script src="js/home-search.js?v=1"></script>
 <script src="js/community-help.js?v=4"></script>
 
 <script src="announcement.js?v=2"></script>
@@ -728,12 +832,14 @@ body.light .comm-tabs{background:rgba(90,120,200,.08)}
         x.classList.toggle('on', on);
         x.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      if (key === 'all') { if (hub) hub.hidden = false; return; }
+      var feed = window.TAFEICommFeed;
+      if (key === 'all') {
+        if (feed) feed.hide();
+        if (hub) hub.hidden = false;
+        return;
+      }
       if (hub) hub.hidden = true;
-      var art = window.TAFEIArticles;
-      if (art && art.openColumn) art.openColumn(key);
-      var sec = document.getElementById('articles');
-      if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (feed) feed.show(key);
     });
   }
 })();
