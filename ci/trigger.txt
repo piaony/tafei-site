@@ -1,1 +1,1 @@
-v96 probe paths
+v98 launcher paths
