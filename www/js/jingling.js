@@ -1053,6 +1053,10 @@
       var opacityVal = $('noOpacityVal');
       if (opacityVal) opacityVal.textContent = opacity.value + '%';
     }
+    var autonomy = $('noAutonomy');
+    if (autonomy) autonomy.checked = String(nativeOverlayCall('overlayAutonomy', '1')) !== '0';
+    var doodle = $('noDoodle');
+    if (doodle) doodle.checked = String(nativeOverlayCall('overlayDoodle', '1')) !== '0';
     refreshNativeOverlay();
   }
 
@@ -1075,6 +1079,14 @@
     if (result === 'on') toast('已开启，退出 App 后她会留在桌面上。');
     else if (result === 'denied') toast('还没有悬浮窗权限，请先在系统设置里允许。', true);
     else toast('开启失败，请稍后再试。', true);
+  });
+
+  [['noAutonomy', 'setOverlayAutonomy'], ['noDoodle', 'setOverlayDoodle']].forEach(function (row) {
+    var box = $(row[0]);
+    if (!box) return;
+    box.addEventListener('change', function () {
+      nativeOverlayCall(row[1], null, box.checked ? 1 : 0);
+    });
   });
 
   [['noSize', 'setOverlaySize', 'noSizeVal'], ['noOpacity', 'setOverlayOpacity', 'noOpacityVal']].forEach(function (row) {

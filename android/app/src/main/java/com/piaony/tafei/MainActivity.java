@@ -293,6 +293,32 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public String overlayAutonomy() {
+            return act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("overlay_autonomy", true) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String overlayDoodle() {
+            return act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("overlay_doodle", true) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public void setOverlayAutonomy(int on) {
+            act.getSharedPreferences("tafei_app", 0).edit()
+                .putBoolean("overlay_autonomy", on != 0).apply();
+            SpiritOverlayService.updatePrefs(act);
+        }
+
+        @JavascriptInterface
+        public void setOverlayDoodle(int on) {
+            act.getSharedPreferences("tafei_app", 0).edit()
+                .putBoolean("overlay_doodle", on != 0).apply();
+            SpiritOverlayService.updatePrefs(act);
+        }
+
+        @JavascriptInterface
         public void setOverlaySpirit(String id) {
             String safe = (id == null) ? "xiaota" : id.replaceAll("[^a-zA-Z0-9_-]", "");
             if (safe.isEmpty()) safe = "xiaota";

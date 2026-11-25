@@ -60,6 +60,8 @@ public class SpiritOverlayService extends Service {
     private static final String PREF_SIZE = "overlay_size";
     private static final String PREF_OPACITY = "overlay_opacity";
     private static final String PREF_SPIRIT = "overlay_spirit";
+    private static final String PREF_AUTONOMY = "overlay_autonomy";
+    private static final String PREF_DOODLE = "overlay_doodle";
 
     private static volatile boolean appForeground = true;
     private static volatile SpiritOverlayService instance;
@@ -71,9 +73,18 @@ public class SpiritOverlayService extends Service {
     private ParticleView particleView;
     private ImageView sprite;
     private TextView bubble;
+    private DoodleView doodleView;
+    private WindowManager.LayoutParams doodleParams;
     private final Map<String, Bitmap> frameCache = new HashMap<>();
     private final Random random = new Random();
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final String[] yaoLines = new String[]{
+        "瑶在森林里替你看着风的方向。",
+        "这片桌面，也有一点像森林呢。",
+        "我把星光放在你手边。",
+        "累了就靠过来，我不走。",
+        "鹿灵会记得你今天来过。"
+    };
     private final String[] lines = new String[]{
         "今天也要一起收集糖霜吗？",
         "我在这儿，切回挞飞就能继续玩。",
@@ -88,6 +99,15 @@ public class SpiritOverlayService extends Service {
     private float lastDownY = 0f;
     private boolean moved = false;
     private boolean longPressFired = false;
+    private boolean dragging = false;
+    private boolean pickupShown = false;
+    private boolean autonomyEnabled = true;
+    private boolean doodleEnabled = true;
+    private int wanderStep = 0;
+    private int wanderStartX = 0;
+    private int wanderStartY = 0;
+    private int wanderTargetX = 0;
+    private int wanderTargetY = 0;
     private int scalePercent = 100;
 
     public static void start(Context context) {
@@ -125,7 +145,12 @@ public class SpiritOverlayService extends Service {
     public static void updatePrefs(Context context) {
         SpiritOverlayService svc = instance;
         if (svc != null) {
-            svc.applyPrefs();
+            svc.handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    svc.applyPrefs();
+                }
+            });
             return;
         }
         SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
@@ -145,6 +170,8 @@ public class SpiritOverlayService extends Service {
                 public void run() {
                     if (svc.sprite == null) return;
                     svc.frameCache.clear();
+                    if (svc.particleView != null) svc.particleView.setYao(svc.isYao());
+                    if (svc.doodleView != null) svc.doodleView.setYao(svc.isYao());
                     Bitmap art = svc.spiritBitmap();
                     if (art != null) svc.sprite.setImageBitmap(art);
                 }
@@ -202,6 +229,12 @@ public class SpiritOverlayService extends Service {
     @Override
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        if (doodleView != null && windowManager != null) {
+            try {
+                windowManager.removeView(doodleView);
+            } catch (Exception ignored) {
+            }
+        }
         if (root != null && windowManager != null) {
             try {
                 windowManager.removeView(root);
@@ -215,6 +248,8 @@ public class SpiritOverlayService extends Service {
         particleView = null;
         sprite = null;
         bubble = null;
+        doodleView = null;
+        doodleParams = null;
         if (instance == this) instance = null;
         super.onDestroy();
     }
@@ -299,6 +334,7 @@ public class SpiritOverlayService extends Service {
 
         stage = new FrameLayout(this);
         particleView = new ParticleView(this);
+        particleView.setYao(isYao());
         stage.addView(particleView, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
@@ -336,7 +372,11 @@ public class SpiritOverlayService extends Service {
                         lastRawY = event.getRawY();
                         lastDownY = event.getY();
                         moved = false;
+                        dragging = false;
+                        pickupShown = false;
                         longPressFired = false;
+                        wanderStep = 0;
+                        handler.removeCallbacks(autonomyTask);
                         handler.postDelayed(longPressTask, 520L);
                         return true;
                     case MotionEvent.ACTION_MOVE:
@@ -347,6 +387,12 @@ public class SpiritOverlayService extends Service {
                             handler.removeCallbacks(longPressTask);
                         }
                         if (moved) {
+                            dragging = true;
+                            if (!pickupShown) {
+                                pickupShown = true;
+                                showFrame("action-upgrade", 0);
+                                showBubble("要带我去哪里呀？");
+                            }
                             params.x += (int) dx;
                             params.y += (int) dy;
                             lastRawX = event.getRawX();
@@ -356,11 +402,22 @@ public class SpiritOverlayService extends Service {
                                 windowManager.updateViewLayout(root, params);
                             } catch (Exception ignored) {
                             }
+                            if (particleView != null) particleView.trail();
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
                         handler.removeCallbacks(longPressTask);
-                        if (!moved && !longPressFired) handleTap(lastDownY);
+                        if (!moved && !longPressFired) {
+                            handleTap(lastDownY);
+                        } else if (moved) {
+                            dragging = false;
+                            wanderStep = 0;
+                            showFrame("main", 0);
+                            if (pickupShown) showBubble("放我下来啦。");
+                            pickupShown = false;
+                            if (particleView != null) particleView.burst(7);
+                            scheduleAutonomy(3200L);
+                        }
                         return true;
                     case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacks(longPressTask);
@@ -371,6 +428,7 @@ public class SpiritOverlayService extends Service {
             }
         });
 
+        ensureDoodleWindow();
         try {
             windowManager.addView(root, params);
         } catch (Exception e) {
@@ -392,6 +450,31 @@ public class SpiritOverlayService extends Service {
                 }
             }
         });
+    }
+
+    private void ensureDoodleWindow() {
+        if (doodleView != null || windowManager == null) return;
+        doodleView = new DoodleView(this);
+        doodleView.setYao(isYao());
+        int type = Build.VERSION.SDK_INT >= 26
+            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            : WindowManager.LayoutParams.TYPE_PHONE;
+        doodleParams = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT);
+        doodleParams.gravity = Gravity.TOP | Gravity.START;
+        try {
+            windowManager.addView(doodleView, doodleParams);
+        } catch (Exception e) {
+            doodleView = null;
+            doodleParams = null;
+        }
     }
 
     private void handleTap(float localY) {
@@ -484,8 +567,11 @@ public class SpiritOverlayService extends Service {
     }
 
     private void applyPrefs() {
-        scalePercent = getSharedPreferences(PREFS, 0).getInt(PREF_SIZE, 100);
-        int opacity = getSharedPreferences(PREFS, 0).getInt(PREF_OPACITY, 100);
+        SharedPreferences sp = getSharedPreferences(PREFS, 0);
+        scalePercent = sp.getInt(PREF_SIZE, 100);
+        autonomyEnabled = sp.getBoolean(PREF_AUTONOMY, true);
+        doodleEnabled = sp.getBoolean(PREF_DOODLE, true);
+        int opacity = sp.getInt(PREF_OPACITY, 100);
         if (root != null) {
             root.setAlpha(Math.max(0.4f, Math.min(1f, opacity / 100f)));
         }
@@ -496,6 +582,13 @@ public class SpiritOverlayService extends Service {
             lp.height = size;
             stage.setLayoutParams(lp);
         }
+        if (particleView != null) particleView.setYao(isYao());
+        if (doodleView != null) doodleView.setYao(isYao());
+        if (autonomyEnabled && root != null && !appForeground) {
+            scheduleAutonomy(1800L);
+        } else {
+            handler.removeCallbacks(autonomyTask);
+        }
         if (root != null && params != null) {
             try {
                 windowManager.updateViewLayout(root, params);
@@ -503,6 +596,103 @@ public class SpiritOverlayService extends Service {
             }
         }
     }
+
+    private boolean isYao() {
+        return spiritFolder().startsWith("yao-");
+    }
+
+    private void scheduleAutonomy(long delayMs) {
+        handler.removeCallbacks(autonomyTask);
+        if (autonomyEnabled && root != null && !appForeground) {
+            handler.postDelayed(autonomyTask, Math.max(800L, delayMs));
+        }
+    }
+
+    private final Runnable autonomyTask = new Runnable() {
+        @Override
+        public void run() {
+            if (root == null) return;
+            if (!autonomyEnabled || appForeground || dragging) {
+                handler.postDelayed(this, 1300L);
+                return;
+            }
+            int roll = random.nextInt(100);
+            if (roll < 22) {
+                wander();
+            } else if (roll < 38) {
+                if (doodleEnabled) drawDoodle();
+                else showQuietFrame("emotion-happy", 1300);
+            } else if (roll < 54) {
+                showQuietFrame(isYao() ? "action-sit" : "emotion-sleepy", 1800);
+            } else if (roll < 66) {
+                showBubble(randomLine());
+            } else if (roll < 78) {
+                showQuietFrame("action-idle", 1300);
+                if (particleView != null) particleView.burst(4);
+            } else {
+                showQuietFrame("emotion-happy", 1200);
+            }
+            handler.postDelayed(this, 2600L + random.nextInt(4200));
+        }
+    };
+
+    private void showQuietFrame(String frame, int durationMs) {
+        showFrame(frame, durationMs);
+    }
+
+    private String randomLine() {
+        String[] pool = isYao() ? yaoLines : lines;
+        return pool[random.nextInt(pool.length)];
+    }
+
+    private void drawDoodle() {
+        if (doodleView == null || root == null || params == null) return;
+        float cx = params.x + root.getWidth() / 2f;
+        float cy = params.y + root.getHeight() * 0.52f;
+        cx += (random.nextFloat() - 0.5f) * dp(120);
+        cy += (random.nextFloat() - 0.5f) * dp(90);
+        cx = Math.max(dp(24), Math.min(screenWidth() - dp(24), cx));
+        cy = Math.max(dp(80), Math.min(screenHeight() - dp(40), cy));
+        doodleView.doodle(cx, cy);
+        if (particleView != null) particleView.burst(5);
+        showBubble(isYao() ? "给你画一颗会发光的星星。" : "画个小记号，别弄丢我。");
+    }
+
+    private void wander() {
+        if (root == null || params == null || wanderStep > 0 || dragging || appForeground) return;
+        wanderStartX = params.x;
+        wanderStartY = params.y;
+        wanderTargetX = params.x + (random.nextInt(2) == 0 ? 1 : -1) * dp(30 + random.nextInt(55));
+        wanderTargetY = params.y + (random.nextInt(2) == 0 ? 1 : -1) * dp(18 + random.nextInt(50));
+        wanderStep = 1;
+        handler.post(wanderTask);
+    }
+
+    private final Runnable wanderTask = new Runnable() {
+        @Override
+        public void run() {
+            if (root == null || params == null || dragging || appForeground) {
+                wanderStep = 0;
+                return;
+            }
+            if (wanderStep <= 10) {
+                float t = wanderStep / 10f;
+                float ease = t * t * (3f - 2f * t);
+                params.x = Math.round(wanderStartX + (wanderTargetX - wanderStartX) * ease);
+                params.y = Math.round(wanderStartY + (wanderTargetY - wanderStartY) * ease);
+                clampPosition();
+                try {
+                    windowManager.updateViewLayout(root, params);
+                } catch (Exception ignored) {
+                }
+                if (particleView != null) particleView.trail();
+                wanderStep++;
+                handler.postDelayed(this, 55L);
+            } else {
+                wanderStep = 0;
+            }
+        }
+    };
 
     private String spiritFolder() {
         String id = getSharedPreferences(PREFS, 0).getString(PREF_SPIRIT, "xiaota");
@@ -559,8 +749,18 @@ public class SpiritOverlayService extends Service {
 
     private void updateVisibility() {
         if (root == null) return;
-        root.setVisibility(appForeground ? View.GONE : View.VISIBLE);
-        if (!appForeground && particleView != null) particleView.invalidate();
+        int visibility = appForeground ? View.GONE : View.VISIBLE;
+        root.setVisibility(visibility);
+        if (doodleView != null) doodleView.setVisibility(visibility);
+        if (appForeground) {
+            handler.removeCallbacks(autonomyTask);
+            handler.removeCallbacks(wanderTask);
+            wanderStep = 0;
+            if (doodleView != null) doodleView.clear();
+        } else {
+            if (particleView != null) particleView.invalidate();
+            scheduleAutonomy(1800L);
+        }
     }
 
     private void clampPosition() {
