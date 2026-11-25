@@ -290,6 +290,12 @@ public final class DesktopProbe {
                             containers.put(container, count);
                         }
                         if (itemType != 0) continue;
+                        int containerValue = intValue(rows, "container", Integer.MIN_VALUE);
+                        if (containerValue != -100) continue;
+                        int screen = intValue(rows, "screen", -1);
+                        int cellX = intValue(rows, "cellX", -1);
+                        int cellY = intValue(rows, "cellY", -1);
+                        if (screen < 0 || cellX < 0 || cellY < 0) continue;
                         appShortcutCount++;
                         if (samples.length() >= 12) continue;
                         String intent = stringValue(rows, "intent");
@@ -301,9 +307,9 @@ public final class DesktopProbe {
                         item.put("label", label == null ? "" : label);
                         item.put("package", pkg);
                         item.put("component", component == null ? "" : component);
-                        item.put("screen", intValue(rows, "screen", -1));
-                        item.put("cellX", intValue(rows, "cellX", -1));
-                        item.put("cellY", intValue(rows, "cellY", -1));
+                        item.put("screen", screen);
+                        item.put("cellX", cellX);
+                        item.put("cellY", cellY);
                         samples.put(item);
                     }
                 } finally {
