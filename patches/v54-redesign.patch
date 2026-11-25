@@ -1,1 +1,307 @@
-PLACEHOLDER
+--- a/www/index.html
++++ b/www/index.html
+@@ -25,6 +25,21 @@
+ <link rel="stylesheet" href="css/tafei-ico.css?v=34">
+ <link rel="stylesheet" href="css/home-v2.css?v=34">
+ <script src="js/app-shell.js?v=2" defer></script>
++<style>
++/* 社区栏目切换 */
++.comm-tabs{display:flex;gap:8px;margin:0 0 14px;padding:4px;border-radius:14px;background:rgba(120,150,255,.07);border:1px solid rgba(130,170,255,.16)}
++.comm-tabs button{flex:1;min-width:0;padding:9px 6px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--tf-muted,#8fa2c6);font:inherit;font-size:12.5px;cursor:pointer}
++.comm-tabs button.on{background:linear-gradient(120deg,#53ddff,#728cff);color:#06101f;font-weight:800}
++body.light .comm-tabs{background:rgba(90,120,200,.08)}
++/* 更新日志合集 */
++.changelog-card{display:grid;gap:14px}
++.log-list{display:grid;gap:14px}
++.log-list .log-item:nth-child(n+4){display:none}
++.changelog-mod.open .log-list .log-item:nth-child(n+4){display:block}
++.cl-toggle{width:100%;padding:11px;border:1px dashed rgba(130,170,255,.25);border-radius:13px;background:transparent;color:var(--tf-muted,#8fa2c6);font:inherit;font-size:12px;cursor:pointer}
++.cl-toggle b{color:#64e8ff;font-weight:800}
++.changelog-mod.open .cl-toggle span{display:inline-block;transform:rotate(180deg)}
++</style>
+ </head>
+ <body class="page-home">
+ <svg class="tf-sprite" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+@@ -115,7 +130,8 @@
+ <div class="hv-list">
+  <a class="hv-row" href="naiwa.html"><span class="hv-mini" data-ti="game"></span><b>奶娃小游戏</b><i>27 款 · 点开就玩</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+  <a class="hv-row" href="#articles"><span class="hv-mini" data-ti="book"></span><b>文章攻略</b><i>Root / 刷机 / 选购实测</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+- <a class="hv-row" href="#changelog"><span class="hv-mini" data-ti="update"></span><b>更新日志</b><i>每次改动都记录</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
++ <a class="hv-row" href="#changelog"><span class="hv-mini" data-ti="update"></span><b>更新日志合集</b><i>最近 3 条 · 可展开</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
++ <a class="hv-row" href="#guestbook"><span class="hv-mini" data-ti="chat"></span><b>留言板</b><i>随便聊聊 · 站长都会看</i><svg class="ti-svg chev" aria-hidden="true"><use href="#ti-go"></use></svg></a>
+ </div>
+ 
+ <div class="hv-intro">
+@@ -163,9 +179,10 @@
+ 
+ <section id="articles" class="reveal" aria-label="文章内容"></section>
+ 
+-<section id="changelog" class="reveal">
+- <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志</h2></div><p>站点每次较大改动都会记录在这里。</p></div>
+- <div class="panel" style="padding:24px;display:grid;gap:18px">
++<section id="changelog" class="reveal changelog-mod">
++ <div class="section-head"><div><div class="kicker">CHANGELOG</div><h2>更新日志合集</h2></div><p>默认只显示最近 3 条，展开看全部。</p></div>
++ <div class="panel changelog-card">
++  <div class="log-list" id="logList">
+   <div class="log-item"><div class="af-card-meta"><span class="af-col">v23.1</span><span class="af-date">2026-11-24</span></div><p>精灵小屋为瑶新增「时之祈愿 · 原画」皮肤：直接使用高精度原画立绘，在伙伴坞的皮肤条里点选即可换上，图鉴、头像、全站挂件会一起切换。原画皮肤是静态立绘，只有心情、粒子与台词反馈，不跟随 Q 版动作帧。</p></div>
+   <div class="log-item"><div class="af-card-meta"><span class="af-col">v23.0</span><span class="af-date">2026-11-22</span></div><p>「挞飞原创伙伴」小挞飞正式升级为官方形象：棕发小女孩、金色挞壳帽、奶油白裙、青绿围巾和星星糖挎包；全站挂件、个人中心、伙伴坞、小挞工坊和精灵小屋统一使用新资产。Lv.10 永久纪念卡改为空白星空卡面 + Canvas 动态文字，可按当前精灵名、等级、称号、亲密度和日期生成并下载。魔法伙伴面板和全站挂件改为跟随精灵小屋里选中的当前伙伴，可在图鉴里自由切换，不再固定小挞飞。</p></div>
+   <div class="log-item"><div class="af-card-meta"><span class="af-col">v22.2</span><span class="af-date">2026-11-22</span></div><p>精灵十级权益全部落地：Lv.4 专属互动台词、Lv.6 私信签名、Lv.7 限定卡面边框、Lv.8 个人主页展示位、Lv.9 专属称号、Lv.10 永久纪念卡；新增个人主页伙伴卡与可下载纪念卡，权益不再只是文字。</p></div>
+@@ -194,19 +211,20 @@
+   <div class="log-item"><div class="af-card-meta"><span class="af-col">v20.0</span><span class="af-date">2026-11-21</span></div><p>首页改为内容优先：新增文章系统，上线手机权限与高中资料两个栏目，首批 6 篇范文；补齐 SEO 基础（sitemap、robots、社交卡片）。</p></div>
+   <div class="log-item"><div class="af-card-meta"><span class="af-col">v19.0</span><span class="af-date">2026-11-20</span></div><p>上线信息中心：系统通知、公告与私信；站长审查后台支持账号列表、私信核查、封禁与解封；注册需同意社区规范。</p></div>
+   <div class="log-item"><div class="af-card-meta"><span class="af-col">v18.0</span><span class="af-date">2026-11 上旬</span></div><p>页面拆分重构，新增站内指令面板、快捷键与搜索视图记忆；留言墙、社区、项目展示整合到统一界面。</p></div>
++  </div>
++  <button class="cl-toggle" id="logToggle" type="button" aria-expanded="false">展开全部 <b id="logCount">0</b> 条记录 <span>⌄</span></button>
+  </div>
+ </section>
+ 
+-<section id="home-tools" class="reveal">
+- <div class="panel" style="padding:24px">
+-  <h3>留言墙</h3>
+-  <p>想说些什么？也可以看看大家留下的留言。</p>
+-  <button class="btn primary" type="button" data-open-view="guestbook">打开留言墙 ↗</button>
+- </div>
+-</section>
++
+ 
+ <section id="community" class="reveal">
+- <div class="community-hub" id="communityHub">
++ <div class="comm-tabs" id="commTabs" role="tablist" aria-label="社区栏目">
++ <button class="on" type="button" data-ctab="all" role="tab" aria-selected="true">综合</button>
++ <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
++ <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
++</div>
++<div class="community-hub" id="communityHub">
+   <div class="community-me" id="communityMe">
+    <button class="community-avatar" id="communityAvatarBtn" type="button" aria-label="更换头像">
+     <span id="communityAvatarFallback">访</span>
+@@ -622,13 +640,6 @@
+  </div>
+ </section>
+ 
+-<section id="projects" class="reveal">
+-<div class="section-head"><div><div class="kicker">02 / FOUNDER'S WORK</div><h2>发起人作品</h2></div><p>这里放置真实完成的项目。点击卡片可以查看说明，后续可以继续添加你的作品。</p></div>
+-<div class="grid">
+-<article class="panel project"><div class="symbol">✦</div><h3>挞飞个人网站</h3><p>从零开始制作并部署的个人网站，记录这段学习与创作过程。</p><div class="bottom"><span class="tag">HTML · CSS · JS</span><a class="textbtn" href="https://piaony.github.io/tafei-site/" target="_blank" rel="noopener">访问网站 ↗</a></div></article>
+-<article class="panel project"><div class="symbol">⌘</div><h3>下一个作品</h3><p>这里预留给你的下一个网页、小工具或编程练习。完成后再替换这段文字。</p><div class="bottom"><span class="tag">待添加</span><button class="textbtn detailBtn" data-title="下一个作品" data-desc="把你真正完成的项目名称、用途和访问链接添加到这里。">编辑提示 ↗</button></div></article>
+-<article class="panel project"><div class="symbol">◇</div><h3>实验与练习</h3><p>收集学习过程中做过的小实验，展示从尝试到掌握的过程。</p><div class="bottom"><span class="tag">持续更新</span><button class="textbtn detailBtn" data-title="实验与练习" data-desc="可以放置 JavaScript 小练习、网页交互实验或自己编写的演示程序。">查看说明 ↗</button></div></article>
+-</div></section>
+ <section id="about" class="reveal">
+ <div class="section-head"><div><div class="kicker">03 / OUR MISSION</div><h2>挞飞的初心</h2></div><p>让每个人都能平等、自由、友善地享受互联网带来的便利。</p></div>
+ <div class="about-grid">
+@@ -639,35 +650,11 @@
+ <p>无论身处哪里，无论是否懂技术，每个人都值得平等地享受互联网带来的便利。</p>
+ <span class="tag">FREE · FRIENDLY · OPEN</span>
+ </div>
+-<div class="panel about-card"><h3>学习路线</h3>
+-<div class="skill"><div class="skill-top"><span>HTML · 网页结构</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:42%"></div></div></div>
+-<div class="skill"><div class="skill-top"><span>CSS · 页面样式</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:32%"></div></div></div>
+-<div class="skill"><div class="skill-top"><span>JavaScript · 交互逻辑</span><span>学习中</span></div><div class="track"><div class="fill" style="--w:18%"></div></div></div>
+-<p class="note">进度条为页面示意值，可按真实学习情况修改，不代表考试或能力评级。</p>
++<div class="panel about-card"><h3>站长简介</h3>
++<p id="founderIntro">高二在读，临沂人。自己在折腾手机：解 BL、Root、刷机、救砖和性能调优都亲自上手，也在把踩过的坑整理成文章。</p>
++<p>挞飞由站长本人维护，站内服务、答疑和售后都由站长对接，没有中间商，也不做夸大承诺。</p>
++<span class="tag">临沂 · 站长本人接单</span>
+ </div></div></section>
+-<section id="lab" class="reveal"><div class="section-head"><div><div class="kicker">04 / PLAYGROUND</div><h2>交互实验室</h2></div><p>试试下面的命令行。输入 help 查看可以使用的指令。</p></div>
+-<div class="panel lab"><div class="terminal"><div class="termbar">● ● ●　 taifei-terminal — safe demo</div><div class="termout" id="termout">欢迎来到挞飞实验室！
+-输入 help 查看可用命令。
+-</div><form class="termform" id="termform"><span>visitor@tafei:~$</span><input id="command" autocomplete="off" aria-label="输入命令" placeholder="输入 help"><button>运行</button></form></div></div></section>
+-
+-<section id="studio" class="reveal">
+- <div class="section-head"><div><div class="kicker">05 / CREATOR STUDIO</div><h2>我的项目管理台</h2></div><p>把完成的小作品添加到展厅，整理名称、介绍和访问地址。</p></div>
+- <div class="feature-grid">
+-  <div class="panel form-panel">
+-   <h3>添加一个作品</h3>
+-   <input id="projectName" maxlength="40" placeholder="作品名称，例如：我的计算器">
+-   <textarea id="projectDesc" maxlength="220" placeholder="简单介绍它能做什么"></textarea>
+-   <input id="projectUrl" type="url" placeholder="作品网址（可选，需以 https:// 开头）">
+-   <button class="action-btn primary" id="addProject">＋ 添加到我的展厅</button>
+-   <p class="local-note">说明：目前作品数据保存在当前浏览器中。清除浏览器数据或换设备后不会自动同步。</p>
+-  </div>
+-  <div class="panel">
+-   <h3>我的新增作品</h3>
+-   <div id="userProjects" class="user-projects"><div class="empty-state">还没有添加作品，试着添加你的第一个项目吧。</div></div>
+-  </div>
+- </div>
+- <div class="stats-row"><div class="stat-chip"><strong id="projectCount">0</strong>个自定义作品</div><div class="stat-chip"><strong>23.0</strong>当前网站版本</div></div>
+-</section>
+ <section id="guestbook" class="reveal">
+  <div class="section-head"><div><div class="kicker">06 / MESSAGE WALL</div><h2>留言墙</h2></div><p>留下一句话，记录你对这个数字空间的想法。</p></div>
+  <div class="feature-grid">
+@@ -682,8 +669,6 @@
+  </div>
+ </section>
+ 
+-<section id="contact" class="reveal"><div class="panel contact"><div><div class="kicker">07 / CONNECT</div><h2 style="margin:6px 0">保持好奇，继续创造。</h2><p>想了解代码和作品，可以从我的 GitHub 开始。</p></div><div class="contact-links"><a class="btn primary" href="https://github.com/piaony" target="_blank" rel="noopener">GitHub ↗</a><a class="btn" href="#home">回到顶部 ↑</a></div></div></section>
+-
+ </main>
+ <footer class="wrap">© <span id="year"></span> TAFEI · 用好奇心搭建自己的数字世界 · <a href="fix.html">手机急救室</a> · <a href="jingling.html?from=tafei" target="_blank" rel="noopener">精灵小屋</a><div class="site-risk">站内官方服务由站长本人提供。请通过站内私信、服务预约或站长公开联系方式对接；不要私下转账，也不要把设备交给站外认识的人。站外交易产生的纠纷与损失，本站无法承担责任。</div></footer>
+ <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><button class="iconbtn close" id="closeModal" aria-label="关闭">✕</button><h3 id="modalTitle">项目说明</h3><p id="modalDesc"></p></div></div>
+@@ -717,5 +702,41 @@
+ <script src="js/spirit-chat.js?v=2" defer></script>
+ <script src="js/spirit-widget.js?v=21" defer></script>
+ <script src="js/spirit-extra.js?v=43"></script>
++<script>
++(function () {
++  var mod = document.getElementById('changelog');
++  var btn = document.getElementById('logToggle');
++  var list = document.getElementById('logList');
++  var cnt = document.getElementById('logCount');
++  if (mod && btn && list) {
++    if (cnt) cnt.textContent = String(list.querySelectorAll('.log-item').length);
++    btn.addEventListener('click', function () {
++      var open = mod.classList.toggle('open');
++      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
++      btn.firstChild.textContent = open ? '收起全部 ' : '展开全部 ';
++    });
++  }
++  var tabs = document.getElementById('commTabs');
++  var hub = document.getElementById('communityHub');
++  if (tabs) {
++    tabs.addEventListener('click', function (e) {
++      var b = e.target.closest('[data-ctab]');
++      if (!b) return;
++      var key = b.getAttribute('data-ctab');
++      Array.prototype.forEach.call(tabs.querySelectorAll('button'), function (x) {
++        var on = x === b;
++        x.classList.toggle('on', on);
++        x.setAttribute('aria-selected', on ? 'true' : 'false');
++      });
++      if (key === 'all') { if (hub) hub.hidden = false; return; }
++      if (hub) hub.hidden = true;
++      var art = window.TAFEIArticles;
++      if (art && art.openColumn) art.openColumn(key);
++      var sec = document.getElementById('articles');
++      if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
++    });
++  }
++})();
++</script>
+ </body>
+ </html>
+--- a/www/js/home-core.js
++++ b/www/js/home-core.js
+@@ -7,7 +7,7 @@
+ document.querySelectorAll('#navlinks a').forEach(a=>a.addEventListener('click',()=>$('#navlinks').classList.remove('open')));
+ const modal=$('#modal');document.querySelectorAll('.detailBtn').forEach(b=>b.addEventListener('click',()=>{$('#modalTitle').textContent=b.dataset.title;$('#modalDesc').textContent=b.dataset.desc;modal.classList.add('show')}));
+ $('#closeModal').addEventListener('click',()=>modal.classList.remove('show'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
+-const out=$('#termout');$('#termform').addEventListener('submit',e=>{e.preventDefault();const input=$('#command'),cmd=input.value.trim().toLowerCase();if(!cmd)return;let result='未知命令：'+cmd+'。输入 help 查看帮助。';if(cmd==='help')result='可用命令：\nhelp   显示帮助\nabout  关于挞飞\n time  显示当前时间\nclear  清空终端';if(cmd==='about')result='我是挞飞。这里记录学习、实验和作品。';if(cmd==='time')result='当前时间：'+new Date().toLocaleString('zh-CN');if(cmd==='clear'){out.textContent='';input.value='';return;}out.textContent+='visitor@tafei:~$ '+cmd+'\n'+result+'\n\n';input.value='';out.scrollTop=out.scrollHeight;});
++const out=$('#termout');$('#termform')&&$('#termform').addEventListener('submit',e=>{e.preventDefault();const input=$('#command'),cmd=input.value.trim().toLowerCase();if(!cmd)return;let result='未知命令：'+cmd+'。输入 help 查看帮助。';if(cmd==='help')result='可用命令：\nhelp   显示帮助\nabout  关于挞飞\n time  显示当前时间\nclear  清空终端';if(cmd==='about')result='我是挞飞。这里记录学习、实验和作品。';if(cmd==='time')result='当前时间：'+new Date().toLocaleString('zh-CN');if(cmd==='clear'){out.textContent='';input.value='';return;}out.textContent+='visitor@tafei:~$ '+cmd+'\n'+result+'\n\n';input.value='';out.scrollTop=out.scrollHeight;});
+ const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+ const canvas=$('#stars'),ctx=canvas.getContext('2d');let stars=[];
+ function resize(){const dpr=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:Math.min(100,Math.floor(innerWidth/8))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.3,v:Math.random()*.22+.04,a:Math.random()*.6+.2}))}
+--- a/www/js/tafei-auth.js
++++ b/www/js/tafei-auth.js
+@@ -150,14 +150,14 @@
+       + '</form>'
+       + '<form class="tfa-form" id="tfaOffForm" hidden>'
+       + '<div class="tfa-field"><label>官方账号</label>'
+-      + '<input class="tfa-input" id="tfaOffUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" placeholder="3659229103 或完整邮箱"></div>'
++      + '<input class="tfa-input" id="tfaOffUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" placeholder="请输入官方账号"></div>'
+       + '<div class="tfa-field"><label>密码</label>'
+       + '<input class="tfa-input" id="tfaOffPass" type="password" autocomplete="current-password" placeholder="官方账号密码"></div>'
+       + '<div class="tfa-field"><label>验证码</label>'
+       + '<div class="tfa-cap"><input class="tfa-input" id="tfaOffCap" type="text" inputmode="numeric" maxlength="4" placeholder="4 位数字">'
+       + '<canvas class="tfa-canvas" id="tfaOffCanvas" width="96" height="40" title="点一下换一张"></canvas></div>'
+       + '<div class="tfa-cap-tip">看不清？点右侧图片换一张</div></div>'
+-      + '<div class="tfa-hint">仅站长本人使用。登录后「我的」会出现官方账号标识与管理员后台入口。</div>'
++
+       + '<button class="tfa-submit" type="submit">登录官方账号</button>'
+       + '<div class="tfa-foot"><button class="tfa-link sub" type="button" data-act="forgot">忘记密码</button>'
+       + '<button class="tfa-link" type="button" data-act="to-login">用普通账号登录</button></div>'
+--- a/www/admin-center.html
++++ b/www/admin-center.html
+@@ -193,7 +193,7 @@
+     <div class="admin-login-head"><h2>站长登录</h2><span class="admin-version">v21.10</span></div>
+     <p class="hint">已用站长账号登录站点的，打开本页会自动进入；没有站点登录态时，用站长邮箱登录一次即可。</p>
+     <label for="email">邮箱</label>
+-    <input id="email" type="text" inputmode="email" placeholder="3659229103 或 3659229103@qq.com" autocomplete="username" autocapitalize="off">
++    <input id="email" type="text" inputmode="email" placeholder="官方账号" autocomplete="username" autocapitalize="off">
+     <label for="password">密码</label>
+     <input id="password" type="password" placeholder="账号密码" autocomplete="current-password">
+     <button id="loginBtn">登录</button>
+--- a/www/css/spirit-widget.css
++++ b/www/css/spirit-widget.css
+@@ -9,9 +9,9 @@
+   will-change:left,top;
+ }
+ .spirit-widget[hidden]{display:none!important}
+-.spirit-widget.show{opacity:var(--sw-opacity,1);pointer-events:none}
+-.spirit-widget.edge-peek{opacity:calc(var(--sw-opacity,1) * .55);scale:calc(var(--sw-scale,1) * .72);transform-origin:bottom center}
+-.spirit-widget.settings-open{opacity:calc(var(--sw-opacity,1) * .22)!important;pointer-events:none}
++.spirit-widget.show{opacity:1;pointer-events:none}
++.spirit-widget.edge-peek{scale:calc(var(--sw-scale,1) * .72);transform-origin:bottom center}
++.spirit-widget.settings-open{pointer-events:none}
+ .spirit-widget .sw-body{
+   display:block;position:relative;width:100%;margin:0;padding:0;border:0;background:transparent;
+   cursor:grab;pointer-events:auto;outline:none;z-index:1;
+@@ -21,13 +21,14 @@
+   position:absolute;left:12%;bottom:2%;width:76%;height:22%;z-index:0;
+   border-radius:50%;pointer-events:none;
+   background:radial-gradient(ellipse at center,rgba(184,199,255,.30),rgba(255,214,153,.18) 42%,transparent 72%);
+-  filter:blur(5px);opacity:.55;animation:swAura 4.8s ease-in-out infinite;
++  filter:blur(5px);opacity:calc(.55 * var(--sw-body-opacity,1));animation:swAura 4.8s ease-in-out infinite;
+ }
+ .spirit-widget.is-photo .sw-aura{display:none}
+ .spirit-widget .sw-fx{position:absolute;inset:0;z-index:3;overflow:visible;pointer-events:none}
+ .spirit-widget .sw-body:focus-visible{outline:2px solid rgba(110,231,255,.7);outline-offset:4px;border-radius:12px}
+ .spirit-widget .sw-art{
+   display:block;width:100%;height:auto;max-height:128px;object-fit:contain;
++  opacity:var(--sw-body-opacity,1);
+   transform-origin:50% 88%;pointer-events:none;
+   animation:swBreathe 4.6s ease-in-out infinite;
+   transition:filter .25s ease,opacity .2s ease;
+@@ -41,7 +42,7 @@
+ .spirit-widget .sw-shadow{
+   position:absolute;left:22%;bottom:2px;width:56%;height:9px;border-radius:50%;
+   background:radial-gradient(ellipse at center,rgba(0,0,0,.42),transparent 72%);
+-  filter:blur(3px);opacity:.48;pointer-events:none;transition:opacity .4s ease,transform .4s ease;
++  filter:blur(3px);opacity:calc(.48 * var(--sw-body-opacity,1));pointer-events:none;transition:opacity .4s ease,transform .4s ease;
+ }
+ .spirit-widget.walking .sw-shadow{opacity:.28;transform:scaleX(.78)}
+ .spirit-widget .sw-zzz{
+--- a/www/js/spirit-widget.js
++++ b/www/js/spirit-widget.js
+@@ -207,7 +207,9 @@
+     var opacity = Number(widgetConf('opacity', 1));
+     if (!Number.isFinite(opacity)) opacity = 1;
+     root.style.setProperty('--sw-scale', String(Math.max(0.72, Math.min(1.25, size))));
+-    root.style.setProperty('--sw-opacity', String(Math.max(0.45, Math.min(1, opacity))));
++    var bodyOpacity = Math.max(0.3, Math.min(1, opacity));
++    root.style.setProperty('--sw-opacity', String(bodyOpacity));
++    root.style.setProperty('--sw-body-opacity', String(bodyOpacity));
+     root.classList.toggle('sw-quiet', quietMode());
+     root.classList.toggle('sw-lite', LITE);
+     if (!particlesEnabled()) {
+--- a/www/js/spirit-core.js
++++ b/www/js/spirit-core.js
+@@ -336,7 +336,7 @@
+         next.widget.y = clamp(saved.widget.y, 0, 1);
+         next.widget.corner = saved.widget.corner || 'free';
+         next.widget.size = clamp(saved.widget.size == null ? 1 : saved.widget.size, 0.72, 1.25);
+-        next.widget.opacity = clamp(saved.widget.opacity == null ? 1 : saved.widget.opacity, 0.45, 1);
++        next.widget.opacity = clamp(saved.widget.opacity == null ? 1 : saved.widget.opacity, 0.3, 1);
+         next.widget.autoWalk = saved.widget.autoWalk !== false;
+         next.widget.particles = saved.widget.particles !== false;
+         next.widget.speech = saved.widget.speech !== false;
+@@ -934,7 +934,7 @@
+   function setWidgetOptions(patch) {
+     patch = patch || {};
+     if (patch.size != null) state.widget.size = clamp(patch.size, 0.72, 1.25);
+-    if (patch.opacity != null) state.widget.opacity = clamp(patch.opacity, 0.45, 1);
++    if (patch.opacity != null) state.widget.opacity = clamp(patch.opacity, 0.3, 1);
+     if (patch.autoWalk != null) state.widget.autoWalk = !!patch.autoWalk;
+     if (patch.particles != null) state.widget.particles = !!patch.particles;
+     if (patch.speech != null) state.widget.speech = !!patch.speech;
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -83,7 +83,7 @@
+       <button type="button" data-ws-mode="quiet">安静</button>
+      </div>
+      <label class="ws-range">大小 <input type="range" id="wsSize" min="75" max="120" step="5" value="100"><em id="wsSizeVal">100%</em></label>
+-     <label class="ws-range">透明度 <input type="range" id="wsOpacity" min="50" max="100" step="5" value="100"><em id="wsOpacityVal">100%</em></label>
++     <label class="ws-range">透明度 <input type="range" id="wsOpacity" min="30" max="100" step="5" value="100"><em id="wsOpacityVal">100%</em></label>
+      <div class="ws-toggles">
+       <label><input type="checkbox" id="wsAutoWalk"> 自动走动</label>
+       <label><input type="checkbox" id="wsParticles"> 粒子特效</label>
