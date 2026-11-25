@@ -36,6 +36,10 @@ public class SpiritAccessibilityService extends AccessibilityService {
     }
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private int scanLimit = 6;
+    private int scanLeft = 0;
+    private int scanRight = 0;
+    private int navOffset = 0;
 
     @Override
     protected void onServiceConnected() {
@@ -76,10 +80,14 @@ public class SpiritAccessibilityService extends AccessibilityService {
     }
 
     private void doEat(String label, int screen) {
-        doEatAttempt(label, screen, 0);
+        scanLimit = Math.max(6, Math.min(9, screen + 2));
+        scanLeft = 0;
+        scanRight = 0;
+        navOffset = 0;
+        scanForTarget(label, screen);
     }
 
-    private void doEatAttempt(String label, int screen, final int attempt) {
+    private void scanForTarget(String label, int screen) {
         AccessibilityNodeInfo root = getRootInActiveWindow();
         if (root == null) {
             report("failed", label, "no-root");
@@ -93,21 +101,38 @@ public class SpiritAccessibilityService extends AccessibilityService {
             return;
         }
         AccessibilityNodeInfo target = findLabel(root, label, 0);
-        if (target == null && screen > 0 && attempt <= screen) {
+        if (target == null && scanLeft < scanLimit) {
             if (swipeLeft()) {
-                toast("切到屏" + Math.min(screen, attempt + 1) + "…");
+                scanLeft++;
+                navOffset++;
+                toast("向左找「" + label + "」· 第" + scanLeft + "页");
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        doEatAttempt(label, screen, attempt + 1);
+                        scanForTarget(label, screen);
+                    }
+                }, 520L);
+                return;
+            }
+        }
+        if (target == null && scanRight < scanLimit * 2) {
+            if (swipeRight()) {
+                scanRight++;
+                navOffset--;
+                toast("向右找「" + label + "」· 第" + scanRight + "页");
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scanForTarget(label, screen);
                     }
                 }, 520L);
                 return;
             }
         }
         if (target == null) {
-            report("failed", label, "not-on-screen-" + screen);
-            toast("桌面上没有找到「" + label + "」，请先滑到屏" + screen + "再试");
+            returnToOrigin();
+            report("failed", label, "not-found-" + screen);
+            toast("没扫到「" + label + "」，目标约在屏" + screen + "；请手动滑到该屏再试");
             return;
         }
         Rect bounds = new Rect();
@@ -132,17 +157,53 @@ public class SpiritAccessibilityService extends AccessibilityService {
     }
 
     private boolean swipeLeft() {
+        return swipeHorizontal(true);
+    }
+
+    private boolean swipeRight() {
+        return swipeHorizontal(false);
+    }
+
+    private boolean swipeHorizontal(boolean left) {
         int w = getResources().getDisplayMetrics().widthPixels;
         int h = getResources().getDisplayMetrics().heightPixels;
         Path path = new Path();
-        path.moveTo(w * 0.82f, h * 0.58f);
-        path.lineTo(w * 0.18f, h * 0.58f);
+        path.moveTo(w * (left ? 0.82f : 0.18f), h * 0.58f);
+        path.lineTo(w * (left ? 0.18f : 0.82f), h * 0.58f);
         GestureDescription.StrokeDescription stroke =
             new GestureDescription.StrokeDescription(path, 0L, 320L);
         GestureDescription gesture = new GestureDescription.Builder()
             .addStroke(stroke)
             .build();
         return dispatchGesture(gesture, null, null);
+    }
+
+    private void returnToOrigin() {
+        if (navOffset > 0) {
+            if (swipeRight()) {
+                navOffset--;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        returnToOrigin();
+                    }
+                }, 460L);
+            } else {
+                navOffset = 0;
+            }
+        } else if (navOffset < 0) {
+            if (swipeLeft()) {
+                navOffset++;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        returnToOrigin();
+                    }
+                }, 460L);
+            } else {
+                navOffset = 0;
+            }
+        }
     }
 
     private boolean longPress(int x, int y) {
@@ -194,6 +255,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
             public void run() {
                 if (findRemoveNode() == null) {
                     report("success", label, "accessibility");
+                    returnToOrigin();
                     toast("已移除「" + label + "」，应用还在抽屉里");
                 } else if (next < 3) {
                     clickRemove(label, next);
@@ -228,6 +290,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
                         public void run() {
                             if (findRemoveNode() == null) {
                                 report("success", label, "root");
+                                returnToOrigin();
                                 toast("已移除「" + label + "」");
                             } else {
                                 report("failed", label, "root-still-open");
