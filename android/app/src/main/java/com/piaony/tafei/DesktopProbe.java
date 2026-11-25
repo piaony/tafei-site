@@ -248,14 +248,14 @@ public final class DesktopProbe {
                     Cursor cols = null;
                     try {
                         cols = db.rawQuery("PRAGMA table_info(" + table + ")", null);
-                        Set<String> names = new LinkedHashSet<>();
+                        Set<String> tableCols = new LinkedHashSet<>();
                         while (cols.moveToNext()) {
                             String col = cols.getString(cols.getColumnIndex("name"));
-                            if (col != null) names.add(col);
+                            if (col != null) tableCols.add(col);
                         }
-                        if (names.contains("intent") && names.contains("cellX") && names.contains("cellY")) {
+                        if (tableCols.contains("intent") && tableCols.contains("cellX") && tableCols.contains("cellY")) {
                             itemsTable = table;
-                            columnNames = names;
+                            columnNames = tableCols;
                             break;
                         }
                     } catch (Throwable ignored) {
