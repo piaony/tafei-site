@@ -1,0 +1,497 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index 20c2c45..55a9da8 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -2,2 +2,3 @@ package com.piaony.tafei;
+ 
++import android.content.Intent;
+ import android.graphics.Color;
+@@ -33,2 +34,4 @@ public class MainActivity extends BridgeActivity {
+     private boolean firstCheckDone = false;
++    private String pendingPage = null;
++    private boolean pageHandled = false;
+ 
+@@ -45,2 +48,4 @@ public class MainActivity extends BridgeActivity {
+         webView.addJavascriptInterface(new NativeBridge(this), "TafeiNative");
++        NotificationHelper.ensureChannel(this);
++        readPageIntent(getIntent());
+ 
+@@ -72,2 +77,38 @@ public class MainActivity extends BridgeActivity {
+         if (firstCheckDone) UpdateChecker.maybeCheck(this);
++        openPendingPage();
++    }
++
++    @Override
++    public void onNewIntent(Intent intent) {
++        super.onNewIntent(intent);
++        setIntent(intent);
++        readPageIntent(intent);
++        openPendingPage();
++    }
++
++    private void readPageIntent(Intent intent) {
++        if (intent == null) return;
++        String page = intent.getStringExtra("tafei_page");
++        if (page != null && !page.isEmpty()) {
++            pendingPage = page;
++            pageHandled = false;
++        }
++    }
++
++    /** 从通知点进来后，等网页加载好再切到社区页。 */
++    private void openPendingPage() {
++        if (pendingPage == null || pageHandled) return;
++        pageHandled = true;
++        final String page = pendingPage;
++        pendingPage = null;
++        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
++            @Override
++            public void run() {
++                WebView webView = (MainActivity.this.bridge != null) ? MainActivity.this.bridge.getWebView() : null;
++                if (webView == null) return;
++                String js = "(function(){try{if(window.TAFEIViews&&TAFEIViews.showPage){TAFEIViews.showPage('"
++                        + page.replace("'", "") + "');}return 1;}catch(e){return 0;}})()";
++                webView.evaluateJavascript(js, null);
++            }
++        }, 900L);
+     }
+@@ -136,2 +177,22 @@ public class MainActivity extends BridgeActivity {
+ 
++        @JavascriptInterface
++        public void notifyMessage(String title, String body, String page) {
++            NotificationHelper.show(act, title, body, page);
++        }
++
++        @JavascriptInterface
++        public void requestNotifyPermission() {
++            act.runOnUiThread(new Runnable() {
++                @Override
++                public void run() {
++                    NotificationHelper.requestPermission(act);
++                }
++            });
++        }
++
++        @JavascriptInterface
++        public String notificationsAllowed() {
++            return NotificationHelper.hasPermission(act) ? "1" : "0";
++        }
++
+         @JavascriptInterface
+diff --git a/android/app/src/main/java/com/piaony/tafei/NotificationHelper.java b/android/app/src/main/java/com/piaony/tafei/NotificationHelper.java
+new file mode 100644
+index 0000000..cde91c5
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/NotificationHelper.java
+@@ -0,0 +1,83 @@
++package com.piaony.tafei;
++
++import android.app.Activity;
++import android.app.NotificationChannel;
++import android.app.NotificationManager;
++import android.app.PendingIntent;
++import android.content.Context;
++import android.content.Intent;
++import android.content.pm.PackageManager;
++import android.os.Build;
++
++import androidx.core.app.NotificationCompat;
++import androidx.core.content.ContextCompat;
++
++/**
++ * 站内消息通知：系统通知 / 站内公告 / 私信有新内容时，在通知栏提醒。
++ * 点击通知回到 App，并跳到社区页。
++ */
++public class NotificationHelper {
++
++    private static final String CHANNEL_ID = "tafei_messages";
++    private static final String CHANNEL_NAME = "消息与公告";
++
++    public static void ensureChannel(Context context) {
++        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
++        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
++        if (nm == null) return;
++        if (nm.getNotificationChannel(CHANNEL_ID) != null) return;
++        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
++        channel.setDescription("系统通知、站内公告和私信提醒");
++        channel.enableVibration(true);
++        nm.createNotificationChannel(channel);
++    }
++
++    public static boolean hasPermission(Context context) {
++        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true;
++        return ContextCompat.checkSelfPermission(context, "android.permission.POST_NOTIFICATIONS")
++                == PackageManager.PERMISSION_GRANTED;
++    }
++
++    /** 安卓 13 及以上需要动态申请；已申请过就不再打扰。 */
++    public static void requestPermission(Activity activity) {
++        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;
++        if (hasPermission(activity)) return;
++        try {
++            activity.requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 1001);
++        } catch (Throwable ignored) {
++        }
++    }
++
++    public static void show(Context context, String title, String body, String page) {
++        if (!hasPermission(context)) return;
++        ensureChannel(context);
++        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
++        if (nm == null) return;
++
++        String safeTitle = (title == null || title.trim().isEmpty()) ? "挞飞" : title.trim();
++        String safeBody = (body == null) ? "" : body.trim();
++        if (safeBody.length() > 180) safeBody = safeBody.substring(0, 180) + "…";
++
++        Intent intent = new Intent(context, MainActivity.class);
++        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
++        intent.putExtra("tafei_page", (page == null || page.isEmpty()) ? "community" : page);
++
++        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
++        PendingIntent pending = PendingIntent.getActivity(context, (int) (System.currentTimeMillis() % 100000), intent, flags);
++
++        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
++                .setSmallIcon(R.mipmap.ic_launcher)
++                .setContentTitle(safeTitle)
++                .setContentText(safeBody)
++                .setStyle(new NotificationCompat.BigTextStyle().bigText(safeBody))
++                .setAutoCancel(true)
++                .setPriority(NotificationCompat.PRIORITY_HIGH)
++                .setContentIntent(pending);
++
++        try {
++            nm.notify((int) (System.currentTimeMillis() % 100000), builder.build());
++        } catch (Throwable ignored) {
++        }
++    }
++}
+diff --git a/www/css/tafei-inbox.css b/www/css/tafei-inbox.css
+index 45ecfc7..5ec6946 100644
+--- a/www/css/tafei-inbox.css
++++ b/www/css/tafei-inbox.css
+@@ -191 +191,8 @@ body.light .tf3-code{background:rgba(232,240,255,.9);color:#0f2a48}
+ }
++
++/* 未登录：站长默认会话置顶 */
++.tf3-guest-chat{padding:12px;display:flex;flex-direction:column;gap:10px}
++.tf3-guest-chat .tf3-threadhead{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tf-text,#eef4ff)}
++.tf3-pin{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(100,232,255,.16);color:var(--tf-cyan,#64e8ff)}
++.tf3-guest-hint{margin:0;padding:10px 12px;border-radius:12px;background:rgba(100,232,255,.07);font-size:12.5px;line-height:1.7}
++.tf3-guest-chat .tf3-cta{align-self:flex-start}
+diff --git a/www/index.html b/www/index.html
+index 6d84096..4338161 100644
+--- a/www/index.html
++++ b/www/index.html
+@@ -96,2 +96,11 @@ body:not(.light) #shop .sv-cart-head span b{color:#64e8ff}
+ @media(max-width:860px){#shop .sv-grid{gap:8px}}
++/* 社区：消息/聊天置顶，文章下沉 */
++.comm-articles{margin-top:26px;padding-top:6px}
++.comm-articles .comm-tabs{margin-top:14px}
++.comm-articles .comm-feed{margin-top:16px}
++.comm-articles .af-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
++@media(max-width:620px){.comm-articles .af-grid{grid-template-columns:minmax(0,1fr)}}
++.comm-articles .af-group-head{margin-bottom:12px}
++#community #info{margin-top:22px}
++
+ /* 就地搜索 */
+@@ -323,8 +332,2 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
+ <section id="community" class="reveal">
+- <div class="comm-tabs" id="commTabs" role="tablist" aria-label="社区栏目">
+- <button class="on" type="button" data-ctab="all" role="tab" aria-selected="true">综合</button>
+- <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
+- <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
+-</div>
+-<div class="comm-feed" id="commFeed" hidden></div>
+ <div class="community-hub" id="communityHub">
+@@ -373,2 +376,57 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
+ 
++ <section id="info" class="community-block">
++ <div class="section-head">
++  <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
++  <p>系统通知、公告和私信都在这里；站长官方会话默认置顶。</p>
++ </div>
++
++ <div class="tf3" id="tf3Inbox">
++  <div class="tf3-bar">
++   <div class="tf3-tabs" role="tablist" aria-label="信息中心分类">
++    <button type="button" class="tf3-tab is-active" role="tab" aria-selected="true" data-pane="system">
++     系统通知<span class="tf3-badge" data-badge="system" hidden>0</span>
++    </button>
++    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="notice">
++     公告通知<span class="tf3-badge" data-badge="notice" hidden>0</span>
++    </button>
++    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="dm">
++     私信<span class="tf3-badge" data-badge="dm" hidden>0</span>
++    </button>
++   </div>
++   <button type="button" class="tf3-readall" id="tf3ReadAll">全部标为已读</button>
++  </div>
++
++  <div class="tf3-pane" data-pane-body="system" role="tabpanel">
++   <div class="tf3-list" id="tf3SystemList">
++    <div class="tf3-hint">正在读取系统通知…</div>
++   </div>
++  </div>
++
++  <div class="tf3-pane" data-pane-body="notice" role="tabpanel" hidden>
++   <div class="tf3-list" id="tf3NoticeList">
++    <div class="tf3-hint">正在读取公告…</div>
++   </div>
++  </div>
++
++  <div class="tf3-pane" data-pane-body="dm" role="tabpanel" hidden>
++   <div class="tf3-list" id="tf3DmWrap">
++    <div class="tf3-hint">正在检查私信状态…</div>
++   </div>
++  </div>
++ </div>
++</section>
++
++ <section class="community-block comm-articles" id="commArticles">
++  <div class="section-head">
++   <div><div class="kicker">TAFEI COLUMNS</div><h2>文章与资料</h2></div>
++   <p>综合、手机权限、高中资料放在消息和聊天下面，点栏目就地展开。</p>
++  </div>
++ <div class="comm-tabs" id="commTabs" role="tablist" aria-label="社区栏目">
++ <button class="on" type="button" data-ctab="all" role="tab" aria-selected="true">综合</button>
++ <button type="button" data-ctab="phone" role="tab" aria-selected="false">手机权限</button>
++ <button type="button" data-ctab="study" role="tab" aria-selected="false">高中资料</button>
++</div>
++<div class="comm-feed" id="commFeed" hidden></div>
++ </section>
++
+  <section class="task-center" id="taskCenter" hidden aria-labelledby="taskCenterTitle">
+@@ -457,48 +515,3 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
+ 
+- <section id="info" class="community-block">
+- <div class="section-head">
+-  <div><div class="kicker">TAFEI INFORMATION</div><h2>消息中心</h2></div>
+-  <p>系统通知、公告和私信都在这里；站长官方会话默认置顶。</p>
+- </div>
+-
+- <div class="tf3" id="tf3Inbox">
+-  <div class="tf3-bar">
+-   <div class="tf3-tabs" role="tablist" aria-label="信息中心分类">
+-    <button type="button" class="tf3-tab is-active" role="tab" aria-selected="true" data-pane="system">
+-     系统通知<span class="tf3-badge" data-badge="system" hidden>0</span>
+-    </button>
+-    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="notice">
+-     公告通知<span class="tf3-badge" data-badge="notice" hidden>0</span>
+-    </button>
+-    <button type="button" class="tf3-tab" role="tab" aria-selected="false" data-pane="dm">
+-     私信<span class="tf3-badge" data-badge="dm" hidden>0</span>
+-    </button>
+-   </div>
+-   <button type="button" class="tf3-readall" id="tf3ReadAll">全部标为已读</button>
+-  </div>
+-
+-  <div class="tf3-pane" data-pane-body="system" role="tabpanel">
+-   <div class="tf3-list" id="tf3SystemList">
+-    <div class="tf3-hint">正在读取系统通知…</div>
+-   </div>
+-  </div>
+-
+-  <div class="tf3-pane" data-pane-body="notice" role="tabpanel" hidden>
+-   <div class="tf3-list" id="tf3NoticeList">
+-    <div class="tf3-hint">正在读取公告…</div>
+-   </div>
+-  </div>
+-
+-  <div class="tf3-pane" data-pane-body="dm" role="tabpanel" hidden>
+-   <div class="tf3-list" id="tf3DmWrap">
+-    <div class="tf3-hint">正在检查私信状态…</div>
+-   </div>
+-  </div>
+- </div>
+-</section>
+-
+-
+-
+-
+- <div class="community-profile-wrap" id="communityProfileWrap" hidden>
++<div class="community-profile-wrap" id="communityProfileWrap" hidden>
+   <div class="community-profile-top">
+@@ -798,3 +811,3 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
+ <script src="js/articles.js?v=2"></script>
+-<script src="js/community-feed.js?v=1"></script>
++<script src="js/community-feed.js?v=2"></script>
+ <script src="js/home-search.js?v=1"></script>
+@@ -805,3 +818,4 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
+ <script src="js/tafei-features.js?v=5" defer></script>
+-<script src="js/tafei-inbox.js?v=7" defer></script>
++<script src="js/tafei-inbox.js?v=10" defer></script>
++<script src="js/tafei-notify.js?v=1" defer></script>
+ <script src="js/spirit-chat.js?v=2" defer></script>
+@@ -836,8 +850,2 @@ body.light .hv-sr{background:rgba(255,255,255,.96)}
+       var feed = window.TAFEICommFeed;
+-      if (key === 'all') {
+-        if (feed) feed.hide();
+-        if (hub) hub.hidden = false;
+-        return;
+-      }
+-      if (hub) hub.hidden = true;
+       if (feed) feed.show(key);
+diff --git a/www/js/community-feed.js b/www/js/community-feed.js
+index 3fc6c27..5a40875 100644
+--- a/www/js/community-feed.js
++++ b/www/js/community-feed.js
+@@ -67,2 +67,12 @@
+ 
++  function renderAll() {
++    var list = (DATA.articles || []).slice().sort(byDateDesc);
++    var head = '<div class="af-group-head"><div><div class="kicker">ALL POSTS</div>'
++      + '<h2>全部文章</h2></div><p>综合、手机权限、高中资料，按时间倒序。</p></div>';
++    host.innerHTML = head + (list.length
++      ? '<div class="af-grid">' + list.map(cardHtml).join('') + '</div>'
++      : '<div class="empty-state">还没有文章。</div>');
++    bindCards();
++  }
++
+   function renderReader(a) {
+@@ -113,3 +123,3 @@
+     host.hidden = false;
+-    load(function () { renderList(colId); });
++    load(function () { colId === 'all' ? renderAll() : renderList(colId); });
+   }
+@@ -123,2 +133,3 @@
+   window.TAFEICommFeed = { show: show, hide: hide, openArticle: openArticle };
++  load(function () { if (!cur) show('all'); });
+ })();
+diff --git a/www/js/tafei-inbox.js b/www/js/tafei-inbox.js
+index 1e6647f..d24b713 100644
+--- a/www/js/tafei-inbox.js
++++ b/www/js/tafei-inbox.js
+@@ -391,4 +391,7 @@
+     if (!token()) {
+-      box.innerHTML = '<div class="tf3-empty">登录后才能收发私信。<br>未登录也可以正常浏览其他内容。'
+-        + '<br><button type="button" class="tf3-cta" data-role="go-login">去登录 / 注册</button></div>';
++      box.innerHTML = '<div class="tf3-guest-chat">'
++        + '<div class="tf3-threadhead"><b>站长 · 官方会话</b><span class="tf3-pin">默认置顶</span></div>'
++        + '<div class="tf3-msgs"><div class="tf3-msg tf3-official-msg">' + esc(OWNER_WELCOME) + '</div></div>'
++        + '<div class="tf3-empty tf3-guest-hint">未登录也能看到站长的默认会话。登录后可以直接回复；和其他用户发起对话需要账号。</div>'
++        + '<button type="button" class="tf3-cta" data-role="go-login">登录后继续对话</button></div>';
+       var btn = $('[data-role="go-login"]', box);
+diff --git a/www/js/tafei-notify.js b/www/js/tafei-notify.js
+new file mode 100644
+index 0000000..ba04c05
+--- /dev/null
++++ b/www/js/tafei-notify.js
+@@ -0,0 +1,116 @@
++/* TAFEI · 站内消息通知：系统通知 / 站内公告 / 私信有新内容时，调用原生通知栏提醒 */
++(function () {
++  'use strict';
++  var NATIVE = window.TafeiNative;
++  if (!NATIVE || typeof NATIVE.notifyMessage !== 'function') return;
++  if (window.__tafeiNotify) return;
++  window.__tafeiNotify = true;
++
++  var API = 'https://kwkewmhmxyjmzdjyutwa.supabase.co/rest/v1';
++  var KEY = 'sb_publishable_tyeDf4FmwSW6j7C7s0Gdfg_Me5HqXkV';
++  var AUTH = 'tafei-auth-session';
++  var SEEN_KEY = 'tafei-notified-ids';
++  var ASKED_KEY = 'tafei-notify-asked';
++  var INTERVAL = 3 * 60 * 1000;
++  var booted = false;
++
++  function loadSeen() {
++    try {
++      var v = JSON.parse(localStorage.getItem(SEEN_KEY) || 'null');
++      return v && typeof v === 'object' ? v : {};
++    } catch (e) { return {}; }
++  }
++  var seen = loadSeen();
++
++  function saveSeen() {
++    try {
++      var keys = Object.keys(seen);
++      if (keys.length > 260) {
++        keys.slice(0, keys.length - 260).forEach(function (k) { delete seen[k]; });
++      }
++      localStorage.setItem(SEEN_KEY, JSON.stringify(seen));
++    } catch (e) {}
++  }
++
++  function push(title, body, page, key, silent) {
++    if (!key) return;
++    if (seen[key]) return;
++    seen[key] = Date.now();
++    saveSeen();
++    if (silent) return;
++    try {
++      NATIVE.notifyMessage(title, body, page || 'community');
++    } catch (e) {}
++  }
++
++  function trim(s, n) {
++    var t = String(s == null ? '' : s).replace(/[#>*`]/g, '').replace(/\s+/g, ' ').trim();
++    return t.length > n ? t.slice(0, n) + '…' : t;
++  }
++
++  function session() {
++    try { return JSON.parse(localStorage.getItem(AUTH) || 'null'); } catch (e) { return null; }
++  }
++
++  async function scanNotices(silent) {
++    try {
++      var res = await fetch('data/notices.json', { cache: 'no-store' });
++      if (!res.ok) return;
++      var data = await res.json();
++      (data.items || []).forEach(function (n) {
++        push('系统通知 · ' + trim(n.title, 30), trim(n.body, 110), 'community', 'sys:' + n.id, silent);
++      });
++    } catch (e) {}
++  }
++
++  async function scanAnnouncements(silent) {
++    try {
++      var res = await fetch(API + '/tafei_announcements?select=id,title,content,created_at&order=created_at.desc&limit=6', {
++        headers: { apikey: KEY }
++      });
++      if (!res.ok) return;
++      var rows = await res.json();
++      (rows || []).forEach(function (a) {
++        push('站内公告 · ' + trim(a.title, 30), trim(a.content, 110), 'community', 'ann:' + a.id, silent);
++      });
++    } catch (e) {}
++  }
++
++  async function scanMessages(silent) {
++    var s = session();
++    if (!s || !s.access_token || !s.user || !s.user.id) return;
++    try {
++      var res = await fetch(API + '/tafei_messages?recipient_id=eq.' + encodeURIComponent(s.user.id)
++        + '&read_at=is.null&select=id,sender_id,body,created_at&order=created_at.desc&limit=5', {
++        headers: { apikey: KEY, Authorization: 'Bearer ' + s.access_token }
++      });
++      if (!res.ok) return;
++      var rows = await res.json();
++      (rows || []).forEach(function (m) {
++        push('新私信', trim(m.body, 110), 'community', 'dm:' + m.id, silent);
++      });
++    } catch (e) {}
++  }
++
++  function check() {
++    if (document.visibilityState === 'hidden') return;
++    scanNotices(booted);
++    scanAnnouncements(booted);
++    scanMessages(booted);
++    booted = true;
++  }
++
++  /* 首次进 App 申请一次通知权限 */
++  if (!localStorage.getItem(ASKED_KEY)) {
++    try { localStorage.setItem(ASKED_KEY, '1'); } catch (e) {}
++    setTimeout(function () {
++      try { NATIVE.requestNotifyPermission(); } catch (e) {}
++    }, 1800);
++  }
++
++  setTimeout(check, 2500);
++  setInterval(check, INTERVAL);
++  document.addEventListener('visibilitychange', function () {
++    if (document.visibilityState === 'visible') check();
++  });
++})();
