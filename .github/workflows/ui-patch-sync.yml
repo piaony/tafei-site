@@ -15,20 +15,22 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Apply v145b folder target fix
+      - name: Apply v145c folder icon bounds fix
         run: |
           set -e
-          if grep -q "dragFolderStep(service, items, target" android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java 2>/dev/null; then
-            echo "v145b folder fix already present"
+          target="android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java"
+          count=$(grep -c "Rect icon = bounds;" "$target" 2>/dev/null || true)
+          if [ "$count" -ge 2 ]; then
+            echo "v145c folder icon fix already present"
             exit 0
           fi
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/fUinfyV39S" -o /tmp/v145b.patch
-          wc -c /tmp/v145b.patch
-          git apply --check -p1 /tmp/v145b.patch
-          git apply -p1 /tmp/v145b.patch
+            "https://aka.doubaocdn.com/s/JBAKGgi3eV" -o /tmp/v145c.patch
+          wc -c /tmp/v145c.patch
+          git apply --check -p1 /tmp/v145c.patch
+          git apply -p1 /tmp/v145c.patch
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
           git add android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java
-          git commit -m "fix(app): pass folder target through drag steps"
+          git commit -m "fix(app): use located bounds in folder action"
           git push origin HEAD:app/capacitor-setup
