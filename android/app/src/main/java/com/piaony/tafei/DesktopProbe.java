@@ -115,6 +115,10 @@ public final class DesktopProbe {
             diagCmd(diag, "user10 根目录", "ls -la /data/user/10", 460);
             diagCmd(diag, "user_de/10 根目录", "ls -la /data/user_de/10", 460);
             diagCmd(diag, "launcher pid", "pidof com.android.launcher", 120);
+            diagCmd(diag, "launcher root 数据目录", "ls -la /proc/$(pidof com.android.launcher)/root/data/user_de/0/com.android.launcher", 600);
+            diagCmd(diag, "launcher root databases", "ls -la /proc/$(pidof com.android.launcher)/root/data/user_de/0/com.android.launcher/databases", 760);
+            diagCmd(diag, "launcher root db 查找", "find -L /proc/$(pidof com.android.launcher)/root/data/user_de/0/com.android.launcher -maxdepth 3 -name '*.db'", 780);
+            diagCmd(diag, "launcher root files", "ls -la /proc/$(pidof com.android.launcher)/root/data/user_de/0/com.android.launcher/files", 600);
             diagCmd(diag, "launcher 打开的 db", "ls -l /proc/$(pidof com.android.launcher)/fd | grep -Ei 'db|launcher|favorite'", 820);
             diagCmd(diag, "launcher.db 全局查找", "find -L /data/user /data/user_de /data/data /data/system /data/oppo -maxdepth 5 -name launcher.db", 720);
             diagCmd(diag, "boot 数据目录", "ls -la /data/user_de/0/com.android.launcher", 560);
