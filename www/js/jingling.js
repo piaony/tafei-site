@@ -1445,7 +1445,8 @@
       return;
     }
     var startedAt = Date.now();
-    var timer = setInterval(function () {
+    var timer = null;
+    var poll = function () {
       var raw = String(nativeOverlayCall('desktopActionStatus', 'idle||'));
       var parts = raw.split('|');
       var state = parts[0] || 'idle';
@@ -1465,7 +1466,8 @@
         showActionOut('操作失败：' + ddText(detail), true);
         toast('操作失败：' + ddText(detail), true);
       }
-    }, 450);
+    };
+    setTimeout(function () { poll(); timer = setInterval(poll, 450); }, 1100);
     setTimeout(function () {
       if (dmState.busy) {
         clearInterval(timer);
