@@ -1,0 +1,55 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index c9286de..9a504c3 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -217,6 +217,50 @@ public class MainActivity extends BridgeActivity {
+             return DesktopProbe.probe(act);
+         }
+ 
++        @JavascriptInterface
++        public String accessibilityReady() {
++            return SpiritAccessibilityService.isReady() ? "1" : "0";
++        }
++
++        @JavascriptInterface
++        public void openAccessibility() {
++            act.runOnUiThread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        act.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
++                    } catch (Exception ignored) {
++                    }
++                }
++            });
++        }
++
++        @JavascriptInterface
++        public String eatDesktopIcon(String label, String pkg, int screen, int cellX, int cellY) {
++            if (!SpiritAccessibilityService.isReady()) {
++                openAccessibility();
++                return "accessibility-off";
++            }
++            if (label == null || label.trim().isEmpty()) return "no-icon";
++            act.runOnUiThread(new Runnable() {
++                @Override
++                public void run() {
++                    Intent home = new Intent(Intent.ACTION_MAIN);
++                    home.addCategory(Intent.CATEGORY_HOME);
++                    home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++                    try {
++                        act.startActivity(home);
++                    } catch (Exception e) {
++                        Toast.makeText(act, "无法回到桌面", Toast.LENGTH_SHORT).show();
++                        return;
++                    }
++                    Toast.makeText(act, "正在长按「" + label + "」…", Toast.LENGTH_SHORT).show();
++                    SpiritAccessibilityService.eatIcon(label, pkg, screen, cellX, cellY);
++                }
++            });
++            return "started";
++        }
++
+         @JavascriptInterface
+         public String overlaySupported() {
+             return Build.VERSION.SDK_INT >= 23 ? "1" : "0";
