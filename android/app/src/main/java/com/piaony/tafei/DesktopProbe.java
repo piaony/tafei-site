@@ -232,13 +232,19 @@ public final class DesktopProbe {
             Cursor columns = null;
             try {
                 db = SQLiteDatabase.openDatabase(localDb.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-                tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='favorites'", null);
-                if (!tables.moveToFirst()) {
-                    addDiag(diag, name + "：没有 favorites 表");
-                    continue;
+                tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+                List<String> tableNames = new ArrayList<>();
+                while (tables.moveToNext()) {
+                    String table = tables.getString(tables.getColumnIndex("name"));
+                    if (table != null && !table.startsWith("sqlite_")) tableNames.add(table);
                 }
                 tables.close();
                 tables = null;
+                if (!tableNames.contains("favorites")) {
+                    addDiag(diag, name + "：没有 favorites 表；表=" + trim(join(tableNames), 420));
+                    if (name.equals("launcher.db")) dumpTables(db, name, diag);
+                    continue;
+                }
 
                 JSONObject result = new JSONObject();
                 JSONArray columnArray = new JSONArray();
@@ -430,6 +436,38 @@ public final class DesktopProbe {
             out.append(value);
         }
         return out.toString();
+    }
+
+    private static void dumpTables(SQLiteDatabase db, String label, JSONArray diag) {
+        Cursor tables = null;
+        try {
+            tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+            List<String> names = new ArrayList<>();
+            while (tables.moveToNext()) {
+                String table = tables.getString(tables.getColumnIndex("name"));
+                if (table != null && !table.startsWith("sqlite_")) names.add(table);
+            }
+            addDiag(diag, label + " 表清单（" + names.size() + "）：" + trim(join(names), 600));
+            for (String table : names) {
+                Cursor columns = null;
+                try {
+                    columns = db.rawQuery("PRAGMA table_info(" + table + ")", null);
+                    List<String> cols = new ArrayList<>();
+                    while (columns.moveToNext()) {
+                        String col = columns.getString(columns.getColumnIndex("name"));
+                        if (col != null) cols.add(col);
+                    }
+                    addDiag(diag, "  " + table + "：" + trim(join(cols), 300));
+                } catch (Throwable ignored) {
+                } finally {
+                    if (columns != null) columns.close();
+                }
+            }
+        } catch (Throwable t) {
+            addDiag(diag, label + " 表清单失败：" + String.valueOf(t.getMessage()));
+        } finally {
+            if (tables != null) tables.close();
+        }
     }
 
     private static String firstToken(String value) {
