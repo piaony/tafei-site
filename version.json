@@ -1,6 +1,6 @@
 {
-  "code": 99,
-  "name": "1.0.99",
-  "notes": "v99 继续定位桌面数据库：直接列出 /data、/data/user/0 和系统桌面包的数据目录，并用 find 全盘查找 launcher.db，再读取系统桌面包的 dataDir。\n1. 先确认 /data/user/0 本身是否存在；\n2. 直接看 com.android.launcher 的 data 目录和 databases；\n3. 跨 /data/data、/data/user/0、/data/user_de/0 查找 launcher.db；\n4. 读取 dumpsys package 的 dataDir；\n5. 仍然只读，不删除、不移动、不写数据库。",
+  "code": 100,
+  "name": "1.0.100",
+  "notes": "v100 按 dumpsys 给出的真实 dataDir 继续查桌面：直接列出 /data/user_de/0/com.android.launcher，检查它的 databases 和所有 .db 文件。\n1. 确认系统桌面数据在 direct-boot 用户目录；\n2. 看 databases 里实际有哪些文件；\n3. 用 find -L 跨符号链接查找 .db；\n4. 同时保留 /data、/data/user/0 列表和 dataDir 输出；\n5. 仍然只读，不删除、不移动、不写数据库。",
   "url": "https://github.com/Piaony/tafei-site/releases/latest/download/app-release.apk"
 }
