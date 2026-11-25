@@ -1,0 +1,885 @@
+diff --git a/android/app/src/main/AndroidManifest.xml b/android/app/src/main/AndroidManifest.xml
+index 01a95f7..c57e6a4 100644
+--- a/android/app/src/main/AndroidManifest.xml
++++ b/android/app/src/main/AndroidManifest.xml
+@@ -25,6 +25,24 @@
+ 
+         </activity>
+ 
++        <service
++            android:name=".SpiritOverlayService"
++            android:exported="false"
++            android:foregroundServiceType="specialUse">
++            <property
++                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
++                android:value="desktop companion overlay" />
++        </service>
++
++        <receiver
++            android:name=".SpiritOverlayBootReceiver"
++            android:enabled="true"
++            android:exported="true">
++            <intent-filter>
++                <action android:name="android.intent.action.BOOT_COMPLETED" />
++            </intent-filter>
++        </receiver>
++
+         <provider
+             android:name="androidx.core.content.FileProvider"
+             android:authorities="${applicationId}.fileprovider"
+@@ -41,4 +59,8 @@
+     <uses-permission android:name="android.permission.INTERNET" />
+     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
++    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
++    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+ </manifest>
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index 55a9da8..fec811f 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -2,11 +2,14 @@ package com.piaony.tafei;
+ 
+ import android.content.Intent;
+ import android.graphics.Color;
++import android.net.Uri;
++import android.os.Build;
+ import android.graphics.drawable.ColorDrawable;
+ import android.os.Bundle;
+ import android.os.Handler;
+ import android.os.Looper;
+ import android.os.SystemClock;
++import android.provider.Settings;
+ import android.view.View;
+ import android.webkit.JavascriptInterface;
+ import android.webkit.WebView;
+@@ -73,11 +76,18 @@ public class MainActivity extends BridgeActivity {
+     @Override
+     public void onResume() {
+         super.onResume();
++        SpiritOverlayService.onAppState(this, true);
+         /* 切回前台时再检查一次（内部有 12 小时节流，不会频繁请求） */
+         if (firstCheckDone) UpdateChecker.maybeCheck(this);
+         openPendingPage();
+     }
+ 
++    @Override
++    public void onPause() {
++        SpiritOverlayService.onAppState(this, false);
++        super.onPause();
++    }
++
+     @Override
+     public void onNewIntent(Intent intent) {
+         super.onNewIntent(intent);
+@@ -195,6 +205,89 @@ public class MainActivity extends BridgeActivity {
+             return NotificationHelper.hasPermission(act) ? "1" : "0";
+         }
+ 
++        @JavascriptInterface
++        public String overlaySupported() {
++            return Build.VERSION.SDK_INT >= 23 ? "1" : "0";
++        }
++
++        @JavascriptInterface
++        public String overlayStatus() {
++            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) return "denied";
++            boolean on = act.getSharedPreferences("tafei_app", 0)
++                .getBoolean("overlay_enabled", false);
++            return on ? "on" : "off";
++        }
++
++        @JavascriptInterface
++        public void requestOverlayPermission() {
++            act.runOnUiThread(new Runnable() {
++                @Override
++                public void run() {
++                    try {
++                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
++                            Uri.parse("package:" + act.getPackageName()));
++                        act.startActivity(intent);
++                    } catch (Exception e) {
++                        try {
++                            act.startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
++                        } catch (Exception ignored) {
++                        }
++                    }
++                }
++            });
++        }
++
++        @JavascriptInterface
++        public String startOverlay() {
++            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) return "denied";
++            act.getSharedPreferences("tafei_app", 0).edit().putBoolean("overlay_enabled", true).apply();
++            try {
++                SpiritOverlayService.start(act);
++                return "on";
++            } catch (Exception e) {
++                return "off";
++            }
++        }
++
++        @JavascriptInterface
++        public String stopOverlay() {
++            act.getSharedPreferences("tafei_app", 0).edit().putBoolean("overlay_enabled", false).apply();
++            SpiritOverlayService.stop(act);
++            return "off";
++        }
++
++        @JavascriptInterface
++        public int overlaySize() {
++            return act.getSharedPreferences("tafei_app", 0).getInt("overlay_size", 100);
++        }
++
++        @JavascriptInterface
++        public int overlayOpacity() {
++            return act.getSharedPreferences("tafei_app", 0).getInt("overlay_opacity", 100);
++        }
++
++        @JavascriptInterface
++        public void setOverlaySize(int percent) {
++            int value = Math.max(70, Math.min(130, percent));
++            act.getSharedPreferences("tafei_app", 0).edit().putInt("overlay_size", value).apply();
++            SpiritOverlayService.updatePrefs(act);
++        }
++
++        @JavascriptInterface
++        public void setOverlayOpacity(int percent) {
++            int value = Math.max(40, Math.min(100, percent));
++            act.getSharedPreferences("tafei_app", 0).edit().putInt("overlay_opacity", value).apply();
++            SpiritOverlayService.updatePrefs(act);
++        }
++
++        @JavascriptInterface
++        public void setOverlaySpirit(String id) {
++            String safe = (id == null) ? "xiaota" : id.replaceAll("[^a-zA-Z0-9_-]", "");
++            if (safe.isEmpty()) safe = "xiaota";
++            act.getSharedPreferences("tafei_app", 0).edit().putString("overlay_spirit", safe).apply();
++            SpiritOverlayService.updateSpirit(act);
++        }
++
+         @JavascriptInterface
+         public void toast(String msg) {
+             final String m = msg;
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayBootReceiver.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayBootReceiver.java
+new file mode 100644
+index 0000000..54475de
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayBootReceiver.java
+@@ -0,0 +1,22 @@
++package com.piaony.tafei;
++
++import android.content.BroadcastReceiver;
++import android.content.Context;
++import android.content.Intent;
++import android.provider.Settings;
++
++/** 手机重启后，如果用户开过桌面精灵，就把悬浮窗接回来。 */
++public class SpiritOverlayBootReceiver extends BroadcastReceiver {
++    @Override
++    public void onReceive(Context context, Intent intent) {
++        if (intent == null || !Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) return;
++        boolean enabled = context.getSharedPreferences("tafei_app", 0)
++            .getBoolean("overlay_enabled", false);
++        if (!enabled) return;
++        if (android.os.Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(context)) return;
++        try {
++            SpiritOverlayService.start(context);
++        } catch (Exception ignored) {
++        }
++    }
++}
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+new file mode 100644
+index 0000000..44853ab
+--- /dev/null
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -0,0 +1,479 @@
++package com.piaony.tafei;
++
++import android.app.Notification;
++import android.app.NotificationChannel;
++import android.app.NotificationManager;
++import android.app.PendingIntent;
++import android.app.Service;
++import android.content.Context;
++import android.content.Intent;
++import android.content.SharedPreferences;
++import android.content.pm.ServiceInfo;
++import android.graphics.Bitmap;
++import android.graphics.BitmapFactory;
++import android.graphics.Color;
++import android.graphics.PixelFormat;
++import android.graphics.Typeface;
++import android.graphics.drawable.GradientDrawable;
++import android.os.Build;
++import android.os.Handler;
++import android.os.IBinder;
++import android.os.Looper;
++import android.provider.Settings;
++import android.util.TypedValue;
++import android.view.Gravity;
++import android.view.MotionEvent;
++import android.view.View;
++import android.view.WindowManager;
++import android.widget.ImageView;
++import android.widget.LinearLayout;
++import android.widget.TextView;
++
++import java.io.InputStream;
++
++import androidx.core.app.NotificationCompat;
++import androidx.core.content.ContextCompat;
++
++/**
++ * 桌面精灵悬浮窗。
++ * 退出 App 后，用前台服务把当前伙伴留在桌面上；点一下说台词，连点两下回到挞飞。
++ * 需要「显示在其他应用上层」权限，国产系统还需要允许自启动/后台活动。
++ */
++public class SpiritOverlayService extends Service {
++
++    public static final String ACTION_START = "com.piaony.tafei.overlay.START";
++    public static final String ACTION_STOP = "com.piaony.tafei.overlay.STOP";
++    public static final String ACTION_APP_STATE = "com.piaony.tafei.overlay.APP_STATE";
++    public static final String ACTION_UPDATE = "com.piaony.tafei.overlay.UPDATE";
++    public static final String ACTION_SPIRIT = "com.piaony.tafei.overlay.SPIRIT";
++    public static final String EXTRA_FOREGROUND = "foreground";
++
++    private static final String CHANNEL_ID = "tafei_overlay";
++    private static final int NOTIFICATION_ID = 9101;
++    private static final String PREFS = "tafei_app";
++    private static final String PREF_ENABLED = "overlay_enabled";
++    private static final String PREF_SIZE = "overlay_size";
++    private static final String PREF_OPACITY = "overlay_opacity";
++    private static final String PREF_SPIRIT = "overlay_spirit";
++
++    private static volatile boolean appForeground = true;
++    private static volatile SpiritOverlayService instance;
++
++    private WindowManager windowManager;
++    private WindowManager.LayoutParams params;
++    private LinearLayout root;
++    private ImageView sprite;
++    private TextView bubble;
++    private final Handler handler = new Handler(Looper.getMainLooper());
++    private final String[] lines = new String[]{
++        "今天也要一起收集糖霜吗？",
++        "我在这儿，切回挞飞就能继续玩。",
++        "别忘了喂我一点零食。",
++        "桌面有点亮，我眯一会儿。",
++        "你忙你的，我替你看着时间。"
++    };
++    private int lineIndex = 0;
++    private long lastTapAt = 0L;
++    private float lastRawX = 0f;
++    private float lastRawY = 0f;
++    private boolean moved = false;
++    private int scalePercent = 100;
++
++    public static void start(Context context) {
++        Intent intent = new Intent(context, SpiritOverlayService.class).setAction(ACTION_START);
++        ContextCompat.startForegroundService(context, intent);
++    }
++
++    public static void stop(Context context) {
++        context.stopService(new Intent(context, SpiritOverlayService.class));
++    }
++
++    /** App 回到前台时收起悬浮窗，退到后台时再放出来。 */
++    public static void onAppState(Context context, boolean foreground) {
++        appForeground = foreground;
++        SpiritOverlayService svc = instance;
++        if (svc != null) {
++            svc.updateVisibility();
++            return;
++        }
++        SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
++        if (!sp.getBoolean(PREF_ENABLED, false)) return;
++        try {
++            Intent intent = new Intent(context, SpiritOverlayService.class)
++                .setAction(ACTION_APP_STATE)
++                .putExtra(EXTRA_FOREGROUND, foreground);
++            if (foreground) {
++                ContextCompat.startForegroundService(context, intent);
++            } else {
++                context.startService(intent);
++            }
++        } catch (Exception ignored) {
++        }
++    }
++
++    public static void updatePrefs(Context context) {
++        SpiritOverlayService svc = instance;
++        if (svc != null) {
++            svc.applyPrefs();
++            return;
++        }
++        SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
++        if (!sp.getBoolean(PREF_ENABLED, false)) return;
++        try {
++            Intent intent = new Intent(context, SpiritOverlayService.class).setAction(ACTION_UPDATE);
++            ContextCompat.startForegroundService(context, intent);
++        } catch (Exception ignored) {
++        }
++    }
++
++    public static void updateSpirit(Context context) {
++        SpiritOverlayService svc = instance;
++        if (svc != null && svc.sprite != null) {
++            Bitmap art = svc.spiritBitmap();
++            if (art != null) svc.sprite.setImageBitmap(art);
++            return;
++        }
++        SharedPreferences sp = context.getSharedPreferences(PREFS, 0);
++        if (!sp.getBoolean(PREF_ENABLED, false)) return;
++        try {
++            Intent intent = new Intent(context, SpiritOverlayService.class).setAction(ACTION_SPIRIT);
++            ContextCompat.startForegroundService(context, intent);
++        } catch (Exception ignored) {
++        }
++    }
++
++    @Override
++    public void onCreate() {
++        super.onCreate();
++        instance = this;
++        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
++        ensureChannel();
++        if (!canOverlay()) {
++            setEnabled(false);
++            stopSelf();
++            return;
++        }
++        startForegroundCompat();
++    }
++
++    @Override
++    public int onStartCommand(Intent intent, int flags, int startId) {
++        String action = (intent == null) ? null : intent.getAction();
++        if (ACTION_STOP.equals(action)) {
++            setEnabled(false);
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        if (!canOverlay()) {
++            setEnabled(false);
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        startForegroundCompat();
++        if (ACTION_APP_STATE.equals(action)) {
++            appForeground = intent.getBooleanExtra(EXTRA_FOREGROUND, appForeground);
++        } else {
++            setEnabled(true);
++        }
++        ensureOverlay();
++        applyPrefs();
++        updateVisibility();
++        return START_STICKY;
++    }
++
++    @Override
++    public void onDestroy() {
++        handler.removeCallbacksAndMessages(null);
++        if (root != null && windowManager != null) {
++            try {
++                windowManager.removeView(root);
++            } catch (Exception ignored) {
++            }
++        }
++        root = null;
++        if (instance == this) instance = null;
++        super.onDestroy();
++    }
++
++    @Override
++    public IBinder onBind(Intent intent) {
++        return null;
++    }
++
++    private boolean canOverlay() {
++        return Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this);
++    }
++
++    private void ensureChannel() {
++        if (Build.VERSION.SDK_INT < 26) return;
++        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
++        if (nm == null) return;
++        NotificationChannel channel = new NotificationChannel(
++            CHANNEL_ID, "桌面精灵", NotificationManager.IMPORTANCE_LOW);
++        channel.setDescription("退出 App 后，让伙伴继续留在桌面");
++        channel.setSound(null, null);
++        channel.enableVibration(false);
++        nm.createNotificationChannel(channel);
++    }
++
++    private void startForegroundCompat() {
++        Notification notification = buildNotification();
++        if (Build.VERSION.SDK_INT >= 34) {
++            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
++        } else {
++            startForeground(NOTIFICATION_ID, notification);
++        }
++    }
++
++    private Notification buildNotification() {
++        Intent open = new Intent(this, MainActivity.class);
++        open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
++        PendingIntent openPi = PendingIntent.getActivity(
++            this, 101, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
++
++        Intent stop = new Intent(this, SpiritOverlayService.class).setAction(ACTION_STOP);
++        PendingIntent stopPi = PendingIntent.getService(
++            this, 102, stop, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
++
++        return new NotificationCompat.Builder(this, CHANNEL_ID)
++            .setSmallIcon(R.drawable.ic_spirit_notify)
++            .setContentTitle("挞飞精灵正在陪着你")
++            .setContentText("点一下回到挞飞，也可以在这里收起精灵")
++            .setContentIntent(openPi)
++            .addAction(0, "收起精灵", stopPi)
++            .setOngoing(true)
++            .setShowWhen(false)
++            .setPriority(NotificationCompat.PRIORITY_LOW)
++            .build();
++    }
++
++    private void ensureOverlay() {
++        if (root != null || windowManager == null) return;
++        root = new LinearLayout(this);
++        root.setOrientation(LinearLayout.VERTICAL);
++        root.setGravity(Gravity.CENTER_HORIZONTAL);
++        int pad = dp(4);
++        root.setPadding(pad, pad, pad, pad);
++
++        bubble = new TextView(this);
++        bubble.setTextColor(Color.WHITE);
++        bubble.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f);
++        bubble.setTypeface(Typeface.DEFAULT);
++        bubble.setGravity(Gravity.CENTER);
++        bubble.setPadding(dp(9), dp(7), dp(9), dp(7));
++        bubble.setMaxWidth(dp(220));
++        GradientDrawable bubbleBg = new GradientDrawable();
++        bubbleBg.setColor(Color.parseColor("#E6111A31"));
++        bubbleBg.setCornerRadius(dp(11));
++        bubbleBg.setStroke(dp(1), Color.parseColor("#55FFD36E"));
++        bubble.setBackground(bubbleBg);
++        bubble.setVisibility(View.GONE);
++        LinearLayout.LayoutParams bubbleLp = new LinearLayout.LayoutParams(
++            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
++        bubbleLp.bottomMargin = dp(5);
++        root.addView(bubble, bubbleLp);
++
++        sprite = new ImageView(this);
++        sprite.setAdjustViewBounds(true);
++        sprite.setScaleType(ImageView.ScaleType.FIT_CENTER);
++        Bitmap art = spiritBitmap();
++        if (art != null) sprite.setImageBitmap(art);
++        else sprite.setImageResource(R.mipmap.ic_launcher);
++        LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(dp(104), dp(104));
++        root.addView(sprite, imageLp);
++
++        int type = Build.VERSION.SDK_INT >= 26
++            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
++            : WindowManager.LayoutParams.TYPE_PHONE;
++        params = new WindowManager.LayoutParams(
++            WindowManager.LayoutParams.WRAP_CONTENT,
++            WindowManager.LayoutParams.WRAP_CONTENT,
++            type,
++            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
++                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
++            PixelFormat.TRANSLUCENT);
++        params.gravity = Gravity.TOP | Gravity.START;
++        params.x = Math.max(0, screenWidth() - dp(120));
++        params.y = Math.max(dp(80), screenHeight() / 2);
++
++        root.setOnTouchListener(new View.OnTouchListener() {
++            @Override
++            public boolean onTouch(View v, MotionEvent event) {
++                switch (event.getActionMasked()) {
++                    case MotionEvent.ACTION_DOWN:
++                        lastRawX = event.getRawX();
++                        lastRawY = event.getRawY();
++                        moved = false;
++                        return true;
++                    case MotionEvent.ACTION_MOVE:
++                        float dx = event.getRawX() - lastRawX;
++                        float dy = event.getRawY() - lastRawY;
++                        if (Math.abs(dx) > dp(4) || Math.abs(dy) > dp(4)) moved = true;
++                        if (moved) {
++                            params.x += (int) dx;
++                            params.y += (int) dy;
++                            lastRawX = event.getRawX();
++                            lastRawY = event.getRawY();
++                            clampPosition();
++                            try {
++                                windowManager.updateViewLayout(root, params);
++                            } catch (Exception ignored) {
++                            }
++                        }
++                        return true;
++                    case MotionEvent.ACTION_UP:
++                        if (!moved) handleTap();
++                        return true;
++                    default:
++                        return false;
++                }
++            }
++        });
++
++        try {
++            windowManager.addView(root, params);
++        } catch (Exception e) {
++            root = null;
++            setEnabled(false);
++            stopSelf();
++            return;
++        }
++        root.post(new Runnable() {
++            @Override
++            public void run() {
++                if (root != null && params != null) {
++                    params.x = Math.max(0, screenWidth() - root.getWidth() - dp(4));
++                    clampPosition();
++                    try {
++                        windowManager.updateViewLayout(root, params);
++                    } catch (Exception ignored) {
++                    }
++                }
++            }
++        });
++    }
++
++    private void handleTap() {
++        long now = System.currentTimeMillis();
++        if (now - lastTapAt < 360L) {
++            lastTapAt = 0L;
++            hideBubble();
++            Intent open = new Intent(this, MainActivity.class);
++            open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
++            startActivity(open);
++            return;
++        }
++        lastTapAt = now;
++        showBubble(lines[lineIndex % lines.length]);
++        lineIndex++;
++    }
++
++    private void showBubble(String text) {
++        if (bubble == null) return;
++        handler.removeCallbacks(hideBubbleTask);
++        bubble.setText(text);
++        bubble.setVisibility(View.VISIBLE);
++        bubble.setAlpha(0f);
++        bubble.animate().alpha(1f).setDuration(150).start();
++        handler.postDelayed(hideBubbleTask, 2600L);
++    }
++
++    private final Runnable hideBubbleTask = new Runnable() {
++        @Override
++        public void run() {
++            hideBubble();
++        }
++    };
++
++    private void hideBubble() {
++        if (bubble == null) return;
++        bubble.animate().alpha(0f).setDuration(120).withEndAction(new Runnable() {
++            @Override
++            public void run() {
++                if (bubble != null) bubble.setVisibility(View.GONE);
++            }
++        }).start();
++    }
++
++    private void applyPrefs() {
++        scalePercent = getSharedPreferences(PREFS, 0).getInt(PREF_SIZE, 100);
++        int opacity = getSharedPreferences(PREFS, 0).getInt(PREF_OPACITY, 100);
++        if (root != null) {
++            root.setAlpha(Math.max(0.4f, Math.min(1f, opacity / 100f)));
++        }
++        if (sprite != null) {
++            int size = dp((int) Math.round(104 * scalePercent / 100.0));
++            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) sprite.getLayoutParams();
++            lp.width = size;
++            lp.height = size;
++            sprite.setLayoutParams(lp);
++        }
++        if (root != null && params != null) {
++            try {
++                windowManager.updateViewLayout(root, params);
++            } catch (Exception ignored) {
++            }
++        }
++    }
++
++    private Bitmap spiritBitmap() {
++        String id = getSharedPreferences(PREFS, 0).getString(PREF_SPIRIT, "xiaota");
++        if (id == null || id.isEmpty()) id = "xiaota";
++        id = id.replaceAll("[^a-zA-Z0-9-]", "");
++        if (id.isEmpty()) id = "xiaota";
++        String folder = id + "-v23";
++        InputStream input = null;
++        try {
++            input = getAssets().open("public/assets/spirits/" + folder + "/main.png");
++            return BitmapFactory.decodeStream(input);
++        } catch (Exception e) {
++            if (!"xiaota".equals(id)) {
++                try {
++                    input = getAssets().open("public/assets/spirits/xiaota-v23/main.png");
++                    return BitmapFactory.decodeStream(input);
++                } catch (Exception ignored) {
++                }
++            }
++            return null;
++        } finally {
++            if (input != null) {
++                try {
++                    input.close();
++                } catch (Exception ignored) {
++                }
++            }
++        }
++    }
++
++    private void updateVisibility() {
++        if (root == null) return;
++        root.setVisibility(appForeground ? View.GONE : View.VISIBLE);
++    }
++
++    private void clampPosition() {
++        if (root == null || params == null) return;
++        int w = root.getWidth();
++        int h = root.getHeight();
++        int sw = screenWidth();
++        int sh = screenHeight();
++        params.x = Math.max(0, Math.min(params.x, sw - w));
++        params.y = Math.max(0, Math.min(params.y, sh - h - dp(12)));
++    }
++
++    private int screenWidth() {
++        return getResources().getDisplayMetrics().widthPixels;
++    }
++
++    private int screenHeight() {
++        return getResources().getDisplayMetrics().heightPixels;
++    }
++
++    private int dp(int value) {
++        return Math.round(TypedValue.applyDimension(
++            TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics()));
++    }
++
++    private void setEnabled(boolean enabled) {
++        getSharedPreferences(PREFS, 0).edit().putBoolean(PREF_ENABLED, enabled).apply();
++    }
++}
+diff --git a/android/app/src/main/res/drawable/ic_spirit_notify.xml b/android/app/src/main/res/drawable/ic_spirit_notify.xml
+new file mode 100644
+index 0000000..c643471
+--- /dev/null
++++ b/android/app/src/main/res/drawable/ic_spirit_notify.xml
+@@ -0,0 +1,6 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp" android:height="24dp"
++    android:viewportWidth="24" android:viewportHeight="24">
++    <path android:fillColor="#FFFFFFFF"
++        android:pathData="M12,2.5l2.9,6.1 6.6,0.9 -4.8,4.7 1.1,6.7 -5.8,-3.1 -5.8,3.1 1.1,-6.7 -4.8,-4.7 6.6,-0.9z"/>
++</vector>
+diff --git a/www/css/spirit-house.css b/www/css/spirit-house.css
+index 5ab9ce7..3241d48 100644
+--- a/www/css/spirit-house.css
++++ b/www/css/spirit-house.css
+@@ -382,3 +382,10 @@ body.spirit-memorial-open{overflow:hidden}
+  .spirit-gallery-foot{padding:9px 14px calc(9px + env(safe-area-inset-bottom))}
+  .spirit-gallery-foot span{max-width:62%;line-height:1.35}
+ }
++
++/* 桌面精灵：退出 App 后的原生悬浮窗入口 */
++.native-overlay-card{border-color:rgba(255,211,110,.26);background:linear-gradient(135deg,rgba(255,211,110,.09),rgba(110,231,255,.05))}
++.native-overlay-card .widget-switch-copy b{color:var(--sp-gold)}
++.native-overlay-card.on{border-color:rgba(255,211,110,.52);box-shadow:0 0 0 1px rgba(255,211,110,.08) inset}
++.native-overlay-settings{display:grid;gap:9px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--sp-line)}
++.native-overlay-settings[hidden]{display:none!important}
+diff --git a/www/jingling.html b/www/jingling.html
+index 0f28725..208ae4b 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -8,7 +8,7 @@
+ <meta name="robots" content="noindex,follow">
+ <link rel="stylesheet" href="css/angela.css?v=4">
+ <link rel="stylesheet" href="css/jingling.css?v=2">
+-<link rel="stylesheet" href="css/spirit-house.css?v=15">
++<link rel="stylesheet" href="css/spirit-house.css?v=16">
+ <link rel="stylesheet" href="css/app-shell.css?v=2">
+ <script src="js/app-shell.js?v=2" defer></script>
+ </head>
+@@ -92,6 +92,22 @@
+       <label><input type="checkbox" id="wsEdgeHide"> 贴边收起</label>
+      </div>
+      <p class="ws-note">拖动位置和这些设置会保存在本机；安静模式会关闭粒子和台词。</p>
++     <div class="native-overlay-settings" id="nativeOverlaySettings" hidden>
++      <div class="ws-head"><b>桌面精灵</b><span>仅在 App 内生效</span></div>
++      <label class="ws-range">大小 <input type="range" id="noSize" min="70" max="130" step="5" value="100"><em id="noSizeVal">100%</em></label>
++      <label class="ws-range">透明度 <input type="range" id="noOpacity" min="50" max="100" step="5" value="100"><em id="noOpacityVal">100%</em></label>
++      <p class="ws-note">只影响退出 App 后的桌面悬浮精灵，不改变页面里的全站挂件。</p>
++     </div>
++
++    <div class="widget-switch-card native-overlay-card" id="nativeOverlayCard" hidden>
++     <div class="widget-switch-copy">
++      <b id="nativeOverlayLabel">桌面精灵</b>
++      <span id="nativeOverlayState">未开启</span>
++      <small>退出 App 后留在桌面；需要允许「显示在其他应用上层」。</small>
++     </div>
++     <button type="button" class="widget-switch" id="nativeOverlayToggle" role="switch" aria-checked="false" aria-labelledby="nativeOverlayLabel">
++      <i aria-hidden="true"></i>
++     </button>
+     </div>
+ 
+     <div class="partner-skins" id="partnerSkins" aria-label="皮肤选择">
+@@ -251,7 +267,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=23"></script>
++<script src="js/jingling.js?v=24"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 7dfe088..1109852 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -19,6 +19,7 @@
+   var gridSig = '';
+   var shopSig = '';
+   var widgetLoader = null;
++  var overlayPending = false;
+ 
+   function loadWidgetScript() {
+     if (window.TafeiSpiritWidgetLoaded) return Promise.resolve();
+@@ -371,6 +372,11 @@
+     if (faceNode && faceSpirit) {
+       var faceSkin = core.skinsOf(faceSpirit.id)[0];
+       if (faceSkin) faceNode.src = webpGrid(faceSkin.img);
++      try {
++        if (window.TafeiNative && typeof TafeiNative.setOverlaySpirit === 'function') {
++          TafeiNative.setOverlaySpirit(faceSpirit.id);
++        }
++      } catch (e) {}
+     }
+     Array.prototype.forEach.call(grid.querySelectorAll('img[data-fallback]'), function (img) {
+       img.addEventListener('error', function () {
+@@ -1001,6 +1007,103 @@
+     });
+   });
+ 
++  /* 桌面精灵：只在 App 内出现，调用 TafeiNative 原生悬浮窗 */
++  function nativeOverlayCall(name, fallback) {
++    try {
++      if (!window.TafeiNative || typeof TafeiNative[name] !== 'function') return fallback;
++      var args = Array.prototype.slice.call(arguments, 2);
++      var value = TafeiNative[name].apply(TafeiNative, args);
++      return value == null ? fallback : value;
++    } catch (e) {
++      return fallback;
++    }
++  }
++
++  function refreshNativeOverlay() {
++    var card = $('nativeOverlayCard');
++    if (!card || card.hidden) return;
++    var status = String(nativeOverlayCall('overlayStatus', 'off'));
++    var isOn = status === 'on';
++    var toggle = $('nativeOverlayToggle');
++    var state = $('nativeOverlayState');
++    if (toggle) {
++      toggle.classList.toggle('on', isOn);
++      toggle.setAttribute('aria-checked', String(isOn));
++    }
++    if (state) state.textContent = status === 'denied' ? '需要悬浮窗权限' : (isOn ? '已开启 · 退出 App 后生效' : '未开启');
++    card.classList.toggle('on', isOn);
++  }
++
++  function initNativeOverlay() {
++    var card = $('nativeOverlayCard');
++    if (!card) return;
++    if (String(nativeOverlayCall('overlaySupported', '0')) !== '1') return;
++    card.hidden = false;
++    var settings = $('nativeOverlaySettings');
++    if (settings) settings.hidden = false;
++    var size = $('noSize');
++    var opacity = $('noOpacity');
++    if (size) {
++      size.value = String(nativeOverlayCall('overlaySize', 100));
++      var sizeVal = $('noSizeVal');
++      if (sizeVal) sizeVal.textContent = size.value + '%';
++    }
++    if (opacity) {
++      opacity.value = String(nativeOverlayCall('overlayOpacity', 100));
++      var opacityVal = $('noOpacityVal');
++      if (opacityVal) opacityVal.textContent = opacity.value + '%';
++    }
++    refreshNativeOverlay();
++  }
++
++  $('nativeOverlayToggle')?.addEventListener('click', function () {
++    var status = String(nativeOverlayCall('overlayStatus', 'off'));
++    if (status === 'on') {
++      nativeOverlayCall('stopOverlay', 'off');
++      refreshNativeOverlay();
++      toast('桌面精灵已收起。');
++      return;
++    }
++    if (status === 'denied') {
++      overlayPending = true;
++      nativeOverlayCall('requestOverlayPermission', null);
++      toast('请允许「显示在其他应用上层」，回来后会自动开启。');
++      return;
++    }
++    var result = String(nativeOverlayCall('startOverlay', 'off'));
++    refreshNativeOverlay();
++    if (result === 'on') toast('已开启，退出 App 后她会留在桌面上。');
++    else if (result === 'denied') toast('还没有悬浮窗权限，请先在系统设置里允许。', true);
++    else toast('开启失败，请稍后再试。', true);
++  });
++
++  [['noSize', 'setOverlaySize', 'noSizeVal'], ['noOpacity', 'setOverlayOpacity', 'noOpacityVal']].forEach(function (row) {
++    var input = $(row[0]);
++    if (!input) return;
++    input.addEventListener('input', function () {
++      var out = $(row[2]);
++      if (out) out.textContent = input.value + '%';
++    });
++    input.addEventListener('change', function () {
++      nativeOverlayCall(row[1], null, Number(input.value));
++    });
++  });
++
++  document.addEventListener('visibilitychange', function () {
++    if (document.hidden) return;
++    refreshNativeOverlay();
++    if (!overlayPending) return;
++    var status = String(nativeOverlayCall('overlayStatus', 'off'));
++    if (status === 'off') {
++      overlayPending = false;
++      var result = String(nativeOverlayCall('startOverlay', 'off'));
++      refreshNativeOverlay();
++      if (result === 'on') toast('权限拿到了，桌面精灵已开启。');
++    } else if (status === 'on') {
++      overlayPending = false;
++    }
++  });
++
+   core.subscribe(function () {
+     renderAll();
+     primeWidget();
+@@ -1010,4 +1113,5 @@
+   // 初次渲染
+   renderAll();
+   primeWidget();
++  initNativeOverlay();
+ })();
