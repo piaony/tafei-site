@@ -1,6 +1,8 @@
 package com.piaony.tafei;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -241,6 +243,16 @@ public class MainActivity extends BridgeActivity {
         public String startOverlay() {
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(act)) return "denied";
             act.getSharedPreferences("tafei_app", 0).edit().putBoolean("overlay_enabled", true).apply();
+            if (Build.VERSION.SDK_INT >= 33
+                && act.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                act.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        act.requestPermissions(
+                            new String[]{Manifest.permission.POST_NOTIFICATIONS}, 9201);
+                    }
+                });
+            }
             try {
                 SpiritOverlayService.start(act);
                 return "on";
