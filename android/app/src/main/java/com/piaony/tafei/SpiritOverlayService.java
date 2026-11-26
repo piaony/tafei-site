@@ -1216,7 +1216,7 @@ public class SpiritOverlayService extends Service {
 
         // 两次脚落地一秒，身体两次起伏；不再每帧都做正弦摆动。
         float phase = elapsed * 4f * (float) Math.PI / 1000f;
-        float bob = (float) Math.abs(Math.sin(phase)) * dp(3.5f);
+        float bob = (float) Math.abs(Math.sin(phase)) * dp(3);
         float squash = 1f - (float) Math.abs(Math.cos(phase)) * 0.012f;
         sprite.setTranslationY(-bob);
         sprite.setRotation((float) Math.sin(phase) * 1.8f * dir);
