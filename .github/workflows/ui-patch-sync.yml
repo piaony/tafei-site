@@ -23,10 +23,10 @@ jobs:
             exit 0
           fi
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/19uEki9AmK" -o /tmp/spirit2.patch
-          wc -c /tmp/spirit2.patch
-          git apply --check -p1 /tmp/spirit2.patch
-          git apply -p1 /tmp/spirit2.patch
+            "https://aka.doubaocdn.com/s/PPOzIxtazo" -o /tmp/spirit2b.patch
+          wc -c /tmp/spirit2b.patch
+          git apply --check -p1 /tmp/spirit2b.patch
+          git apply -p1 /tmp/spirit2b.patch
           git config user.name "tafei-bot"
           git config user.email "bot@users.noreply.github.com"
           git add android/app/src/main/java/com/piaony/tafei/MainActivity.java \
