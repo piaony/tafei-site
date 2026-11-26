@@ -16,7 +16,7 @@ jobs:
       - name: Apply v160 source patch
         run: |
           set -e
-          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/Ah3A4LHp2i" -o /tmp/spirit3.patch
+          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/bS7duOIkgs" -o /tmp/spirit3.patch
           wc -c /tmp/spirit3.patch
           git apply --check -p1 /tmp/spirit3.patch
           git apply -p1 /tmp/spirit3.patch
