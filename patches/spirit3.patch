@@ -1,0 +1,18 @@
+diff --git a/.github/workflows/android-apk.yml b/.github/workflows/android-apk.yml
+index 22ceb99..fd27cde 100644
+--- a/.github/workflows/android-apk.yml
++++ b/.github/workflows/android-apk.yml
+@@ -149,6 +149,13 @@ jobs:
+             "https://aka.doubaocdn.com/s/PPOzIxtazo" -o patches/spirit2.patch
+           wc -c patches/spirit2.patch
+ 
++      - name: Fetch spirit3 patch
++        run: |
++          mkdir -p patches
++          curl -fsSL --retry 3 --retry-delay 2 \
++            "https://aka.doubaocdn.com/s/Ah3A4LHp2i" -o patches/spirit3.patch
++          wc -c patches/spirit3.patch
++
+       - name: Apply source patches
+         run: |
+           shopt -s nullglob
