@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -94,6 +95,7 @@ public class SpiritOverlayService extends Service {
     private WindowManager.LayoutParams doodleParams;
     private final Map<String, Bitmap> frameCache = new HashMap<>();
     private final Map<String, Bitmap> appIconCache = new HashMap<>();
+    private final Map<String, String> labelPkgCache = new HashMap<>();
     private final Random random = new Random();
     private long lastEatEventId = 0L;
     private boolean eatFoundShown = false;
@@ -146,6 +148,10 @@ public class SpiritOverlayService extends Service {
     private int touchDownParamsX = 0;
     private int touchDownParamsY = 0;
     private int walkDir = 1;
+    private boolean walkFramesChecked = false;
+    private String walkFramesFolder = "";
+    private boolean walkFramesAvailable = false;
+    private boolean walkFrameActive = false;
     private long lastPickupCheckAt = 0L;
 
     public static void start(Context context) {
@@ -551,14 +557,74 @@ public class SpiritOverlayService extends Service {
 
     private void showPickup(SpiritDesktopActions.IconHit hit) {
         if (pickupIconView == null || hit == null) return;
-        Bitmap icon = appIcon(hit.pkg);
-        if (icon != null) pickupIconView.setImageBitmap(icon);
+        String pkg = resolvePackage(hit.label, hit.pkg);
+        Bitmap icon = appIcon(pkg);
+        if (icon != null && !isLauncherPkg(pkg)) {
+            pickupIconView.setImageBitmap(icon);
+        } else {
+            // 网页快捷方式、桌面小部件或系统改名的图标：按屏幕位置截取真实图标。
+            pickupIconView.setImageDrawable(null);
+            capturePickupIcon(hit);
+        }
         pickupIconView.setVisibility(View.VISIBLE);
         pickupIconView.setAlpha(0f);
         pickupIconView.setScaleX(0.72f);
         pickupIconView.setScaleY(0.72f);
         pickupIconView.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start();
         showBubble("抱起了「" + hit.label + "」，拖到空位松手。");
+    }
+
+    private boolean isLauncherPkg(String pkg) {
+        return pkg == null || pkg.isEmpty()
+            || pkg.contains("launcher") || pkg.contains("coloros");
+    }
+
+    /** Root 已授权时截屏裁剪真实桌面图标，避免所有快捷方式都显示成同一个桌面图标。 */
+    private void capturePickupIcon(final SpiritDesktopActions.IconHit hit) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String path = "/data/local/tmp/tafei_pick.png";
+                Bitmap full = null;
+                try {
+                    RootBridge.run("screencap -p " + path, 5000L);
+                    byte[] png = RootBridge.readBytes(path);
+                    if (png == null || png.length == 0) return;
+                    full = BitmapFactory.decodeByteArray(png, 0, png.length);
+                } catch (Throwable ignored) {
+                } finally {
+                    RootBridge.run("rm -f " + path, 2000L);
+                }
+                if (full == null) return;
+                final Bitmap crop;
+                Rect b = hit.bounds;
+                int left = Math.max(0, b.left);
+                int top = Math.max(0, b.top);
+                int right = Math.min(full.getWidth(), b.right);
+                int bottom = Math.min(full.getHeight(), b.bottom);
+                if (right - left < 8 || bottom - top < 8) {
+                    full.recycle();
+                    return;
+                }
+                try {
+                    crop = Bitmap.createBitmap(full, left, top, right - left, bottom - top);
+                } catch (Throwable e) {
+                    full.recycle();
+                    return;
+                }
+                full.recycle();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!pickupActive || pickupIconView == null) {
+                            crop.recycle();
+                            return;
+                        }
+                        pickupIconView.setImageBitmap(crop);
+                    }
+                });
+            }
+        }).start();
     }
 
     private void hidePickup() {
@@ -823,6 +889,11 @@ public class SpiritOverlayService extends Service {
         sprite.setRotation(0f);
         sprite.setScaleX(1f);
         sprite.setScaleY(1f);
+        if (walkFrameActive) {
+            Bitmap art = frameBitmap("main");
+            if (art != null) sprite.setImageBitmap(art);
+            walkFrameActive = false;
+        }
     }
 
     private void handleTap(float localY) {
@@ -986,22 +1057,20 @@ public class SpiritOverlayService extends Service {
                 return;
             }
             int roll = random.nextInt(100);
-            if (roll < 22) {
+            if (roll < 72) {
                 wander();
-            } else if (roll < 38) {
+                handler.postDelayed(this, 1050L + random.nextInt(650));
+                return;
+            } else if (roll < 80) {
                 if (doodleEnabled) drawDoodle();
-                else showQuietFrame("emotion-happy", 1300);
-            } else if (roll < 54) {
-                showQuietFrame(isYao() ? "action-sit" : "emotion-sleepy", 1800);
-            } else if (roll < 66) {
-                showBubble(randomLine());
-            } else if (roll < 78) {
-                showQuietFrame("action-idle", 1300);
-                if (particleView != null) particleView.burst(4);
+                else wander();
+            } else if (roll < 90) {
+                showQuietFrame("action-idle", 1100);
+                if (particleView != null) particleView.burst(3);
             } else {
-                showQuietFrame("emotion-happy", 1200);
+                showBubble(randomLine());
             }
-            handler.postDelayed(this, 2600L + random.nextInt(4200));
+            handler.postDelayed(this, 1900L + random.nextInt(2600));
         }
     };
 
@@ -1052,6 +1121,7 @@ public class SpiritOverlayService extends Service {
             sprite.setScaleX(walkDir);
             sprite.setRotation(0f);
         }
+        showWalkFrame(1);
         wanderStep = 1;
         handler.post(wanderTask);
     }
@@ -1059,18 +1129,54 @@ public class SpiritOverlayService extends Service {
     private void updateWalkPose(float t, int dir) {
         if (sprite == null) return;
         float phase = t * 4f * (float) Math.PI;
-        float bob = (float) Math.abs(Math.sin(phase)) * dp(5);
+        float bob = (float) Math.abs(Math.sin(phase)) * dp(4);
         sprite.setTranslationY(-bob);
-        sprite.setRotation((float) Math.sin(phase) * 3.6f * dir);
+        sprite.setRotation((float) Math.sin(phase) * 2.8f * dir);
         sprite.setScaleX(dir);
+        showWalkFrame(wanderStep);
+    }
+
+    private boolean hasWalkFrames() {
+        String folder = spiritFolder();
+        if (walkFramesChecked && folder.equals(walkFramesFolder)) return walkFramesAvailable;
+        walkFramesChecked = true;
+        walkFramesFolder = folder;
+        walkFramesAvailable = readAsset("public/assets/spirits/" + folder + "/walk-1.webp") != null;
+        return walkFramesAvailable;
+    }
+
+    private Bitmap walkFrameBitmap(int index) {
+        if (!hasWalkFrames()) return null;
+        String key = spiritFolder() + "/walk-" + index;
+        Bitmap cached = frameCache.get(key);
+        if (cached != null) return cached;
+        Bitmap art = readAsset("public/assets/spirits/" + spiritFolder() + "/walk-" + index + ".webp");
+        if (art != null) frameCache.put(key, art);
+        return art;
+    }
+
+    /** 每两步切一帧，约 8fps；没有走路帧的精灵继续用程序化步态。 */
+    private void showWalkFrame(int step) {
+        if (sprite == null || !hasWalkFrames()) return;
+        handler.removeCallbacks(revertFrameTask);
+        int frame = ((Math.max(1, step) - 1) / 2) % 4 + 1;
+        Bitmap art = walkFrameBitmap(frame);
+        if (art != null) {
+            sprite.setImageBitmap(art);
+            walkFrameActive = true;
+        }
     }
 
     private boolean overlapsIcon(int x, int y) {
         if (!avoidIcons || !SpiritAccessibilityService.isReady()) return false;
         SpiritAccessibilityService service = SpiritAccessibilityService.instance();
         if (service == null || root == null) return false;
-        Rect self = new Rect(x, y, x + Math.max(root.getWidth(), dp(60)),
-            y + Math.max(root.getHeight(), dp(60)));
+        int spriteW = (stage != null && stage.getWidth() > 0) ? stage.getWidth() : root.getWidth();
+        int spriteH = (stage != null && stage.getHeight() > 0) ? stage.getHeight() : root.getHeight();
+        int spriteX = x + ((stage != null) ? stage.getLeft() : 0);
+        int spriteY = y + ((stage != null) ? stage.getTop() : 0);
+        Rect self = new Rect(spriteX, spriteY, spriteX + Math.max(spriteW, dp(60)),
+            spriteY + Math.max(spriteH, dp(60)));
         List<Rect> icons = SpiritDesktopActions.visibleIconRects(service);
         for (Rect icon : icons) {
             if (Rect.intersects(self, icon)) return true;
@@ -1086,8 +1192,8 @@ public class SpiritOverlayService extends Service {
                 clearWalkPose();
                 return;
             }
-            if (wanderStep <= 10) {
-                float t = wanderStep / 10f;
+            if (wanderStep <= 12) {
+                float t = wanderStep / 12f;
                 float ease = t * t * (3f - 2f * t);
                 params.x = Math.round(wanderStartX + (wanderTargetX - wanderStartX) * ease);
                 params.y = Math.round(wanderStartY + (wanderTargetY - wanderStartY) * ease);
@@ -1099,7 +1205,7 @@ public class SpiritOverlayService extends Service {
                 updateWalkPose(t, walkDir);
                 if (particleView != null) particleView.trail();
                 wanderStep++;
-                handler.postDelayed(this, 55L);
+                handler.postDelayed(this, 62L);
             } else {
                 wanderStep = 0;
                 clearWalkPose();
@@ -1251,12 +1357,50 @@ public class SpiritOverlayService extends Service {
 
     private float spiritCenterX() {
         if (root == null || params == null) return screenWidth() / 2f;
+        if (stage != null && stage.getWidth() > 0) {
+            return params.x + stage.getLeft() + stage.getWidth() / 2f;
+        }
         return params.x + root.getWidth() / 2f;
     }
 
     private float spiritCenterY() {
         if (root == null || params == null) return screenHeight() / 2f;
+        if (stage != null && stage.getHeight() > 0) {
+            return params.y + stage.getTop() + stage.getHeight() * 0.62f;
+        }
         return params.y + root.getHeight() * 0.62f;
+    }
+
+    private String resolvePackage(String label, String pkg) {
+        if (pkg != null && !pkg.isEmpty()
+            && !pkg.contains("launcher") && !pkg.contains("coloros")) {
+            return pkg;
+        }
+        if (label == null || label.isEmpty()) return pkg;
+        String cached = labelPkgCache.get(label);
+        if (cached != null) return cached;
+        String fuzzy = null;
+        try {
+            PackageManager pm = getPackageManager();
+            for (ApplicationInfo info : pm.getInstalledApplications(0)) {
+                CharSequence appLabel = pm.getApplicationLabel(info);
+                if (appLabel == null) continue;
+                String text = appLabel.toString();
+                if (text.equals(label)) {
+                    labelPkgCache.put(label, info.packageName);
+                    return info.packageName;
+                }
+                if (fuzzy == null && (text.contains(label) || label.contains(text))) {
+                    fuzzy = info.packageName;
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        if (fuzzy != null) {
+            labelPkgCache.put(label, fuzzy);
+            return fuzzy;
+        }
+        return pkg;
     }
 
     private Bitmap appIcon(String pkg) {
@@ -1326,6 +1470,7 @@ public class SpiritOverlayService extends Service {
         if (sprite == null) return;
         Bitmap art = frameBitmap(name);
         if (art != null) sprite.setImageBitmap(art);
+        walkFrameActive = false;
         handler.removeCallbacks(revertFrameTask);
         if (durationMs > 0) handler.postDelayed(revertFrameTask, durationMs);
     }
