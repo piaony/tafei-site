@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ApplicationInfo;
@@ -24,6 +26,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.view.HapticFeedbackConstants;
 import android.util.TypedValue;
@@ -64,6 +68,10 @@ public class SpiritOverlayService extends Service {
 
     private static final String CHANNEL_ID = "tafei_overlay";
     private static final int NOTIFICATION_ID = 9101;
+    private static final long WALK_STEP_MS = 40L;
+    private static final long WALK_FRAME_MS = 125L;
+    private static final int WALK_STEPS = 30;
+    private static final long ICON_CACHE_MS = 2600L;
     private static final String PREFS = "tafei_app";
     private static final String PREF_ENABLED = "overlay_enabled";
     private static final String PREF_SIZE = "overlay_size";
@@ -148,11 +156,36 @@ public class SpiritOverlayService extends Service {
     private int touchDownParamsX = 0;
     private int touchDownParamsY = 0;
     private int walkDir = 1;
-    private boolean walkFramesChecked = false;
-    private String walkFramesFolder = "";
-    private boolean walkFramesAvailable = false;
+    private WalkFrameDrawable walkDrawable;
+    private String walkAtlasFolder = "";
+    private boolean walkAtlasLoading = false;
+    private long walkStartedAt = 0L;
+    private int lastWalkFrame = -1;
     private boolean walkFrameActive = false;
+    private boolean screenOn = true;
+    private boolean powerSave = false;
+    private boolean screenReceiverRegistered = false;
+    private List<Rect> iconRectsCache = null;
+    private long iconRectsCacheAt = 0L;
     private long lastPickupCheckAt = 0L;
+    private final BroadcastReceiver screenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null || intent.getAction() == null) return;
+            String action = intent.getAction();
+            if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                screenOn = false;
+                pauseMotion();
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                screenOn = true;
+                updateVisibility();
+            } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)) {
+                PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+                powerSave = pm != null && pm.isPowerSaveMode();
+                if (screenOn) updateVisibility();
+            }
+        }
+    };
 
     public static void start(Context context) {
         Intent intent = new Intent(context, SpiritOverlayService.class).setAction(ACTION_START);
@@ -222,6 +255,8 @@ public class SpiritOverlayService extends Service {
                     if (svc.doodleView != null) svc.doodleView.setYao(svc.isYao());
                     Bitmap art = svc.spiritBitmap();
                     if (art != null) svc.sprite.setImageBitmap(art);
+                    svc.clearWalkPose();
+                    svc.preloadWalkAtlas();
                 }
             });
             return;
@@ -248,6 +283,18 @@ public class SpiritOverlayService extends Service {
             return;
         }
         startForegroundCompat();
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        screenOn = pm == null || pm.isInteractive();
+        powerSave = pm != null && pm.isPowerSaveMode();
+        try {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            registerReceiver(screenReceiver, filter);
+            screenReceiverRegistered = true;
+        } catch (Throwable ignored) {
+        }
         lastEatEventId = SpiritAccessibilityService.lastEventId();
         handler.postDelayed(eatPollTask, 220L);
     }
@@ -280,6 +327,13 @@ public class SpiritOverlayService extends Service {
     @Override
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        if (screenReceiverRegistered) {
+            try {
+                unregisterReceiver(screenReceiver);
+            } catch (Throwable ignored) {
+            }
+            screenReceiverRegistered = false;
+        }
         if (eatEffectView != null && windowManager != null) {
             try {
                 windowManager.removeView(eatEffectView);
@@ -395,6 +449,7 @@ public class SpiritOverlayService extends Service {
         stage = new FrameLayout(this);
         particleView = new ParticleView(this);
         particleView.setYao(isYao());
+        particleView.setActive(false);
         stage.addView(particleView, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
@@ -405,6 +460,7 @@ public class SpiritOverlayService extends Service {
         else sprite.setImageResource(R.mipmap.ic_launcher);
         stage.addView(sprite, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        preloadWalkAtlas();
 
         pickupIconView = new ImageView(this);
         pickupIconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -884,6 +940,8 @@ public class SpiritOverlayService extends Service {
     }
 
     private void clearWalkPose() {
+        lastWalkFrame = -1;
+        walkStartedAt = 0L;
         if (sprite == null) return;
         sprite.setTranslationY(0f);
         sprite.setRotation(0f);
@@ -955,6 +1013,7 @@ public class SpiritOverlayService extends Service {
             if (sprite == null) return;
             Bitmap art = frameBitmap("main");
             if (art != null) sprite.setImageBitmap(art);
+            walkFrameActive = false;
         }
     };
 
@@ -1024,7 +1083,7 @@ public class SpiritOverlayService extends Service {
         }
         if (particleView != null) particleView.setYao(isYao());
         if (doodleView != null) doodleView.setYao(isYao());
-        if (autonomyEnabled && root != null && !appForeground) {
+        if (autonomyEnabled && root != null && !appForeground && screenOn) {
             scheduleAutonomy(1800L);
         } else {
             handler.removeCallbacks(autonomyTask);
@@ -1043,7 +1102,7 @@ public class SpiritOverlayService extends Service {
 
     private void scheduleAutonomy(long delayMs) {
         handler.removeCallbacks(autonomyTask);
-        if (autonomyEnabled && root != null && !appForeground) {
+        if (autonomyEnabled && root != null && !appForeground && screenOn && wanderStep == 0) {
             handler.postDelayed(autonomyTask, Math.max(800L, delayMs));
         }
     }
@@ -1052,25 +1111,31 @@ public class SpiritOverlayService extends Service {
         @Override
         public void run() {
             if (root == null) return;
-            if (!autonomyEnabled || appForeground || dragging) {
+            if (!autonomyEnabled || appForeground || dragging || !screenOn) {
+                if (screenOn) handler.postDelayed(this, 1300L);
+                return;
+            }
+            if (wanderStep > 0) {
                 handler.postDelayed(this, 1300L);
                 return;
             }
             int roll = random.nextInt(100);
-            if (roll < 72) {
+            int walkChance = powerSave ? 62 : 72;
+            if (roll < walkChance) {
+                // 走路自己负责结束后的下一次调度，避免和行走任务重叠。
                 wander();
-                handler.postDelayed(this, 1050L + random.nextInt(650));
+                if (wanderStep == 0) scheduleAutonomy(1200L);
                 return;
-            } else if (roll < 80) {
-                if (doodleEnabled) drawDoodle();
+            } else if (roll < walkChance + 8) {
+                if (doodleEnabled && !powerSave) drawDoodle();
                 else wander();
-            } else if (roll < 90) {
+            } else if (roll < walkChance + 18) {
                 showQuietFrame("action-idle", 1100);
                 if (particleView != null) particleView.burst(3);
             } else {
                 showBubble(randomLine());
             }
-            handler.postDelayed(this, 1900L + random.nextInt(2600));
+            handler.postDelayed(this, (powerSave ? 2600L : 1900L) + random.nextInt(2600));
         }
     };
 
@@ -1097,13 +1162,13 @@ public class SpiritOverlayService extends Service {
     }
 
     private void wander() {
-        if (root == null || params == null || wanderStep > 0 || dragging || appForeground) return;
+        if (root == null || params == null || wanderStep > 0 || dragging || appForeground || !screenOn) return;
         wanderStartX = params.x;
         wanderStartY = params.y;
         boolean found = false;
-        for (int attempt = 0; attempt < 6; attempt++) {
-            int tx = params.x + (random.nextInt(2) == 0 ? 1 : -1) * dp(30 + random.nextInt(55));
-            int ty = params.y + (random.nextInt(2) == 0 ? 1 : -1) * dp(18 + random.nextInt(50));
+        for (int attempt = 0; attempt < 3; attempt++) {
+            int tx = params.x + (random.nextInt(2) == 0 ? 1 : -1) * dp(40 + random.nextInt(60));
+            int ty = params.y + (random.nextInt(2) == 0 ? 1 : -1) * dp(20 + random.nextInt(45));
             if (!overlapsIcon(tx, ty)) {
                 wanderTargetX = tx;
                 wanderTargetY = ty;
@@ -1117,54 +1182,79 @@ public class SpiritOverlayService extends Service {
             return;
         }
         walkDir = wanderTargetX < wanderStartX ? -1 : 1;
+        walkStartedAt = SystemClock.uptimeMillis();
+        lastWalkFrame = -1;
         if (sprite != null) {
             sprite.setScaleX(walkDir);
             sprite.setRotation(0f);
+            if (walkDrawable != null) {
+                sprite.setImageDrawable(walkDrawable);
+                walkDrawable.setFrame(0);
+                walkFrameActive = true;
+            }
         }
-        showWalkFrame(1);
+        if (particleView != null) particleView.activate(1500);
         wanderStep = 1;
+        handler.removeCallbacks(autonomyTask);
         handler.post(wanderTask);
     }
 
-    private void updateWalkPose(float t, int dir) {
+    private void updateWalkPose(int dir) {
         if (sprite == null) return;
-        float phase = t * 4f * (float) Math.PI;
-        float bob = (float) Math.abs(Math.sin(phase)) * dp(4);
+        long elapsed = Math.max(0L, SystemClock.uptimeMillis() - walkStartedAt);
+        int frameCount = walkDrawable == null ? 0 : walkDrawable.getFrameCount();
+        if (frameCount > 0) {
+            int frame = (int) ((elapsed / WALK_FRAME_MS) % frameCount);
+            if (sprite.getDrawable() != walkDrawable) sprite.setImageDrawable(walkDrawable);
+            if (frame != lastWalkFrame) {
+                walkDrawable.setFrame(frame);
+                lastWalkFrame = frame;
+            }
+            walkFrameActive = true;
+            handler.removeCallbacks(revertFrameTask);
+        }
+
+        // 两次脚落地一秒，身体两次起伏；不再每帧都做正弦摆动。
+        float phase = elapsed * 4f * (float) Math.PI / 1000f;
+        float bob = (float) Math.abs(Math.sin(phase)) * dp(3.5f);
+        float squash = 1f - (float) Math.abs(Math.cos(phase)) * 0.012f;
         sprite.setTranslationY(-bob);
-        sprite.setRotation((float) Math.sin(phase) * 2.8f * dir);
+        sprite.setRotation((float) Math.sin(phase) * 1.8f * dir);
         sprite.setScaleX(dir);
-        showWalkFrame(wanderStep);
+        sprite.setScaleY(squash);
+    }
+
+    private void preloadWalkAtlas() {
+        final String folder = spiritFolder();
+        if (folder.equals(walkAtlasFolder) && (walkAtlasLoading || walkDrawable != null)) return;
+        if (!folder.equals(walkAtlasFolder)) {
+            walkDrawable = null;
+            lastWalkFrame = -1;
+        }
+        walkAtlasFolder = folder;
+        walkAtlasLoading = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Bitmap atlas = readAsset("public/assets/spirits/" + folder + "/walk-atlas.webp");
+                final WalkFrameDrawable drawable = atlas == null ? null : new WalkFrameDrawable(atlas, 384);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!folder.equals(spiritFolder())) {
+                            if (atlas != null) atlas.recycle();
+                            return;
+                        }
+                        walkDrawable = drawable;
+                        walkAtlasLoading = false;
+                    }
+                });
+            }
+        }).start();
     }
 
     private boolean hasWalkFrames() {
-        String folder = spiritFolder();
-        if (walkFramesChecked && folder.equals(walkFramesFolder)) return walkFramesAvailable;
-        walkFramesChecked = true;
-        walkFramesFolder = folder;
-        walkFramesAvailable = readAsset("public/assets/spirits/" + folder + "/walk-1.webp") != null;
-        return walkFramesAvailable;
-    }
-
-    private Bitmap walkFrameBitmap(int index) {
-        if (!hasWalkFrames()) return null;
-        String key = spiritFolder() + "/walk-" + index;
-        Bitmap cached = frameCache.get(key);
-        if (cached != null) return cached;
-        Bitmap art = readAsset("public/assets/spirits/" + spiritFolder() + "/walk-" + index + ".webp");
-        if (art != null) frameCache.put(key, art);
-        return art;
-    }
-
-    /** 每两步切一帧，约 8fps；没有走路帧的精灵继续用程序化步态。 */
-    private void showWalkFrame(int step) {
-        if (sprite == null || !hasWalkFrames()) return;
-        handler.removeCallbacks(revertFrameTask);
-        int frame = ((Math.max(1, step) - 1) / 2) % 4 + 1;
-        Bitmap art = walkFrameBitmap(frame);
-        if (art != null) {
-            sprite.setImageBitmap(art);
-            walkFrameActive = true;
-        }
+        return walkDrawable != null && walkDrawable.getFrameCount() > 1;
     }
 
     private boolean overlapsIcon(int x, int y) {
@@ -1177,8 +1267,13 @@ public class SpiritOverlayService extends Service {
         int spriteY = y + ((stage != null) ? stage.getTop() : 0);
         Rect self = new Rect(spriteX, spriteY, spriteX + Math.max(spriteW, dp(60)),
             spriteY + Math.max(spriteH, dp(60)));
-        List<Rect> icons = SpiritDesktopActions.visibleIconRects(service);
-        for (Rect icon : icons) {
+        long now = SystemClock.uptimeMillis();
+        if (iconRectsCache == null || now - iconRectsCacheAt > ICON_CACHE_MS) {
+            iconRectsCache = SpiritDesktopActions.visibleIconRects(service);
+            iconRectsCacheAt = now;
+        }
+        if (iconRectsCache == null) return false;
+        for (Rect icon : iconRectsCache) {
             if (Rect.intersects(self, icon)) return true;
         }
         return false;
@@ -1187,13 +1282,14 @@ public class SpiritOverlayService extends Service {
     private final Runnable wanderTask = new Runnable() {
         @Override
         public void run() {
-            if (root == null || params == null || dragging || appForeground) {
+            if (root == null || params == null || dragging || appForeground || !screenOn) {
                 wanderStep = 0;
                 clearWalkPose();
+                if (particleView != null) particleView.setActive(false);
                 return;
             }
-            if (wanderStep <= 12) {
-                float t = wanderStep / 12f;
+            if (wanderStep <= WALK_STEPS) {
+                float t = Math.max(0f, (wanderStep - 1) / (float) WALK_STEPS);
                 float ease = t * t * (3f - 2f * t);
                 params.x = Math.round(wanderStartX + (wanderTargetX - wanderStartX) * ease);
                 params.y = Math.round(wanderStartY + (wanderTargetY - wanderStartY) * ease);
@@ -1202,13 +1298,16 @@ public class SpiritOverlayService extends Service {
                     activeWindowManager.updateViewLayout(root, params);
                 } catch (Exception ignored) {
                 }
-                updateWalkPose(t, walkDir);
-                if (particleView != null) particleView.trail();
+                updateWalkPose(walkDir);
+                // 只在脚步接触地面时撒一点星屑，不再每一帧都喷粒子。
+                if (particleView != null && wanderStep % 4 == 0) particleView.trail();
                 wanderStep++;
-                handler.postDelayed(this, 62L);
+                handler.postDelayed(this, WALK_STEP_MS);
             } else {
                 wanderStep = 0;
                 clearWalkPose();
+                if (particleView != null) particleView.setActive(false);
+                scheduleAutonomy(450L + random.nextInt(500));
             }
         }
     };
@@ -1477,22 +1576,29 @@ public class SpiritOverlayService extends Service {
 
     private void updateVisibility() {
         if (root == null) return;
-        int visibility = appForeground ? View.GONE : View.VISIBLE;
+        boolean paused = appForeground || !screenOn;
+        int visibility = paused ? View.GONE : View.VISIBLE;
         root.setVisibility(visibility);
         if (doodleView != null) doodleView.setVisibility(visibility);
         if (eatEffectView != null) {
             eatEffectView.setVisibility(visibility);
-            if (appForeground) eatEffectView.clear();
+            if (paused) eatEffectView.clear();
         }
-        if (appForeground) {
+        if (paused) {
             handler.removeCallbacks(autonomyTask);
             handler.removeCallbacks(wanderTask);
             wanderStep = 0;
+            clearWalkPose();
             if (doodleView != null) doodleView.clear();
+            if (particleView != null) particleView.setActive(false);
         } else {
-            if (particleView != null) particleView.invalidate();
+            if (particleView != null) particleView.setActive(false);
             scheduleAutonomy(1800L);
         }
+    }
+
+    private void pauseMotion() {
+        updateVisibility();
     }
 
     private void clampPosition() {

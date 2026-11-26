@@ -54,6 +54,8 @@ public class ParticleView extends View {
     };
     private long lastFrameAt = SystemClock.uptimeMillis();
     private boolean yao = false;
+    private boolean active = false;
+    private long activeUntil = 0L;
 
     public ParticleView(Context context) {
         super(context);
@@ -65,7 +67,32 @@ public class ParticleView extends View {
         invalidate();
     }
 
+    /** 打开粒子层；only-on-demand，不再让桌面常驻刷新。 */
+    public void setActive(boolean on) {
+        if (active == on) {
+            if (!on) activeUntil = 0L;
+            return;
+        }
+        active = on;
+        activeUntil = 0L;
+        if (on) {
+            lastFrameAt = SystemClock.uptimeMillis();
+        } else {
+            particles.clear();
+        }
+        invalidate();
+    }
+
+    /** 短暂激活；到时间后自动停掉 postInvalidate。 */
+    public void activate(long durationMs) {
+        active = true;
+        activeUntil = SystemClock.uptimeMillis() + Math.max(220L, durationMs);
+        lastFrameAt = SystemClock.uptimeMillis();
+        invalidate();
+    }
+
     public void burst(int count) {
+        activate(900L);
         float cx = getWidth() / 2f;
         float cy = getHeight() / 2f;
         for (int i = 0; i < count; i++) {
@@ -90,6 +117,7 @@ public class ParticleView extends View {
 
     /** 拖动时在身后撒一串很轻的星屑。 */
     public void trail() {
+        activate(700L);
         if (getWidth() <= 0 || getHeight() <= 0) return;
         for (int i = 0; i < 2; i++) {
             Particle p = new Particle();
@@ -114,6 +142,16 @@ public class ParticleView extends View {
         long now = SystemClock.uptimeMillis();
         float dt = Math.min(80f, now - lastFrameAt);
         lastFrameAt = now;
+
+        if (!active) {
+            return;
+        }
+        if (activeUntil > 0L && now > activeUntil) {
+            active = false;
+            activeUntil = 0L;
+            particles.clear();
+            return;
+        }
 
         int ambientMax = yao ? YAO_MAX : DEFAULT_MAX;
         if (particles.size() < ambientMax && random.nextInt(3) == 0) {
@@ -141,7 +179,7 @@ public class ParticleView extends View {
             drawParticle(canvas, p, Math.max(0, alpha));
         }
 
-        if (isShown()) postInvalidateDelayed(45);
+        if (active && isShown()) postInvalidateDelayed(45);
     }
 
     private Particle ambient() {
