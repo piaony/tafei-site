@@ -1,0 +1,27 @@
+name: Apply spirit3 patch
+
+on:
+  push:
+    paths:
+      - .github/workflows/apply-spirit3.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v160 source patch
+        run: |
+          set -e
+          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/Ah3A4LHp2i" -o /tmp/spirit3.patch
+          wc -c /tmp/spirit3.patch
+          git apply --check -p1 /tmp/spirit3.patch
+          git apply -p1 /tmp/spirit3.patch
+          git config user.name "tafei-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(spirit): overlay touch drag, root a11y bootstrap, walk cycle" || true
+          git push origin HEAD:app/capacitor-setup
