@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -36,8 +37,12 @@ import android.widget.TextView;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -65,9 +70,13 @@ public class SpiritOverlayService extends Service {
     private static final String PREF_SPIRIT = "overlay_spirit";
     private static final String PREF_AUTONOMY = "overlay_autonomy";
     private static final String PREF_DOODLE = "overlay_doodle";
+    private static final String PREF_ROOT_GLOBAL = "overlay_root_global";
+    private static final String PREF_AVOID_ICONS = "overlay_avoid_icons";
+    private static final String PREF_PICKUP = "overlay_pickup";
 
     private static volatile boolean appForeground = true;
     private static volatile SpiritOverlayService instance;
+    private static volatile String rootModeState = "app";
 
     private WindowManager windowManager;
     private WindowManager.LayoutParams params;
@@ -121,6 +130,14 @@ public class SpiritOverlayService extends Service {
     private int wanderTargetX = 0;
     private int wanderTargetY = 0;
     private int scalePercent = 100;
+    private boolean rootGlobalEnabled = false;
+    private boolean avoidIcons = true;
+    private boolean pickupEnabled = false;
+    private ImageView pickupIconView;
+    private SpiritDesktopActions.IconHit pickupHit;
+    private boolean pickupActive = false;
+    private float pickupDownX = 0f;
+    private float pickupDownY = 0f;
 
     public static void start(Context context) {
         Intent intent = new Intent(context, SpiritOverlayService.class).setAction(ACTION_START);
@@ -152,6 +169,10 @@ public class SpiritOverlayService extends Service {
             }
         } catch (Exception ignored) {
         }
+    }
+
+    public static String rootModeStatus() {
+        return rootModeState;
     }
 
     public static void updatePrefs(Context context) {
@@ -369,18 +390,39 @@ public class SpiritOverlayService extends Service {
         stage.addView(sprite, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
+        pickupIconView = new ImageView(this);
+        pickupIconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        pickupIconView.setVisibility(View.GONE);
+        FrameLayout.LayoutParams pickupLp = new FrameLayout.LayoutParams(dp(38), dp(38),
+            Gravity.END | Gravity.BOTTOM);
+        pickupLp.rightMargin = dp(2);
+        pickupLp.bottomMargin = dp(2);
+        stage.addView(pickupIconView, pickupLp);
+
         LinearLayout.LayoutParams stageLp = new LinearLayout.LayoutParams(dp(104), dp(104));
         root.addView(stage, stageLp);
 
-        int type = Build.VERSION.SDK_INT >= 26
-            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            : WindowManager.LayoutParams.TYPE_PHONE;
+        boolean wantRootLayer = rootGlobalEnabled && RootBridge.isGranted();
+        if (wantRootLayer) {
+            RootBridge.run("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow", 4000L);
+        }
+        int baseFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        int type = wantRootLayer
+            ? WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY
+            : (Build.VERSION.SDK_INT >= 26
+                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                : WindowManager.LayoutParams.TYPE_PHONE);
+        if (wantRootLayer) {
+            baseFlags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        }
         params = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             type,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            baseFlags,
             PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
         params.x = Math.max(0, screenWidth() - dp(120));
@@ -394,6 +436,14 @@ public class SpiritOverlayService extends Service {
                         lastRawX = event.getRawX();
                         lastRawY = event.getRawY();
                         lastDownY = event.getY();
+                        pickupDownX = event.getRawX();
+                        pickupDownY = event.getRawY();
+                        pickupHit = null;
+                        pickupActive = false;
+                        if (pickupEnabled && SpiritAccessibilityService.isReady()) {
+                            pickupHit = SpiritDesktopActions.iconAt(
+                                SpiritAccessibilityService.instance(), (int) event.getRawX(), (int) event.getRawY());
+                        }
                         moved = false;
                         dragging = false;
                         pickupShown = false;
@@ -415,7 +465,12 @@ public class SpiritOverlayService extends Service {
                             handler.removeCallbacks(longPressTask);
                             pickupShown = true;
                             showFrame("action-upgrade", 0);
-                            showBubble("要带我去哪里呀？");
+                            if (pickupEnabled && pickupHit != null && !pickupActive) {
+                                pickupActive = true;
+                                showPickup(pickupHit);
+                            } else {
+                                showBubble("要带我去哪里呀？");
+                            }
                         }
                         if (dragging) {
                             params.x += (int) dx;
@@ -437,13 +492,19 @@ public class SpiritOverlayService extends Service {
                             longPressFired = false;
                             moved = false;
                             dragging = false;
+                            pickupActive = false;
+                            hidePickup();
                             scheduleAutonomy(2500L);
                         } else if (dragging) {
+                            boolean dropped = pickupActive;
+                            if (dropped) performPickupDrop(event.getRawX(), event.getRawY());
                             dragging = false;
                             moved = false;
                             wanderStep = 0;
+                            pickupActive = false;
+                            hidePickup();
                             showFrame("main", 0);
-                            if (pickupShown) showBubble("放我下来啦。");
+                            if (pickupShown && !dropped) showBubble("放我下来啦。");
                             pickupShown = false;
                             if (particleView != null) particleView.burst(7);
                             scheduleAutonomy(3200L);
@@ -456,6 +517,8 @@ public class SpiritOverlayService extends Service {
                         moved = false;
                         dragging = false;
                         pickupShown = false;
+                        pickupActive = false;
+                        hidePickup();
                         longPressFired = false;
                         return true;
                     default:
@@ -467,11 +530,32 @@ public class SpiritOverlayService extends Service {
         ensureDoodleWindow();
         try {
             windowManager.addView(root, params);
+            rootModeState = wantRootLayer ? "system" : "app";
         } catch (Exception e) {
-            root = null;
-            setEnabled(false);
-            stopSelf();
-            return;
+            if (wantRootLayer) {
+                // 国产 ROM 常会拒绝 TYPE_SYSTEM_OVERLAY；退回普通悬浮层，不影响精灵本身。
+                int fallbackType = Build.VERSION.SDK_INT >= 26
+                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    : WindowManager.LayoutParams.TYPE_PHONE;
+                params.type = fallbackType;
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+                try {
+                    windowManager.addView(root, params);
+                    rootModeState = "fallback";
+                } catch (Exception again) {
+                    root = null;
+                    setEnabled(false);
+                    stopSelf();
+                    return;
+                }
+            } else {
+                root = null;
+                setEnabled(false);
+                stopSelf();
+                return;
+            }
         }
         ensureEatEffectWindow();
         root.post(new Runnable() {
@@ -536,6 +620,76 @@ public class SpiritOverlayService extends Service {
         } catch (Exception e) {
             doodleView = null;
             doodleParams = null;
+        }
+    }
+
+    private void showPickup(SpiritDesktopActions.IconHit hit) {
+        if (pickupIconView == null || hit == null) return;
+        Bitmap icon = appIcon(hit.pkg);
+        if (icon != null) pickupIconView.setImageBitmap(icon);
+        pickupIconView.setVisibility(View.VISIBLE);
+        pickupIconView.setAlpha(0f);
+        pickupIconView.setScaleX(0.72f);
+        pickupIconView.setScaleY(0.72f);
+        pickupIconView.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start();
+        showBubble("抱起了「" + hit.label + "」，拖到空位松手。");
+    }
+
+    private void hidePickup() {
+        if (pickupIconView == null) return;
+        pickupIconView.animate().alpha(0f).scaleX(0.7f).scaleY(0.7f).setDuration(140)
+            .withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    if (pickupIconView != null) pickupIconView.setVisibility(View.GONE);
+                }
+            }).start();
+    }
+
+    private void performPickupDrop(float rawX, float rawY) {
+        SpiritDesktopActions.IconHit hit = pickupHit;
+        pickupHit = null;
+        if (hit == null) return;
+        int stepX = Math.max(dp(72), hit.bounds.width());
+        int stepY = Math.max(dp(72), hit.bounds.height());
+        int dx = Math.round((rawX - pickupDownX) / (float) stepX);
+        int dy = Math.round((rawY - pickupDownY) / (float) stepY);
+        dx = Math.max(-4, Math.min(4, dx));
+        dy = Math.max(-4, Math.min(4, dy));
+        if (dx == 0 && dy == 0) {
+            showBubble("放回原位啦。");
+            return;
+        }
+        try {
+            JSONObject item = new JSONObject();
+            item.put("label", hit.label);
+            item.put("package", hit.pkg);
+            // 用相对位移作为目标格：无障碍定位仍以真实图标为锚，不依赖数据库坐标。
+            item.put("screen", 0);
+            item.put("cellX", 0);
+            item.put("cellY", 0);
+            JSONArray items = new JSONArray();
+            items.put(item);
+            JSONObject target = new JSONObject();
+            target.put("screen", 0);
+            target.put("cellX", dx);
+            target.put("cellY", dy);
+            target.put("folderId", -1);
+            JSONObject payload = new JSONObject();
+            payload.put("items", items);
+            payload.put("target", target);
+            payload.put("emptyCells", new JSONArray());
+            payload.put("cols", 4);
+            payload.put("rows", 6);
+            String result = SpiritAccessibilityService.startDesktopAction("move", payload.toString());
+            if ("started".equals(result)) {
+                showFrame("action-upgrade", 900);
+                showBubble("接住「" + hit.label + "」了，正在落位。");
+            } else {
+                showBubble("没抱稳，再来一次。");
+            }
+        } catch (Exception e) {
+            showBubble("抱起来了，但没找到落点。");
         }
     }
 
@@ -633,6 +787,25 @@ public class SpiritOverlayService extends Service {
         scalePercent = sp.getInt(PREF_SIZE, 100);
         autonomyEnabled = sp.getBoolean(PREF_AUTONOMY, true);
         doodleEnabled = sp.getBoolean(PREF_DOODLE, true);
+        avoidIcons = sp.getBoolean(PREF_AVOID_ICONS, true);
+        pickupEnabled = sp.getBoolean(PREF_PICKUP, false);
+        boolean nextRoot = sp.getBoolean(PREF_ROOT_GLOBAL, false);
+        if (nextRoot != rootGlobalEnabled) {
+            rootGlobalEnabled = nextRoot;
+            if (root != null && windowManager != null) {
+                try {
+                    windowManager.removeView(root);
+                } catch (Exception ignored) {
+                }
+                root = null;
+                stage = null;
+                particleView = null;
+                sprite = null;
+                bubble = null;
+                pickupIconView = null;
+                ensureOverlay();
+            }
+        }
         int opacity = sp.getInt(PREF_OPACITY, 100);
         if (root != null) {
             root.setAlpha(Math.max(0.4f, Math.min(1f, opacity / 100f)));
@@ -724,10 +897,36 @@ public class SpiritOverlayService extends Service {
         if (root == null || params == null || wanderStep > 0 || dragging || appForeground) return;
         wanderStartX = params.x;
         wanderStartY = params.y;
-        wanderTargetX = params.x + (random.nextInt(2) == 0 ? 1 : -1) * dp(30 + random.nextInt(55));
-        wanderTargetY = params.y + (random.nextInt(2) == 0 ? 1 : -1) * dp(18 + random.nextInt(50));
+        boolean found = false;
+        for (int attempt = 0; attempt < 6; attempt++) {
+            int tx = params.x + (random.nextInt(2) == 0 ? 1 : -1) * dp(30 + random.nextInt(55));
+            int ty = params.y + (random.nextInt(2) == 0 ? 1 : -1) * dp(18 + random.nextInt(50));
+            if (!overlapsIcon(tx, ty)) {
+                wanderTargetX = tx;
+                wanderTargetY = ty;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            wanderStep = 0;
+            return;
+        }
         wanderStep = 1;
         handler.post(wanderTask);
+    }
+
+    private boolean overlapsIcon(int x, int y) {
+        if (!avoidIcons || !SpiritAccessibilityService.isReady()) return false;
+        SpiritAccessibilityService service = SpiritAccessibilityService.instance();
+        if (service == null || root == null) return false;
+        Rect self = new Rect(x, y, x + Math.max(root.getWidth(), dp(60)),
+            y + Math.max(root.getHeight(), dp(60)));
+        List<Rect> icons = SpiritDesktopActions.visibleIconRects(service);
+        for (Rect icon : icons) {
+            if (Rect.intersects(self, icon)) return true;
+        }
+        return false;
     }
 
     private final Runnable wanderTask = new Runnable() {

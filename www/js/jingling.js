@@ -1057,6 +1057,12 @@
     if (autonomy) autonomy.checked = String(nativeOverlayCall('overlayAutonomy', '1')) !== '0';
     var doodle = $('noDoodle');
     if (doodle) doodle.checked = String(nativeOverlayCall('overlayDoodle', '1')) !== '0';
+    var avoid = $('noAvoidIcons');
+    if (avoid) avoid.checked = String(nativeOverlayCall('overlayAvoidIcons', '1')) !== '0';
+    var pickup = $('noPickup');
+    if (pickup) pickup.checked = String(nativeOverlayCall('overlayPickup', '0')) !== '0';
+    var rootGlobal = $('noRootGlobal');
+    if (rootGlobal) rootGlobal.checked = String(nativeOverlayCall('overlayRootGlobal', '0')) !== '0';
     refreshNativeOverlay();
   }
 
@@ -1839,11 +1845,17 @@
     else toast('开启失败，请稍后再试。', true);
   });
 
-  [['noAutonomy', 'setOverlayAutonomy'], ['noDoodle', 'setOverlayDoodle']].forEach(function (row) {
+  [['noAutonomy', 'setOverlayAutonomy'], ['noDoodle', 'setOverlayDoodle'],
+   ['noAvoidIcons', 'setOverlayAvoidIcons'], ['noPickup', 'setOverlayPickup'],
+   ['noRootGlobal', 'setOverlayRootGlobal']].forEach(function (row) {
     var box = $(row[0]);
     if (!box) return;
     box.addEventListener('change', function () {
-      nativeOverlayCall(row[1], null, box.checked ? 1 : 0);
+      var result = nativeOverlayCall(row[1], null, box.checked ? 1 : 0);
+      if (row[0] === 'noRootGlobal' && box.checked && String(result) === 'no-root') {
+        box.checked = false;
+        toast('Root 全域模式需要先给挞飞授予超级用户。', true);
+      }
     });
   });
 

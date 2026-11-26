@@ -464,6 +464,51 @@ public class MainActivity extends BridgeActivity {
                 .putBoolean("overlay_doodle", on != 0).apply();
             SpiritOverlayService.updatePrefs(act);
         }
+        @JavascriptInterface
+        public String overlayAvoidIcons() {
+            return act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("overlay_avoid_icons", true) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public void setOverlayAvoidIcons(int on) {
+            act.getSharedPreferences("tafei_app", 0).edit()
+                .putBoolean("overlay_avoid_icons", on != 0).apply();
+            SpiritOverlayService.updatePrefs(act);
+        }
+
+        @JavascriptInterface
+        public String overlayPickup() {
+            return act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("overlay_pickup", false) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public void setOverlayPickup(int on) {
+            act.getSharedPreferences("tafei_app", 0).edit()
+                .putBoolean("overlay_pickup", on != 0).apply();
+            SpiritOverlayService.updatePrefs(act);
+        }
+
+        @JavascriptInterface
+        public String overlayRootGlobal() {
+            return act.getSharedPreferences("tafei_app", 0)
+                .getBoolean("overlay_root_global", false) ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String setOverlayRootGlobal(int on) {
+            if (on != 0 && !RootBridge.isGranted()) return "no-root";
+            act.getSharedPreferences("tafei_app", 0).edit()
+                .putBoolean("overlay_root_global", on != 0).apply();
+            SpiritOverlayService.updatePrefs(act);
+            return "1";
+        }
+
+        @JavascriptInterface
+        public String overlayRootModeStatus() {
+            return SpiritOverlayService.rootModeStatus();
+        }
 
         @JavascriptInterface
         public void setOverlaySpirit(String id) {

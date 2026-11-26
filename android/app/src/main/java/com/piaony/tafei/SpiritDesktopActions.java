@@ -600,6 +600,83 @@ final class SpiritDesktopActions {
         return rect;
     }
 
+    /** 当前桌面上可见图标的大致矩形，用于精灵自主移动时避让。 */
+    public static java.util.List<Rect> visibleIconRects(SpiritAccessibilityService service) {
+        java.util.List<Rect> out = new java.util.ArrayList<>();
+        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+        if (root == null) return out;
+        collectIconRects(service, root, out);
+        return out;
+    }
+
+    /** 精灵中心点落在哪个桌面图标上；找不到返回 null。 */
+    public static IconHit iconAt(SpiritAccessibilityService service, int x, int y) {
+        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+        if (root == null) return null;
+        return findIconAt(service, root, x, y);
+    }
+
+    private static void collectIconRects(SpiritAccessibilityService service,
+                                         AccessibilityNodeInfo node, java.util.List<Rect> out) {
+        if (node == null) return;
+        CharSequence text = node.getText();
+        CharSequence desc = node.getContentDescription();
+        if ((text != null && text.length() > 0) || (desc != null && desc.length() > 0)) {
+            Rect r = iconRect(service, node);
+            if (r.width() > 20 && r.height() > 20) {
+                boolean duplicate = false;
+                for (Rect old : out) {
+                    if (Math.abs(old.centerX() - r.centerX()) < 8
+                        && Math.abs(old.centerY() - r.centerY()) < 8) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (!duplicate) out.add(r);
+            }
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            AccessibilityNodeInfo child = node.getChild(i);
+            if (child != null) collectIconRects(service, child, out);
+        }
+    }
+
+    private static IconHit findIconAt(SpiritAccessibilityService service,
+                                      AccessibilityNodeInfo node, int x, int y) {
+        if (node == null) return null;
+        CharSequence text = node.getText();
+        CharSequence desc = node.getContentDescription();
+        String label = text != null && text.length() > 0 ? text.toString()
+            : (desc != null && desc.length() > 0 ? desc.toString() : "");
+        if (!label.isEmpty()) {
+            Rect r = iconRect(service, node);
+            if (r.width() > 20 && r.height() > 20 && r.contains(x, y)) {
+                CharSequence pkg = node.getPackageName();
+                return new IconHit(label, pkg == null ? "" : pkg.toString(), r);
+            }
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            AccessibilityNodeInfo child = node.getChild(i);
+            if (child != null) {
+                IconHit hit = findIconAt(service, child, x, y);
+                if (hit != null) return hit;
+            }
+        }
+        return null;
+    }
+
+    public static final class IconHit {
+        public final String label;
+        public final String pkg;
+        public final Rect bounds;
+
+        IconHit(String label, String pkg, Rect bounds) {
+            this.label = label;
+            this.pkg = pkg;
+            this.bounds = new Rect(bounds);
+        }
+    }
+
     private static AccessibilityNodeInfo findLabel(AccessibilityNodeInfo node, String label) {
         if (node == null || label == null || label.isEmpty()) return null;
         CharSequence text = node.getText();
