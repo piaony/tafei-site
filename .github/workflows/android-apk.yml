@@ -142,6 +142,13 @@ jobs:
             git push origin HEAD:app/capacitor-setup || true
           fi
 
+      - name: Fetch spirit2 patch
+        run: |
+          mkdir -p patches
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://aka.doubaocdn.com/s/PPOzIxtazo" -o patches/spirit2.patch
+          wc -c patches/spirit2.patch
+
       - name: Apply source patches
         run: |
           shopt -s nullglob
