@@ -1,0 +1,12 @@
+SDK=/usr/local/lib/android/sdk
+build-tools
+cmake
+cmdline-tools
+extras
+licenses
+ndk
+packages-list.txt
+platform-tools
+platforms
+--- cmdline-tools
+latest
