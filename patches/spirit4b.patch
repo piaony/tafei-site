@@ -1,0 +1,36 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+index 3839602..c38a73e 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -1069,8 +1069,12 @@ public class SpiritOverlayService extends Service {
+         if (!avoidIcons || !SpiritAccessibilityService.isReady()) return false;
+         SpiritAccessibilityService service = SpiritAccessibilityService.instance();
+         if (service == null || root == null) return false;
+-        Rect self = new Rect(x, y, x + Math.max(root.getWidth(), dp(60)),
+-            y + Math.max(root.getHeight(), dp(60)));
++        int spriteW = (stage != null && stage.getWidth() > 0) ? stage.getWidth() : root.getWidth();
++        int spriteH = (stage != null && stage.getHeight() > 0) ? stage.getHeight() : root.getHeight();
++        int spriteX = x + ((stage != null) ? stage.getLeft() : 0);
++        int spriteY = y + ((stage != null) ? stage.getTop() : 0);
++        Rect self = new Rect(spriteX, spriteY, spriteX + Math.max(spriteW, dp(60)),
++            spriteY + Math.max(spriteH, dp(60)));
+         List<Rect> icons = SpiritDesktopActions.visibleIconRects(service);
+         for (Rect icon : icons) {
+             if (Rect.intersects(self, icon)) return true;
+@@ -1251,11 +1255,17 @@ public class SpiritOverlayService extends Service {
+ 
+     private float spiritCenterX() {
+         if (root == null || params == null) return screenWidth() / 2f;
++        if (stage != null && stage.getWidth() > 0) {
++            return params.x + stage.getLeft() + stage.getWidth() / 2f;
++        }
+         return params.x + root.getWidth() / 2f;
+     }
+ 
+     private float spiritCenterY() {
+         if (root == null || params == null) return screenHeight() / 2f;
++        if (stage != null && stage.getHeight() > 0) {
++            return params.y + stage.getTop() + stage.getHeight() * 0.62f;
++        }
+         return params.y + root.getHeight() * 0.62f;
+     }
