@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -523,7 +524,7 @@ final class SpiritDesktopActions {
 
     private static void scanLabel(SpiritAccessibilityService service, String label,
                                   int leftCount, int rightCount, FindCallback callback) {
-        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+        AccessibilityNodeInfo root = launcherRoot(service);
         if (root == null) {
             callback.failed("access-no-root");
             return;
@@ -592,7 +593,7 @@ final class SpiritDesktopActions {
             int w = service.getResources().getDisplayMetrics().widthPixels;
             int h = service.getResources().getDisplayMetrics().heightPixels;
             if (p.width() > rect.width() && p.height() > rect.height()
-                && p.width() < w * 0.65f && p.height() < h * 0.32f) {
+                && p.width() < w * 0.32f && p.height() < h * 0.18f) {
                 rect = p;
             }
             parent = parent.getParent();
@@ -603,7 +604,7 @@ final class SpiritDesktopActions {
     /** 当前桌面上可见图标的大致矩形，用于精灵自主移动时避让。 */
     public static java.util.List<Rect> visibleIconRects(SpiritAccessibilityService service) {
         java.util.List<Rect> out = new java.util.ArrayList<>();
-        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+        AccessibilityNodeInfo root = launcherRoot(service);
         if (root == null) return out;
         collectIconRects(service, root, out);
         return out;
@@ -611,9 +612,29 @@ final class SpiritDesktopActions {
 
     /** 精灵中心点落在哪个桌面图标上；找不到返回 null。 */
     public static IconHit iconAt(SpiritAccessibilityService service, int x, int y) {
-        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+        AccessibilityNodeInfo root = launcherRoot(service);
         if (root == null) return null;
         return findIconAt(service, root, x, y);
+    }
+
+    private static AccessibilityNodeInfo launcherRoot(SpiritAccessibilityService service) {
+        AccessibilityNodeInfo root = service.getRootInActiveWindow();
+        if (isLauncherRoot(root)) return root;
+        try {
+            for (AccessibilityWindowInfo window : service.getWindows()) {
+                AccessibilityNodeInfo candidate = window.getRoot();
+                if (isLauncherRoot(candidate)) return candidate;
+            }
+        } catch (Throwable ignored) {
+        }
+        return root;
+    }
+
+    private static boolean isLauncherRoot(AccessibilityNodeInfo root) {
+        if (root == null) return false;
+        CharSequence pkg = root.getPackageName();
+        String name = pkg == null ? "" : pkg.toString();
+        return name.contains("launcher") || name.contains("coloros");
     }
 
     private static void collectIconRects(SpiritAccessibilityService service,
@@ -623,7 +644,10 @@ final class SpiritDesktopActions {
         CharSequence desc = node.getContentDescription();
         if ((text != null && text.length() > 0) || (desc != null && desc.length() > 0)) {
             Rect r = iconRect(service, node);
-            if (r.width() > 20 && r.height() > 20) {
+            int sw = service.getResources().getDisplayMetrics().widthPixels;
+            int sh = service.getResources().getDisplayMetrics().heightPixels;
+            if (r.width() > 20 && r.height() > 20
+                && r.width() <= sw * 0.36f && r.height() <= sh * 0.2f) {
                 boolean duplicate = false;
                 for (Rect old : out) {
                     if (Math.abs(old.centerX() - r.centerX()) < 8
@@ -650,7 +674,11 @@ final class SpiritDesktopActions {
             : (desc != null && desc.length() > 0 ? desc.toString() : "");
         if (!label.isEmpty()) {
             Rect r = iconRect(service, node);
-            if (r.width() > 20 && r.height() > 20 && r.contains(x, y)) {
+            int sw = service.getResources().getDisplayMetrics().widthPixels;
+            int sh = service.getResources().getDisplayMetrics().heightPixels;
+            if (r.width() > 20 && r.height() > 20
+                && r.width() <= sw * 0.36f && r.height() <= sh * 0.2f
+                && r.contains(x, y)) {
                 CharSequence pkg = node.getPackageName();
                 return new IconHit(label, pkg == null ? "" : pkg.toString(), r);
             }

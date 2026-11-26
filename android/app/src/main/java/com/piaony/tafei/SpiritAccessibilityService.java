@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.Toast;
@@ -111,6 +112,17 @@ public class SpiritAccessibilityService extends AccessibilityService {
 
     public static SpiritAccessibilityService instance() {
         return instance;
+    }
+
+    /** 无障碍层可以添加 TYPE_ACCESSIBILITY_OVERLAY，用来尝试覆盖系统界面。 */
+    public static WindowManager overlayWindowManager() {
+        SpiritAccessibilityService svc = instance;
+        if (svc == null) return null;
+        try {
+            return (WindowManager) svc.getSystemService(WINDOW_SERVICE);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     public static String startDesktopAction(String action, String payload) {

@@ -2,6 +2,7 @@ package com.piaony.tafei;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -508,6 +509,18 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public String overlayRootModeStatus() {
             return SpiritOverlayService.rootModeStatus();
+        }
+        @JavascriptInterface
+        public String overlayDebug() {
+            SharedPreferences sp = act.getSharedPreferences("tafei_app", 0);
+            boolean root = RootBridge.isGranted();
+            boolean a11y = SpiritAccessibilityService.isReady();
+            String layer = SpiritOverlayService.rootModeStatus();
+            return "root=" + (root ? "1" : "0")
+                + " a11y=" + (a11y ? "1" : "0")
+                + " layer=" + layer
+                + " avoid=" + (sp.getBoolean("overlay_avoid_icons", true) ? "1" : "0")
+                + " pickup=" + (sp.getBoolean("overlay_pickup", false) ? "1" : "0");
         }
 
         @JavascriptInterface

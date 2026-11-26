@@ -1,0 +1,610 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index 43a9d58..91bc110 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -2,6 +2,7 @@ package com.piaony.tafei;
+ 
+ import android.Manifest;
+ import android.content.Intent;
++import android.content.SharedPreferences;
+ import android.content.pm.PackageManager;
+ import android.graphics.Bitmap;
+ import android.graphics.Canvas;
+@@ -509,6 +510,18 @@ public class MainActivity extends BridgeActivity {
+         public String overlayRootModeStatus() {
+             return SpiritOverlayService.rootModeStatus();
+         }
++        @JavascriptInterface
++        public String overlayDebug() {
++            SharedPreferences sp = act.getSharedPreferences("tafei_app", 0);
++            boolean root = RootBridge.isGranted();
++            boolean a11y = SpiritAccessibilityService.isReady();
++            String layer = SpiritOverlayService.rootModeStatus();
++            return "root=" + (root ? "1" : "0")
++                + " a11y=" + (a11y ? "1" : "0")
++                + " layer=" + layer
++                + " avoid=" + (sp.getBoolean("overlay_avoid_icons", true) ? "1" : "0")
++                + " pickup=" + (sp.getBoolean("overlay_pickup", false) ? "1" : "0");
++        }
+ 
+         @JavascriptInterface
+         public void setOverlaySpirit(String id) {
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+index 37a1dee..7d291d3 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritAccessibilityService.java
+@@ -7,6 +7,7 @@ import android.graphics.Rect;
+ import android.os.Handler;
+ import android.os.Looper;
+ import android.view.accessibility.AccessibilityEvent;
++import android.view.WindowManager;
+ import android.view.accessibility.AccessibilityNodeInfo;
+ import android.view.accessibility.AccessibilityWindowInfo;
+ import android.widget.Toast;
+@@ -113,6 +114,17 @@ public class SpiritAccessibilityService extends AccessibilityService {
+         return instance;
+     }
+ 
++    /** 无障碍层可以添加 TYPE_ACCESSIBILITY_OVERLAY，用来尝试覆盖系统界面。 */
++    public static WindowManager overlayWindowManager() {
++        SpiritAccessibilityService svc = instance;
++        if (svc == null) return null;
++        try {
++            return (WindowManager) svc.getSystemService(WINDOW_SERVICE);
++        } catch (Throwable t) {
++            return null;
++        }
++    }
++
+     public static String startDesktopAction(String action, String payload) {
+         return SpiritDesktopActions.start(instance, action, payload);
+     }
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java b/android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java
+index 0a631be..326bc24 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritDesktopActions.java
+@@ -7,6 +7,7 @@ import android.graphics.Rect;
+ import android.os.Handler;
+ import android.os.Looper;
+ import android.view.accessibility.AccessibilityNodeInfo;
++import android.view.accessibility.AccessibilityWindowInfo;
+ 
+ import org.json.JSONArray;
+ import org.json.JSONObject;
+@@ -523,7 +524,7 @@ final class SpiritDesktopActions {
+ 
+     private static void scanLabel(SpiritAccessibilityService service, String label,
+                                   int leftCount, int rightCount, FindCallback callback) {
+-        AccessibilityNodeInfo root = service.getRootInActiveWindow();
++        AccessibilityNodeInfo root = launcherRoot(service);
+         if (root == null) {
+             callback.failed("access-no-root");
+             return;
+@@ -592,7 +593,7 @@ final class SpiritDesktopActions {
+             int w = service.getResources().getDisplayMetrics().widthPixels;
+             int h = service.getResources().getDisplayMetrics().heightPixels;
+             if (p.width() > rect.width() && p.height() > rect.height()
+-                && p.width() < w * 0.65f && p.height() < h * 0.32f) {
++                && p.width() < w * 0.32f && p.height() < h * 0.18f) {
+                 rect = p;
+             }
+             parent = parent.getParent();
+@@ -603,7 +604,7 @@ final class SpiritDesktopActions {
+     /** 当前桌面上可见图标的大致矩形，用于精灵自主移动时避让。 */
+     public static java.util.List<Rect> visibleIconRects(SpiritAccessibilityService service) {
+         java.util.List<Rect> out = new java.util.ArrayList<>();
+-        AccessibilityNodeInfo root = service.getRootInActiveWindow();
++        AccessibilityNodeInfo root = launcherRoot(service);
+         if (root == null) return out;
+         collectIconRects(service, root, out);
+         return out;
+@@ -611,11 +612,31 @@ final class SpiritDesktopActions {
+ 
+     /** 精灵中心点落在哪个桌面图标上；找不到返回 null。 */
+     public static IconHit iconAt(SpiritAccessibilityService service, int x, int y) {
+-        AccessibilityNodeInfo root = service.getRootInActiveWindow();
++        AccessibilityNodeInfo root = launcherRoot(service);
+         if (root == null) return null;
+         return findIconAt(service, root, x, y);
+     }
+ 
++    private static AccessibilityNodeInfo launcherRoot(SpiritAccessibilityService service) {
++        AccessibilityNodeInfo root = service.getRootInActiveWindow();
++        if (isLauncherRoot(root)) return root;
++        try {
++            for (AccessibilityWindowInfo window : service.getWindows()) {
++                AccessibilityNodeInfo candidate = window.getRoot();
++                if (isLauncherRoot(candidate)) return candidate;
++            }
++        } catch (Throwable ignored) {
++        }
++        return root;
++    }
++
++    private static boolean isLauncherRoot(AccessibilityNodeInfo root) {
++        if (root == null) return false;
++        CharSequence pkg = root.getPackageName();
++        String name = pkg == null ? "" : pkg.toString();
++        return name.contains("launcher") || name.contains("coloros");
++    }
++
+     private static void collectIconRects(SpiritAccessibilityService service,
+                                          AccessibilityNodeInfo node, java.util.List<Rect> out) {
+         if (node == null) return;
+@@ -623,7 +644,10 @@ final class SpiritDesktopActions {
+         CharSequence desc = node.getContentDescription();
+         if ((text != null && text.length() > 0) || (desc != null && desc.length() > 0)) {
+             Rect r = iconRect(service, node);
+-            if (r.width() > 20 && r.height() > 20) {
++            int sw = service.getResources().getDisplayMetrics().widthPixels;
++            int sh = service.getResources().getDisplayMetrics().heightPixels;
++            if (r.width() > 20 && r.height() > 20
++                && r.width() <= sw * 0.36f && r.height() <= sh * 0.2f) {
+                 boolean duplicate = false;
+                 for (Rect old : out) {
+                     if (Math.abs(old.centerX() - r.centerX()) < 8
+@@ -650,7 +674,11 @@ final class SpiritDesktopActions {
+             : (desc != null && desc.length() > 0 ? desc.toString() : "");
+         if (!label.isEmpty()) {
+             Rect r = iconRect(service, node);
+-            if (r.width() > 20 && r.height() > 20 && r.contains(x, y)) {
++            int sw = service.getResources().getDisplayMetrics().widthPixels;
++            int sh = service.getResources().getDisplayMetrics().heightPixels;
++            if (r.width() > 20 && r.height() > 20
++                && r.width() <= sw * 0.36f && r.height() <= sh * 0.2f
++                && r.contains(x, y)) {
+                 CharSequence pkg = node.getPackageName();
+                 return new IconHit(label, pkg == null ? "" : pkg.toString(), r);
+             }
+diff --git a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+index 88cce09..458107e 100644
+--- a/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
++++ b/android/app/src/main/java/com/piaony/tafei/SpiritOverlayService.java
+@@ -79,6 +79,7 @@ public class SpiritOverlayService extends Service {
+     private static volatile String rootModeState = "app";
+ 
+     private WindowManager windowManager;
++    private WindowManager activeWindowManager;
+     private WindowManager.LayoutParams params;
+     private LinearLayout root;
+     private FrameLayout stage;
+@@ -225,6 +226,7 @@ public class SpiritOverlayService extends Service {
+         super.onCreate();
+         instance = this;
+         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
++        activeWindowManager = windowManager;
+         ensureChannel();
+         if (!canOverlay()) {
+             setEnabled(false);
+@@ -278,7 +280,7 @@ public class SpiritOverlayService extends Service {
+         }
+         if (root != null && windowManager != null) {
+             try {
+-                windowManager.removeView(root);
++                activeWindowManager.removeView(root);
+             } catch (Exception ignored) {
+             }
+         }
+@@ -403,154 +405,62 @@ public class SpiritOverlayService extends Service {
+         root.addView(stage, stageLp);
+ 
+         boolean wantRootLayer = rootGlobalEnabled && RootBridge.isGranted();
+-        if (wantRootLayer) {
+-            RootBridge.run("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow", 4000L);
+-        }
++        int appType = Build.VERSION.SDK_INT >= 26
++            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
++            : WindowManager.LayoutParams.TYPE_PHONE;
+         int baseFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+-        int type = wantRootLayer
+-            ? WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY
+-            : (Build.VERSION.SDK_INT >= 26
+-                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+-                : WindowManager.LayoutParams.TYPE_PHONE);
+-        if (wantRootLayer) {
+-            baseFlags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+-        }
+         params = new WindowManager.LayoutParams(
+             WindowManager.LayoutParams.WRAP_CONTENT,
+             WindowManager.LayoutParams.WRAP_CONTENT,
+-            type,
++            appType,
+             baseFlags,
+             PixelFormat.TRANSLUCENT);
+         params.gravity = Gravity.TOP | Gravity.START;
+         params.x = Math.max(0, screenWidth() - dp(120));
+         params.y = Math.max(dp(80), screenHeight() / 2);
+ 
+-        root.setOnTouchListener(new View.OnTouchListener() {
+-            @Override
+-            public boolean onTouch(View v, MotionEvent event) {
+-                switch (event.getActionMasked()) {
+-                    case MotionEvent.ACTION_DOWN:
+-                        lastRawX = event.getRawX();
+-                        lastRawY = event.getRawY();
+-                        lastDownY = event.getY();
+-                        pickupDownX = event.getRawX();
+-                        pickupDownY = event.getRawY();
+-                        pickupHit = null;
+-                        pickupActive = false;
+-                        if (pickupEnabled && SpiritAccessibilityService.isReady()) {
+-                            pickupHit = SpiritDesktopActions.iconAt(
+-                                SpiritAccessibilityService.instance(), (int) event.getRawX(), (int) event.getRawY());
+-                        }
+-                        moved = false;
+-                        dragging = false;
+-                        pickupShown = false;
+-                        longPressFired = false;
+-                        wanderStep = 0;
+-                        handler.removeCallbacks(autonomyTask);
+-                        handler.postDelayed(longPressTask, 520L);
+-                        return true;
+-                    case MotionEvent.ACTION_MOVE:
+-                        if (longPressFired) {
+-                            // 长按已经进入摸头，后续移动不再转成拖拽，避免两套特效打架。
+-                            return true;
+-                        }
+-                        float dx = event.getRawX() - lastRawX;
+-                        float dy = event.getRawY() - lastRawY;
+-                        if (!dragging && (Math.abs(dx) > dp(10) || Math.abs(dy) > dp(10))) {
+-                            moved = true;
+-                            dragging = true;
+-                            handler.removeCallbacks(longPressTask);
+-                            pickupShown = true;
+-                            showFrame("action-upgrade", 0);
+-                            if (pickupEnabled && pickupHit != null && !pickupActive) {
+-                                pickupActive = true;
+-                                showPickup(pickupHit);
+-                            } else {
+-                                showBubble("要带我去哪里呀？");
+-                            }
+-                        }
+-                        if (dragging) {
+-                            params.x += (int) dx;
+-                            params.y += (int) dy;
+-                            lastRawX = event.getRawX();
+-                            lastRawY = event.getRawY();
+-                            clampPosition();
+-                            try {
+-                                windowManager.updateViewLayout(root, params);
+-                            } catch (Exception ignored) {
+-                            }
+-                            if (particleView != null) particleView.trail();
+-                        }
+-                        return true;
+-                    case MotionEvent.ACTION_UP:
+-                        handler.removeCallbacks(longPressTask);
+-                        if (longPressFired) {
+-                            // 只结束摸头，不触发拖拽落地，也不打开面板。
+-                            longPressFired = false;
+-                            moved = false;
+-                            dragging = false;
+-                            pickupActive = false;
+-                            hidePickup();
+-                            scheduleAutonomy(2500L);
+-                        } else if (dragging) {
+-                            boolean dropped = pickupActive;
+-                            if (dropped) performPickupDrop(event.getRawX(), event.getRawY());
+-                            dragging = false;
+-                            moved = false;
+-                            wanderStep = 0;
+-                            pickupActive = false;
+-                            hidePickup();
+-                            showFrame("main", 0);
+-                            if (pickupShown && !dropped) showBubble("放我下来啦。");
+-                            pickupShown = false;
+-                            if (particleView != null) particleView.burst(7);
+-                            scheduleAutonomy(3200L);
+-                        } else if (!moved) {
+-                            handleTap(lastDownY);
+-                        }
+-                        return true;
+-                    case MotionEvent.ACTION_CANCEL:
+-                        handler.removeCallbacks(longPressTask);
+-                        moved = false;
+-                        dragging = false;
+-                        pickupShown = false;
+-                        pickupActive = false;
+-                        hidePickup();
+-                        longPressFired = false;
+-                        return true;
+-                    default:
+-                        return false;
+-                }
+-            }
+-        });
+-
+-        ensureDoodleWindow();
+-        try {
+-            windowManager.addView(root, params);
+-            rootModeState = wantRootLayer ? "system" : "app";
+-        } catch (Exception e) {
+-            if (wantRootLayer) {
+-                // 国产 ROM 常会拒绝 TYPE_SYSTEM_OVERLAY；退回普通悬浮层，不影响精灵本身。
+-                int fallbackType = Build.VERSION.SDK_INT >= 26
+-                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+-                    : WindowManager.LayoutParams.TYPE_PHONE;
+-                params.type = fallbackType;
+-                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
++        boolean added = false;
++        if (wantRootLayer && SpiritAccessibilityService.isReady()) {
++            WindowManager accessibilityWm = SpiritAccessibilityService.overlayWindowManager();
++            if (accessibilityWm != null) {
++                params.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
++                params.flags = baseFlags
++                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
++                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+                 try {
+-                    windowManager.addView(root, params);
+-                    rootModeState = "fallback";
+-                } catch (Exception again) {
+-                    root = null;
+-                    setEnabled(false);
+-                    stopSelf();
+-                    return;
++                    accessibilityWm.addView(root, params);
++                    activeWindowManager = accessibilityWm;
++                    rootModeState = "accessibility";
++                    added = true;
++                } catch (Exception ignored) {
+                 }
+-            } else {
++            }
++        }
++        if (!added && wantRootLayer) {
++            RootBridge.run("appops set " + getPackageName() + " SYSTEM_ALERT_WINDOW allow", 4000L);
++            RootBridge.run("appops set " + getPackageName() + " INTERNAL_SYSTEM_WINDOW allow", 4000L);
++            params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
++            params.flags = baseFlags
++                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
++                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
++            try {
++                windowManager.addView(root, params);
++                activeWindowManager = windowManager;
++                rootModeState = "system";
++                added = true;
++            } catch (Exception ignored) {
++            }
++        }
++        if (!added) {
++            params.type = appType;
++            params.flags = baseFlags;
++            try {
++                windowManager.addView(root, params);
++                activeWindowManager = windowManager;
++                rootModeState = wantRootLayer ? "fallback" : "app";
++            } catch (Exception e) {
+                 root = null;
+                 setEnabled(false);
+                 stopSelf();
+@@ -565,7 +475,7 @@ public class SpiritOverlayService extends Service {
+                     params.x = Math.max(0, screenWidth() - root.getWidth() - dp(4));
+                     clampPosition();
+                     try {
+-                        windowManager.updateViewLayout(root, params);
++                        activeWindowManager.updateViewLayout(root, params);
+                     } catch (Exception ignored) {
+                     }
+                 }
+@@ -646,25 +556,85 @@ public class SpiritOverlayService extends Service {
+             }).start();
+     }
+ 
+-    private void performPickupDrop(float rawX, float rawY) {
+-        SpiritDesktopActions.IconHit hit = pickupHit;
++    private void performPickupDrop(final float rawX, final float rawY) {
++        final SpiritDesktopActions.IconHit hit = pickupHit;
+         pickupHit = null;
+         if (hit == null) return;
+-        int stepX = Math.max(dp(72), hit.bounds.width());
+-        int stepY = Math.max(dp(72), hit.bounds.height());
+-        int dx = Math.round((rawX - pickupDownX) / (float) stepX);
+-        int dy = Math.round((rawY - pickupDownY) / (float) stepY);
+-        dx = Math.max(-4, Math.min(4, dx));
+-        dy = Math.max(-4, Math.min(4, dy));
++        final int stepX = Math.max(dp(72), hit.bounds.width());
++        final int stepY = Math.max(dp(72), hit.bounds.height());
++        final int dx = Math.max(-4, Math.min(4, Math.round((rawX - pickupDownX) / (float) stepX)));
++        final int dy = Math.max(-4, Math.min(4, Math.round((rawY - pickupDownY) / (float) stepY)));
+         if (dx == 0 && dy == 0) {
+             showBubble("放回原位啦。");
+             return;
+         }
++        showBubble("正在找空位…");
++        new Thread(new Runnable() {
++            @Override
++            public void run() {
++                JSONObject payload = null;
++                try {
++                    String raw = DesktopProbe.probe(SpiritOverlayService.this);
++                    JSONObject probe = new JSONObject(raw);
++                    JSONArray samples = probe.optJSONArray("samples");
++                    JSONArray folders = probe.optJSONArray("folders");
++                    if (samples != null) {
++                        JSONObject source = findSample(samples, hit.label);
++                        if (source != null) {
++                            int screen = source.optInt("screen", 0);
++                            int sx = source.optInt("cellX", 0);
++                            int sy = source.optInt("cellY", 0);
++                            int tx = Math.max(0, Math.min(3, sx + dx));
++                            int ty = Math.max(0, Math.min(5, sy + dy));
++                            int[] empty = nearestEmpty(tx, ty, screen, samples, folders);
++                            if (empty != null) {
++                                JSONObject item = new JSONObject(source.toString());
++                                item.put("screen", screen);
++                                item.put("cellX", sx);
++                                item.put("cellY", sy);
++                                JSONObject target = new JSONObject();
++                                target.put("screen", screen);
++                                target.put("cellX", empty[0]);
++                                target.put("cellY", empty[1]);
++                                target.put("folderId", -1);
++                                JSONArray items = new JSONArray();
++                                items.put(item);
++                                payload = new JSONObject();
++                                payload.put("items", items);
++                                payload.put("target", target);
++                                payload.put("emptyCells", new JSONArray());
++                                payload.put("cols", 4);
++                                payload.put("rows", 6);
++                            }
++                        }
++                    }
++                } catch (Throwable ignored) {
++                }
++                if (payload == null) {
++                    payload = relativePickupPayload(hit, dx, dy);
++                }
++                final JSONObject finalPayload = payload;
++                handler.post(new Runnable() {
++                    @Override
++                    public void run() {
++                        String result = SpiritAccessibilityService.startDesktopAction("move", finalPayload.toString());
++                        if ("started".equals(result)) {
++                            showFrame("action-upgrade", 900);
++                            showBubble("接住「" + hit.label + "」了，正在落位。");
++                        } else {
++                            showBubble("没抱稳，再来一次。");
++                        }
++                    }
++                });
++            }
++        }, "tafei-pickup").start();
++    }
++
++    private JSONObject relativePickupPayload(SpiritDesktopActions.IconHit hit, int dx, int dy) {
+         try {
+             JSONObject item = new JSONObject();
+             item.put("label", hit.label);
+             item.put("package", hit.pkg);
+-            // 用相对位移作为目标格：无障碍定位仍以真实图标为锚，不依赖数据库坐标。
+             item.put("screen", 0);
+             item.put("cellX", 0);
+             item.put("cellY", 0);
+@@ -681,18 +651,52 @@ public class SpiritOverlayService extends Service {
+             payload.put("emptyCells", new JSONArray());
+             payload.put("cols", 4);
+             payload.put("rows", 6);
+-            String result = SpiritAccessibilityService.startDesktopAction("move", payload.toString());
+-            if ("started".equals(result)) {
+-                showFrame("action-upgrade", 900);
+-                showBubble("接住「" + hit.label + "」了，正在落位。");
+-            } else {
+-                showBubble("没抱稳，再来一次。");
+-            }
++            return payload;
+         } catch (Exception e) {
+-            showBubble("抱起来了，但没找到落点。");
++            return null;
++        }
++    }
++
++    private JSONObject findSample(JSONArray samples, String label) {
++        if (samples == null || label == null) return null;
++        for (int i = 0; i < samples.length(); i++) {
++            JSONObject item = samples.optJSONObject(i);
++            if (item == null) continue;
++            String text = item.optString("label", "");
++            if (label.equals(text) || label.contains(text) || text.contains(label)) return item;
++        }
++        return null;
++    }
++
++    private int[] nearestEmpty(int tx, int ty, int screen, JSONArray samples, JSONArray folders) {
++        for (int radius = 0; radius <= 6; radius++) {
++            for (int y = ty - radius; y <= ty + radius; y++) {
++                for (int x = tx - radius; x <= tx + radius; x++) {
++                    if (x < 0 || x > 3 || y < 0 || y > 5) continue;
++                    if (occupied(x, y, screen, samples, folders)) continue;
++                    return new int[]{x, y};
++                }
++            }
+         }
++        return null;
++    }
++
++    private boolean occupied(int x, int y, int screen, JSONArray samples, JSONArray folders) {
++        if (occupiedIn(samples, x, y, screen)) return true;
++        return occupiedIn(folders, x, y, screen);
+     }
+ 
++    private boolean occupiedIn(JSONArray list, int x, int y, int screen) {
++        if (list == null) return false;
++        for (int i = 0; i < list.length(); i++) {
++            JSONObject item = list.optJSONObject(i);
++            if (item == null) continue;
++            if (item.optInt("screen", -1) == screen
++                && item.optInt("cellX", -1) == x
++                && item.optInt("cellY", -1) == y) return true;
++        }
++        return false;
++    }
+     private void handleTap(float localY) {
+         long now = System.currentTimeMillis();
+         if (now - lastTapAt < 360L) {
+@@ -794,7 +798,7 @@ public class SpiritOverlayService extends Service {
+             rootGlobalEnabled = nextRoot;
+             if (root != null && windowManager != null) {
+                 try {
+-                    windowManager.removeView(root);
++                    activeWindowManager.removeView(root);
+                 } catch (Exception ignored) {
+                 }
+                 root = null;
+@@ -826,7 +830,7 @@ public class SpiritOverlayService extends Service {
+         }
+         if (root != null && params != null) {
+             try {
+-                windowManager.updateViewLayout(root, params);
++                activeWindowManager.updateViewLayout(root, params);
+             } catch (Exception ignored) {
+             }
+         }
+@@ -943,7 +947,7 @@ public class SpiritOverlayService extends Service {
+                 params.y = Math.round(wanderStartY + (wanderTargetY - wanderStartY) * ease);
+                 clampPosition();
+                 try {
+-                    windowManager.updateViewLayout(root, params);
++                    activeWindowManager.updateViewLayout(root, params);
+                 } catch (Exception ignored) {
+                 }
+                 if (particleView != null) particleView.trail();
+diff --git a/www/jingling.html b/www/jingling.html
+index fbf39d1..4fbb75d 100644
+--- a/www/jingling.html
++++ b/www/jingling.html
+@@ -104,6 +104,7 @@
+        <label><input type="checkbox" id="noRootGlobal"> Root 全域模式</label>
+       </div>
+       <p class="ws-note">只影响退出 App 后的桌面悬浮精灵；Root 全域模式会尝试覆盖系统界面，安全锁屏等系统级限制下会自动回退普通悬浮。抱起图标默认关闭，开启后拖动精灵经过应用图标即可搬运。</p>
++      <p class="ws-note" id="noDebug">精灵诊断：等待读取…</p>
+      </div>
+     </div>
+ 
+@@ -322,7 +323,7 @@
+ <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
+ 
+ <script src="js/spirit-core.js?v=15"></script>
+-<script src="js/jingling.js?v=38"></script>
++<script src="js/jingling.js?v=39"></script>
+ <script src="js/spirit-growth.js" defer></script>
+ </body>
+ </html>
+diff --git a/www/js/jingling.js b/www/js/jingling.js
+index 694193c..df7743b 100644
+--- a/www/js/jingling.js
++++ b/www/js/jingling.js
+@@ -1063,6 +1063,8 @@
+     if (pickup) pickup.checked = String(nativeOverlayCall('overlayPickup', '0')) !== '0';
+     var rootGlobal = $('noRootGlobal');
+     if (rootGlobal) rootGlobal.checked = String(nativeOverlayCall('overlayRootGlobal', '0')) !== '0';
++    var debug = $('noDebug');
++    if (debug) debug.textContent = '精灵诊断：' + String(nativeOverlayCall('overlayDebug', '未知'));
+     refreshNativeOverlay();
+   }
+ 

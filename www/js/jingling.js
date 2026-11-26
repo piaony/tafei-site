@@ -1063,6 +1063,8 @@
     if (pickup) pickup.checked = String(nativeOverlayCall('overlayPickup', '0')) !== '0';
     var rootGlobal = $('noRootGlobal');
     if (rootGlobal) rootGlobal.checked = String(nativeOverlayCall('overlayRootGlobal', '0')) !== '0';
+    var debug = $('noDebug');
+    if (debug) debug.textContent = '精灵诊断：' + String(nativeOverlayCall('overlayDebug', '未知'));
     refreshNativeOverlay();
   }
 
