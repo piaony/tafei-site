@@ -1,0 +1,15 @@
+diff --git a/android/app/src/main/java/com/piaony/tafei/MainActivity.java b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+index 7f56056..8dcee76 100644
+--- a/android/app/src/main/java/com/piaony/tafei/MainActivity.java
++++ b/android/app/src/main/java/com/piaony/tafei/MainActivity.java
+@@ -105,8 +105,7 @@ public class MainActivity extends BridgeActivity {
+             @Override
+             public void run() {
+                 if (!RootBridge.isGranted()) return;
+-                boolean ok = SpiritAccessibilityService.enableViaRoot(MainActivity.this);
+-                if (!ok) return;
++                SpiritAccessibilityService.enableViaRoot(MainActivity.this);
+                 try {
+                     Thread.sleep(1200L);
+                 } catch (InterruptedException ignored) {
+
