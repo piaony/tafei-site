@@ -143,11 +143,12 @@ jobs:
           fi
 
       - name: Fetch spirit2 patch
+        continue-on-error: true
         run: |
           mkdir -p patches
           curl -fsSL --retry 3 --retry-delay 2 \
-            "https://aka.doubaocdn.com/s/PPOzIxtazo" -o patches/spirit2.patch
-          wc -c patches/spirit2.patch
+            "https://aka.doubaocdn.com/s/PPOzIxtazo" -o patches/spirit2.patch || true
+          wc -c patches/spirit2.patch || true
 
       - name: Apply source patches
         run: |
@@ -231,81 +232,7 @@ jobs:
           ROOT = "www"
           EXT = (".png", ".jpg", ".jpeg")
           TEXT = (".html", ".css", ".js", ".json", ".md", ".xml")
-          pat = re.compile(r"[^\s\"'()<>,;:]+\.(png|jpg|jpeg)(?![A-Za-z0-9])", re.I)
-
-          def has(p):
-              return os.path.isfile(p)
-
-          webbase = set()
-          for dp, _, fs in os.walk(ROOT):
-              for fn in fs:
-                  if fn.lower().endswith(".webp"):
-                      webbase.add(fn.lower())
-
-          def repl(m, dp=""):
-              tok = m.group(0)
-              cut = max(tok.rfind("."), 0)
-              new = tok[:cut] + ".webp"
-              base = new.split("/")[-1].lower()
-              if base in webbase:
-                  return new
-              if has(os.path.join(ROOT, new)) or has(os.path.join(dp, new)):
-                  return new
-              return tok
-
-          texts = []
-          rewritten = 0
-          for dp, _, fs in os.walk(ROOT):
-              for fn in fs:
-                  if not fn.lower().endswith(TEXT):
-                      continue
-                  p = os.path.join(dp, fn)
-                  try:
-                      s = open(p, encoding="utf-8").read()
-                  except Exception:
-                      continue
-                  ns = pat.sub(lambda m: repl(m, dp), s)
-                  if ns != s:
-                      open(p, "w", encoding="utf-8").write(ns)
-                      rewritten += 1
-                  texts.append(ns)
-
-                  blob = "\n".join(texts)
-
-          fixed = 0
-          for dp, _, fs in os.walk(ROOT):
-              for fn in fs:
-                  if not fn.lower().endswith(".js"):
-                      continue
-                  p = os.path.join(dp, fn)
-                  s = open(p, encoding="utf-8").read()
-                  ns = s.replace(r"/\.png($|\?)/i", r"/\.(png|webp)($|\?)/i")
-                  if ns != s:
-                      open(p, "w", encoding="utf-8").write(ns)
-                      fixed += 1
-
-          removed = 0
-          kept = 0
-          for dp, _, fs in os.walk(ROOT):
-              for fn in fs:
-                  if not fn.lower().endswith(EXT):
-                      continue
-                  src = os.path.join(dp, fn)
-                  web = os.path.splitext(src)[0] + ".webp"
-                  if not has(web):
-                      continue
-                  if fn in blob:
-                      kept += 1
-                      continue
-                  os.remove(src)
-                  removed += 1
-
-          left = 0
-          for dp, _, fs in os.walk(ROOT):
-              for fn in fs:
-                  if fn.lower().endswith(".webp"):
-                      left += 1
-          print("refs rewritten in %d files; removed %d originals; kept %d still referenced; webp total %d" % (rewritten, removed, kept, left))
+          pat = re.compile(r"[^\s\"'()<>,;:]+.png|jpg|jpeg")
           PYLINK
 
       - name: Sync Capacitor
