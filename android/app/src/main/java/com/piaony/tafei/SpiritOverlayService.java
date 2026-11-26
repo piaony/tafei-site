@@ -73,6 +73,8 @@ public class SpiritOverlayService extends Service {
     private static final String PREF_ROOT_GLOBAL = "overlay_root_global";
     private static final String PREF_AVOID_ICONS = "overlay_avoid_icons";
     private static final String PREF_PICKUP = "overlay_pickup";
+    private static final String PREF_X = "overlay_x";
+    private static final String PREF_Y = "overlay_y";
 
     private static volatile boolean appForeground = true;
     private static volatile SpiritOverlayService instance;
@@ -139,6 +141,12 @@ public class SpiritOverlayService extends Service {
     private boolean pickupActive = false;
     private float pickupDownX = 0f;
     private float pickupDownY = 0f;
+    private float touchDownRawX = 0f;
+    private float touchDownRawY = 0f;
+    private int touchDownParamsX = 0;
+    private int touchDownParamsY = 0;
+    private int walkDir = 1;
+    private long lastPickupCheckAt = 0L;
 
     public static void start(Context context) {
         Intent intent = new Intent(context, SpiritOverlayService.class).setAction(ACTION_START);
@@ -403,6 +411,12 @@ public class SpiritOverlayService extends Service {
 
         LinearLayout.LayoutParams stageLp = new LinearLayout.LayoutParams(dp(104), dp(104));
         root.addView(stage, stageLp);
+        stage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return onOverlayTouch(event);
+            }
+        });
 
         boolean wantRootLayer = rootGlobalEnabled && RootBridge.isGranted();
         int appType = Build.VERSION.SDK_INT >= 26
@@ -418,8 +432,10 @@ public class SpiritOverlayService extends Service {
             baseFlags,
             PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
-        params.x = Math.max(0, screenWidth() - dp(120));
-        params.y = Math.max(dp(80), screenHeight() / 2);
+        SharedPreferences positionPrefs = getSharedPreferences(PREFS, 0);
+        params.x = positionPrefs.getInt(PREF_X, Math.max(0, screenWidth() - dp(120)));
+        params.y = positionPrefs.getInt(PREF_Y, Math.max(dp(80), screenHeight() / 2));
+        clampPosition();
 
         boolean added = false;
         if (wantRootLayer && SpiritAccessibilityService.isReady()) {
@@ -697,6 +713,118 @@ public class SpiritOverlayService extends Service {
         }
         return false;
     }
+    private boolean onOverlayTouch(MotionEvent event) {
+        if (root == null || params == null) return false;
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                dragging = false;
+                moved = false;
+                longPressFired = false;
+                pickupActive = false;
+                pickupHit = null;
+                pickupShown = false;
+                hidePickup();
+                lastPickupCheckAt = 0L;
+                touchDownRawX = event.getRawX();
+                touchDownRawY = event.getRawY();
+                touchDownParamsX = params.x;
+                touchDownParamsY = params.y;
+                lastDownY = event.getY();
+                clearWalkPose();
+                handler.removeCallbacks(longPressTask);
+                handler.removeCallbacks(autonomyTask);
+                handler.postDelayed(longPressTask, 520L);
+                return true;
+
+            case MotionEvent.ACTION_MOVE:
+                float dx = event.getRawX() - touchDownRawX;
+                float dy = event.getRawY() - touchDownRawY;
+                if (!moved && Math.abs(dx) + Math.abs(dy) > dp(8)) {
+                    moved = true;
+                    handler.removeCallbacks(longPressTask);
+                }
+                if (moved) {
+                    dragging = true;
+                    params.x = touchDownParamsX + Math.round(dx);
+                    params.y = touchDownParamsY + Math.round(dy);
+                    clampPosition();
+                    try {
+                        activeWindowManager.updateViewLayout(root, params);
+                    } catch (Exception ignored) {
+                    }
+                    updatePickupFromTouch(event.getRawX(), event.getRawY());
+                }
+                return true;
+
+            case MotionEvent.ACTION_UP:
+                handler.removeCallbacks(longPressTask);
+                boolean drop = pickupActive && pickupHit != null;
+                if (drop) {
+                    performPickupDrop(event.getRawX(), event.getRawY());
+                } else if (moved) {
+                    saveOverlayPosition();
+                } else if (!longPressFired) {
+                    handleTap(event.getY());
+                }
+                if (!drop) hidePickup();
+                pickupActive = false;
+                pickupHit = null;
+                pickupShown = false;
+                dragging = false;
+                moved = false;
+                longPressFired = false;
+                scheduleAutonomy(900L);
+                return true;
+
+            case MotionEvent.ACTION_CANCEL:
+                handler.removeCallbacks(longPressTask);
+                hidePickup();
+                pickupActive = false;
+                pickupHit = null;
+                pickupShown = false;
+                dragging = false;
+                moved = false;
+                longPressFired = false;
+                scheduleAutonomy(900L);
+                return true;
+        }
+        return false;
+    }
+
+    private void updatePickupFromTouch(float rawX, float rawY) {
+        if (!pickupEnabled || pickupHit != null || pickupActive) return;
+        long now = System.currentTimeMillis();
+        if (now - lastPickupCheckAt < 180L) return;
+        lastPickupCheckAt = now;
+        SpiritAccessibilityService service = SpiritAccessibilityService.instance();
+        if (service == null) return;
+        SpiritDesktopActions.IconHit hit = SpiritDesktopActions.iconAt(
+            service, Math.round(spiritCenterX()), Math.round(spiritCenterY()));
+        if (hit == null) return;
+        pickupHit = hit;
+        pickupActive = true;
+        pickupShown = true;
+        pickupDownX = rawX;
+        pickupDownY = rawY;
+        showPickup(hit);
+    }
+
+    private void saveOverlayPosition() {
+        if (params == null) return;
+        getSharedPreferences(PREFS, 0).edit()
+            .putInt(PREF_X, params.x)
+            .putInt(PREF_Y, params.y)
+            .apply();
+    }
+
+    private void clearWalkPose() {
+        if (sprite == null) return;
+        sprite.setTranslationY(0f);
+        sprite.setRotation(0f);
+        sprite.setScaleX(1f);
+        sprite.setScaleY(1f);
+    }
+
     private void handleTap(float localY) {
         long now = System.currentTimeMillis();
         if (now - lastTapAt < 360L) {
@@ -794,7 +922,9 @@ public class SpiritOverlayService extends Service {
         avoidIcons = sp.getBoolean(PREF_AVOID_ICONS, true);
         pickupEnabled = sp.getBoolean(PREF_PICKUP, false);
         boolean nextRoot = sp.getBoolean(PREF_ROOT_GLOBAL, false);
-        if (nextRoot != rootGlobalEnabled) {
+        boolean layerUpgrade = nextRoot && SpiritAccessibilityService.isReady()
+            && !("accessibility".equals(rootModeState) || "system".equals(rootModeState));
+        if (nextRoot != rootGlobalEnabled || layerUpgrade) {
             rootGlobalEnabled = nextRoot;
             if (root != null && windowManager != null) {
                 try {
@@ -914,10 +1044,25 @@ public class SpiritOverlayService extends Service {
         }
         if (!found) {
             wanderStep = 0;
+            clearWalkPose();
             return;
+        }
+        walkDir = wanderTargetX < wanderStartX ? -1 : 1;
+        if (sprite != null) {
+            sprite.setScaleX(walkDir);
+            sprite.setRotation(0f);
         }
         wanderStep = 1;
         handler.post(wanderTask);
+    }
+
+    private void updateWalkPose(float t, int dir) {
+        if (sprite == null) return;
+        float phase = t * 4f * (float) Math.PI;
+        float bob = (float) Math.abs(Math.sin(phase)) * dp(5);
+        sprite.setTranslationY(-bob);
+        sprite.setRotation((float) Math.sin(phase) * 3.6f * dir);
+        sprite.setScaleX(dir);
     }
 
     private boolean overlapsIcon(int x, int y) {
@@ -938,6 +1083,7 @@ public class SpiritOverlayService extends Service {
         public void run() {
             if (root == null || params == null || dragging || appForeground) {
                 wanderStep = 0;
+                clearWalkPose();
                 return;
             }
             if (wanderStep <= 10) {
@@ -950,11 +1096,13 @@ public class SpiritOverlayService extends Service {
                     activeWindowManager.updateViewLayout(root, params);
                 } catch (Exception ignored) {
                 }
+                updateWalkPose(t, walkDir);
                 if (particleView != null) particleView.trail();
                 wanderStep++;
                 handler.postDelayed(this, 55L);
             } else {
                 wanderStep = 0;
+                clearWalkPose();
             }
         }
     };

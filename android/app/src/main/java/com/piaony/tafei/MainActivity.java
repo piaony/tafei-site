@@ -48,6 +48,7 @@ public class MainActivity extends BridgeActivity {
     private boolean firstCheckDone = false;
     private String pendingPage = null;
     private boolean pageHandled = false;
+    private long lastA11yTryAt = 0L;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,10 +88,37 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        maybeEnableRootA11y();
         SpiritOverlayService.onAppState(this, true);
         /* 切回前台时再检查一次（内部有 12 小时节流，不会频繁请求） */
         if (firstCheckDone) UpdateChecker.maybeCheck(this);
         openPendingPage();
+    }
+
+    private void maybeEnableRootA11y() {
+        if (!getSharedPreferences("tafei_app", 0).getBoolean("overlay_root_global", false)) return;
+        if (SpiritAccessibilityService.isReady()) return;
+        long now = System.currentTimeMillis();
+        if (now - lastA11yTryAt < 20000L) return;
+        lastA11yTryAt = now;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!RootBridge.isGranted()) return;
+                boolean ok = SpiritAccessibilityService.enableViaRoot(MainActivity.this);
+                if (!ok) return;
+                try {
+                    Thread.sleep(1200L);
+                } catch (InterruptedException ignored) {
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SpiritOverlayService.updatePrefs(MainActivity.this);
+                    }
+                });
+            }
+        }, "tafei-root-a11y").start();
     }
 
     @Override
@@ -503,6 +531,7 @@ public class MainActivity extends BridgeActivity {
             act.getSharedPreferences("tafei_app", 0).edit()
                 .putBoolean("overlay_root_global", on != 0).apply();
             SpiritOverlayService.updatePrefs(act);
+            if (on != 0) act.maybeEnableRootA11y();
             return "1";
         }
 

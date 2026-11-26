@@ -103,7 +103,7 @@
        <label><input type="checkbox" id="noPickup"> 抱起图标</label>
        <label><input type="checkbox" id="noRootGlobal"> Root 全域模式</label>
       </div>
-      <p class="ws-note">只影响退出 App 后的桌面悬浮精灵；Root 全域模式会尝试覆盖系统界面，安全锁屏等系统级限制下会自动回退普通悬浮。抱起图标默认关闭，开启后拖动精灵经过应用图标即可搬运。</p>
+      <p class="ws-note">只影响退出 App 后的桌面悬浮精灵；开启 Root 全域会先用 Root 尝试启用无障碍，再尝试覆盖系统界面，安全锁屏等系统级限制下会自动回退普通悬浮。抱起图标默认关闭，开启后拖动精灵经过应用图标即可搬运。</p>
       <p class="ws-note" id="noDebug">精灵诊断：等待读取…</p>
      </div>
     </div>
@@ -323,7 +323,7 @@
 <div class="spirit-toast" id="spiritToast" role="status" aria-live="polite"></div>
 
 <script src="js/spirit-core.js?v=15"></script>
-<script src="js/jingling.js?v=39"></script>
+<script src="js/jingling.js?v=40"></script>
 <script src="js/spirit-growth.js" defer></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package com.piaony.tafei;
 
+import android.content.Context;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 import android.graphics.Path;
@@ -90,6 +91,7 @@ public class SpiritAccessibilityService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         instance = this;
+        SpiritOverlayService.updatePrefs(this);
     }
 
     @Override
@@ -123,6 +125,20 @@ public class SpiritAccessibilityService extends AccessibilityService {
         } catch (Throwable t) {
             return null;
         }
+    }
+
+    /** Root 兜底：把本服务写进系统无障碍列表，省掉 ColorOS 的受限设置入口。 */
+    public static boolean enableViaRoot(Context context) {
+        if (isReady() || context == null) return isReady();
+        String component = context.getPackageName() + "/" + SpiritAccessibilityService.class.getName();
+        String cmd = "cur=$(/system/bin/settings --user 0 get secure enabled_accessibility_services 2>/dev/null); "
+            + "if [ \"$cur\" = \"null\" ]; then cur=\"\"; fi; "
+            + "case \",$cur,\" in *\"," + component + ",\"*) ;; *) cur=\"${cur:+$cur:}" + component + "\";; esac; "
+            + "/system/bin/settings --user 0 put secure enabled_accessibility_services \"$cur\"; "
+            + "/system/bin/settings --user 0 put secure accessibility_enabled 1; "
+            + "/system/bin/settings --user 0 get secure enabled_accessibility_services";
+        RootBridge.Result result = RootBridge.run(cmd, 5000L);
+        return result.exitCode == 0 && result.output.contains(component);
     }
 
     public static String startDesktopAction(String action, String payload) {
