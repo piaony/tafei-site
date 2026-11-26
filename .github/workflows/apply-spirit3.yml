@@ -1,4 +1,4 @@
-name: Apply spirit3 patch
+name: v170 patch debug
 
 on:
   push:
@@ -6,22 +6,23 @@ on:
       - .github/workflows/apply-spirit3.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply:
+  debug:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply v160 source patch
+      - name: Probe patch
         run: |
           set -e
-          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/bS7duOIkgs" -o /tmp/spirit3.patch
-          wc -c /tmp/spirit3.patch
-          git apply --check -p1 /tmp/spirit3.patch
-          git apply -p1 /tmp/spirit3.patch
-          git config user.name "tafei-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add -A
-          git commit -m "fix(spirit): overlay touch drag, root a11y bootstrap, walk cycle" || true
-          git push origin HEAD:app/capacitor-setup
+          curl -fsSL --retry 3 --retry-delay 2 "https://aka.doubaocdn.com/s/zfICdUdrSD" -o /tmp/spirit3.patch
+          echo "::notice::patch_bytes=$(wc -c < /tmp/spirit3.patch)"
+          head -c 80 /tmp/spirit3.patch | tr '\n' ' '
+          echo
+          if ! git apply --check --binary -p1 /tmp/spirit3.patch 2>/tmp/apply.err; then
+            ERR=$(tr '\n' ' ' < /tmp/apply.err | cut -c1-900)
+            echo "::error::check_failed ${ERR}"
+            exit 1
+          fi
+          echo "::notice::check_ok"
