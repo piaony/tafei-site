@@ -105,8 +105,7 @@ public class MainActivity extends BridgeActivity {
             @Override
             public void run() {
                 if (!RootBridge.isGranted()) return;
-                boolean ok = SpiritAccessibilityService.enableViaRoot(MainActivity.this);
-                if (!ok) return;
+                SpiritAccessibilityService.enableViaRoot(MainActivity.this);
                 try {
                     Thread.sleep(1200L);
                 } catch (InterruptedException ignored) {
