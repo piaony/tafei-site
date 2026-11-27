@@ -1,0 +1,88 @@
+name: Build TAFEI Thermal APK
+
+on:
+  push:
+    branches:
+      - thermal-tool
+    paths:
+      - 'thermal-app/**'
+      - '.github/workflows/thermal-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+
+      - name: Install Android SDK 35
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          echo "sdk.dir=$SDK" > thermal-app/local.properties
+
+      - name: Prepare signing key
+        run: |
+          base64 -d android/signing/hobby-key.b64 > thermal-app/ci-signing.jks
+          echo "THERMAL_KEYSTORE=$GITHUB_WORKSPACE/thermal-app/ci-signing.jks" >> "$GITHUB_ENV"
+          echo "THERMAL_KEYPASS=android" >> "$GITHUB_ENV"
+          echo "THERMAL_KEY_ALIAS=androiddebugkey" >> "$GITHUB_ENV"
+          echo "THERMAL_KEY_PASS=android" >> "$GITHUB_ENV"
+          keytool -list -keystore thermal-app/ci-signing.jks -storepass android | head -5
+
+      - name: Build release APK
+        working-directory: thermal-app
+        run: |
+          set -o pipefail
+          gradle --no-daemon assembleRelease --stacktrace 2>&1 | tee build.log
+
+      - name: Collect APK
+        run: |
+          mkdir -p out
+          cp thermal-app/app/build/outputs/apk/release/app-release.apk out/tafei-thermal-v1.0.0.apk
+          ls -lh out
+          sha256sum out/tafei-thermal-v1.0.0.apk | tee out/SHA256.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tafei-thermal-apk
+          path: out/tafei-thermal-v1.0.0.apk
+          if-no-files-found: error
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: thermal-v1.0.0
+          name: 挞飞温控 v1.0.0
+          make_latest: false
+          body: |
+            挞飞温控 · Reno11 Pro（天玑9200+）专属温控工具。
+
+            - 三档温控：默认 / 游戏 95℃ / 极致 100℃
+            - 实时 CPU / GPU / 后盖温度面板
+            - 桌面快捷方式：游戏温控 / 默认温控
+            - 悬浮温度窗
+            - 仅修改 passive 阈值和临时框架属性，保留 critical 高温保护，重启自动恢复
+
+            仅限本机测试使用，极致模式必须搭配散热背夹。
+          files: out/tafei-thermal-v1.0.0.apk
