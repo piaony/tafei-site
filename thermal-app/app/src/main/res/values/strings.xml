@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">挞飞温控</string>
+    <string name="subtitle">Reno11 Pro · 天玑9200+ 专属</string>
+    <string name="root_checking">正在检查 Root…</string>
+    <string name="root_ok">Root 已授权</string>
+    <string name="root_no">未获得 Root 权限</string>
+    <string name="mode_default">默认</string>
+    <string name="mode_game">游戏</string>
+    <string name="mode_extreme">极致</string>
+    <string name="apply">应用当前模式</string>
+    <string name="pin_game">添加「游戏」桌面快捷方式</string>
+    <string name="pin_default">添加「默认」桌面快捷方式</string>
+    <string name="overlay_on">开启悬浮温度窗</string>
+    <string name="overlay_off">关闭悬浮温度窗</string>
+    <string name="footer">仅调整可写温控阈值，保留 critical 高温保护，不删除温控服务。\n所有改动重启后自动恢复；极致模式必须搭配散热背夹。</string>
+</resources>

@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.piaony.thermal'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.piaony.thermal'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    signingConfigs {
+        release {
+            def ks = System.getenv('THERMAL_KEYSTORE')
+            if (ks != null && !ks.trim().isEmpty()) {
+                storeFile file(ks)
+                storePassword System.getenv('THERMAL_KEYPASS') ?: 'android'
+                keyAlias System.getenv('THERMAL_KEY_ALIAS') ?: 'androiddebugkey'
+                keyPassword System.getenv('THERMAL_KEY_PASS') ?: 'android'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (System.getenv('THERMAL_KEYSTORE') != null) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
