@@ -1,0 +1,67 @@
+name: Build ThermalGuard
+
+on:
+  push:
+    branches:
+      - thermalguard
+    paths:
+      - 'thermalguard/**'
+      - '.github/workflows/thermalguard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+
+      - name: Extract source
+        run: |
+          mkdir -p thermalguard
+          base64 -d thermalguard/source.tar.gz.b64 > /tmp/thermalguard-src.tar.gz
+          tar -xzf /tmp/thermalguard-src.tar.gz -C .
+          ls -la thermalguard
+
+      - name: Build debug APK
+        run: |
+          cd thermalguard
+          gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Show APK
+        run: ls -lh thermalguard/app/build/outputs/apk/debug/
+
+      - name: Publish APK release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: thermalguard-v1.0.${{ github.run_number }}
+          name: 温控助手 v1.0.${{ github.run_number }}
+          body: |
+            温控助手（仅适配 OPPO Reno11 Pro / 天玑9200+ / ColorOS 16）。
+
+            - 三档：默认 / 游戏 95℃ / 极致 98℃
+            - 只改 passive 温控触发点，保留 critical / hot 硬件保护
+            - 所有改动重启自动还原
+            - 温度悬浮窗 + 游戏模式桌面快捷方式
+            - 测试签名 APK，直接安装；如系统提示未知来源请允许
+          files: thermalguard/app/build/outputs/apk/debug/app-debug.apk
+          fail_on_unmatched_files: true
